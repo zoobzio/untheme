@@ -1,0 +1,37 @@
+{
+  "name": "@untheme/config",
+  "version": "0.0.1",
+  "description": "🎨 Configuration for Untheme.",
+  "author": "Alexander Thorwaldson <alex@zoobz.io>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zoobzio/untheme",
+    "directory": "packages/config"
+  },
+  "keywords": [],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "stub": "unbuild --stub"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.25",
+    "@untheme/core": "workspace:*",
+    "magic-string": "^0.30.6",
+    "unconfig": "^0.3.11"
+  }
+}

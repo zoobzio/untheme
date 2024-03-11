@@ -1,0 +1,37 @@
+{
+  "name": "@untheme/core",
+  "version": "0.0.1",
+  "description": "The instant on-demand Atomic CSS engine.",
+  "author": "Alexander Thorwaldson <alex@zoobz.io>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zoobzio/untheme",
+    "directory": "packages/core"
+  },
+  "keywords": [],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "stub": "unbuild --stub"
+  },
+  "devDependencies": {
+    "@untheme/colors": "workspace:*",
+    "@untheme/tokens": "workspace:*",
+    "defu": "^6.1.4",
+    "unhead": "^1.8.13"
+  }
+}
