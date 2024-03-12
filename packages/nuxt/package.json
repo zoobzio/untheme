@@ -1,13 +1,13 @@
 {
-  "name": "@untheme/tokens",
+  "name": "@untheme/nuxt",
   "version": "0.0.1",
-  "description": "The instant on-demand Atomic CSS engine.",
+  "description": "A Nuxt module for Untheme.",
   "author": "Alexander Thorwaldson <alex@zoobz.io>",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/zoobzio/untheme",
-    "directory": "packages/tokens"
+    "directory": "packages/nuxt"
   },
   "keywords": [],
   "sideEffects": false,
@@ -15,10 +15,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "require": "./index.cjs"
     }
   },
-  "main": "dist/index.cjs",
+  "main": "index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
@@ -28,11 +28,13 @@
     "build": "unbuild",
     "stub": "unbuild --stub"
   },
-  "devDependencies": {
-    "@types/lodash": "^4.14.202",
+  "dependencies": {
+    "@nuxt/kit": "^3.10.3",
     "defu": "^6.1.4",
-    "lodash": "^4.17.21",
-    "magic-string": "^0.30.6",
-    "unconfig": "^0.3.11"
+    "unhead": "^1.8.13",
+    "untheme": "workspace:*"
+  },
+  "devDependencies": {
+    "@nuxt/schema": "^3.10.3"
   }
 }

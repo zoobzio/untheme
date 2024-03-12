@@ -1,25 +1,13 @@
-export type { ColorPack } from "./packs";
+export type ColorPack = keyof typeof import("./packs")["default"];
+
+export type ColorOption = keyof typeof import("./packs")["default"][ColorPack];
+
+export type ColorShade = keyof typeof import("./packs")["default"][ColorPack][ColorOption];
 
 export type ColorDefinition = {
-    0?: string;
-    50: string;
-    100: string;
-    200: string;
-    300: string;
-    400: string;
-    500: string;
-    600: string;
-    700: string;
-    800: string;
-    900: string;
-    950: string;
-    1000?: string;
-};
-
-export type ColorShade = keyof ColorDefinition;
+    [Property in ColorShade]: string;
+}
 
 export type ColorScheme = {
     [key: string]: ColorDefinition;
 }
-
-export type Color = keyof ColorScheme;

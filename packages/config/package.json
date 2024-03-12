@@ -1,13 +1,13 @@
 {
-  "name": "@untheme/config",
+  "name": "@untheme/colors",
   "version": "0.0.1",
-  "description": "🎨 Configuration for Untheme.",
+  "description": "🎨 Color packs for Untheme.",
   "author": "Alexander Thorwaldson <alex@zoobz.io>",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/zoobzio/untheme",
-    "directory": "packages/config"
+    "directory": "packages/colors"
   },
   "keywords": [],
   "sideEffects": false,
@@ -29,9 +29,7 @@
     "stub": "unbuild --stub"
   },
   "devDependencies": {
-    "@types/node": "^20.11.25",
-    "@untheme/core": "workspace:*",
-    "magic-string": "^0.30.6",
+    "defu": "^6.1.4",
     "unconfig": "^0.3.11"
   }
 }

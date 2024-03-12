@@ -1,14 +1,5 @@
-import type { ColorScheme } from "@untheme/colors";
-import { ColorToken, Token } from "@untheme/tokens";
+import type { UnthemeConfig } from "@untheme/config";
 
-export interface UserConfig {
-    prefix?: string;
-
-    colors?: ColorScheme;
-
-    colorTokens?: {
-        [key: string]: ColorToken;
-    }
-
-    tokens?: Token;
+export type Untheme = {
+    config: UnthemeConfig;
 }

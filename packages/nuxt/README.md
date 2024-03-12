@@ -1,6 +1,6 @@
-# @untheme/config
+# @untheme/nuxt
 
-Configuration utils for `Untheme`. 
+A Nuxt module that implements `Untheme`.
 
 ## Documentation
 

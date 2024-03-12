@@ -1,9 +1,5 @@
 import tailwind from "./tailwind";
 
-const packs = {
+export default {
     tailwind
-}
-
-export type ColorPack = keyof typeof packs;
-
-export default packs;
+};

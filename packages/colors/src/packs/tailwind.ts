@@ -1,5 +1,3 @@
-import type { ColorScheme } from "../types";
-
 // ❤️ tailwind: https://github.com/tailwindlabs/tailwindcss/blob/master/src/public/colors.js
 export default {
   red: {
@@ -288,4 +286,4 @@ export default {
     900: "#1c1917",
     950: "#0c0a09",
   },
-} satisfies ColorScheme;
+};

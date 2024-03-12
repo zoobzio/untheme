@@ -1,10 +1,20 @@
+import type { ColorShade } from "@untheme/colors";
+
 export type ColorToken = {
-    dark: string;
-    light: string;
+    color: string;
+    dark: ColorShade;
+    light: ColorShade;
 }
 
 export type ColorTokenMode = keyof ColorToken;
 
-export type Token = {
-    [key: string]: string;
+export type TokenScheme = {
+    root: {
+        [key: string]: string;
+    }
+    colors: {
+        [key: string]: ColorToken;
+    }
 }
+
+export type TokenGroup = keyof TokenScheme;
