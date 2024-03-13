@@ -1,7 +1,7 @@
 {
   "name": "@untheme/core",
   "version": "0.0.1",
-  "description": "The instant on-demand Atomic CSS engine.",
+  "description": "🚀 Core utils for `Untheme`",
   "author": "Alexander Thorwaldson <alex@zoobz.io>",
   "license": "MIT",
   "repository": {
@@ -29,9 +29,9 @@
     "stub": "unbuild --stub"
   },
   "devDependencies": {
-    "@untheme/colors": "workspace:*",
-    "@untheme/tokens": "workspace:*",
+    "@untheme/config": "workspace:*",
+    "@untheme/kit": "workspace:*",
     "defu": "^6.1.4",
-    "unhead": "^1.8.13"
+    "lodash.kebabcase": "^4.1.1"
   }
 }

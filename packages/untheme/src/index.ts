@@ -1,4 +1,4 @@
 export * from "@untheme/colors";
-export * from "@untheme/config";
 export * from "@untheme/core";
-export * from "@untheme/tokens";
+export * from "@untheme/kit";
+export * from "@untheme/schema";

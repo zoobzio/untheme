@@ -1,13 +1,35 @@
-export type ColorPack = keyof typeof import("./packs")["default"];
+export type UnthemeColorPack = keyof typeof import("./packs")["default"];
 
-export type ColorOption = keyof typeof import("./packs")["default"][ColorPack];
+export type UnthemeColorDefinition = {
+    50: string;
+    100: string;
+    200: string;
+    300: string;
+    400: string;
+    500: string;
+    600: string;
+    700: string;
+    800: string;
+    900: string;
+    950: string;
+};
 
-export type ColorShade = keyof typeof import("./packs")["default"][ColorPack][ColorOption];
+export type UnthemeColorShade = keyof UnthemeColorDefinition;
 
-export type ColorDefinition = {
-    [Property in ColorShade]: string;
-}
+export type UnthemeColorMode = "dark" | "light";
 
-export type ColorScheme = {
-    [key: string]: ColorDefinition;
+export type UnthemeColorToken = {
+    [key: string]: {
+        color: keyof UnthemeColorPluginConfig["scheme"];
+    } & {
+        [Property in UnthemeColorMode]: UnthemeColorShade;
+    }
+};
+
+export interface UnthemeColorPluginConfig {
+    mode: UnthemeColorMode;
+    scheme: {
+        [key: string]: UnthemeColorDefinition;
+    };
+    tokens: UnthemeColorToken;
 }

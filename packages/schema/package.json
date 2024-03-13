@@ -1,13 +1,13 @@
 {
-  "name": "@untheme/colors",
+  "name": "@untheme/schema",
   "version": "0.0.1",
-  "description": "🎨 Color packs for Untheme.",
+  "description": "The instant on-demand Atomic CSS engine.",
   "author": "Alexander Thorwaldson <alex@zoobz.io>",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/zoobzio/untheme",
-    "directory": "packages/colors"
+    "directory": "packages/schema"
   },
   "keywords": [],
   "sideEffects": false,
@@ -29,7 +29,8 @@
     "stub": "unbuild --stub"
   },
   "devDependencies": {
+    "@untheme/kit": "workspace:*",
     "defu": "^6.1.4",
-    "unconfig": "^0.3.11"
+    "unhead": "^1.8.13"
   }
 }

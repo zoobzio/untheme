@@ -1,13 +1,13 @@
 {
-  "name": "@untheme/tokens",
+  "name": "@untheme/kit",
   "version": "0.0.1",
-  "description": "The instant on-demand Atomic CSS engine.",
+  "description": "🧰 Extension utils for `Untheme`",
   "author": "Alexander Thorwaldson <alex@zoobz.io>",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/zoobzio/untheme",
-    "directory": "packages/tokens"
+    "directory": "packages/kit"
   },
   "keywords": [],
   "sideEffects": false,
@@ -29,10 +29,6 @@
     "stub": "unbuild --stub"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.202",
-    "defu": "^6.1.4",
-    "lodash": "^4.17.21",
-    "magic-string": "^0.30.6",
-    "unconfig": "^0.3.11"
+    "@untheme/schema": "workspace:*"
   }
 }

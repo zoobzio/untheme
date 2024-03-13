@@ -1,6 +1,6 @@
 # @untheme/core
 
-The core engine of `Untheme` without any presets.
+🚀 Core utils for `Untheme`
 
 ## Documentation
 

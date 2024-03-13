@@ -36,8 +36,10 @@
     "export:sizes": "npx export-size . -r"
   },
   "dependencies": {
+    "@untheme/colors": "workspace:*",
     "@untheme/core": "workspace:*",
-    "@untheme/tokens": "workspace:*",
+    "@untheme/kit": "workspace:*",
+    "@untheme/schema": "workspace:*",
     "hookable": "^5.5.3"
   }
 }

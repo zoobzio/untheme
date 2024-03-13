@@ -1,25 +1,27 @@
-import { defineNuxtModule } from "@nuxt/kit";
-import { type UserConfig, useUntheme, defineUnthemeConfig } from "untheme";
+import { addImportsSources, defineNuxtModule } from "@nuxt/kit";
+import { UnthemeCoreConfig, manufactureUntheme } from "untheme";
 
-export default defineNuxtModule<UserConfig>({
+export default defineNuxtModule<UnthemeCoreConfig>({
     meta: {
         name: 'untheme',
         configKey: 'untheme',
     },
     async setup(options, nuxt) {
-        
-        /*addImportsSources({
-            from: 'untheme',
-            imports: ['useUntheme', "defineUnthemeConfig", "useColorPack"] as Array<keyof typeof import('untheme')>,
-        });*/
+        nuxt.hook("ready", () => {
+            manufactureUntheme(options);
+        });
+        addImportsSources({
+            from: "untheme",
+            imports: ["useUntheme"] as Array<keyof typeof import("untheme")>,
+        });
     }
 });
 
 declare module '@nuxt/schema' {
     interface NuxtConfig {
-      untheme?: UserConfig;
+      untheme?: UnthemeCoreConfig;
     }
     interface NuxtOptions {
-      untheme?: UserConfig;
+      untheme?: UnthemeCoreConfig;
     }
 }

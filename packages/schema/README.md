@@ -1,6 +1,6 @@
-# @untheme/config
+# @untheme/core
 
-Configuration utils for `Untheme`. 
+The core engine of `Untheme` without any presets.
 
 ## Documentation
 

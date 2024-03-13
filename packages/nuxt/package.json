@@ -30,8 +30,6 @@
   },
   "dependencies": {
     "@nuxt/kit": "^3.10.3",
-    "defu": "^6.1.4",
-    "unhead": "^1.8.13",
     "untheme": "workspace:*"
   },
   "devDependencies": {

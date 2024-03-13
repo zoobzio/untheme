@@ -1,6 +1,6 @@
-# @untheme/nuxt
+# @untheme/core
 
-A Nuxt module for Untheme.
+The core engine of `Untheme` without any presets.
 
 ## Documentation
 

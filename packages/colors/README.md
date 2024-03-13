@@ -1,6 +1,6 @@
-# @untheme/colors
+# @untheme/core
 
-A set of color packs for `Untheme`. 
+The core engine of `Untheme` without any presets.
 
 ## Documentation
 
