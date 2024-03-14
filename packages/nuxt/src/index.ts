@@ -1,20 +1,42 @@
-import { addImportsSources, defineNuxtModule } from "@nuxt/kit";
-import { UnthemeCoreConfig, manufactureUntheme } from "untheme";
+import { defineNuxtModule } from "@nuxt/kit";
+import { type UnthemeCoreConfig, useColorPack, useColorPlugin, manufactureUntheme } from "untheme";
 
 export default defineNuxtModule<UnthemeCoreConfig>({
-    meta: {
-        name: 'untheme',
-        configKey: 'untheme',
-    },
-    async setup(options, nuxt) {
-        nuxt.hook("ready", () => {
-            manufactureUntheme(options);
-        });
-        addImportsSources({
-            from: "untheme",
-            imports: ["useUntheme"] as Array<keyof typeof import("untheme")>,
-        });
-    }
+  meta: {
+    name: '@untheme/nuxt',
+    configKey: 'untheme',
+  },
+  defaults: {
+    prefix: "ut",
+    tokens: {},
+    plugins: [
+      useColorPlugin({
+        mode: "dark",
+        scheme: useColorPack("tailwind"),
+        tokens: {
+          primary: {
+            color: "emerald",
+            dark: 600,
+            light: 500
+          },
+          content: {
+            color: "stone",
+            dark: 800,
+            light: 200
+          },
+          contrast: {
+            color: "stone",
+            dark: 900,
+            light: 100
+          }
+        }
+      })
+    ]
+  },
+  async setup(options, nuxt) {
+    const { tokens, utils } = manufactureUntheme(options);
+    console.log(JSON.stringify(tokens, null, 2));
+  }
 });
 
 declare module '@nuxt/schema' {

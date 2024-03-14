@@ -28,7 +28,7 @@
     "build": "unbuild",
     "stub": "unbuild --stub"
   },
-  "devDependencies": {
+  "dependencies": {
     "@untheme/kit": "workspace:*"
   }
 }

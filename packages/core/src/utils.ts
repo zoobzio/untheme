@@ -12,13 +12,13 @@ export function useUntheme() {
 
 export function manufactureUntheme(core: UnthemeCoreConfig) {
     let tokens = mergeTokens(core.tokens);
-    if (core.layers) {
-        tokens = mergeTokens(tokens, ...core.layers.map(({ tokens }) => ({ tokens })));
+    if (core.plugins) {
+        tokens = mergeTokens(tokens, ...core.plugins.map(({ tokens }) => ({ tokens })));
     }
 
     let utils = manufactureTokenUtils(core.prefix, tokens);
-    if (core.layers) {
-        utils = core.layers.reduce((x,y) => {
+    if (core.plugins) {
+        utils = core.plugins.reduce((x,y) => {
             x = {
                 ...x,
                 ...y.utils,

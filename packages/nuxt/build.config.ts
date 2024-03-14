@@ -7,6 +7,6 @@ export default defineBuildConfig({
   clean: true,
   declaration: true,
   externals: [
-    '@nuxt/schema',
+    'untheme',
   ],
 })

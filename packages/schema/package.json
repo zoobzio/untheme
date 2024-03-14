@@ -27,10 +27,5 @@
   "scripts": {
     "build": "unbuild",
     "stub": "unbuild --stub"
-  },
-  "devDependencies": {
-    "@untheme/kit": "workspace:*",
-    "defu": "^6.1.4",
-    "unhead": "^1.8.13"
   }
 }

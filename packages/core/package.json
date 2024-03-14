@@ -28,8 +28,8 @@
     "build": "unbuild",
     "stub": "unbuild --stub"
   },
-  "devDependencies": {
-    "@untheme/config": "workspace:*",
+  "dependencies": {
+    "@untheme/schema": "workspace:*",
     "@untheme/kit": "workspace:*",
     "defu": "^6.1.4",
     "lodash.kebabcase": "^4.1.1"

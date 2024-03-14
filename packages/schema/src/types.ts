@@ -16,5 +16,5 @@ export interface UnthemeCoreConfig {
 
     tokens: UnthemeTokenScheme;
 
-    layers: Untheme[];
+    plugins?: Untheme[];
 }

@@ -24,7 +24,7 @@ export function manufactureTokenUtils(prefix: string, tokens: UnthemeTokenScheme
     }
 
     function useRootVars() {
-        const rootVars = useTokens().map(token => `--${prefix}-${kebabCase(token)}: ${resolveToken(token)};`);
+        const rootVars = useTokens().map(token => `--${prefix}-${token}: ${resolveToken(token)};`);
         return `:root{\n${rootVars.join("\n")}}`;
     }
 

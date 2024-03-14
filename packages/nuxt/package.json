@@ -30,9 +30,7 @@
   },
   "dependencies": {
     "@nuxt/kit": "^3.10.3",
+    "@nuxt/schema": "^3.10.3",
     "untheme": "workspace:*"
-  },
-  "devDependencies": {
-    "@nuxt/schema": "^3.10.3"
   }
 }

@@ -1,6 +1,6 @@
-# @untheme/schema
+# @untheme/nuxt
 
-Schema of `Untheme`
+A Nuxt module that implements `Untheme`.
 
 ## Documentation
 
