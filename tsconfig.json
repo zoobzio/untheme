@@ -9,11 +9,9 @@
     "moduleResolution": "node",
     "paths": {
       "@untheme/colors": ["packages/colors/src"],
-      "@untheme/config": ["packages/config/src"],
       "@untheme/core": ["packages/core/src"],
       "@untheme/kit": ["packages/kit/src"],
       "@untheme/nuxt": ["packages/nuxt/src"],
-      "@untheme/schema": ["packages/schema/src"],
       "untheme": ["packages/untheme/src"],
     },
     "resolveJsonModule": true,

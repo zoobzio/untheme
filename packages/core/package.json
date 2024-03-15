@@ -1,7 +1,7 @@
 {
   "name": "@untheme/core",
   "version": "0.0.1",
-  "description": "🚀 Core utils for `Untheme`",
+  "description": "🚀 Core engine for `Untheme`",
   "author": "Alexander Thorwaldson <alex@zoobz.io>",
   "license": "MIT",
   "repository": {
@@ -29,7 +29,6 @@
     "stub": "unbuild --stub"
   },
   "dependencies": {
-    "@untheme/schema": "workspace:*",
     "@untheme/kit": "workspace:*",
     "defu": "^6.1.4",
     "lodash.kebabcase": "^4.1.1"

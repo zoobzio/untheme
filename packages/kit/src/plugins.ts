@@ -1,12 +1,8 @@
-import { defu } from "defu";
-import type { UnthemePluginCallback } from "@untheme/schema";
+import type { UnthemeConfig, UnthemePlugin } from "./types";
 
-export function defineUnthemePlugin<Options extends {}>(
-    callback: UnthemePluginCallback<Options>,
-    defaults: Partial<Options>,
+export function defineUnthemePlugin<Token extends string, Options extends UnthemeConfig>(
+    plugin: UnthemePlugin<Token, Options>,
+    options: Options
 ) {
-    return (options: Partial<Options>) => {
-        const withDefaults = defu(options, defaults) as Options;
-        return callback(withDefaults);
-    }
+    return plugin(options);
 }

@@ -1,36 +1,13 @@
-import type { Untheme, UnthemeCoreConfig } from "@untheme/schema";
-import { manufactureTokenUtils, mergeTokens } from "./tokens";
+import type { UnthemeCoreConfig } from "./types";
 
-let untheme: Untheme;
-
-export function useUntheme() {
-    if (!untheme) {
-        throw new Error("Untheme not initialized!");
-    }
-    return untheme;
-}
-
-export function manufactureUntheme(core: UnthemeCoreConfig) {
-    let tokens = mergeTokens(core.tokens);
-    if (core.plugins) {
-        tokens = mergeTokens(tokens, ...core.plugins.map(({ tokens }) => ({ tokens })));
-    }
-
-    let utils = manufactureTokenUtils(core.prefix, tokens);
-    if (core.plugins) {
-        utils = core.plugins.reduce((x,y) => {
-            x = {
-                ...x,
-                ...y.utils,
-            }
-            return x;
-        }, utils);
-    }
-
-    untheme = {
+export function useCoreTheme<Token extends string>({ tokens }: UnthemeCoreConfig<Token>) {
+    const useTokens = () => Object.keys(tokens) as Token[];
+    const resolveToken = (token: Token) => tokens[token];
+    const editToken = (token: Token, value: string) => tokens[token] = value;
+    return {
         tokens,
-        utils
+        useTokens,
+        resolveToken,
+        editToken,
     }
-
-    return useUntheme();
 }

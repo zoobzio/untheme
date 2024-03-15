@@ -1,4 +1,10 @@
-export type UnthemeColorPack = keyof typeof import("./packs")["default"];
+import { UnthemeConfig } from "@untheme/kit";
+
+export type UnthemeColorPacks = typeof import("./packs")["default"];
+
+export type UnthemeColorPack = keyof UnthemeColorPacks;
+
+export type UnthemeColors = keyof UnthemeColorPacks[UnthemeColorPack];
 
 export type UnthemeColorDefinition = {
     50: string;
@@ -18,18 +24,20 @@ export type UnthemeColorShade = keyof UnthemeColorDefinition;
 
 export type UnthemeColorMode = "dark" | "light";
 
-export type UnthemeColorToken = {
-    [key: string]: {
-        color: keyof UnthemeColorPluginConfig["scheme"];
+export type UnthemeColorRole<Role extends string, Color extends string> = {
+    [Property in Role]: {
+        color: Color;
     } & {
         [Property in UnthemeColorMode]: UnthemeColorShade;
     }
 };
 
-export interface UnthemeColorPluginConfig {
-    mode: UnthemeColorMode;
-    scheme: {
-        [key: string]: UnthemeColorDefinition;
-    };
-    tokens: UnthemeColorToken;
+export interface UnthemeColorConfig<Role extends string, Color extends string> extends UnthemeConfig {
+    colors: {
+        mode: UnthemeColorMode;
+        scheme: {
+            [Property in Color]: UnthemeColorDefinition;
+        };
+        roles: UnthemeColorRole<Role, Color>;
+    }
 }

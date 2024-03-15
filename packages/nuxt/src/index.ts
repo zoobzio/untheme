@@ -1,49 +1,51 @@
 import { defineNuxtModule } from "@nuxt/kit";
-import { type UnthemeCoreConfig, useColorPack, useColorPlugin, manufactureUntheme } from "untheme";
+import { useCoreTheme, useColorTheme, useColorPack } from "untheme";
 
-export default defineNuxtModule<UnthemeCoreConfig>({
+export interface UnthemeNuxtConfig {
+}
+
+export default defineNuxtModule<UnthemeNuxtConfig[]>({
   meta: {
     name: '@untheme/nuxt',
-    configKey: 'untheme',
+    configKey: 'themes',
   },
-  defaults: {
-    prefix: "ut",
-    tokens: {},
-    plugins: [
-      useColorPlugin({
+  defaults: [],
+  async setup() {
+    const tokens =  {
+      paddingSmall: "8px"
+    };
+
+    const untheme = useCoreTheme({
+      prefix: "z",
+      tokens
+    });
+
+    console.log(untheme.resolveToken("paddingSmall"));
+    untheme.editToken("paddingSmall", "16px");
+    console.log(untheme.resolveToken("paddingSmall"));
+
+    const test = useColorTheme({
+      prefix: "color",
+      colors: {
         mode: "dark",
         scheme: useColorPack("tailwind"),
-        tokens: {
+        roles: {
           primary: {
-            color: "emerald",
+            color: "orange",
             dark: 600,
             light: 500
-          },
-          content: {
-            color: "stone",
-            dark: 800,
-            light: 200
-          },
-          contrast: {
-            color: "stone",
-            dark: 900,
-            light: 100
           }
         }
-      })
-    ]
-  },
-  async setup(options, nuxt) {
-    const { tokens, utils } = manufactureUntheme(options);
-    console.log(JSON.stringify(tokens, null, 2));
+      }
+    });
   }
 });
 
 declare module '@nuxt/schema' {
     interface NuxtConfig {
-      untheme?: UnthemeCoreConfig;
+      themes?: UnthemeNuxtConfig[];
     }
     interface NuxtOptions {
-      untheme?: UnthemeCoreConfig;
+      themes?: UnthemeNuxtConfig[];
     }
 }
