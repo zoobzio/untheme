@@ -1,5 +1,5 @@
 import { defineNuxtModule } from "@nuxt/kit";
-import { useCoreTheme, useColorTheme, useColorPack } from "untheme";
+import { useCorePlugin } from "untheme";
 
 export interface UnthemeNuxtConfig {
 }
@@ -11,19 +11,20 @@ export default defineNuxtModule<UnthemeNuxtConfig[]>({
   },
   defaults: [],
   async setup() {
-    const tokens =  {
-      paddingSmall: "8px"
-    };
-
-    const untheme = useCoreTheme({
-      prefix: "z",
-      tokens
+    const untheme = useCorePlugin({
+      prefix: "padding",
+      tokens: {
+        small: "8px",
+        medium: "12px",
+        large: "16px"
+      },
     });
 
-    console.log(untheme.resolveToken("paddingSmall"));
-    untheme.editToken("paddingSmall", "16px");
-    console.log(untheme.resolveToken("paddingSmall"));
+    console.log(untheme.resolveToken("small"));
+    untheme.editToken("small", "16px");
+    console.log(untheme.resolveToken("small"));
 
+    /*
     const test = useColorTheme({
       prefix: "color",
       colors: {
@@ -38,6 +39,11 @@ export default defineNuxtModule<UnthemeNuxtConfig[]>({
         }
       }
     });
+
+    console.log(test.resolveColorRole("primary"));
+    test.setColorMode();
+    console.log(test.resolveColorRole("primary"));
+    */
   }
 });
 

@@ -1,17 +1,13 @@
-export type UnthemeTokenScheme<Token extends string> = {
+export type UnthemeTokens<Token extends string> = {
     [Property in Token]: string;
-};
-
-export interface UnthemeConfig {
-    prefix: string;
 }
 
-export interface UnthemePluginInput {
-    name: string;
+export type UnthemePluginInput = {}
+
+export type UnthemePluginOutput<Token extends string> = {
+    tokens: () => UnthemeTokens<Token>;
 }
 
-export interface UnthemePluginOutput<Token extends string> {
-    tokens?: UnthemeTokenScheme<Token>;
+export type Untheme<Prefix extends string> = {
+    [Property in Prefix]: UnthemePluginOutput<any>;
 }
-
-export type UnthemePlugin<Token extends string, Options extends UnthemeConfig> = (options: Options) => UnthemePluginOutput<Token>;

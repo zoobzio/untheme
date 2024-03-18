@@ -1,14 +1,13 @@
-import type { UnthemeColorConfig, UnthemeColorPack, UnthemeColorShade, UnthemeColorRole, UnthemeColorMode } from "./types";
+import type { UnthemeColorPluginInput, UnthemeColorPack, UnthemeColorShade, UnthemeColorRole, UnthemeColorMode, UnthemeColorPlugin } from "./types";
+import type { UnthemeTokens } from "@untheme/kit";
 import packs from "./packs";
-import { UnthemeTokenScheme } from "@untheme/kit";
+
 
 export function useColorPack(pack: UnthemeColorPack) {
     return packs[pack];
 }
 
-export function useColorTheme<Role extends string, Color extends string>({ prefix, colors: { mode, scheme, roles }}: UnthemeColorConfig<Role, Color>) {
-    let tokens = {} as UnthemeTokenScheme<Role>;
-
+export function useColorTheme<Role extends string, Color extends string>({ colors: { mode, scheme, roles }}: UnthemeColorPluginInput<Role, Color>): UnthemeColorPlugin<Role, Color> {
     function useColors() {
         return Object.keys(scheme) as Color[];
     }
@@ -22,6 +21,7 @@ export function useColorTheme<Role extends string, Color extends string>({ prefi
     }
 
     function resolveColorShade(color: Color, shade: 0 | UnthemeColorShade | 1000) {
+        // TODO: consider removing hardset 0/100 values
         switch(shade) {
             case 0:
                 return "#fff";
@@ -36,43 +36,40 @@ export function useColorTheme<Role extends string, Color extends string>({ prefi
         return Object.keys(roles) as Role[];
     }
 
-    function resolveColorRole(token: Role) {
-        const _token = roles[token];
-        return scheme[_token.color][_token[mode]];
+    function resolveColorRole(role: Role) {
+        return roles[role];
     }
 
-    function resolveRoleTokens() {
-        tokens = useColorRoles().reduce((x,y) => {
-            x[y] = resolveColorRole(y)
-            return x;
-        }, {} as UnthemeTokenScheme<Role>);
+    function resolveColorRoleToken(role: Role) {
+        const token = resolveColorRole(role);
+        return scheme[token.color][token[mode]];
     }
 
-    function setColorRole(token: Role, role: Partial<UnthemeColorRole<Role, Color>>) {
-        roles[token] = {
-            ...roles[token],
-            ...role
+    function setColorRole(role: Role, value: Partial<UnthemeColorRole<Role, Color>>) {
+        roles[role] = {
+            ...roles[role],
+            ...value,
         }
-        resolveRoleTokens();
-        return resolveColorRole(token);
     }
 
     function setColorMode(colorMode?: UnthemeColorMode) {
         mode = colorMode ? colorMode : (mode === "dark" ? "light" : "dark");
-        resolveRoleTokens();
         return mode;
     }
 
-    resolveRoleTokens();
-
     return {
-        tokens,
+        tokens: () => ({
+            ...useColorRoles().reduce((x,y) => {
+                x[y] = resolveColorRoleToken(y);
+                return x;
+            }, {} as UnthemeTokens<Role>),
+        }),
         useColors,
         resolveColor,
         useColorShades,
         resolveColorShade,
         useColorRoles,
-        resolveColorRole,
+        resolveColorRoleToken,
         setColorRole,
         setColorMode,
     }

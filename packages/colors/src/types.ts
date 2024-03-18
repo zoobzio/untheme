@@ -1,4 +1,4 @@
-import { UnthemeConfig } from "@untheme/kit";
+import type { UnthemePluginInput, UnthemePluginOutput } from "@untheme/kit";
 
 export type UnthemeColorPacks = typeof import("./packs")["default"];
 
@@ -26,13 +26,13 @@ export type UnthemeColorMode = "dark" | "light";
 
 export type UnthemeColorRole<Role extends string, Color extends string> = {
     [Property in Role]: {
-        color: Color;
+        color: Color; // TODO: there is a bug here, this changes the expected outcome of the `Color` generic
     } & {
         [Property in UnthemeColorMode]: UnthemeColorShade;
     }
 };
 
-export interface UnthemeColorConfig<Role extends string, Color extends string> extends UnthemeConfig {
+export interface UnthemeColorPluginInput<Role extends string, Color extends string> extends UnthemePluginInput {
     colors: {
         mode: UnthemeColorMode;
         scheme: {
@@ -40,4 +40,15 @@ export interface UnthemeColorConfig<Role extends string, Color extends string> e
         };
         roles: UnthemeColorRole<Role, Color>;
     }
+}
+
+export interface UnthemeColorPlugin<Role extends string, Color extends string> extends UnthemePluginOutput<Role> {
+    useColors: () => Color[];
+    resolveColor: (color: Color) => UnthemeColorDefinition;
+    useColorShades: (color: Color) => UnthemeColorShade[];
+    resolveColorShade: (color: Color, shade: UnthemeColorShade) => string;
+    useColorRoles: () => Role[];
+    resolveColorRoleToken: (role: Role) => string;
+    setColorRole: (role: Role, value: Partial<UnthemeColorRole<Role, Color>>) => void;
+    setColorMode: (mode?: UnthemeColorMode) => UnthemeColorMode;
 }

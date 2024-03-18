@@ -29,7 +29,6 @@
     "stub": "unbuild --stub"
   },
   "dependencies": {
-    "@untheme/schema": "workspace:*",
     "defu": "^6.1.4"
   }
 }

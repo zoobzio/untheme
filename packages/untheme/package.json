@@ -39,7 +39,7 @@
     "@untheme/colors": "workspace:*",
     "@untheme/core": "workspace:*",
     "@untheme/kit": "workspace:*",
-    "@untheme/schema": "workspace:*",
+    "defu": "^6.1.4",
     "hookable": "^5.5.3"
   }
 }
