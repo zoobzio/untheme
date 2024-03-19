@@ -1,5 +1,5 @@
 import { defineNuxtModule } from "@nuxt/kit";
-import { useCorePlugin } from "untheme";
+import { useColorPack, useColorTheme, useCoreTheme, useTokens } from "untheme";
 
 export interface UnthemeNuxtConfig {
 }
@@ -11,39 +11,33 @@ export default defineNuxtModule<UnthemeNuxtConfig[]>({
   },
   defaults: [],
   async setup() {
-    const untheme = useCorePlugin({
-      prefix: "padding",
+
+    let test = useCoreTheme({
       tokens: {
-        small: "8px",
-        medium: "12px",
-        large: "16px"
-      },
-    });
-
-    console.log(untheme.resolveToken("small"));
-    untheme.editToken("small", "16px");
-    console.log(untheme.resolveToken("small"));
-
-    /*
-    const test = useColorTheme({
-      prefix: "color",
-      colors: {
-        mode: "dark",
-        scheme: useColorPack("tailwind"),
-        roles: {
-          primary: {
-            color: "orange",
-            dark: 600,
-            light: 500
-          }
-        }
+          paddingSmall: "12px"
       }
     });
 
-    console.log(test.resolveColorRole("primary"));
-    test.setColorMode();
-    console.log(test.resolveColorRole("primary"));
-    */
+    let colors = useColorTheme({
+      mode: "dark",
+      scheme: useColorPack("tailwind"),
+      roles: {
+        primary: {
+          color: "orange",
+          light: 500,
+          dark: 600
+        }
+      }
+    })
+    
+    let tokens = useTokens();
+    console.log(tokens);
+    
+    test.editToken("paddingSmall", "16px");
+    console.log(tokens);
+
+    colors.toggleColorMode();
+    console.log(tokens);
   }
 });
 

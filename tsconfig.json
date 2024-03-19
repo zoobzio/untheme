@@ -8,9 +8,6 @@
     "module": "esnext",
     "moduleResolution": "node",
     "paths": {
-      "@untheme/colors": ["packages/colors/src"],
-      "@untheme/core": ["packages/core/src"],
-      "@untheme/kit": ["packages/kit/src"],
       "@untheme/nuxt": ["packages/nuxt/src"],
       "untheme": ["packages/untheme/src"],
     },
