@@ -1,5 +1,5 @@
 {
-  "name": "untheme",
+  "name": "@untheme/color",
   "type": "module",
   "version": "1.0.0",
   "author": {
@@ -11,20 +11,20 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zoobzio/untheme.git",
-    "directory": "packages/untheme"
+    "directory": "packages/colors"
   },
   "bugs": {
-    "url": "https://github.com/unjs/untheme/issues"
+    "url": "https://github.com/zoobzio/untheme/issues"
   },
   "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./index.cjs"
+      "require": "./dist/index.cjs"
     }
   },
-  "main": "index.cjs",
+  "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
