@@ -10,7 +10,7 @@
     "paths": {
       "@untheme/colors": ["packages/colors/src"],
       "@untheme/nuxt": ["packages/nuxt/src"],
-      "untheme": ["packages/untheme/src"],
+      "untheme": ["packages/untheme/src"]
     },
     "resolveJsonModule": true,
     "strict": true,

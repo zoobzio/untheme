@@ -1,4 +1,4 @@
-import { defineBuildConfig } from 'unbuild'
+import { defineBuildConfig } from "unbuild";
 
 export default defineBuildConfig({
   clean: true,
@@ -7,7 +7,5 @@ export default defineBuildConfig({
     inlineDependencies: true,
     emitCJS: true,
   },
-  entries: [
-    { input: 'src/index', name: 'index' },
-  ],
-})
+  entries: [{ input: "src/index", name: "index" }],
+});
