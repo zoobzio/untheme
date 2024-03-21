@@ -1,27 +1,31 @@
-import type { Untheme, UnthemeCore, UnthemeColors } from "./types";
+import { manufactureReferenceTokenizer } from "./tokens/reference";
+import { manufactureSystemTokenizer } from "./tokens/system";
+import type { Untheme } from "./types";
 
-export const defineUntheme: Untheme = (config) => {
-    let tokens: Record<string, string> = {};
-    
-    const useCoreTheme: UnthemeCore = (core) => {
-        return {
-            listTokens: <T extends string>() => Object.keys(core) as T[],
-            resolveToken: (token: keyof typeof core) => core[token],
-            editToken: (token: keyof typeof core, value: string) => core[token] = value,
-        }
-    }
+export const defineUntheme: Untheme = (config, refTokens, sysTokens) => {
+    const defineReferenceTokens = manufactureReferenceTokenizer<keyof typeof refTokens>();
+    const defineSystemTokens = manufactureSystemTokenizer<keyof typeof sysTokens, keyof typeof refTokens>();
 
-    const useColorTheme: UnthemeColors<keyof typeof config.colors> = (colors) => {
-        return {
-            listRoles: <C extends string>() => Object.keys(colors) as C[],
-            resolveRole: (role: keyof typeof colors) => colors[role],
-            editRole: (role: keyof typeof colors, options: Partial<typeof colors[typeof role]>) => colors[role] = { ...colors[role], ...options },
-        }
-    }
+    const {
+        getReferenceTokens,
+        listReferenceTokens,
+        resolveReferenceToken,
+        editReferenceToken
+    } = defineReferenceTokens(refTokens);
+
+    const {
+        getSystemTokens,
+        listSystemTokens,
+        resolveSystemToken
+    } = defineSystemTokens(sysTokens);
 
     return {
-        useTokens: () => tokens,
-        useCoreTheme,
-        useColorTheme,
+        getReferenceTokens,
+        listReferenceTokens,
+        resolveReferenceToken,
+        editReferenceToken,
+        getSystemTokens,
+        listSystemTokens,
+        resolveSystemToken
     }
 }

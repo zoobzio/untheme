@@ -1,41 +1,66 @@
-import type { UnthemeColorMode, UnthemeColorScheme, UnthemeColorShade } from "@untheme/colors";
+type NoInfer<T> = [T][T extends any ? 0 : never];
 
-export interface UnthemeCore {
-    <Token extends string>(
-        config: {
-            [T in Token]: string;
-        }
+export type UnthemeRefTokens<RefToken extends string> = {
+    [T in RefToken]: string;
+}
+
+export interface UnthemeReference<RefToken extends string> {
+    (
+        referenceTokens: UnthemeRefTokens<RefToken>
     ): {
-        listTokens: () => Token[];
-        resolveToken: (token: Token) => string;
-        editToken: (token: Token, value: string) => string; 
+        // defineSystemTokens: UnthemeSystem<ReferenceToken>;
+        getReferenceTokens: () => typeof referenceTokens;
+        listReferenceTokens: () => RefToken[];
+        resolveReferenceToken: (token: RefToken) => string;
+        editReferenceToken: (token: RefToken, value: string) => string;
     }
 }
 
-export interface UnthemeColors<Color extends string> {
-    <Role extends string>(
-        config: {
-            [R in Role]: {
-                color: ReturnType<() => Color>;
-            } & {
-                [M in UnthemeColorMode]: UnthemeColorShade;
-            }       
-        }
+export type _UnthemeReference<RefToken extends string> = ReturnType<UnthemeReference<RefToken>>;
+
+
+
+export type UnthemeSystemTokens<SysToken extends string, RefToken extends string> = {
+    [S in SysToken]: NoInfer<RefToken>;
+}
+
+export interface UnthemeSystem<SysToken extends string, RefToken extends string> {
+    (
+        systemTokens: UnthemeSystemTokens<SysToken, ReturnType<() => RefToken>>
     ): {
-        listRoles: () => Role[];
-        resolveRole: (role: Role) => typeof config[Role];
-        editRole: (role: Role, options: typeof config[Role]) => typeof config[Role];
+        // defineComponentTokens: UnthemeComponent<Token & SystemToken>;
+        getSystemTokens: () => typeof systemTokens;
+        listSystemTokens: () => SysToken[];
+        resolveSystemToken: (token: SysToken) => string;
+        // editSystemToken: (variant: Variant, token: SystemToken, value: Token) => string;
+    }
+}
+
+export type _UnthemeSystem<SysToken extends string, RefToken extends string> = ReturnType<UnthemeSystem<SysToken, RefToken>>;
+
+export type UnthemeComponentTokens<CmpToken extends string, SysToken extends string, RefToken extends string> = {
+    [C in CmpToken]: NoInfer<SysToken & RefToken>;
+}
+
+export interface UnthemeComponent<CmpToken extends string, SysToken extends string, RefToken extends string> {
+    (
+        componentTokens: UnthemeComponentTokens<CmpToken, SysToken, RefToken>
+    ): {
+        getComponentTokens: () => typeof componentTokens;
+        listComponentTokens: () => CmpToken[];
+        resolveComponentToken: (token: CmpToken) => string;
+        editComponentToken: (token: CmpToken, value: SysToken & RefToken) => string;
     }
 }
 
 export interface Untheme {
-    <Color extends string>(
+    <RefToken extends string, SysToken extends string>(
         config: {
             prefix: string;
-            colors: UnthemeColorScheme<Color>
-        }
-    ): {
-        useCoreTheme: UnthemeCore;
-        useColorTheme: UnthemeColors<Color>;
-    }
+        },
+        referenceTokens: UnthemeRefTokens<RefToken>,
+        systemTokens: UnthemeSystemTokens<SysToken, RefToken>,
+    ): _UnthemeReference<RefToken> & _UnthemeSystem<SysToken, RefToken> & {
+
+    };
 }
