@@ -1,23 +1,19 @@
-import type { UnthemeReference } from "../types";
+import type { UnthemeRefTokens, UnthemeRefUtils } from "../types";
 
-export function manufactureReferenceTokenizer<
-  RefToken extends string,
->(): UnthemeReference<RefToken> {
-  return (tokens) => {
-    const getReferenceTokens = () => tokens;
+export function defineRefUtils<RefToken extends string>(tokens: UnthemeRefTokens<RefToken>): UnthemeRefUtils<RefToken> {
+  const getReferenceTokens = () => tokens;
 
-    const listReferenceTokens = () => Object.keys(tokens) as RefToken[];
+  const listReferenceTokens = () => Object.keys(tokens) as RefToken[];
 
-    const resolveReferenceToken = (token: RefToken) => tokens[token];
+  const resolveReferenceToken = (token: RefToken) => tokens[token];
 
-    const editReferenceToken = (token: RefToken, value: string) =>
-      (tokens[token] = value);
+  const editReferenceToken = (token: RefToken, value: string) =>
+    (tokens[token] = value);
 
-    return {
-      getReferenceTokens,
-      listReferenceTokens,
-      resolveReferenceToken,
-      editReferenceToken,
-    };
+  return {
+    getReferenceTokens,
+    listReferenceTokens,
+    resolveReferenceToken,
+    editReferenceToken,
   };
 }

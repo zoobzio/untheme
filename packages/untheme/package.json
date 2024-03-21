@@ -14,7 +14,7 @@
     "directory": "packages/untheme"
   },
   "bugs": {
-    "url": "https://github.com/unjs/untheme/issues"
+    "url": "https://github.com/zoobzio/untheme/issues"
   },
   "sideEffects": false,
   "exports": {

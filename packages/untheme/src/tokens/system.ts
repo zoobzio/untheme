@@ -1,24 +1,22 @@
-import { UnthemeSystem } from "../types";
+import type { UnthemeSysTokens, UnthemeSysUtils } from "../types";
 
-export function manufactureSystemTokenizer<
-  SysToken extends string,
+export function defineSysUtils<
   RefToken extends string,
->(): UnthemeSystem<SysToken, RefToken> {
-  return (tokens) => {
-    const getSystemTokens = () => tokens;
+  SysToken extends string, 
+>(tokens: UnthemeSysTokens<RefToken, SysToken>): UnthemeSysUtils<RefToken, SysToken> {
+  const getSystemTokens = () => tokens;
 
-    const listSystemTokens = () => Object.keys(tokens) as SysToken[];
+  const listSystemTokens = () => Object.keys(tokens) as SysToken[];
 
-    const resolveSystemToken = (token: SysToken) => tokens[token];
+  const resolveSystemToken = (token: SysToken) => tokens[token];
 
-    const editSystemToken = (token: SysToken, value: RefToken) =>
-      (tokens[token] = value);
+  const editSystemToken = (token: SysToken, value: RefToken) =>
+    (tokens[token] = value);
 
-    return {
-      getSystemTokens,
-      listSystemTokens,
-      resolveSystemToken,
-      editSystemToken,
-    };
+  return {
+    getSystemTokens,
+    listSystemTokens,
+    resolveSystemToken,
+    editSystemToken,
   };
 }

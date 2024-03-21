@@ -1,32 +1,34 @@
-import { manufactureReferenceTokenizer } from "./tokens/reference";
-import { manufactureSystemTokenizer } from "./tokens/system";
-import type { Untheme } from "./types";
+import { defineRefUtils } from "./tokens/reference";
+import { defineSysUtils } from "./tokens/system";
+import type { Untheme, UnthemeConfig, UnthemeTokens } from "./types";
 
-export const defineUntheme: Untheme = (config, refTokens, sysTokens) => {
-  const defineReferenceTokens =
-    manufactureReferenceTokenizer<keyof typeof refTokens>();
-  const defineSystemTokens = manufactureSystemTokenizer<
-    keyof typeof sysTokens,
-    keyof typeof refTokens
-  >();
+export function defineUnthemeConfig<RefToken extends string, SysToken extends string>(config: UnthemeConfig<RefToken, SysToken>) {
+  return config;
+}
 
-  const {
-    getReferenceTokens,
-    listReferenceTokens,
-    resolveReferenceToken,
-    editReferenceToken,
-  } = defineReferenceTokens(refTokens);
+export const defineUntheme: Untheme = ({ refTokens, sysTokens }) => {
+  let tokens: UnthemeTokens<keyof typeof refTokens, keyof typeof sysTokens> = {
+    ...refTokens,
+    ...sysTokens,
+  };
 
-  const { getSystemTokens, listSystemTokens, resolveSystemToken } =
-    defineSystemTokens(sysTokens);
+  const getTokens = () => tokens;
+
+  const listTokens = () => Object.keys(tokens) as (keyof typeof tokens)[];
+
+  const resolveToken: (token: keyof typeof tokens) => string = (token) => {
+    const result = tokens[token];
+    return result in tokens ? resolveToken(result) : result;
+  };
+
+  const refUtils = defineRefUtils<keyof typeof refTokens>(tokens);
+  const sysUtils = defineSysUtils<keyof typeof refTokens, keyof typeof sysTokens>(tokens);
 
   return {
-    getReferenceTokens,
-    listReferenceTokens,
-    resolveReferenceToken,
-    editReferenceToken,
-    getSystemTokens,
-    listSystemTokens,
-    resolveSystemToken,
+    getTokens,
+    listTokens,
+    resolveToken,
+    ...refUtils,
+    ...sysUtils 
   };
 };

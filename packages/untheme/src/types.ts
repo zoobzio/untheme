@@ -4,72 +4,44 @@ export type UnthemeRefTokens<RefToken extends string> = {
   [T in RefToken]: string;
 };
 
-export interface UnthemeReference<RefToken extends string> {
-  (referenceTokens: UnthemeRefTokens<RefToken>): {
-    // defineSystemTokens: UnthemeSystem<ReferenceToken>;
-    getReferenceTokens: () => typeof referenceTokens;
-    listReferenceTokens: () => RefToken[];
-    resolveReferenceToken: (token: RefToken) => string;
-    editReferenceToken: (token: RefToken, value: string) => string;
-  };
-}
-
-export type _UnthemeReference<RefToken extends string> = ReturnType<
-  UnthemeReference<RefToken>
->;
-
-export type UnthemeSystemTokens<
-  SysToken extends string,
+export type UnthemeSysTokens<
   RefToken extends string,
+  SysToken extends string,
 > = {
   [S in SysToken]: NoInfer<RefToken>;
 };
 
-export interface UnthemeSystem<
-  SysToken extends string,
+export type UnthemeTokens<
   RefToken extends string,
-> {
-  (systemTokens: UnthemeSystemTokens<SysToken, ReturnType<() => RefToken>>): {
-    // defineComponentTokens: UnthemeComponent<Token & SystemToken>;
-    getSystemTokens: () => typeof systemTokens;
-    listSystemTokens: () => SysToken[];
-    resolveSystemToken: (token: SysToken) => string;
-    // editSystemToken: (variant: Variant, token: SystemToken, value: Token) => string;
-  };
+  SysToken extends string,
+> = UnthemeRefTokens<RefToken> & UnthemeSysTokens<RefToken, SysToken>;
+
+export type UnthemeRefUtils<RefToken extends string> = {
+  getReferenceTokens: () => UnthemeRefTokens<RefToken>;
+  listReferenceTokens: () => RefToken[];
+  resolveReferenceToken: (token: RefToken) => string;
+  editReferenceToken: (token: RefToken, value: string) => string;
 }
 
-export type _UnthemeSystem<
-  SysToken extends string,
-  RefToken extends string,
-> = ReturnType<UnthemeSystem<SysToken, RefToken>>;
+export type UnthemeSysUtils<RefToken extends string, SysToken extends string> = {
+  getSystemTokens: () => UnthemeSysTokens<RefToken, SysToken>;
+  listSystemTokens: () => SysToken[];
+  resolveSystemToken: (token: SysToken) => string;
+  editSystemToken: (token: SysToken, value: NoInfer<RefToken>) => string;
+}
 
-export type UnthemeComponentTokens<
-  CmpToken extends string,
-  SysToken extends string,
-  RefToken extends string,
-> = {
-  [C in CmpToken]: NoInfer<SysToken & RefToken>;
-};
-
-export interface UnthemeComponent<
-  CmpToken extends string,
-  SysToken extends string,
-  RefToken extends string,
-> {
-  (componentTokens: UnthemeComponentTokens<CmpToken, SysToken, RefToken>): {
-    getComponentTokens: () => typeof componentTokens;
-    listComponentTokens: () => CmpToken[];
-    resolveComponentToken: (token: CmpToken) => string;
-    editComponentToken: (token: CmpToken, value: SysToken & RefToken) => string;
-  };
+export type UnthemeConfig<RefToken extends string, SysToken extends string, > = {
+  refTokens: UnthemeRefTokens<RefToken>;
+  sysTokens: UnthemeSysTokens<RefToken, SysToken>;
 }
 
 export interface Untheme {
   <RefToken extends string, SysToken extends string>(
-    config: {
-      prefix: string;
-    },
-    referenceTokens: UnthemeRefTokens<RefToken>,
-    systemTokens: UnthemeSystemTokens<SysToken, RefToken>,
-  ): _UnthemeReference<RefToken> & _UnthemeSystem<SysToken, RefToken> & {};
+    config: UnthemeConfig<RefToken, SysToken>
+  ): UnthemeRefUtils<RefToken> &
+    UnthemeSysUtils<RefToken, SysToken> & {
+      getTokens: () => UnthemeTokens<RefToken, SysToken>;
+      listTokens: () => (RefToken | SysToken)[];
+      resolveToken: (token: RefToken | SysToken) => string;
+    };
 }
