@@ -12,6 +12,7 @@
   "dependencies": {
     "@untheme/nuxt": "link:../../packages/nuxt",
     "nuxt": "^3.10.3",
+    "untheme": "../../packages/untheme",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
   }

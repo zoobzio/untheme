@@ -1,7 +1,4 @@
-<script setup lang="ts">
-const config = useUntheme();
-console.log(config);
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div>

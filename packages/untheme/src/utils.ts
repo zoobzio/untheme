@@ -1,34 +1,85 @@
-import { defineRefUtils } from "./tokens/reference";
-import { defineSysUtils } from "./tokens/system";
-import type { Untheme, UnthemeConfig, UnthemeTokens } from "./types";
+import type {
+  Untheme,
+  UnthemeRefTokens,
+  UnthemeTokenUtils,
+  UnthemeSysTokens,
+  UnthemeThemeUtils,
+} from "./types";
 
-export function defineUnthemeConfig<RefToken extends string, SysToken extends string>(config: UnthemeConfig<RefToken, SysToken>) {
-  return config;
+export function defineTokenUtils<RefToken extends string>(
+  tokens: UnthemeRefTokens<RefToken>,
+): UnthemeTokenUtils<RefToken> {
+  return {
+    getReferenceTokens: () => tokens,
+    listReferenceTokens: () => Object.keys(tokens) as RefToken[],
+    resolveReferenceToken: (token: RefToken) => tokens[token],
+    editReferenceToken: (token: RefToken, value: string) =>
+      (tokens[token] = value),
+  };
 }
 
-export const defineUntheme: Untheme = ({ refTokens, sysTokens }) => {
-  let tokens: UnthemeTokens<keyof typeof refTokens, keyof typeof sysTokens> = {
-    ...refTokens,
-    ...sysTokens,
-  };
-
-  const getTokens = () => tokens;
-
-  const listTokens = () => Object.keys(tokens) as (keyof typeof tokens)[];
-
-  const resolveToken: (token: keyof typeof tokens) => string = (token) => {
-    const result = tokens[token];
-    return result in tokens ? resolveToken(result) : result;
-  };
-
-  const refUtils = defineRefUtils<keyof typeof refTokens>(tokens);
-  const sysUtils = defineSysUtils<keyof typeof refTokens, keyof typeof sysTokens>(tokens);
-
+export function defineThemeUtils<
+  RefToken extends string,
+  SysToken extends string,
+>(
+  tokens: UnthemeSysTokens<RefToken, SysToken>,
+): UnthemeThemeUtils<RefToken, SysToken> {
   return {
-    getTokens,
-    listTokens,
-    resolveToken,
-    ...refUtils,
-    ...sysUtils 
+    getSystemTokens: () => tokens,
+    listSystemTokens: () => Object.keys(tokens) as SysToken[],
+    resolveSystemToken: (token: SysToken) => tokens[token],
+    editSystemToken: (token: SysToken, value: RefToken) =>
+      (tokens[token] = value),
+  };
+}
+
+export const defineUntheme: Untheme = (config) => {
+  return (variant) => {
+    let theme = config.themes[variant];
+
+    type Token = keyof typeof config.tokens;
+    type ThemeToken = keyof typeof theme;
+
+    const tokenUtils = defineTokenUtils(config.tokens);
+    const themeUtils = defineThemeUtils(theme);
+
+    function getTokens() {
+      return {
+        ...tokenUtils.getReferenceTokens(),
+        ...themeUtils.getSystemTokens(),
+      };
+    }
+
+    function listTokens() {
+      return [
+        ...tokenUtils.listReferenceTokens(),
+        ...themeUtils.listSystemTokens(),
+      ];
+    }
+
+    function resolveToken(token: Token | ThemeToken): string {
+      return token in config.tokens
+        ? config.tokens[token as Token]
+        : resolveToken(theme[token as ThemeToken]);
+    }
+
+    function editToken<T>(
+      token: T extends Token ? Token : ThemeToken,
+      value: T extends Token ? string : Token,
+    ): string {
+      token in config.tokens
+        ? (config.tokens[token as Token] = value)
+        : (theme[token as ThemeToken] = value as Token);
+      return resolveToken(token);
+    }
+
+    return {
+      getTokens,
+      listTokens,
+      resolveToken,
+      editToken,
+      ...tokenUtils,
+      ...themeUtils,
+    };
   };
 };
