@@ -1,6 +1,6 @@
-import { defineUnthemeConfig } from "untheme";
+import { defineUntheme } from "untheme";
 
-export default defineUnthemeConfig({
+export default defineUntheme({
   tokens: {
     green: "#green",
     blue: "#blue",

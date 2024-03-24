@@ -2,5 +2,9 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
 
-  modules: ["@untheme/nuxt"],
+  modules: ["@nuxtjs/color-mode"],
+
+  colorMode: {
+    preference: "dark",
+  },
 });

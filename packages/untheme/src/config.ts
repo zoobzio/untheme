@@ -1,5 +1,5 @@
 import { loadConfig } from "unconfig";
-import { Config, UnthemeConfig } from "./types";
+import { Untheme, type UnthemeConfig } from "./types";
 
 export function defineUnthemeConfig<
   RefToken extends string,
@@ -9,10 +9,8 @@ export function defineUnthemeConfig<
   return config;
 }
 
-export const inferUnthemeConfig: Config = (config) => config 
-
-export async function loadUnthemeConfig(path: string) {
-  const { config } = await loadConfig({
+export async function loadUntheme(path: string) {
+  const { config } = await loadConfig<ReturnType<Untheme>>({
     sources: [
       {
         files: path,
@@ -20,5 +18,5 @@ export async function loadUnthemeConfig(path: string) {
       },
     ],
   });
-  return inferUnthemeConfig(config);
+  return config;
 }

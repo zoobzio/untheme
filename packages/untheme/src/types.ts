@@ -1,4 +1,4 @@
-type NoInfer<T> = [T][T extends any ? 0 : never];
+export type NoInfer<T> = [T][T extends any ? 0 : never];
 
 export type UnthemeRefTokens<RefToken extends string> = {
   [T in RefToken]: string;
@@ -41,17 +41,13 @@ export type UnthemeThemeUtils<
   editSystemToken: (token: SysToken, value: NoInfer<RefToken>) => string;
 };
 
-export type UnthemeConfig<
+export interface UnthemeConfig<
   RefToken extends string,
   SysToken extends string,
   Theme extends string,
-> = {
+> {
   tokens: UnthemeRefTokens<RefToken>;
   themes: UnthemeThemes<RefToken, SysToken, Theme>;
-};
-
-export interface Config {
-  <RefToken extends string, SysToken extends string, Theme extends string>(config: any): Promise<UnthemeConfig<RefToken, SysToken, Theme>>;
 }
 
 export interface Untheme {
