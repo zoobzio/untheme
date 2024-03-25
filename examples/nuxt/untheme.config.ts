@@ -1,10 +1,10 @@
 import { defineUntheme } from "untheme";
 
-export default defineUntheme({
+export const { useUntheme, useTokenVars } = defineUntheme({
   tokens: {
-    green: "#green",
-    blue: "#blue",
-    red: "#red",
+    green: "#059669",
+    blue: "#0284c7",
+    red: "#dc2626",
   },
   themes: {
     light: {
@@ -13,11 +13,11 @@ export default defineUntheme({
     },
     dark: {
       primary: "blue",
-      error: "red",
+      error: "green",
     },
   },
   roles: {
     onPrimary: "primary",
-    belowPrimary: "red"
-  }
+    belowPrimary: "error",
+  },
 });

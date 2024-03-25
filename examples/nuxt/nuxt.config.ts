@@ -2,7 +2,11 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
 
-  modules: ["@nuxtjs/color-mode"],
+  css: [
+    "@unocss/reset/tailwind.css"
+  ],
+
+  modules: ["@nuxtjs/color-mode", "@unocss/nuxt"],
 
   colorMode: {
     preference: "dark",

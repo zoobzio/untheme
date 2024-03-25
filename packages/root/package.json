@@ -1,5 +1,5 @@
 {
-  "name": "untheme",
+  "name": "@untheme/root",
   "type": "module",
   "version": "0.0.2",
   "author": {
@@ -11,7 +11,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zoobzio/untheme.git",
-    "directory": "packages/untheme"
+    "directory": "packages/root"
   },
   "bugs": {
     "url": "https://github.com/zoobzio/untheme/issues"
@@ -36,6 +36,7 @@
     "export:sizes": "npx export-size . -r"
   },
   "dependencies": {
-    "@untheme/root": "workspace:*"
+    "@types/lodash.kebabcase": "^4.1.9",
+    "lodash.kebabcase": "^4.1.1"
   }
 }

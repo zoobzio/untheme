@@ -25,13 +25,15 @@ export type UnthemeRoleTokens<
   RoleToken extends string,
 > = {
   [R in RoleToken]: NoInfer<RefToken | SysToken>;
-}
+};
 
 export type UnthemeTokens<
   RefToken extends string,
   SysToken extends string,
   RoleToken extends string,
-> = UnthemeRefTokens<RefToken> & UnthemeSysTokens<RefToken, SysToken> & UnthemeRoleTokens<RefToken, SysToken, RoleToken>;
+> = UnthemeRefTokens<RefToken> &
+  UnthemeSysTokens<RefToken, SysToken> &
+  UnthemeRoleTokens<RefToken, SysToken, RoleToken>;
 
 export type UnthemeTokenUtils<RefToken extends string> = {
   getReferenceTokens: () => UnthemeRefTokens<RefToken>;
@@ -58,8 +60,11 @@ export type UnthemeRoleUtils<
   getRoleTokens: () => UnthemeRoleTokens<RefToken, SysToken, RoleToken>;
   listRoleTokens: () => RoleToken[];
   resolveRoleToken: (token: RoleToken) => string;
-  editRoleToken: (token: RoleToken, value: NoInfer<RefToken | SysToken>) => string;
-}
+  editRoleToken: (
+    token: RoleToken,
+    value: NoInfer<RefToken | SysToken>,
+  ) => string;
+};
 
 export interface UnthemeConfig<
   RefToken extends string,
@@ -73,18 +78,28 @@ export interface UnthemeConfig<
 }
 
 export interface Untheme {
-  <RefToken extends string, SysToken extends string, Theme extends string, RoleToken extends string>(
+  <
+    RefToken extends string,
+    SysToken extends string,
+    Theme extends string,
+    RoleToken extends string,
+  >(
     config: UnthemeConfig<RefToken, SysToken, Theme, RoleToken>,
-  ): (theme: Theme) => UnthemeTokenUtils<RefToken> &
-    UnthemeThemeUtils<RefToken, SysToken> & {
-      getTokens: () => UnthemeTokens<RefToken, SysToken, RoleToken>;
-      listTokens: () => (RefToken | SysToken | RoleToken)[];
-      resolveToken: (token: RefToken | SysToken | RoleToken) => string;
-      /*
-      editToken: <Token>(
-        token: Token extends RefToken ? RefToken : (Token extends SysToken ? SysToken : RoleToken),
-        value: Token extends RefToken ? string : (Token extends SysToken ? RefToken : RefToken | SysToken),
-      ) => string;
-      */
-    };
+  ): {
+    useUntheme: (theme: Theme) => UnthemeTokenUtils<RefToken> &
+      UnthemeThemeUtils<RefToken, SysToken> & {
+        getTokens: () => UnthemeTokens<RefToken, SysToken, RoleToken>;
+        listTokens: () => (RefToken | SysToken | RoleToken)[];
+        resolveToken: (token: RefToken | SysToken | RoleToken) => string;
+        /*
+        editToken: <Token>(
+          token: Token extends RefToken ? RefToken : (Token extends SysToken ? SysToken : RoleToken),
+          value: Token extends RefToken ? string : (Token extends SysToken ? RefToken : RefToken | SysToken),
+        ) => string;
+        */
+      };
+    useTokenVars: (
+      match: (RefToken | SysToken | RoleToken)[],
+    ) => Record<RefToken | SysToken | RoleToken, string>;
+  };
 }
