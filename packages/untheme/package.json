@@ -36,6 +36,7 @@
     "export:sizes": "npx export-size . -r"
   },
   "dependencies": {
+    "@untheme/colors": "workspace:*",
     "unconfig": "^0.3.11"
   }
 }
