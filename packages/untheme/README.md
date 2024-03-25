@@ -1,6 +1,6 @@
-# @untheme/root
+# untheme
 
-🧰 CSS Root utilities for Untheme.
+🎨 A universal token manager for design systems.
 
 ## Documentation
 

@@ -8,7 +8,6 @@
     "module": "esnext",
     "moduleResolution": "node",
     "paths": {
-      "@untheme/root": ["packages/root/src"],
       "untheme": ["packages/untheme/src"]
     },
     "resolveJsonModule": true,

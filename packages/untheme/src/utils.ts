@@ -1,4 +1,4 @@
-import { useTokenCSSVars } from "@untheme/root";
+import { useTokenCSSVars } from "./css";
 import type {
   Untheme,
   UnthemeRefTokens,

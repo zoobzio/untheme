@@ -36,6 +36,9 @@
     "export:sizes": "npx export-size . -r"
   },
   "dependencies": {
-    "@untheme/root": "workspace:*"
+    "lodash.kebabcase": "^4.1.1"
+  },
+  "devDependencies": {
+    "@types/lodash.kebabcase": "^4.1.9"
   }
 }
