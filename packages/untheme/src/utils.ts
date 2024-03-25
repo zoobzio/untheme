@@ -4,6 +4,8 @@ import type {
   UnthemeTokenUtils,
   UnthemeSysTokens,
   UnthemeThemeUtils,
+  UnthemeRoleTokens,
+  UnthemeRoleUtils,
 } from "./types";
 
 export function defineTokenUtils<RefToken extends string>(
@@ -33,20 +35,39 @@ export function defineThemeUtils<
   };
 }
 
+export function defineRoleUtils<
+  RefToken extends string,
+  SysToken extends string,
+  RoleToken extends string,
+>(
+  tokens: UnthemeRoleTokens<RefToken, SysToken, RoleToken>
+): UnthemeRoleUtils<RefToken, SysToken, RoleToken> {
+  return {
+    getRoleTokens: () => tokens,
+    listRoleTokens: () => Object.keys(tokens) as RoleToken[],
+    resolveRoleToken: (token: RoleToken) => tokens[token],
+    editRoleToken: (token: RoleToken, value: RefToken | SysToken) =>
+      (tokens[token] = value),
+  }
+}
+
 export const defineUntheme: Untheme = (config) => {
   return (variant) => {
     let theme = config.themes[variant];
 
-    type Token = keyof typeof config.tokens;
+    type RefToken = keyof typeof config.tokens;
     type ThemeToken = keyof typeof theme;
+    type RoleToken = keyof typeof config.roles;
 
     const tokenUtils = defineTokenUtils(config.tokens);
     const themeUtils = defineThemeUtils(theme);
+    const roleUtils = defineRoleUtils(config.roles);
 
     function getTokens() {
       return {
         ...tokenUtils.getReferenceTokens(),
         ...themeUtils.getSystemTokens(),
+        ...roleUtils.getRoleTokens(),
       };
     }
 
@@ -54,32 +75,27 @@ export const defineUntheme: Untheme = (config) => {
       return [
         ...tokenUtils.listReferenceTokens(),
         ...themeUtils.listSystemTokens(),
+        ...roleUtils.listRoleTokens(),
       ];
     }
 
-    function resolveToken(token: Token | ThemeToken): string {
-      return token in config.tokens
-        ? config.tokens[token as Token]
-        : resolveToken(theme[token as ThemeToken]);
-    }
-
-    function editToken<T>(
-      token: T extends Token ? Token : ThemeToken,
-      value: T extends Token ? string : Token,
-    ): string {
-      token in config.tokens
-        ? (config.tokens[token as Token] = value)
-        : (theme[token as ThemeToken] = value as Token);
-      return resolveToken(token);
+    function resolveToken(token: RefToken | ThemeToken | RoleToken): string {
+      if (token in config.tokens) {
+        return config.tokens[token as RefToken];
+      } 
+      if (token in theme) {
+        return resolveToken(theme[token as ThemeToken]);
+      }
+      return resolveToken(config.roles[token as RoleToken]);
     }
 
     return {
       getTokens,
       listTokens,
       resolveToken,
-      editToken,
       ...tokenUtils,
       ...themeUtils,
+      ...roleUtils,
     };
   };
 };

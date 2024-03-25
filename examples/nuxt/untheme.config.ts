@@ -16,4 +16,8 @@ export default defineUntheme({
       error: "red",
     },
   },
+  roles: {
+    onPrimary: "primary",
+    belowPrimary: "red"
+  }
 });

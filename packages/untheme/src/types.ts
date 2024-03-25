@@ -19,10 +19,19 @@ export type UnthemeThemes<
   [V in Theme]: UnthemeSysTokens<RefToken, SysToken>;
 };
 
+export type UnthemeRoleTokens<
+  RefToken extends string,
+  SysToken extends string,
+  RoleToken extends string,
+> = {
+  [R in RoleToken]: NoInfer<RefToken | SysToken>;
+}
+
 export type UnthemeTokens<
   RefToken extends string,
   SysToken extends string,
-> = UnthemeRefTokens<RefToken> & UnthemeSysTokens<RefToken, SysToken>;
+  RoleToken extends string,
+> = UnthemeRefTokens<RefToken> & UnthemeSysTokens<RefToken, SysToken> & UnthemeRoleTokens<RefToken, SysToken, RoleToken>;
 
 export type UnthemeTokenUtils<RefToken extends string> = {
   getReferenceTokens: () => UnthemeRefTokens<RefToken>;
@@ -41,26 +50,41 @@ export type UnthemeThemeUtils<
   editSystemToken: (token: SysToken, value: NoInfer<RefToken>) => string;
 };
 
+export type UnthemeRoleUtils<
+  RefToken extends string,
+  SysToken extends string,
+  RoleToken extends string,
+> = {
+  getRoleTokens: () => UnthemeRoleTokens<RefToken, SysToken, RoleToken>;
+  listRoleTokens: () => RoleToken[];
+  resolveRoleToken: (token: RoleToken) => string;
+  editRoleToken: (token: RoleToken, value: NoInfer<RefToken | SysToken>) => string;
+}
+
 export interface UnthemeConfig<
   RefToken extends string,
   SysToken extends string,
   Theme extends string,
+  RoleToken extends string,
 > {
   tokens: UnthemeRefTokens<RefToken>;
   themes: UnthemeThemes<RefToken, SysToken, Theme>;
+  roles: UnthemeRoleTokens<RefToken, SysToken, RoleToken>;
 }
 
 export interface Untheme {
-  <RefToken extends string, SysToken extends string, Theme extends string>(
-    config: UnthemeConfig<RefToken, SysToken, Theme>,
+  <RefToken extends string, SysToken extends string, Theme extends string, RoleToken extends string>(
+    config: UnthemeConfig<RefToken, SysToken, Theme, RoleToken>,
   ): (theme: Theme) => UnthemeTokenUtils<RefToken> &
     UnthemeThemeUtils<RefToken, SysToken> & {
-      getTokens: () => UnthemeTokens<RefToken, SysToken>;
-      listTokens: () => (RefToken | SysToken)[];
-      resolveToken: (token: RefToken | SysToken) => string;
+      getTokens: () => UnthemeTokens<RefToken, SysToken, RoleToken>;
+      listTokens: () => (RefToken | SysToken | RoleToken)[];
+      resolveToken: (token: RefToken | SysToken | RoleToken) => string;
+      /*
       editToken: <Token>(
-        token: Token extends RefToken ? RefToken : SysToken,
-        value: Token extends RefToken ? string : RefToken,
+        token: Token extends RefToken ? RefToken : (Token extends SysToken ? SysToken : RoleToken),
+        value: Token extends RefToken ? string : (Token extends SysToken ? RefToken : RefToken | SysToken),
       ) => string;
+      */
     };
 }
