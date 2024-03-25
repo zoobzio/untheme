@@ -17,7 +17,7 @@ export default defineConfig({
     },
   },
   theme: {
-    colors: useTokenVars(["belowPrimary", "onPrimary", "primary"]),
+    colors: useTokenVars(/[onPrimary|belowPrimary]/),
   },
   presets: [
     presetUno(),

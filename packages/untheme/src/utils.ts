@@ -59,13 +59,23 @@ export const defineUntheme: Untheme = (config) => {
   type ThemeToken = keyof (typeof config.themes)[Theme];
   type RoleToken = keyof typeof config.roles;
 
+  const tokenUtils = defineTokenUtils(config.tokens);
+  const _themeUtils = defineThemeUtils(config.themes[(Object.keys(config.themes) as (keyof typeof config.themes)[])[0]]);
+  const roleUtils = defineRoleUtils(config.roles);
+
+  const _listTokens = () => {
+    return [
+      ...tokenUtils.listReferenceTokens(),
+      ..._themeUtils.listSystemTokens(),
+      ...roleUtils.listRoleTokens()
+    ]
+  }
+
   return {
     useUntheme: (variant: Theme) => {
       let theme = config.themes[variant];
 
-      const tokenUtils = defineTokenUtils(config.tokens);
       const themeUtils = defineThemeUtils(theme);
-      const roleUtils = defineRoleUtils(config.roles);
 
       function getTokens() {
         return {
@@ -102,6 +112,6 @@ export const defineUntheme: Untheme = (config) => {
         ...roleUtils,
       };
     },
-    useTokenVars: (match) => useTokenCSSVars(match),
+    useTokenVars: (match) => useTokenCSSVars(_listTokens().filter(t => !match || match.test(t))),
   };
 };

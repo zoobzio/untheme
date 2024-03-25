@@ -99,7 +99,7 @@ export interface Untheme {
         */
       };
     useTokenVars: (
-      match: (RefToken | SysToken | RoleToken)[],
+      match?: RegExp,
     ) => Record<RefToken | SysToken | RoleToken, string>;
   };
 }
