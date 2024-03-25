@@ -1,6 +1,6 @@
-# @untheme/nuxt
+# untheme
 
-A Nuxt module that implements `Untheme`.
+🎨 A universal token manager for design systems.
 
 ## Documentation
 
