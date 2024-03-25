@@ -1,6 +1,6 @@
 import { defineUntheme } from "untheme";
 
-export const { useUntheme, useTokenVars } = defineUntheme({
+export default defineUntheme({
   tokens: {
     green: "#059669",
     blue: "#0284c7",

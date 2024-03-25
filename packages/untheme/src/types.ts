@@ -85,21 +85,19 @@ export interface Untheme {
     RoleToken extends string,
   >(
     config: UnthemeConfig<RefToken, SysToken, Theme, RoleToken>,
-  ): {
-    useUntheme: (theme: Theme) => UnthemeTokenUtils<RefToken> &
-      UnthemeThemeUtils<RefToken, SysToken> & {
-        getTokens: () => UnthemeTokens<RefToken, SysToken, RoleToken>;
-        listTokens: () => (RefToken | SysToken | RoleToken)[];
-        resolveToken: (token: RefToken | SysToken | RoleToken) => string;
-        /*
-        editToken: <Token>(
-          token: Token extends RefToken ? RefToken : (Token extends SysToken ? SysToken : RoleToken),
-          value: Token extends RefToken ? string : (Token extends SysToken ? RefToken : RefToken | SysToken),
-        ) => string;
-        */
-      };
-    useTokenVars: (
-      match?: RegExp,
-    ) => Record<RefToken | SysToken | RoleToken, string>;
-  };
+  ): (theme: Theme) => UnthemeTokenUtils<RefToken> &
+    UnthemeThemeUtils<RefToken, SysToken> & {
+      getTokens: () => UnthemeTokens<RefToken, SysToken, RoleToken>;
+      listTokens: () => (RefToken | SysToken | RoleToken)[];
+      resolveToken: (token: RefToken | SysToken | RoleToken) => string;
+      /*
+      editToken: <Token>(
+        token: Token extends RefToken ? RefToken : (Token extends SysToken ? SysToken : RoleToken),
+        value: Token extends RefToken ? string : (Token extends SysToken ? RefToken : RefToken | SysToken),
+      ) => string;
+      */
+      useTokenVars: (
+        match?: RegExp,
+      ) => Record<RefToken | SysToken | RoleToken, string>
+    };
 }

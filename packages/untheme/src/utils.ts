@@ -59,59 +59,47 @@ export const defineUntheme: Untheme = (config) => {
   type ThemeToken = keyof (typeof config.themes)[Theme];
   type RoleToken = keyof typeof config.roles;
 
-  const tokenUtils = defineTokenUtils(config.tokens);
-  const _themeUtils = defineThemeUtils(config.themes[(Object.keys(config.themes) as (keyof typeof config.themes)[])[0]]);
-  const roleUtils = defineRoleUtils(config.roles);
+  return (variant: Theme) => {
+    let theme = config.themes[variant];
 
-  const _listTokens = () => {
-    return [
-      ...tokenUtils.listReferenceTokens(),
-      ..._themeUtils.listSystemTokens(),
-      ...roleUtils.listRoleTokens()
-    ]
-  }
+    const tokenUtils = defineTokenUtils(config.tokens);
+    const themeUtils = defineThemeUtils(theme);
+    const roleUtils = defineRoleUtils(config.roles);
 
-  return {
-    useUntheme: (variant: Theme) => {
-      let theme = config.themes[variant];
-
-      const themeUtils = defineThemeUtils(theme);
-
-      function getTokens() {
-        return {
-          ...tokenUtils.getReferenceTokens(),
-          ...themeUtils.getSystemTokens(),
-          ...roleUtils.getRoleTokens(),
-        };
-      }
-
-      function listTokens() {
-        return [
-          ...tokenUtils.listReferenceTokens(),
-          ...themeUtils.listSystemTokens(),
-          ...roleUtils.listRoleTokens(),
-        ];
-      }
-
-      function resolveToken(token: RefToken | ThemeToken | RoleToken): string {
-        if (token in config.tokens) {
-          return config.tokens[token as RefToken];
-        }
-        if (token in theme) {
-          return resolveToken(theme[token as ThemeToken]);
-        }
-        return resolveToken(config.roles[token as RoleToken]);
-      }
-
+    function getTokens() {
       return {
-        getTokens,
-        listTokens,
-        resolveToken,
-        ...tokenUtils,
-        ...themeUtils,
-        ...roleUtils,
+        ...tokenUtils.getReferenceTokens(),
+        ...themeUtils.getSystemTokens(),
+        ...roleUtils.getRoleTokens(),
       };
-    },
-    useTokenVars: (match) => useTokenCSSVars(_listTokens().filter(t => !match || match.test(t))),
-  };
+    }
+
+    function listTokens() {
+      return [
+        ...tokenUtils.listReferenceTokens(),
+        ...themeUtils.listSystemTokens(),
+        ...roleUtils.listRoleTokens(),
+      ];
+    }
+
+    function resolveToken(token: RefToken | ThemeToken | RoleToken): string {
+      if (token in config.tokens) {
+        return config.tokens[token as RefToken];
+      }
+      if (token in theme) {
+        return resolveToken(theme[token as ThemeToken]);
+      }
+      return resolveToken(config.roles[token as RoleToken]);
+    }
+
+    return {
+      getTokens,
+      listTokens,
+      resolveToken,
+      useTokenVars: (match) => useTokenCSSVars(listTokens().filter(t => !match || match.test(t))),
+      ...tokenUtils,
+      ...themeUtils,
+      ...roleUtils,
+    };
+  }
 };

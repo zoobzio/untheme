@@ -1,5 +1,5 @@
 import { useRootCSSVars } from "untheme";
-import { useUntheme } from "../untheme.config";
+import useUntheme from "../untheme.config";
 
 export default defineNuxtPlugin(() => {
   const colorMode = useColorMode();
