@@ -1,10 +1,8 @@
 import { useRootCSSVars } from "untheme";
-import useUntheme from "../untheme.config";
 
 export default defineNuxtPlugin(() => {
-  const colorMode = useColorMode();
-  const theme = computed(() => useUntheme(colorMode.value as "light" | "dark"));
-  const root = computed(() => useRootCSSVars(theme.value.getTokens()));
+  const { tokens } = useUntheme();
+  const root = computed(() => useRootCSSVars(tokens.value));
   useHead({
     style: [
       {

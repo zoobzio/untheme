@@ -8,9 +8,7 @@ import {
   transformerDirectives,
   transformerVariantGroup,
 } from "unocss";
-import useUntheme from "./untheme.config";
-
-const { useTokenVars } = useUntheme("dark");
+import { useUntheme } from "./utils/theme";
 
 export default defineConfig({
   content: {
@@ -19,7 +17,7 @@ export default defineConfig({
     },
   },
   theme: {
-    colors: useTokenVars(/[onPrimary|belowPrimary]/),
+    colors: useUntheme().theme.value.useVars(/[onPrimary|belowPrimary]/),
   },
   presets: [
     presetUno(),
