@@ -1,40 +1,7 @@
 {
   "name": "@untheme/shared",
-  "type": "module",
-  "version": "0.0.7",
-  "author": {
-    "name": "Alex Thorwaldson",
-    "email": "alex@zoobz.io",
-    "url": "https://zoobz.io"
-  },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/zoobzio/untheme.git",
-    "directory": "packages/shared"
-  },
-  "bugs": {
-    "url": "https://github.com/zoobzio/untheme/issues"
-  },
-  "sideEffects": false,
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
-    }
-  },
-  "main": "dist/index.cjs",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "unbuild .",
-    "stub": "unbuild . --stub",
-    "export:sizes": "npx export-size . -r"
-  },
+  "version": "0.0.8",
+  "private": true,
   "dependencies": {
     "lodash.kebabcase": "^4.1.1"
   },
