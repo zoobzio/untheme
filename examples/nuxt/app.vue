@@ -1,8 +1,5 @@
 <script setup lang="ts">
-const {
-  mode,
-  tokens
-} = useUntheme();
+const { mode, tokens } = useUntheme();
 
 function toggle() {
   mode.value = mode.value === "dark" ? "light" : "dark";

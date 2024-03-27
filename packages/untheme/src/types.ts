@@ -36,8 +36,7 @@ export type UnthemeConfig<
   tokens: UnthemeRefTokens<RefToken>;
   themes: UnthemeThemes<RefToken, SysToken, Theme>;
   roles: UnthemeRoleTokens<RefToken, SysToken, RoleToken>;
-  mode: NoInfer<Theme>;
-}
+};
 
 export type UnthemeTokens<
   RefToken extends string,
@@ -46,3 +45,16 @@ export type UnthemeTokens<
 > = UnthemeRefTokens<RefToken> &
   UnthemeSysTokens<RefToken, SysToken> &
   UnthemeRoleTokens<RefToken, SysToken, RoleToken>;
+
+export interface Untheme {
+  <
+    RefToken extends string,
+    SysToken extends string,
+    Theme extends string,
+    RoleToken extends string,
+  >(
+    config: UnthemeConfig<RefToken, SysToken, Theme, RoleToken>,
+  ): (theme: Theme) => UnthemeTokens<RefToken, SysToken, RoleToken>;
+}
+
+export type _Untheme<U extends Untheme> = ReturnType<U>;

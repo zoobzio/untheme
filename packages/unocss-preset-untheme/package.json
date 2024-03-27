@@ -1,5 +1,5 @@
 {
-  "name": "untheme",
+  "name": "unocss-preset-untheme",
   "type": "module",
   "version": "0.0.6",
   "author": {
@@ -36,6 +36,7 @@
     "export:sizes": "npx export-size . -r"
   },
   "dependencies": {
+    "@unocss/core": "^0.58.7",
     "@untheme/shared": "workspace:*"
   }
 }

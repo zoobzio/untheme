@@ -20,18 +20,21 @@ importers:
         specifier: ^4.3.0
         version: 4.3.0(vue@3.4.21)
     devDependencies:
-      "@nuxtjs/color-mode":
-        specifier: ^3.3.3
-        version: 3.3.3
       "@unocss/nuxt":
         specifier: ^0.58.6
         version: 0.58.6(postcss@8.4.35)(vite@5.1.6)(webpack@5.91.0)
+      "@untheme/shared":
+        specifier: link:../../packages/shared
+        version: link:../../packages/shared
       lodash.kebabcase:
         specifier: ^4.1.1
         version: 4.1.1
       unocss:
         specifier: ^0.58.6
         version: 0.58.6(@unocss/webpack@0.58.6)(postcss@8.4.35)(vite@5.1.6)
+      unocss-preset-untheme:
+        specifier: link:../../packages/unocss-preset-untheme
+        version: link:../../packages/unocss-preset-untheme
 
 packages:
   /@ampproject/remapping@2.3.0:
@@ -1733,19 +1736,6 @@ packages:
       - vti
       - vue-tsc
     dev: false
-
-  /@nuxtjs/color-mode@3.3.3:
-    resolution:
-      {
-        integrity: sha512-t6QM/tj1d/53xQ9JznNVIaqIfQWhjHRzNt5VqTxNeAJWG0HCdiHVezkUTMahPUgUbEJnBrtCoquUYwpyFhNF+Q==,
-      }
-    dependencies:
-      "@nuxt/kit": 3.11.1
-      pathe: 1.1.2
-    transitivePeerDependencies:
-      - rollup
-      - supports-color
-    dev: true
 
   /@parcel/watcher-android-arm64@2.4.1:
     resolution:

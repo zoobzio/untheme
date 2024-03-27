@@ -4,8 +4,8 @@ export function useCSSVarKey(prefix: string, key: string) {
   return `--${prefix}-${kebabCase(key)}`;
 }
 
-export function useCSSVar(key: string) {
-  return `var(${key})`;
+export function useCSSVar(prefix: string, key: string) {
+  return `var(${useCSSVarKey(prefix, key)})`;
 }
 
 export function useRootCSSVars(
@@ -15,10 +15,7 @@ export function useRootCSSVars(
   const keys = Object.keys(tokens);
   const vars = keys.reduce((x, y) => {
     const v = useCSSVarKey(prefix, y);
-    const d =
-      tokens[y] in tokens
-        ? useCSSVar(useCSSVarKey(prefix, tokens[y]))
-        : tokens[y];
+    const d = tokens[y] in tokens ? useCSSVar(prefix, tokens[y]) : tokens[y];
     x.push(`${v}: ${d};`);
     return x;
   }, [] as string[]);
@@ -31,7 +28,7 @@ export function useTokenCSSVars<Token extends string>(
 ): Record<Token, string> {
   return tokens.reduce(
     (x, y) => {
-      x[y] = useCSSVar(useCSSVarKey(prefix, y));
+      x[y] = useCSSVar(prefix, y);
       return x;
     },
     {} as Record<Token, string>,

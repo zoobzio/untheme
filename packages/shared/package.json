@@ -1,5 +1,5 @@
 {
-  "name": "untheme",
+  "name": "@untheme/shared",
   "type": "module",
   "version": "0.0.6",
   "author": {
@@ -11,7 +11,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zoobzio/untheme.git",
-    "directory": "packages/untheme"
+    "directory": "packages/shared"
   },
   "bugs": {
     "url": "https://github.com/zoobzio/untheme/issues"
@@ -36,6 +36,9 @@
     "export:sizes": "npx export-size . -r"
   },
   "dependencies": {
-    "@untheme/shared": "workspace:*"
+    "lodash.kebabcase": "^4.1.1"
+  },
+  "devDependencies": {
+    "@types/lodash.kebabcase": "^4.1.9"
   }
 }

@@ -5,7 +5,7 @@ export default defineUntheme({
     green: "#059669",
     blue: "#0284c7",
     red: "#dc2626",
-    yellow: "#FFFF00"
+    yellow: "#FFFF00",
   },
   themes: {
     light: {
@@ -21,5 +21,5 @@ export default defineUntheme({
     onPrimary: "primary",
     belowPrimary: "error",
   },
-  mode: "dark"
+  mode: "dark",
 });

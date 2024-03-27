@@ -16,9 +16,10 @@
     "vue-router": "^4.3.0"
   },
   "devDependencies": {
-    "@nuxtjs/color-mode": "^3.3.3",
+    "@untheme/shared": "link:../../packages/shared",
     "@unocss/nuxt": "^0.58.6",
     "lodash.kebabcase": "^4.1.1",
-    "unocss": "^0.58.6"
+    "unocss": "^0.58.6",
+    "unocss-preset-untheme": "link:../../packages/unocss-preset-untheme"
   }
 }

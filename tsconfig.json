@@ -8,6 +8,8 @@
     "module": "esnext",
     "moduleResolution": "node",
     "paths": {
+      "@untheme/shared": ["packages/shared/src"],
+      "unocss-preset-untheme": ["packages/unocss-preset-untheme/src"],
       "untheme": ["packages/untheme/src"]
     },
     "resolveJsonModule": true,
