@@ -1,47 +1,22 @@
-import { definePreset } from "@unocss/core";
 import { useTokenCSSVars } from "@untheme/shared";
-import unthemeRules from "./rules";
-import type { UnthemeUnoOptions, UnthemeUnoTemplate } from "./types";
+import type { UnthemePresetOptions, UnthemeTheme } from "./types";
 
-function unthemeUnocssPreset<
-  Token extends string,
-  Template extends UnthemeUnoTemplate,
->(options: UnthemeUnoOptions<Token, Template>) {
-  const tokens = Object.keys(options.tokens) as Token[];
-  const templates = Object.keys(options.template) as Template[];
-
-  const theme = templates.reduce(
-    (x, y) => {
-      let template = options.template[y];
+export function presetUntheme(
+  options: UnthemePresetOptions = {
+    tokens: [],
+    templates: {},
+  },
+) {
+  type Template = keyof typeof options.templates;
+  return {
+    name: "unocss-preset-untheme",
+    theme: (Object.keys(options.templates) as Template[]).reduce((x, y) => {
+      const template = options.templates[y];
       x[y] = useTokenCSSVars(
-        tokens.filter((tkn) => template.test(tkn)),
+        options.tokens.filter((tkn) => !template || template.test(tkn)),
         options.prefix,
       );
       return x;
-    },
-    {} as {
-      [T in Template]: {
-        [K in Token]: string;
-      };
-    },
-  );
-
-  const rules = templates
-    .map((t) => {
-      switch (t) {
-        case "spacing":
-          return unthemeRules.spacing;
-        default:
-          return;
-      }
-    })
-    .flat();
-
-  return {
-    name: "untheme-preset",
-    theme,
-    rules,
+    }, {} as UnthemeTheme),
   };
 }
-
-export default definePreset(unthemeUnocssPreset);

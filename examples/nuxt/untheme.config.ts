@@ -2,24 +2,28 @@ import { defineUntheme } from "untheme";
 
 export default defineUntheme({
   tokens: {
-    green: "#059669",
-    blue: "#0284c7",
-    red: "#dc2626",
-    yellow: "#FFFF00",
+    // colors
+    "color-green": "#059669",
+    "color-blue": "#0284c7",
+    "color-red": "#dc2626",
+    "color-yellow": "#FFFF00",
+    // spacing
+    "spacing-lg": "20px",
+    "spacing-md": "16px",
+    "spacing-sm": "12px",
   },
   themes: {
     light: {
-      primary: "yellow",
-      error: "red",
+      "color-primary": "color-yellow",
+      "color-error": "color-red",
     },
     dark: {
-      primary: "blue",
-      error: "green",
+      "color-primary": "color-blue",
+      "color-error": "color-green",
     },
   },
   roles: {
-    onPrimary: "primary",
-    belowPrimary: "error",
+    "color-on-primary": "color-primary",
+    "color-below-primary": "color-error",
   },
-  mode: "dark",
 });

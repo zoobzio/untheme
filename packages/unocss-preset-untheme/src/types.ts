@@ -1,14 +1,13 @@
-export type UnthemeUnoTemplate = "color" | "spacing";
+export type UnthemeTemplate = "colors" | "spacing";
 
-export type UnthemeUnoOptions<
-  Token extends string,
-  Template extends UnthemeUnoTemplate | keyof typeof import("./rules"),
-> = {
-  prefix: string;
-  tokens: {
-    [T in Token]: string;
-  };
-  template: {
-    [T in Template]: RegExp;
-  };
+export type UnthemeTheme = {
+  [T in UnthemeTemplate]?: Record<string, string>;
 };
+
+export interface UnthemePresetOptions {
+  prefix?: string;
+  tokens: string[];
+  templates: {
+    [Template in UnthemeTemplate]?: RegExp;
+  };
+}

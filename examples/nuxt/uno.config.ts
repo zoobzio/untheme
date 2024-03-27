@@ -8,6 +8,8 @@ import {
   transformerDirectives,
   transformerVariantGroup,
 } from "unocss";
+import untheme from "./untheme.config";
+import presetUntheme from "unocss-preset-untheme";
 
 export default defineConfig({
   content: {
@@ -24,6 +26,13 @@ export default defineConfig({
       provider: "google",
       fonts: {
         sans: "Inter",
+      },
+    }),
+    presetUntheme({
+      tokens: untheme.tokens(),
+      templates: {
+        colors: /color-(.*)/,
+        spacing: /spacing-(.*)/,
       },
     }),
   ],

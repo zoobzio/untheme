@@ -6,7 +6,7 @@ function toggle() {
 }
 
 function swap() {
-  tokens.value.onPrimary = "yellow";
+  tokens.value["color-on-primary"] = "color-yellow";
 }
 </script>
 
@@ -14,9 +14,15 @@ function swap() {
   <div class="min-h-screen flex items-center justify-center">
     <article class="prose">
       <h1 @click="toggle">Colors</h1>
-      <div class="flex items-center gap-4">
-        <div class="bg-on-primary h-50px w-50px rounded-xl" @click="swap" />
-        <div class="bg-below-primary h-50px w-50px rounded-xl" @click="swap" />
+      <div class="flex items-center gap-spacing-sm">
+        <div
+          class="bg-color-on-primary h-50px w-50px rounded-xl"
+          @click="swap"
+        />
+        <div
+          class="bg-color-below-primary h-50px w-50px rounded-xl"
+          @click="swap"
+        />
       </div>
     </article>
   </div>

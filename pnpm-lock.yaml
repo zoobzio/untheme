@@ -32,9 +32,6 @@ importers:
 
   packages/unocss-preset-untheme:
     dependencies:
-      "@unocss/core":
-        specifier: ^0.58.7
-        version: 0.58.7
       "@untheme/shared":
         specifier: workspace:*
         version: link:../shared
@@ -75,6 +72,19 @@ packages:
       "@babel/highlight": 7.23.4
       chalk: 2.4.2
     dev: true
+
+  /@babel/code-frame@7.24.2:
+    resolution:
+      {
+        integrity: sha512-y5+tLQyV8pg3fsiln67BVLD1P13Eg4lh5RW9mF0zUuvLrv9uIQ4MCL+CRT+FTsBlBjcIan6PGsLcBN0m3ClUyQ==,
+      }
+    engines: { node: ">=6.9.0" }
+    requiresBuild: true
+    dependencies:
+      "@babel/highlight": 7.24.2
+      picocolors: 1.0.0
+    dev: true
+    optional: true
 
   /@babel/compat-data@7.23.5:
     resolution:
@@ -263,6 +273,21 @@ packages:
       chalk: 2.4.2
       js-tokens: 4.0.0
     dev: true
+
+  /@babel/highlight@7.24.2:
+    resolution:
+      {
+        integrity: sha512-Yac1ao4flkTxTteCDZLEvdxg2fZfz1v8M4QpaGypq/WPDqg3ijHYbDfs+LG5hvzSoqaSZ9/Z9lKSP3CjZjv+pA==,
+      }
+    engines: { node: ">=6.9.0" }
+    requiresBuild: true
+    dependencies:
+      "@babel/helper-validator-identifier": 7.22.20
+      chalk: 2.4.2
+      js-tokens: 4.0.0
+      picocolors: 1.0.0
+    dev: true
+    optional: true
 
   /@babel/parser@7.24.0:
     resolution:
@@ -923,13 +948,6 @@ packages:
         integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==,
       }
     dev: true
-
-  /@unocss/core@0.58.7:
-    resolution:
-      {
-        integrity: sha512-Df5ytibV0MB7kWLggzLHsJUj08Of2oqXmPg7QjRUghMvCT3dl2LUIZXiztYPMH0F4x0cPebNoa/pavNt8xz9eQ==,
-      }
-    dev: false
 
   /acorn-jsx@5.3.2(acorn@8.11.3):
     resolution:
@@ -3394,7 +3412,7 @@ packages:
       rollup: 3.29.4
       typescript: 5.3.3
     optionalDependencies:
-      "@babel/code-frame": 7.23.5
+      "@babel/code-frame": 7.24.2
     dev: true
 
   /rollup@3.29.4:

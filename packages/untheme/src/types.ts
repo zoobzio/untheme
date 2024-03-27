@@ -45,16 +45,3 @@ export type UnthemeTokens<
 > = UnthemeRefTokens<RefToken> &
   UnthemeSysTokens<RefToken, SysToken> &
   UnthemeRoleTokens<RefToken, SysToken, RoleToken>;
-
-export interface Untheme {
-  <
-    RefToken extends string,
-    SysToken extends string,
-    Theme extends string,
-    RoleToken extends string,
-  >(
-    config: UnthemeConfig<RefToken, SysToken, Theme, RoleToken>,
-  ): (theme: Theme) => UnthemeTokens<RefToken, SysToken, RoleToken>;
-}
-
-export type _Untheme<U extends Untheme> = ReturnType<U>;
