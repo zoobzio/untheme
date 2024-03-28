@@ -1,5 +1,14 @@
 import type { UnthemeConfig, UnthemeTokens } from "./types";
 
+export function defineUnthemeConfig<
+  RefToken extends string,
+  SysToken extends string,
+  Theme extends string,
+  RoleToken extends string,
+>(config: UnthemeConfig<RefToken, SysToken, Theme, RoleToken>) {
+  return config;
+}
+
 export function defineUntheme<
   RefToken extends string,
   SysToken extends string,

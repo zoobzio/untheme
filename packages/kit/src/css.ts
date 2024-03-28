@@ -8,7 +8,20 @@ export function useCSSVar(prefix: string, key: string) {
   return `var(${useCSSVarKey(prefix, key)})`;
 }
 
-export function useRootCSSVars(
+export function useTokenVars<Token extends string>(
+  tokens: Token[],
+  prefix: string = "ut",
+): Record<Token, string> {
+  return tokens.reduce(
+    (x, y) => {
+      x[y] = useCSSVar(prefix, y);
+      return x;
+    },
+    {} as Record<Token, string>,
+  );
+}
+
+export function useRoot(
   tokens: Record<string, string>,
   prefix: string = "ut",
 ): string {
@@ -20,17 +33,4 @@ export function useRootCSSVars(
     return x;
   }, [] as string[]);
   return `:root {\n${vars.join("\n")}\n}`;
-}
-
-export function useTokenCSSVars<Token extends string>(
-  tokens: Token[],
-  prefix: string = "ut",
-): Record<Token, string> {
-  return tokens.reduce(
-    (x, y) => {
-      x[y] = useCSSVar(prefix, y);
-      return x;
-    },
-    {} as Record<Token, string>,
-  );
 }

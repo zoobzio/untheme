@@ -8,7 +8,8 @@
     "module": "esnext",
     "moduleResolution": "node",
     "paths": {
-      "@untheme/shared": ["packages/shared/src"],
+      "@untheme/kit": ["packages/kit/src"],
+      "@untheme/nuxt": ["packages/nuxt/src"],
       "unocss-preset-untheme": ["packages/unocss-preset-untheme/src"],
       "untheme": ["packages/untheme/src"]
     },

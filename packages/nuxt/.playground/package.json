@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-app",
+  "name": "@untheme/nuxt-playground",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,13 +10,9 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@unocss/nuxt": "^0.58.7",
-    "@untheme/nuxt": "link:../../packages/nuxt",
-    "lodash.kebabcase": "^4.1.1",
+    "@untheme/nuxt": "link:../../nuxt",
     "nuxt": "^3.10.3",
-    "unocss-preset-untheme": "link:../../packages/unocss-preset-untheme",
-    "unocss": "^0.58.6",
-    "untheme": "link:../../packages/untheme",
+    "untheme": "link:../../untheme",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
   }

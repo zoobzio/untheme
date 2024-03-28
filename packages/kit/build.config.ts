@@ -7,5 +7,5 @@ export default defineBuildConfig({
   rollup: {
     emitCJS: true,
   },
-  externals: ["untheme"],
+  externals: ["lodash.kebabcase"],
 });

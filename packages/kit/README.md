@@ -1,6 +1,6 @@
-# unocss-preset-untheme
+# @untheme/kit
 
-🎨 An [Untheme](https://github.com/zoobzio/untheme) preset for [UnoCSS](https://unocss.dev)
+🧰 Utilities for Untheme
 
 ## Documentation
 

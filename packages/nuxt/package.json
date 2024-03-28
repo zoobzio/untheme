@@ -1,5 +1,5 @@
 {
-  "name": "unocss-preset-untheme",
+  "name": "@untheme/nuxt",
   "type": "module",
   "version": "0.0.8",
   "author": {
@@ -11,7 +11,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zoobzio/untheme.git",
-    "directory": "packages/untheme"
+    "directory": "packages/nuxt"
   },
   "bugs": {
     "url": "https://github.com/zoobzio/untheme/issues"
@@ -19,24 +19,31 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "types": "./dist/module.d.ts",
+      "import": "./dist/module.mjs",
+      "require": "./dist/module.cjs"
     }
   },
-  "main": "dist/index.cjs",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "main": "dist/module.cjs",
+  "module": "dist/module.mjs",
+  "types": "dist/module.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "unbuild .",
     "stub": "unbuild . --stub",
-    "export:sizes": "npx export-size . -r"
+    "export:sizes": "npx export-size . -r",
+    "dev": "nuxt dev .playground",
+    "postinstall": "nuxt prepare .playground"
   },
   "dependencies": {
+    "@nuxt/kit": "^3.11.1",
     "@untheme/kit": "workspace:*",
     "untheme": "workspace:*"
+  },
+  "devDependencies": {
+    "@nuxt/schema": "^3.11.1",
+    "nuxt": "^3.11.1"
   }
 }

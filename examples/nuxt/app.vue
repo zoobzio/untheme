@@ -5,8 +5,12 @@ function toggle() {
   mode.value = mode.value === "dark" ? "light" : "dark";
 }
 
-function swap() {
-  tokens.value["color-on-primary"] = "color-yellow";
+function toggleOnPrimary() {
+  tokens.value["color-on-primary"] = "color-special";
+}
+
+function toggleBelowPrimary() {
+  tokens.value["color-below-primary"] = "color-special";
 }
 </script>
 
@@ -17,11 +21,11 @@ function swap() {
       <div class="flex items-center gap-spacing-sm">
         <div
           class="bg-color-on-primary h-50px w-50px rounded-xl"
-          @click="swap"
+          @click="toggleOnPrimary"
         />
         <div
           class="bg-color-below-primary h-50px w-50px rounded-xl"
-          @click="swap"
+          @click="toggleBelowPrimary"
         />
       </div>
     </article>
