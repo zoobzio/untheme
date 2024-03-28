@@ -1,7 +1,7 @@
 {
   "name": "unocss-preset-untheme",
   "type": "module",
-  "version": "0.0.16",
+  "version": "0.0.15",
   "author": {
     "name": "Alex Thorwaldson",
     "email": "alex@zoobz.io",
@@ -33,8 +33,7 @@
   "scripts": {
     "build": "unbuild .",
     "stub": "unbuild . --stub",
-    "export:sizes": "npx export-size . -r",
-    "publish": "npm publish --access public"
+    "export:sizes": "npx export-size . -r"
   },
   "dependencies": {
     "@untheme/kit": "workspace:*",
