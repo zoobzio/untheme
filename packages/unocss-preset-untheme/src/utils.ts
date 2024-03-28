@@ -1,6 +1,6 @@
 import { useTokenVars } from "@untheme/kit";
-import type { UnthemePresetOptions, UnthemeTheme } from "./types";
 import { defineUntheme } from "untheme";
+import type { UnthemePresetOptions, UnthemeTheme } from "./types";
 
 export function presetUntheme(options: UnthemePresetOptions) {
   const untheme = defineUntheme(options.config);
