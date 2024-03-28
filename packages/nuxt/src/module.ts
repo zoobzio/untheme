@@ -17,7 +17,7 @@ export default defineNuxtModule<UnthemeNuxtOptions>({
     addTemplate({
       filename: "untheme.config.mjs",
       getContents: () => `
-      import untheme from "${nuxt.options.rootDir}/${options.path || "untheme.config"}";
+      import untheme from "${nuxt.options.srcDir}/${options.path || "untheme.config"}";
 
       export default untheme;`,
     });
@@ -25,7 +25,7 @@ export default defineNuxtModule<UnthemeNuxtOptions>({
     addTypeTemplate({
       filename: "types/untheme.d.ts",
       getContents: () => /** .ts **/ `
-      import untheme from "${nuxt.options.rootDir}/${options.path || "untheme.config"}";
+      import untheme from "${nuxt.options.srcDir}/${options.path || "untheme.config"}";
       type UnthemeConfig = typeof untheme;
       export { type UnthemeConfig };`,
     });

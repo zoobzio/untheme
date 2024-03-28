@@ -12,7 +12,7 @@
     "export:sizes": "pnpm -r --filter=./packages/** run export:sizes",
     "release": "bumpp package.json packages/*/package.json --commit --push --tag",
     "format": "prettier --write --ignore-path .gitignore .",
-    "publish": "pnpm -r --filter=./packages/** npm publish"
+    "publish": "pnpm -r --filter=./packages/** publish"
   },
   "devDependencies": {
     "bumpp": "^9.3.1",
