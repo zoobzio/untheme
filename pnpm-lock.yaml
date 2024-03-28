@@ -36,11 +36,11 @@ importers:
         specifier: ^3.11.1
         version: 3.11.1(rollup@3.29.4)
       "@untheme/kit":
-        specifier: workspace:*
-        version: link:../kit
+        specifier: file:../kit
+        version: file:packages/kit
       untheme:
-        specifier: workspace:*
-        version: link:../untheme
+        specifier: file:../untheme
+        version: file:packages/untheme
     devDependencies:
       "@nuxt/schema":
         specifier: ^3.11.1
@@ -52,11 +52,11 @@ importers:
   packages/unocss-preset-untheme:
     dependencies:
       "@untheme/kit":
-        specifier: workspace:*
-        version: link:../kit
+        specifier: file:../kit
+        version: file:packages/kit
       untheme:
-        specifier: workspace:*
-        version: link:../untheme
+        specifier: file:../untheme
+        version: file:packages/untheme
 
   packages/untheme: {}
 
@@ -10996,3 +10996,15 @@ packages:
       compress-commons: 6.0.2
       readable-stream: 4.5.2
     dev: true
+
+  file:packages/kit:
+    resolution: { directory: packages/kit, type: directory }
+    name: "@untheme/kit"
+    dependencies:
+      lodash.kebabcase: 4.1.1
+    dev: false
+
+  file:packages/untheme:
+    resolution: { directory: packages/untheme, type: directory }
+    name: untheme
+    dev: false

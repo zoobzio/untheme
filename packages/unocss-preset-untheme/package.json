@@ -36,7 +36,7 @@
     "export:sizes": "npx export-size . -r"
   },
   "dependencies": {
-    "@untheme/kit": "workspace:*",
-    "untheme": "workspace:*"
+    "@untheme/kit": "file:../kit",
+    "untheme": "file:../untheme"
   }
 }
