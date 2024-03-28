@@ -8,8 +8,8 @@
   "license": "MIT",
   "scripts": {
     "build": "pnpm -r --filter=./packages/** run build",
-    "stub": "pnpm -r --parallel --filter=./packages/** run stub",
-    "export:sizes": "pnpm -r --parallel --filter=./packages/** run export:sizes",
+    "stub": "pnpm -r --filter=./packages/** run stub",
+    "export:sizes": "pnpm -r --filter=./packages/** run export:sizes",
     "release": "bumpp package.json packages/*/package.json --commit --push --tag",
     "format": "prettier --write --ignore-path .gitignore .",
     "publish": "pnpm -r --parallel --filter=./packages/** run publish"
