@@ -1,7 +1,5 @@
-import kebabCase from "lodash.kebabcase";
-
 export function useCSSVarKey(prefix: string, key: string) {
-  return `--${prefix}-${kebabCase(key)}`;
+  return `--${prefix}-${key}`;
 }
 
 export function useCSSVar(prefix: string, key: string) {
