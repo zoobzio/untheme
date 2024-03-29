@@ -1,10 +1,8 @@
 import { defineUntheme } from "untheme";
 import { useRoot } from "@untheme/kit";
-// @ts-expect-error
 import { ref, computed, reactive } from "#imports";
 // @ts-expect-error
 import config from "#build/untheme.config.mjs";
-// @ts-expect-error
 import type { UnthemeConfig } from "#build/types/untheme.d.ts";
 
 const untheme = defineUntheme(config as UnthemeConfig);
