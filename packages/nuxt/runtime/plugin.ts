@@ -1,4 +1,5 @@
-import { defineNuxtPlugin, useUntheme } from "#imports";
+// @ts-expect-error
+import { defineNuxtPlugin, useUntheme, useHead } from "#imports";
 
 export default defineNuxtPlugin(() => {
   const { root } = useUntheme();
