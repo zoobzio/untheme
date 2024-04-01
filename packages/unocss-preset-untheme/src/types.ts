@@ -3,7 +3,7 @@ export type UnthemeTemplate =
   | "colors"
   | "spacing"
   | "width"
-  | " height"
+  | "height"
   | "fontSize"
   | "fontWeight"
   | "breakpoints";
