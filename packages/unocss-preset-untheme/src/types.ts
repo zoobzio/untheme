@@ -6,7 +6,8 @@ export type UnthemeTemplate =
   | "height"
   | "fontSize"
   | "fontWeight"
-  | "breakpoints";
+  | "breakpoints"
+  | "sizing";
 
 export type UnthemeTheme = {
   [T in UnthemeTemplate]?: Record<string, string>;
