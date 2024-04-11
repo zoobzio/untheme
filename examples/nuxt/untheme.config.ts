@@ -1,12 +1,10 @@
 import { defineUnthemeConfig } from "untheme";
+import { useColorPack } from "@untheme/colors";
 
 export default defineUnthemeConfig({
   tokens: {
     // colors
-    "color-green": "#059669",
-    "color-blue": "#0284c7",
-    "color-red": "#dc2626",
-    "color-yellow": "#FFFF00",
+    ...useColorPack("tw", ["emerald", "indigo", "fuchsia", "orange"], "-"),
     "color-special": "hsl(272, 61%, 34%)",
     // spacing
     "spacing-lg": "20px",
@@ -15,12 +13,12 @@ export default defineUnthemeConfig({
   },
   themes: {
     light: {
-      "color-primary": "color-yellow",
-      "color-error": "color-red",
+      "color-primary": "tw-emerald-400",
+      "color-error": "tw-fuchsia-400",
     },
     dark: {
-      "color-primary": "color-blue",
-      "color-error": "color-green",
+      "color-primary": "tw-emerald-600",
+      "color-error": "tw-fuchsia-600",
     },
   },
   roles: {

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { NavItem } from '@nuxt/content/dist/runtime/types'
+import type { NavItem } from "@nuxt/content/dist/runtime/types";
 
-const navigation = inject<NavItem[]>('navigation', [])
+const navigation = inject<NavItem[]>("navigation", []);
 
-const { header } = useAppConfig()
+const { header } = useAppConfig();
 </script>
 
 <template>
@@ -22,7 +22,11 @@ const { header } = useAppConfig()
     </template>
 
     <template #right>
-      <UContentSearchButton v-if="header?.search" :label="null" class="lg:hidden" />
+      <UContentSearchButton
+        v-if="header?.search"
+        :label="null"
+        class="lg:hidden"
+      />
 
       <UColorModeButton v-if="header?.colorMode" />
 

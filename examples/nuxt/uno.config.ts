@@ -31,7 +31,7 @@ export default defineConfig({
     presetUntheme({
       config,
       templates: {
-        colors: /color-(.*)/,
+        colors: /color|tw(-(.*))/,
         spacing: /spacing-(.*)/,
       },
     }),

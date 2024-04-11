@@ -10,6 +10,9 @@ importers:
       "@unocss/nuxt":
         specifier: ^0.58.7
         version: 0.58.7(postcss@8.4.35)(vite@5.1.6)(webpack@5.91.0)
+      "@untheme/colors":
+        specifier: link:../../packages/colors
+        version: link:../../packages/colors
       "@untheme/nuxt":
         specifier: link:../../packages/nuxt
         version: link:../../packages/nuxt
