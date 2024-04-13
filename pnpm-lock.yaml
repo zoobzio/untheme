@@ -56,7 +56,11 @@ importers:
         specifier: workspace:*
         version: link:../untheme
 
-  packages/untheme: {}
+  packages/untheme:
+    dependencies:
+      "@untheme/kit":
+        specifier: workspace:*
+        version: link:../kit
 
 packages:
   /@aashutoshrathi/word-wrap@1.2.6:

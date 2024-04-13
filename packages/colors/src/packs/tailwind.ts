@@ -1,7 +1,7 @@
-import type { UnthemeColorPack } from "../types";
+import { defineColorPack } from "../pack";
 
 // ❤️ tailwind: https://github.com/tailwindlabs/tailwindcss/blob/master/src/public/colors.js
-export default {
+export default defineColorPack({
   red: {
     50: "#fef2f2",
     100: "#fee2e2",
@@ -288,4 +288,4 @@ export default {
     900: "#1c1917",
     950: "#0c0a09",
   },
-} satisfies UnthemeColorPack;
+});

@@ -23,9 +23,9 @@ export default defineAppConfig({
     links: [
       {
         icon: "i-simple-icons-github",
-        to: "https://github.com/nuxt-ui-pro/docs",
+        to: "https://github.com/zoobzio/untheme",
         target: "_blank",
-        "aria-label": "Docs template on GitHub",
+        "aria-label": "Untheme",
       },
     ],
   },
@@ -34,31 +34,14 @@ export default defineAppConfig({
     colorMode: false,
     links: [
       {
-        icon: "i-simple-icons-nuxtdotjs",
-        to: "https://nuxt.com",
-        target: "_blank",
-        "aria-label": "Nuxt Website",
-      },
-      {
-        icon: "i-simple-icons-discord",
-        to: "https://discord.com/invite/ps2h6QT",
-        target: "_blank",
-        "aria-label": "Nuxt UI on Discord",
-      },
-      {
-        icon: "i-simple-icons-x",
-        to: "https://x.com/nuxt_js",
-        target: "_blank",
-        "aria-label": "Nuxt on X",
-      },
-      {
         icon: "i-simple-icons-github",
-        to: "https://github.com/nuxt/ui",
+        to: "https://github.com/zoobzio/untheme",
         target: "_blank",
         "aria-label": "Nuxt UI on GitHub",
       },
     ],
   },
+  /*
   toc: {
     title: "Table of Contents",
     bottom: {
@@ -80,4 +63,5 @@ export default defineAppConfig({
       ],
     },
   },
+  */
 });

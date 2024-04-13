@@ -15,6 +15,6 @@ export type UnthemeColor = {
   [Shade in UnthemeColorShade]: string;
 };
 
-export type UnthemeColorPack = {
-  [key: string]: UnthemeColor;
+export type UnthemeColorPack<Color extends string> = {
+  [C in Color]: UnthemeColor;
 };

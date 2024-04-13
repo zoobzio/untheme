@@ -27,6 +27,12 @@ export type UnthemeRoleTokens<
   [R in RoleToken]: NoInfer<RefToken | SysToken>;
 };
 
+export type UnthemeToken<
+  RefToken extends string,
+  SysToken extends string,
+  RoleToken extends string,
+> = RefToken | SysToken | RoleToken;
+
 export type UnthemeConfig<
   RefToken extends string,
   SysToken extends string,

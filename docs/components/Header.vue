@@ -12,9 +12,7 @@ const { header } = useAppConfig();
       <template v-if="header?.logo?.dark || header?.logo?.light">
         <UColorModeImage v-bind="{ class: 'h-6 w-auto', ...header?.logo }" />
       </template>
-      <template v-else>
-        Untheme <UBadge label="Docs" variant="subtle" class="mb-0.5" />
-      </template>
+      <template v-else> 🎨 Untheme </template>
     </template>
 
     <template v-if="header?.search" #center>
