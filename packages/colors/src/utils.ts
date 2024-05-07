@@ -43,12 +43,18 @@ export function referenceColorTokens<
   X extends string,
 >(pack: P, color: C, name: N, separator: X) {
   const tokens = shades.map((s) => useTokenize(separator, pack, name, s));
+  const colorTokens = useColorTokens(
+    packs[pack][color] as UnthemeColor,
+    pack,
+    color,
+    separator
+  );
   return tokens.reduce(
     (x, y, i) => {
-      x[y] = useTokenize(separator, pack, color, shades[i]);
+      x[y] = (Object.keys(colorTokens) as (keyof typeof colorTokens)[])[i];
       return x;
     },
-    {} as Record<(typeof tokens)[number], string>,
+    {} as Record<(typeof tokens)[number], keyof typeof colorTokens>,
   );
 }
 
