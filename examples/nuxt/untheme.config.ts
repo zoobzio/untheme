@@ -1,28 +1,47 @@
 import { defineUnthemeConfig } from "untheme";
-import { useColorPack } from "@untheme/colors";
+import { useColorPack, referenceColorTokens } from "@untheme/colors";
 
 export default defineUnthemeConfig({
   tokens: {
     // colors
-    ...useColorPack("tw", ["emerald", "indigo", "fuchsia", "orange"], "-"),
-    "color-special": "hsl(272, 61%, 34%)",
+    ...useColorPack(
+      "tw",
+      ["emerald", "fuchsia", "orange", "red", "stone", "slate"],
+      "-"
+    ),
+    "clr-special": "hsl(272, 61%, 34%)",
     // spacing
     "spacing-lg": "20px",
     "spacing-md": "16px",
     "spacing-sm": "12px",
   },
   themes: {
+    default: {
+      ...referenceColorTokens("tw", "emerald", "primary", "-"),
+      ...referenceColorTokens("tw", "stone", "surface", "-"),
+      ...referenceColorTokens("tw", "red", "error", "-"),
+      "spacing-default": "spacing-sm"
+    },
+    example: {
+      ...referenceColorTokens("tw", "fuchsia", "primary", "-"),
+      ...referenceColorTokens("tw", "slate", "surface", "-"),
+      ...referenceColorTokens("tw", "orange", "error", "-"),
+      "spacing-default": "spacing-lg"
+    },
+  },
+  modes: {
     light: {
-      "color-primary": "tw-emerald-400",
-      "color-error": "tw-fuchsia-400",
+      "clr-primary": "tw-primary-500",
+      "clr-surface": "tw-surface-100",
+      "clr-content": "tw-surface-950",
+      "clr-error": "tw-error-500",
     },
     dark: {
-      "color-primary": "tw-emerald-600",
-      "color-error": "tw-fuchsia-600",
+      "clr-primary": "tw-primary-400",
+      "clr-surface": "tw-surface-900",
+      "clr-content": "tw-surface-50",
+      "clr-error": "tw-error-400",
     },
   },
-  roles: {
-    "color-on-primary": "color-primary",
-    "color-below-primary": "color-error",
-  },
+  roles: {},
 });

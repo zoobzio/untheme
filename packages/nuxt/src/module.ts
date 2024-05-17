@@ -1,33 +1,61 @@
 import {
   defineNuxtModule,
-  addTemplate,
   createResolver,
   addPlugin,
   addImportsDir,
+  addTemplate,
   addTypeTemplate,
+  installModule,
 } from "@nuxt/kit";
-import type { UnthemeNuxtOptions } from "./types";
+import type { UnthemeTemplate } from "untheme";
+
+export type UnthemeNuxtOptions = {
+  config: string | UnthemeTemplate;
+};
 
 export default defineNuxtModule<UnthemeNuxtOptions>({
   meta: {
     name: "@untheme/nuxt",
     configKey: "untheme",
   },
-  setup(options, nuxt) {
-    addTemplate({
-      filename: "untheme.config.mjs",
-      getContents: () => `
-      import untheme from "${nuxt.options.srcDir}/${options.path || "untheme.config"}";
-
-      export default untheme;`,
-    });
+  defaults: {
+    config: "untheme.config",
+  },
+  setup({ config }, nuxt) {
+    installModule("@nuxtjs/color-mode"),
+      addTemplate({
+        filename: "untheme.config.mjs",
+        getContents: () => {
+          if (typeof config === "string") {
+            return [
+              `import untheme from "${nuxt.options.rootDir}/${config}";`,
+              `export default untheme;`,
+            ].join("\n");
+          } else {
+            return [
+              `import { defineUnthemeConfig } from "untheme";`,
+              `export default defineUnthemeConfig(${JSON.stringify(config)});`,
+            ].join("\n");
+          }
+        },
+      });
 
     addTypeTemplate({
       filename: "types/untheme.d.ts",
-      getContents: () => /** .ts **/ `
-      import untheme from "${nuxt.options.srcDir}/${options.path || "untheme.config"}";
-      type UnthemeConfig = typeof untheme;
-      export { type UnthemeConfig };`,
+      getContents: () => {
+        if (typeof config === "string") {
+          return [
+            `import untheme from "${nuxt.options.rootDir}/${config}";`,
+            `export type UnthemeConfig = typeof untheme;`,
+          ].join("\n");
+        } else {
+          return [
+            `import { defineUnthemeConfig } from "untheme";`,
+            `const untheme = defineUnthemeConfig(${JSON.stringify(config)});`,
+            `export type UnthemeConfig = typeof untheme;`,
+          ].join("\n");
+        }
+      },
     });
 
     const { resolve } = createResolver(import.meta.url);

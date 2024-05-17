@@ -1,8 +1,11 @@
 import { useTokenVars } from "@untheme/kit";
 import { defineUntheme } from "untheme";
+import type { UnthemeTemplate } from "untheme";
 import type { UnthemePresetOptions, UnthemeTheme } from "./types";
 
-export function presetUntheme(options: UnthemePresetOptions) {
+export function presetUntheme<Config extends UnthemeTemplate>(
+  options: UnthemePresetOptions<Config>
+) {
   const untheme = defineUntheme(options.config);
   type Template = keyof typeof options.templates;
   return {
@@ -11,7 +14,7 @@ export function presetUntheme(options: UnthemePresetOptions) {
       const template = options.templates[y];
       x[y] = useTokenVars(
         untheme.tokens().filter((tkn) => !template || template.test(tkn)),
-        options.prefix,
+        options.prefix
       );
       return x;
     }, {} as UnthemeTheme),

@@ -1,33 +1,41 @@
-import type { UnthemeConfig, UnthemeTokens } from "./types";
+import type { UnthemeConfig, UnthemeTokenUtil } from "./types";
 
 export function defineUnthemeConfig<
   RefToken extends string,
   SysToken extends string,
-  Theme extends string,
+  ThemeToken extends string,
   RoleToken extends string,
->(config: UnthemeConfig<RefToken, SysToken, Theme, RoleToken>) {
+  ModeToken extends string
+>(config: UnthemeConfig<RefToken, SysToken, ThemeToken, RoleToken, ModeToken>) {
   return config;
 }
 
 export function defineUntheme<
   RefToken extends string,
   SysToken extends string,
-  Theme extends string,
+  ThemeToken extends string,
   RoleToken extends string,
->(config: UnthemeConfig<RefToken, SysToken, Theme, RoleToken>) {
-  const use: (theme: Theme) => UnthemeTokens<RefToken, SysToken, RoleToken> = (
-    theme: Theme,
-  ) => ({
+  ModeToken extends string
+>(config: UnthemeConfig<RefToken, SysToken, ThemeToken, RoleToken, ModeToken>) {
+  const use: UnthemeTokenUtil<
+    RefToken,
+    SysToken,
+    ThemeToken,
+    RoleToken,
+    ModeToken
+  > = (theme, mode) => ({
     ...config.tokens,
     ...config.themes[theme],
+    ...config.modes[mode],
     ...config.roles,
   });
 
-  const themes: () => Theme[] = () => Object.keys(config.themes) as Theme[];
+  const themes: () => ThemeToken[] = () =>
+    Object.keys(config.themes) as ThemeToken[];
 
   const tokens = () => {
-    const theme = themes()[0]; // theme keys are congruent, active theme doesn't matter here so just grab the first
-    const tokens = use(theme);
+    const theme = themes()[0]; // theme tokens are congruent, active theme doesn't matter here so just grab the first
+    const tokens = use(theme, "dark"); // mode tokens are congruent, just grab dark
     return Object.keys(tokens) as (RefToken | SysToken | RoleToken)[];
   };
 

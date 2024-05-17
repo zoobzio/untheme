@@ -1,5 +1,7 @@
+import type { UnthemeTemplate } from "untheme";
+
 // extend theme options as needed: https://github.com/unocss/unocss/blob/main/packages/preset-mini/src/_theme/types.ts
-export type UnthemeTemplate =
+export type UnthemeUtilityTemplate =
   | "width"
   | "height"
   | "maxWidth"
@@ -53,17 +55,13 @@ export type UnthemeTemplate =
   | "gridTemplateRow";
 
 export type UnthemeTheme = {
-  [T in UnthemeTemplate]?: Record<string, string>;
+  [T in UnthemeUtilityTemplate]?: Record<string, string>;
 };
 
-export interface UnthemePresetOptions {
+export interface UnthemePresetOptions<Config extends UnthemeTemplate> {
   prefix?: string;
-  config: {
-    tokens: Record<string, string>;
-    themes: Record<string, Record<string, string>>;
-    roles: Record<string, string>;
-  };
+  config: Config;
   templates: {
-    [Template in UnthemeTemplate]?: RegExp;
+    [Template in UnthemeUtilityTemplate]?: RegExp;
   };
 }

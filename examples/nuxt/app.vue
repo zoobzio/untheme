@@ -1,33 +1,49 @@
 <script setup lang="ts">
-const { mode, tokens } = useUntheme();
-
-function toggle() {
-  mode.value = mode.value === "dark" ? "light" : "dark";
-}
-
-function toggleOnPrimary() {
-  tokens.value["color-on-primary"] = "color-special";
-}
-
-function toggleBelowPrimary() {
-  tokens.value["color-below-primary"] = "color-special";
-}
+const { theme, mode } = useUntheme();
+const themes = useThemes();
+const modes = ["dark", "light"] as const;
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center">
-    <article class="prose">
-      <h1 @click="toggle">Colors</h1>
-      <div class="flex items-center gap-spacing-sm">
-        <div
-          class="bg-color-on-primary h-50px w-50px rounded-xl"
-          @click="toggleOnPrimary"
-        />
-        <div
-          class="bg-color-below-primary h-50px w-50px rounded-xl"
-          @click="toggleBelowPrimary"
-        />
+  <div
+    class="min-h-screen flex items-center justify-center bg-clr-surface text-clr-content"
+  >
+    <article class="prose flex flex-col gap-spacing-default">
+      <h1>Basic Untheme Example</h1>
+      <table class="table-fixed">
+        <thead>
+          <tr>
+            <th>Primary</th>
+            <th>Error</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="bg-clr-primary w-200px pa-spacing-default" />
+            <td class="bg-clr-error w-200px pa-spacing-default" />
+          </tr>
+        </tbody>
+      </table>
+      <div class="flex items-center gap-spacing-default">
+        <label for="theme">Theme</label>
+        <select v-model="theme" name="theme">
+          <option v-for="t in themes" :key="t" :value="t">
+            {{ t }}
+          </option>
+        </select>
+        <label for="mode">Mode</label>
+        <select v-model="mode" name="mode">
+          <option v-for="m in modes" :key="m" :value="m">
+            {{ m }}
+          </option>
+        </select>
       </div>
     </article>
   </div>
 </template>
+
+<style scoped>
+select {
+  --apply: "bg-clr-primary pa-spacing-default rounded";
+}
+</style>
