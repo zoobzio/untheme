@@ -1,4 +1,4 @@
-import { defineNuxtPlugin, useUntheme, useHead } from "#imports";
+import { defineNuxtPlugin, useUntheme, useHead, computed } from "#imports";
 import { useRoot } from "@untheme/kit";
 
 export default defineNuxtPlugin(() => {
