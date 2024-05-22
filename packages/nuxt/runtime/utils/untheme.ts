@@ -1,4 +1,5 @@
 import { defineUntheme } from "untheme";
+import { useRoot } from "@untheme/kit";
 import { useState } from "#app";
 // @ts-expect-error
 import config from "#build/untheme.config.mjs";
@@ -23,4 +24,9 @@ export function useUntheme() {
     theme,
     tokens,
   };
+}
+
+export function useUnthemeRoot() {
+  const { tokens } = useUntheme();
+  return computed(() => useRoot(tokens.value));
 }
