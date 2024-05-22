@@ -9,16 +9,13 @@ const themes = untheme.themes();
 
 export type Theme = (typeof themes)[number];
 
-export function useThemes() {
-  return themes;
-}
+export const useThemes = () => themes;
+export const useTheme = () => useState<Theme>("theme", () => themes[0]);
+export const useMode = () => useState<UnthemeColorMode>("colormode", () => "dark");
 
-export function useUntheme(
-  initTheme: Theme = themes[0],
-  initMode: UnthemeColorMode = "dark"
-) {
-  const theme = useState<Theme>("theme", () => initTheme);
-  const mode = useState<UnthemeColorMode>("mode", () => initMode);
+export function useUntheme() {
+  const theme = useTheme();
+  const mode = useMode();
   const tokens = computed(() => reactive(untheme.use(theme.value, mode.value)));
   return {
     mode,

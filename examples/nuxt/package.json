@@ -10,15 +10,18 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxtjs/color-mode": "^3.4.1",
     "@unocss/nuxt": "^0.58.7",
     "@untheme/colors": "link:../../packages/colors",
     "@untheme/nuxt": "link:../../packages/nuxt",
     "lodash.kebabcase": "^4.1.1",
-    "nuxt": "^3.10.3",
-    "unocss-preset-untheme": "link:../../packages/unocss-preset-untheme",
     "unocss": "^0.58.6",
+    "unocss-preset-untheme": "link:../../packages/unocss-preset-untheme",
     "untheme": "link:../../packages/untheme",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
+  },
+  "devDependencies": {
+    "nuxt": "^3.11.1"
   }
 }
