@@ -1,8 +1,9 @@
 import { defineUntheme } from "untheme";
-import type { UnthemeColorMode } from "untheme";
+import { useState } from "#app";
 // @ts-expect-error
 import config from "#build/untheme.config.mjs";
 import type { UnthemeConfig } from "#build/types/untheme.d.ts";
+import type { UnthemeColorMode } from "untheme";
 
 const untheme = defineUntheme(config as UnthemeConfig);
 const themes = untheme.themes();
