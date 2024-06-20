@@ -14,7 +14,8 @@ export type Theme = (typeof themes)[number];
 
 export const useThemes = () => themes;
 export const useTheme = () => useState<Theme>("theme", () => themes[0]);
-export const useMode = () => useState<UnthemeColorMode>("colormode", () => "dark");
+export const useMode = () =>
+  useState<UnthemeColorMode>("colormode", () => "dark");
 
 export function useUntheme() {
   const theme = useTheme();
@@ -24,6 +25,7 @@ export function useUntheme() {
     mode,
     theme,
     tokens,
+    resolve: untheme.resolve,
   };
 }
 

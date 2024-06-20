@@ -19,7 +19,11 @@ export default defineNuxtModule<UnthemeTemplate>({
       getContents: () => {
         return [
           `import { defineUnthemeConfig } from "untheme";`,
-          `export default defineUnthemeConfig(${JSON.stringify(config)});`,
+          `export default defineUnthemeConfig(${JSON.stringify(
+            config,
+            null,
+            2
+          )});`,
         ].join("\n");
       },
     });
@@ -29,7 +33,11 @@ export default defineNuxtModule<UnthemeTemplate>({
       getContents: () => {
         return [
           `import { defineUnthemeConfig } from "untheme";`,
-          `const untheme = defineUnthemeConfig(${JSON.stringify(config)});`,
+          `const untheme = defineUnthemeConfig(${JSON.stringify(
+            config,
+            null,
+            2
+          )});`,
           `export type UnthemeConfig = typeof untheme;`,
         ].join("\n");
       },

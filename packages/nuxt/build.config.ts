@@ -7,5 +7,5 @@ export default defineBuildConfig({
   rollup: {
     emitCJS: true,
   },
-  externals: ["@nuxt/schema", "@nuxtjs/color-mode"],
+  externals: ["@nuxt/schema"],
 });

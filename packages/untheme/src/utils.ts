@@ -1,4 +1,8 @@
-import type { UnthemeConfig, UnthemeTokenUtil } from "./types";
+import type {
+  UnthemeColorMode,
+  UnthemeConfig,
+  UnthemeTokenUtil,
+} from "./types";
 
 export function defineUnthemeConfig<
   RefToken extends string,
@@ -30,6 +34,17 @@ export function defineUntheme<
     ...config.roles,
   });
 
+  const resolve = (
+    token: RefToken | SysToken | RoleToken | ModeToken,
+    theme: ThemeToken,
+    mode: UnthemeColorMode
+  ) => {
+    const tkns = use(theme, mode);
+    const fTkn: (t: typeof token) => string = (tkn) =>
+      tkns[tkn] in tkns ? fTkn(tkns[tkn]) : tkns[tkn];
+    return fTkn(token);
+  };
+
   const themes: () => ThemeToken[] = () =>
     Object.keys(config.themes) as ThemeToken[];
 
@@ -41,6 +56,7 @@ export function defineUntheme<
 
   return {
     use,
+    resolve,
     themes,
     tokens,
   };
