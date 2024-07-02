@@ -21,19 +21,29 @@ export type UnthemeThemes<
   [T in ThemeToken]: UnthemeSysTokens<RefToken, SysToken>;
 };
 
+export type UnthemeModeTokens<
+  RefToken extends string,
+  SysToken extends string,
+  ModeToken extends string
+> = {
+  [M in ModeToken]: NoInfer<RefToken | SysToken>;
+};
+
 export type UnthemeRoleTokens<
   RefToken extends string,
   SysToken extends string,
+  ModeToken extends string,
   RoleToken extends string
 > = {
-  [R in RoleToken]: NoInfer<RefToken | SysToken>;
+  [R in RoleToken]: NoInfer<RefToken | SysToken | ModeToken>;
 };
 
 export type UnthemeToken<
   RefToken extends string,
   SysToken extends string,
+  ModeToken extends string,
   RoleToken extends string
-> = RefToken | SysToken | RoleToken;
+> = RefToken | SysToken | ModeToken | RoleToken;
 
 export type UnthemeTemplate = {
   tokens: Record<string, string>;
@@ -42,41 +52,40 @@ export type UnthemeTemplate = {
     [M in UnthemeColorMode]: Record<string, string>;
   };
   roles: Record<string, string>;
-  override?: Record<string, string>;
 };
 
 export interface UnthemeConfig<
   RefToken extends string,
   SysToken extends string,
   ThemeToken extends string,
-  RoleToken extends string,
-  ModeToken extends string
+  ModeToken extends string,
+  RoleToken extends string
 > extends UnthemeTemplate {
   tokens: UnthemeRefTokens<RefToken>;
   themes: UnthemeThemes<RefToken, SysToken, ThemeToken>;
   modes: {
-    [M in UnthemeColorMode]: UnthemeRoleTokens<RefToken, SysToken, ModeToken>;
+    [M in UnthemeColorMode]: UnthemeModeTokens<RefToken, SysToken, ModeToken>;
   };
-  roles: UnthemeRoleTokens<RefToken, SysToken, RoleToken>;
+  roles: UnthemeRoleTokens<RefToken, SysToken, ModeToken, RoleToken>;
 }
 
 export type UnthemeTokens<
   RefToken extends string,
   SysToken extends string,
-  RoleToken extends string,
-  ModeToken extends string
+  ModeToken extends string,
+  RoleToken extends string
 > = UnthemeRefTokens<RefToken> &
   UnthemeSysTokens<RefToken, SysToken> &
-  UnthemeRoleTokens<RefToken, SysToken, RoleToken> &
-  UnthemeRoleTokens<RefToken, SysToken, ModeToken>;
+  UnthemeModeTokens<RefToken, SysToken, ModeToken> &
+  UnthemeRoleTokens<RefToken, SysToken, ModeToken, RoleToken>;
 
 export type UnthemeTokenUtil<
   RefToken extends string,
   SysToken extends string,
   ThemeToken extends string,
-  RoleToken extends string,
-  ModeToken extends string
+  ModeToken extends string,
+  RoleToken extends string
 > = (
   theme: ThemeToken,
   mode: UnthemeColorMode
-) => UnthemeTokens<RefToken, SysToken, RoleToken, ModeToken>;
+) => UnthemeTokens<RefToken, SysToken, ModeToken, RoleToken>;

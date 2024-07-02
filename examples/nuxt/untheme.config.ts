@@ -20,13 +20,13 @@ export default defineUnthemeConfig({
       ...referenceColorTokens("tw", "emerald", "primary", "-"),
       ...referenceColorTokens("tw", "stone", "surface", "-"),
       ...referenceColorTokens("tw", "red", "error", "-"),
-      "spacing-default": "spacing-sm"
+      "spacing-default": "spacing-sm",
     },
     example: {
       ...referenceColorTokens("tw", "fuchsia", "primary", "-"),
       ...referenceColorTokens("tw", "slate", "surface", "-"),
       ...referenceColorTokens("tw", "orange", "error", "-"),
-      "spacing-default": "spacing-lg"
+      "spacing-default": "spacing-lg",
     },
   },
   modes: {
@@ -43,5 +43,7 @@ export default defineUnthemeConfig({
       "clr-error": "tw-error-400",
     },
   },
-  roles: {},
+  roles: {
+    test: "clr-content",
+  },
 });
