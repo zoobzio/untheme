@@ -1,6 +1,6 @@
 {
   "name": "untheme-monorepo",
-  "version": "0.0.40",
+  "version": "0.0.41",
   "description": "🎨 A universal theme & token manager.",
   "type": "module",
   "main": "index.js",
