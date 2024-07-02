@@ -13,8 +13,7 @@ export function presetUntheme<Config extends UnthemeTemplate>(
     theme: (Object.keys(options.templates) as Template[]).reduce((x, y) => {
       const template = options.templates[y];
       x[y] = useTokenVars(
-        untheme.tokens().filter((tkn) => !template || template.test(tkn)),
-        options.prefix
+        untheme.tokens().filter((tkn) => !template || template.test(tkn))
       );
       return x;
     }, {} as UnthemeTheme),

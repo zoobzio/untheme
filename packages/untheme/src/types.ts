@@ -42,6 +42,7 @@ export type UnthemeTemplate = {
     [M in UnthemeColorMode]: Record<string, string>;
   };
   roles: Record<string, string>;
+  override?: Record<string, string>;
 };
 
 export interface UnthemeConfig<

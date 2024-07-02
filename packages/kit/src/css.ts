@@ -1,32 +1,25 @@
-export function useCSSVarKey(prefix: string, key: string) {
-  return `--${prefix}-${key}`;
+export function useCSSVarKey(key: string) {
+  return `--${key.replace(/([a-zA-Z])(?=[A-Z])/g, "$1_").toLowerCase()}`;
 }
 
-export function useCSSVar(prefix: string, key: string) {
-  return `var(${useCSSVarKey(prefix, key)})`;
+export function useCSSVar(key: string) {
+  return `var(${useCSSVarKey(key)})`;
 }
 
 export function useTokenVars<Token extends string>(
-  tokens: Token[],
-  prefix: string = "ut",
+  tokens: Token[]
 ): Record<Token, string> {
-  return tokens.reduce(
-    (x, y) => {
-      x[y] = useCSSVar(prefix, y);
-      return x;
-    },
-    {} as Record<Token, string>,
-  );
+  return tokens.reduce((x, y) => {
+    x[y] = useCSSVar(y);
+    return x;
+  }, {} as Record<Token, string>);
 }
 
-export function useRoot(
-  tokens: Record<string, string>,
-  prefix: string = "ut",
-): string {
+export function useRoot(tokens: Record<string, string>): string {
   const keys = Object.keys(tokens);
   const vars = keys.reduce((x, y) => {
-    const v = useCSSVarKey(prefix, y);
-    const d = tokens[y] in tokens ? useCSSVar(prefix, tokens[y]) : tokens[y];
+    const v = useCSSVarKey(y);
+    const d = tokens[y] in tokens ? useCSSVar(tokens[y]) : tokens[y];
     x.push(`${v}: ${d};`);
     return x;
   }, [] as string[]);

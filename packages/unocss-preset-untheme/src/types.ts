@@ -59,7 +59,6 @@ export type UnthemeTheme = {
 };
 
 export interface UnthemePresetOptions<Config extends UnthemeTemplate> {
-  prefix?: string;
   config: Config;
   templates: {
     [Template in UnthemeUtilityTemplate]?: RegExp;
