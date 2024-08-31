@@ -2,7 +2,6 @@ import { defineUntheme } from "untheme";
 import { useRoot } from "@untheme/kit";
 import { useState } from "#app";
 import { computed, reactive } from "vue";
-// @ts-expect-error
 import config from "#build/untheme.config.mjs";
 import type { UnthemeConfig } from "#build/types/untheme.d.ts";
 import type { UnthemeColorMode } from "untheme";

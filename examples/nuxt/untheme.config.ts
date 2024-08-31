@@ -7,7 +7,7 @@ export default defineUnthemeConfig({
     ...useColorPack(
       "tw",
       ["emerald", "fuchsia", "orange", "red", "stone", "slate"],
-      "-"
+      "-",
     ),
     "clr-special": "hsl(272, 61%, 34%)",
     // spacing

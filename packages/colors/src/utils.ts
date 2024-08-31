@@ -47,7 +47,7 @@ export function referenceColorTokens<
     packs[pack][color] as UnthemeColor,
     pack,
     color,
-    separator
+    separator,
   );
   return tokens.reduce(
     (x, y, i) => {

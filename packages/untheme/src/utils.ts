@@ -9,7 +9,7 @@ export function defineUnthemeConfig<
   SysToken extends string,
   ThemeToken extends string,
   ModeToken extends string,
-  RoleToken extends string
+  RoleToken extends string,
 >(config: UnthemeConfig<RefToken, SysToken, ThemeToken, ModeToken, RoleToken>) {
   return config;
 }
@@ -19,7 +19,7 @@ export function defineUntheme<
   SysToken extends string,
   ThemeToken extends string,
   ModeToken extends string,
-  RoleToken extends string
+  RoleToken extends string,
 >(config: UnthemeConfig<RefToken, SysToken, ThemeToken, ModeToken, RoleToken>) {
   const use: UnthemeTokenUtil<
     RefToken,
@@ -37,7 +37,7 @@ export function defineUntheme<
   const resolve = (
     token: RefToken | SysToken | ModeToken | RoleToken,
     theme: ThemeToken,
-    mode: UnthemeColorMode
+    mode: UnthemeColorMode,
   ) => {
     const tkns = use(theme, mode);
     const fTkn: (t: typeof token) => string = (tkn) =>

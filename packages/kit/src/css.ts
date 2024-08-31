@@ -7,12 +7,15 @@ export function useCSSVar(key: string) {
 }
 
 export function useTokenVars<Token extends string>(
-  tokens: Token[]
+  tokens: Token[],
 ): Record<Token, string> {
-  return tokens.reduce((x, y) => {
-    x[y] = useCSSVar(y);
-    return x;
-  }, {} as Record<Token, string>);
+  return tokens.reduce(
+    (x, y) => {
+      x[y] = useCSSVar(y);
+      return x;
+    },
+    {} as Record<Token, string>,
+  );
 }
 
 export function useRoot(tokens: Record<string, string>): string {

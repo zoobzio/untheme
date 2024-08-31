@@ -22,7 +22,7 @@ export default defineNuxtModule<UnthemeTemplate>({
           `export default defineUnthemeConfig(${JSON.stringify(
             config,
             null,
-            2
+            2,
           )});`,
         ].join("\n");
       },
@@ -36,7 +36,7 @@ export default defineNuxtModule<UnthemeTemplate>({
           `const untheme = defineUnthemeConfig(${JSON.stringify(
             config,
             null,
-            2
+            2,
           )});`,
           `export type UnthemeConfig = typeof untheme;`,
         ].join("\n");
