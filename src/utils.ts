@@ -2,7 +2,7 @@ import type {
   UnthemeColorMode,
   UnthemeConfig,
   UnthemeTokenUtil,
-} from "../types";
+} from "./types";
 
 export function defineUnthemeConfig<
   RefToken extends string,

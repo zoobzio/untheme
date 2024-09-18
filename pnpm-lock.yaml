@@ -11,6 +11,9 @@ importers:
       '@eslint/js':
         specifier: ^9.10.0
         version: 9.10.0
+      '@types/node':
+        specifier: ^22.5.5
+        version: 22.5.5
       changelogen:
         specifier: ^0.5.5
         version: 0.5.5
@@ -528,6 +531,9 @@ packages:
 
   '@types/estree@1.0.5':
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
+
+  '@types/node@22.5.5':
+    resolution: {integrity: sha512-Xjs4y5UPO/CLdzpgR6GirZJx36yScjh73+2NlLlkFRSoQN8B0DpfXPdZGnvVmLRLOsqDpOfTNv7D9trgGhmOIA==}
 
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
@@ -1862,6 +1868,9 @@ packages:
       typescript:
         optional: true
 
+  undici-types@6.19.8:
+    resolution: {integrity: sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==}
+
   untildify@4.0.0:
     resolution: {integrity: sha512-KK8xQ1mkzZeg9inewmFVDNkg3l5LUhoq9kN6iWYB/CC9YMG8HA+c1Q8HwDe6dEX7kErrEVNVBO3fWsVq5iDgtw==}
     engines: {node: '>=8'}
@@ -2302,6 +2311,10 @@ snapshots:
   '@trysound/sax@0.2.0': {}
 
   '@types/estree@1.0.5': {}
+
+  '@types/node@22.5.5':
+    dependencies:
+      undici-types: 6.19.8
 
   '@types/resolve@1.20.2': {}
 
@@ -3708,6 +3721,8 @@ snapshots:
       - sass
       - supports-color
       - vue-tsc
+
+  undici-types@6.19.8: {}
 
   untildify@4.0.0: {}
 

@@ -1,7 +1,7 @@
-import { defineColorPack } from "../utils";
+import { defineColorPack } from "../config";
 
 // ❤️ tailwind: https://github.com/tailwindlabs/tailwindcss/blob/master/src/public/colors.js
-export default defineColorPack({
+export const useTailwindColorPack = defineColorPack("tw", {
   red: {
     50: "#fef2f2",
     100: "#fee2e2",

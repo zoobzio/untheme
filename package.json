@@ -19,8 +19,15 @@
   "exports": {
     ".": {
       "types": "./.dist/index.d.ts",
-      "import": "./.dist/index.mjs",
-      "require": "./.dist/index.cjs"
+      "import": "./.dist/index.mjs"
+    },
+    "./kit": {
+      "types": "./.dist/plugins/kit.d.ts",
+      "import": "./.dist/plugins/kit.mjs"
+    },
+    "./plugins/color": {
+      "types": "./.dist/plugins/color/index.d.ts",
+      "import": "./.dist/plugins/color/index.mjs"
     }
   },
   "main": ".dist/index.cjs",
@@ -33,7 +40,7 @@
     "lint": "eslint .",
     "inspect": "prettier --check .",
     "format": "prettier --write .",
-    "typecheck": "tsc --outDir .build",
+    "typecheck": "tsc --outDir .dist",
     "build": "unbuild .",
     "stub": "unbuild . --stub",
     "export:sizes": "npx export-size . -r"
@@ -45,6 +52,7 @@
   ],
   "devDependencies": {
     "@eslint/js": "^9.10.0",
+    "@types/node": "^22.5.5",
     "changelogen": "^0.5.5",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
