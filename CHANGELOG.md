@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.0.44
+
+[compare changes](https://github.com/zoobzio/untheme/compare/v0.0.43...v0.0.44)
+
+### 🩹 Fixes
+
+- Specify package manager ([dca063a](https://github.com/zoobzio/untheme/commit/dca063a))
+
+### ❤️ Contributors
+
+- Alexander Thorwaldson ([@zoobzio](http://github.com/zoobzio))
+
 ## v0.0.43
 
 [compare changes](https://github.com/zoobzio/untheme/compare/v0.0.42...v0.0.43)
