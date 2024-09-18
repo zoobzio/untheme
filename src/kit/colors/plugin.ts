@@ -1,4 +1,4 @@
-import { useTokenize } from "../../plugins/kit";
+import { useTokenize } from "../kit";
 
 const shades = [
   "50",

@@ -1,4 +1,4 @@
-import { defineColorPack } from "../config";
+import { defineColorPack } from "../plugin";
 
 // ❤️ tailwind: https://github.com/tailwindlabs/tailwindcss/blob/master/src/public/colors.js
 export const useTailwindColorPack = defineColorPack("tw", {

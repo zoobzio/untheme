@@ -1,7 +1,7 @@
 {
   "name": "untheme",
   "type": "module",
-  "version": "0.0.45",
+  "version": "0.0.46",
   "author": {
     "name": "Alex Thorwaldson",
     "email": "alex@zoobz.io",
@@ -19,15 +19,13 @@
   "exports": {
     ".": {
       "types": "./.dist/index.d.ts",
-      "import": "./.dist/index.mjs"
+      "import": "./.dist/index.mjs",
+      "require": "./.dist/index.cjs"
     },
     "./kit": {
-      "types": "./.dist/plugins/kit.d.ts",
-      "import": "./.dist/plugins/kit.mjs"
-    },
-    "./plugins/color": {
-      "types": "./.dist/plugins/color/index.d.ts",
-      "import": "./.dist/plugins/color/index.mjs"
+      "types": "./.dist/kit/index.d.ts",
+      "import": "./.dist/kit/index.mjs",
+      "require": "./.dist/kit/index.cjs"
     }
   },
   "main": ".dist/index.cjs",

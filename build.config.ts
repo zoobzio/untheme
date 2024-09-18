@@ -1,7 +1,7 @@
 import { defineBuildConfig } from "unbuild";
 
 export default defineBuildConfig({
-  entries: ["src/index", "plugins/kit", "plugins/color/index"],
+  entries: ["src/index", "src/kit/index"],
   clean: true,
   declaration: true,
   rollup: {
