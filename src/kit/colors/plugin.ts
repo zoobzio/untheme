@@ -93,16 +93,15 @@ export function useColorAliasTokens<
     >,
   );
 }
-export function defineColorPack<
-  Name extends string,
-  Color extends string,
-  Pack extends UnthemeColorPack<Color>,
->(name: Name, pack: Pack) {
+export function defineColorPack<Name extends string, Color extends string>(
+  name: Name,
+  pack: { [C in Color]: UnthemeColorScheme },
+) {
   return () => ({
     tokens: () => useColorPackTokens(name, pack),
     aliases: <Prefix extends string, Alias extends string>(
       prefix: Prefix,
-      aliases: Record<Alias, NoInfer<Color>>,
+      aliases: Record<Alias, Color>,
     ) => useColorAliasTokens(name, pack, prefix, aliases),
   });
 }
