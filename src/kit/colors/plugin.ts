@@ -98,11 +98,11 @@ export function defineColorPack<
   Color extends string,
   Pack extends UnthemeColorPack<Color>,
 >(name: Name, pack: Pack) {
-  return {
+  return () => ({
     tokens: () => useColorPackTokens(name, pack),
     aliases: <Prefix extends string, Alias extends string>(
       prefix: Prefix,
       aliases: Record<Alias, NoInfer<Color>>,
     ) => useColorAliasTokens(name, pack, prefix, aliases),
-  };
+  });
 }
