@@ -24,11 +24,10 @@ export type UnthemeColorPack<Color extends string> = {
   [C in Color]: UnthemeColorScheme;
 };
 
-export function useColorTokenKeys<
-  Name extends string,
-  Color extends string,
-  Pack extends UnthemeColorPack<Color>,
->(name: Name, pack: Pack) {
+export function useColorTokenKeys<Name extends string, Color extends string>(
+  name: Name,
+  pack: UnthemeColorPack<Color>,
+) {
   return (Object.keys(pack) as Color[]).map((k) =>
     useColorTokens(pack[k], name, k),
   );
@@ -49,11 +48,10 @@ export function useColorTokens<Prefix extends string, Name extends string>(
   );
 }
 
-export function useColorPackTokens<
-  Name extends string,
-  Color extends string,
-  Pack extends UnthemeColorPack<Color>,
->(name: Name, pack: Pack) {
+export function useColorPackTokens<Name extends string, Color extends string>(
+  name: Name,
+  pack: UnthemeColorPack<Color>,
+) {
   const keys = Object.keys(pack) as Color[];
   const tokens = keys.map((k) => useColorTokens(pack[k], name, k));
   return Object.assign({}, ...tokens) as Record<
@@ -64,14 +62,13 @@ export function useColorPackTokens<
 export function useColorAliasTokens<
   Name extends string,
   Color extends string,
-  Pack extends UnthemeColorPack<Color>,
   Prefix extends string,
   Alias extends string,
 >(
   name: Name,
-  _pack: Pack,
+  _pack: UnthemeColorPack<Color>,
   prefix: Prefix,
-  aliases: Record<Alias, NoInfer<Color>>,
+  aliases: Record<Alias, Color>,
 ) {
   const keys = Object.keys(aliases) as Alias[];
   const tokens = keys
@@ -95,7 +92,7 @@ export function useColorAliasTokens<
 }
 export function defineColorPack<Name extends string, Color extends string>(
   name: Name,
-  pack: { [C in Color]: UnthemeColorScheme },
+  pack: UnthemeColorPack<Color>,
 ) {
   return () => ({
     tokens: () => useColorPackTokens(name, pack),
