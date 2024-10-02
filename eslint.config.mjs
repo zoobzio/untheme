@@ -10,6 +10,6 @@ export default tslint.config(
   prettierConfig,
   prettierPlugin,
   {
-    ignores: ["**/.dist", "**/.nuxt", "**/packages"],
+    ignores: ["**/.dist", "**/.nuxt"],
   },
 );

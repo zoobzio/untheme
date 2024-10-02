@@ -7,13 +7,6 @@
     "rootDir": ".",
     "module": "esnext",
     "moduleResolution": "node",
-    "paths": {
-      "@untheme/colors": ["packages/colors/src"],
-      "@untheme/kit": ["packages/kit/src"],
-      "@untheme/nuxt": ["packages/nuxt/src"],
-      "unocss-preset-untheme": ["packages/unocss-preset-untheme/src"],
-      "untheme": ["packages/untheme/src"]
-    },
     "resolveJsonModule": true,
     "strict": true,
     "strictFunctionTypes": true,
