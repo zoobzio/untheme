@@ -1,0 +1,61 @@
+{
+  "name": "nuxt-untheme",
+  "type": "module",
+  "version": "1.2.0",
+  "author": {
+    "name": "Alex Thorwaldson",
+    "email": "alex@zoobz.io",
+    "url": "https://zoobz.io"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoobzio/nuxt-untheme.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zoobzio/nuxt-untheme/issues"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./.dist/module.d.ts",
+      "import": "./.dist/module.mjs"
+    }
+  },
+  "module": ".dist/module.mjs",
+  "types": ".dist/module.d.ts",
+  "files": [
+    ".dist",
+    "runtime"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "nuxi typecheck",
+    "build": "unbuild .",
+    "stub": "unbuild . --stub",
+    "prepare": "nuxt prepare",
+    "release": "changelogen --release && git push --follow-tags"
+  },
+  "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "dependencies": {
+    "@nuxt/kit": "catalog:",
+    "@nuxt/schema": "catalog:",
+    "untheme": "workspace:*"
+  },
+  "devDependencies": {
+    "@nuxt/eslint-config": "catalog:",
+    "@types/eslint-config-prettier": "catalog:",
+    "changelogen": "catalog:",
+    "eslint": "catalog:",
+    "eslint-config-prettier": "catalog:",
+    "eslint-plugin-prettier": "catalog:",
+    "nuxt": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "unbuild": "catalog:",
+    "vue": "catalog:"
+  }
+}

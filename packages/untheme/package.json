@@ -1,0 +1,58 @@
+{
+  "name": "untheme",
+  "type": "module",
+  "version": "1.2.0",
+  "author": {
+    "name": "Alex Thorwaldson",
+    "email": "alex@zoobz.io",
+    "url": "https://zoobz.io"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoobzio/untheme.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zoobzio/untheme/issues"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./.dist/index.d.ts",
+      "import": "./.dist/index.mjs",
+      "require": "./.dist/index.cjs"
+    },
+    "./kit": {
+      "types": "./.dist/kit/index.d.ts",
+      "import": "./.dist/kit/index.mjs",
+      "require": "./.dist/kit/index.cjs"
+    }
+  },
+  "main": ".dist/index.cjs",
+  "module": ".dist/index.mjs",
+  "types": ".dist/index.d.ts",
+  "files": [
+    ".dist"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --outDir .dist",
+    "build": "unbuild .",
+    "stub": "unbuild . --stub",
+    "release": "changelogen --release && git push --follow-tags"
+  },
+  "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "devDependencies": {
+    "@eslint/js": "catalog:",
+    "@types/node": "catalog:",
+    "changelogen": "catalog:",
+    "eslint-config-prettier": "catalog:",
+    "eslint-plugin-prettier": "catalog:",
+    "typescript": "catalog:",
+    "typescript-eslint": "catalog:",
+    "unbuild": "catalog:"
+  }
+}

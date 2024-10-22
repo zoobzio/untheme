@@ -1,7 +1,6 @@
 {
-  "name": "untheme",
-  "type": "module",
-  "version": "0.0.51",
+  "name": "@untheme/monorepo",
+  "version": "1.2.0",
   "author": {
     "name": "Alex Thorwaldson",
     "email": "alex@zoobz.io",
@@ -15,44 +14,17 @@
   "bugs": {
     "url": "https://github.com/zoobzio/untheme/issues"
   },
-  "sideEffects": false,
-  "exports": {
-    ".": {
-      "types": "./.dist/index.d.ts",
-      "import": "./.dist/index.mjs",
-      "require": "./.dist/index.cjs"
-    },
-    "./kit": {
-      "types": "./.dist/kit/index.d.ts",
-      "import": "./.dist/kit/index.mjs",
-      "require": "./.dist/kit/index.cjs"
-    }
-  },
-  "main": ".dist/index.cjs",
-  "module": ".dist/index.mjs",
-  "types": ".dist/index.d.ts",
-  "files": [
-    ".dist"
-  ],
   "scripts": {
-    "lint": "eslint .",
-    "typecheck": "tsc --outDir .dist",
-    "build": "unbuild .",
-    "stub": "unbuild . --stub",
-    "release": "changelogen --release && git push --follow-tags"
-  },
-  "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org"
+    "lint": "pnpm -r --stream=true --filter=./packages/** run lint",
+    "prep": "pnpm --filter=./packages/untheme run build",
+    "typecheck": "pnpm -r --stream=true --filter=./packages/** run typecheck",
+    "test": "pnpm -r --stream=true --filter=./packages/** run coverage",
+    "build": "pnpm -r --stream=true --filter=./packages/** run build",
+    "release": "changelogen --release && ./tools/bump.sh && git push --follow-tags",
+    "publish": "pnpm -r --stream=true --filter=./packages/** publish --no-git-checks"
   },
   "devDependencies": {
-    "@eslint/js": "^9.10.0",
-    "@types/node": "^22.5.5",
-    "changelogen": "^0.5.5",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "typescript": "5.5.4",
-    "typescript-eslint": "^8.6.0",
-    "unbuild": "^2.0.0"
-  }
+    "changelogen": "catalog:"
+  },
+  "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c"
 }
