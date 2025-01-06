@@ -1,7 +1,6 @@
-import { defineColorPack } from "../plugin";
+import { defineUnthemeColorPack } from "../colors";
 
-// ❤️ tailwind: https://github.com/tailwindlabs/tailwindcss/blob/master/src/public/colors.js
-export const useTailwindColorPack = defineColorPack("tw", {
+export const useTailwindColorPack = defineUnthemeColorPack("tw", {
   red: {
     50: "#fef2f2",
     100: "#fee2e2",

@@ -1,49 +1,48 @@
+import type { UnthemeColorMode, UnthemeTemplate } from "untheme";
+import { isUnthemeConfig } from "untheme";
 import {
   defineNuxtModule,
   createResolver,
-  addPlugin,
   addImportsDir,
   addTemplate,
-  addTypeTemplate,
+  addPlugin,
+  useLogger,
 } from "@nuxt/kit";
-import type { UnthemeTemplate } from "untheme";
 
-function _tokenize(object: Record<string, unknown> = {}) {
-  if (Object.keys(object).length === 0) {
-    return "never";
-  }
-  return Object.keys(object)
-    .map((k) => `"${k}"`)
-    .join(" | ");
+interface UnthemeNuxtOptions {
+  mode?: UnthemeColorMode;
+  theme?: string;
+  whitelist?: string[];
+  config: UnthemeTemplate;
 }
 
-export default defineNuxtModule<UnthemeTemplate>({
+export default defineNuxtModule<UnthemeNuxtOptions>({
   meta: {
     name: "nuxt-untheme",
     configKey: "untheme",
   },
   setup(options) {
+    const logger = useLogger();
     const { resolve } = createResolver(import.meta.url);
 
-    addTemplate({
-      filename: "untheme.config.mjs",
-      getContents: () => `export default ${JSON.stringify(options)};`,
-    });
-    addTypeTemplate({
-      filename: "types/untheme.d.ts",
-      getContents: () =>
-        [
-          `export type RefToken = ${_tokenize(options.tokens)};`,
-          `export type SysToken = ${_tokenize(options.themes[Object.keys(options.themes)[0]])};`,
-          `export type ThemeToken = ${_tokenize(options.themes)};`,
-          `export type ModeToken = ${_tokenize(options.modes.dark)};`,
-          `export type RoleToken = ${_tokenize(options.roles)};`,
-        ].join("\n"),
-    });
+    if (isUnthemeConfig(options.config)) {
+      addTemplate({
+        filename: "untheme.config.mjs",
+        write: true,
+        getContents: () =>
+          `export default ${JSON.stringify(options, null, 2)};`,
+      });
 
-    addImportsDir(resolve("../runtime/utils"));
-    addPlugin({
-      src: resolve("../runtime/plugin"),
-    });
+      addPlugin({
+        src: resolve("../runtime/plugin.ts"),
+      });
+
+      addImportsDir(resolve("../runtime/utils"));
+    } else {
+      logger.warn(
+        "Invalid `untheme` configuration! Skipping initialization...",
+        options,
+      );
+    }
   },
 });

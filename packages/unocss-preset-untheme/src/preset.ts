@@ -1,4 +1,4 @@
-import { useTokenVars } from "untheme/kit";
+import { useUnthemeTokenCSSVars } from "untheme";
 import { defineUntheme } from "untheme";
 import type { UnthemeTemplate } from "untheme";
 
@@ -76,7 +76,7 @@ export function presetUntheme<Config extends UnthemeTemplate>(
     name: "unocss-preset-untheme",
     theme: (Object.keys(options.templates) as Template[]).reduce((x, y) => {
       const template = options.templates[y];
-      x[y] = useTokenVars(
+      x[y] = useUnthemeTokenCSSVars(
         untheme.tokens().filter((tkn) => !template || template.test(tkn)),
       );
       return x;

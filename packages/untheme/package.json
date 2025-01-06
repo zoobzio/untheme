@@ -22,10 +22,10 @@
       "import": "./.dist/index.mjs",
       "require": "./.dist/index.cjs"
     },
-    "./kit": {
-      "types": "./.dist/kit/index.d.ts",
-      "import": "./.dist/kit/index.mjs",
-      "require": "./.dist/kit/index.cjs"
+    "./plugin": {
+      "types": "./.dist/plugin/index.d.ts",
+      "import": "./.dist/plugin/index.mjs",
+      "require": "./.dist/plugin/index.cjs"
     }
   },
   "main": ".dist/index.cjs",
@@ -36,7 +36,7 @@
   ],
   "scripts": {
     "lint": "eslint .",
-    "typecheck": "tsc --outDir .dist",
+    "check": "tsc --outDir .dist",
     "build": "unbuild .",
     "stub": "unbuild . --stub",
     "release": "changelogen --release && git push --follow-tags"
@@ -44,6 +44,10 @@
   "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c",
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
+  },
+  "dependencies": {
+    "defu": "catalog:",
+    "theme-colors": "^0.1.0"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

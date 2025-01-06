@@ -1,43 +1,45 @@
+import type { UnthemeColorMode } from "untheme";
 import { defineUntheme } from "untheme";
-import { useRoot } from "untheme/kit";
 import { useState } from "#imports";
 import { computed, reactive } from "vue";
 // @ts-ignore
-import config from "#build/untheme.config";
-import type {
-  RefToken,
-  SysToken,
-  ThemeToken,
-  ModeToken,
-  RoleToken,
-} from "#build/types/untheme.d.ts";
-import type { UnthemeConfig, UnthemeColorMode } from "untheme";
+import unthemeConfig from "#build/untheme.config.mjs";
 
-const untheme = defineUntheme(
-  config as UnthemeConfig<RefToken, SysToken, ThemeToken, ModeToken, RoleToken>,
-);
-const themes = untheme.themes();
+const { config, theme, mode, whitelist } = unthemeConfig;
 
-export type Theme = (typeof themes)[number];
+const untheme = defineUntheme(config);
 
-export const useThemes = () => themes;
-export const useTheme = () => useState<Theme>("theme", () => themes[0]);
-export const useMode = () =>
-  useState<UnthemeColorMode>("colormode", () => "dark");
+export const useUnthemeThemes = untheme.themes;
+export const useUnthemeColorModes = untheme.modes;
+export const useUnthemeTokenList = untheme.tokens;
+export const resolveUnthemeToken = untheme.resolve;
+
+export const useUnthemeTheme = () =>
+  useState<ReturnType<typeof untheme.themes>[number]>(
+    "utheme-theme",
+    () => theme ?? "default",
+  );
+
+export const useUnthemeColorMode = () =>
+  useState<UnthemeColorMode>("untheme-colormode", () => mode ?? "dark");
+
+export const useUnthemeTokenWhitelist = () =>
+  useState<ReturnType<typeof useUnthemeTokenList>>(
+    "untheme-whitelist",
+    () => whitelist ?? [],
+  );
 
 export function useUntheme() {
-  const theme = useTheme();
-  const mode = useMode();
-  const tokens = computed(() => reactive(untheme.use(theme.value, mode.value)));
+  const theme = useUnthemeTheme();
+  const mode = useUnthemeColorMode();
+  const whitelist = useUnthemeTokenWhitelist();
+  const config = computed(() => reactive(untheme.use(theme.value, mode.value)));
   return {
     mode,
     theme,
-    tokens,
-    resolve: untheme.resolve,
+    whitelist,
+    config,
+    resolve: (token: Parameters<typeof resolveUnthemeToken>[0]) =>
+      resolveUnthemeToken(token, theme.value, mode.value),
   };
-}
-
-export function useUnthemeRoot() {
-  const { tokens } = useUntheme();
-  return computed(() => useRoot(tokens.value));
 }

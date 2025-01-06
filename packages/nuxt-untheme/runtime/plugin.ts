@@ -1,8 +1,10 @@
 import { defineNuxtPlugin, useHead } from "#imports";
-import { useUnthemeRoot } from "./utils/untheme";
+import { useUnthemeCSSRoot } from "untheme";
+import { useUntheme } from "./utils/untheme";
 
 export default defineNuxtPlugin(() => {
-  const root = useUnthemeRoot();
+  const { config, whitelist } = useUntheme();
+  const root = computed(() => useUnthemeCSSRoot(config.value, whitelist.value));
   useHead({
     style: [
       {

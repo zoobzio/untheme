@@ -20,6 +20,10 @@
     ".": {
       "types": "./.dist/module.d.ts",
       "import": "./.dist/module.mjs"
+    },
+    "./config": {
+      "types": "./.dist/config.d.ts",
+      "import": "./.dist/config.mjs"
     }
   },
   "module": ".dist/module.mjs",
@@ -30,7 +34,7 @@
   ],
   "scripts": {
     "lint": "eslint .",
-    "typecheck": "nuxi typecheck",
+    "check": "nuxi typecheck",
     "build": "unbuild .",
     "stub": "unbuild . --stub",
     "prepare": "nuxt prepare",

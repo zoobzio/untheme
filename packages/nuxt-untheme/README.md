@@ -1,10 +1,10 @@
 # nuxt-untheme
 
-🔮 Build your own tokenized design system w/ dynamic CSS vars in Nuxt using Untheme.
+🎨 Build dynamic & type-safe design systems with Nuxt & Untheme.
 
 [✨ &nbsp;Release Notes](/CHANGELOG.md)
 
-## Configuration
+## Getting started
 
 1. Install the module
 
@@ -16,34 +16,41 @@ pnpm add nuxt-untheme untheme
 
 ```ts
 // ~/untheme.config.ts
-import { defineUnthemeConfig } from "untheme";
+import { defineUnthemeNuxtConfig } from "nuxt-untheme/config";
 
-export default defineUnthemeConfig({
-  tokens: {
-    blue: "#0096ff",
-    green: "#00a36c",
-    orange: "#ff5733",
+export default defineUnthemeNuxtConfig(
+  {
+    tokens: {
+      blue: "#0096ff",
+      green: "#00a36c",
+      orange: "#ff5733",
+    },
+    themes: {
+      theme1: {
+        primary: "blue",
+        secondary: "orange",
+      },
+      theme2: {
+        primary: "green",
+        secondary: "blue",
+      },
+    },
+    modes: {
+      light: {
+        active: "primary",
+      },
+      dark: {
+        active: "secondary",
+      },
+    },
+    roles: {},
   },
-  themes: {
-    theme1: {
-      primary: "blue",
-      secondary: "orange",
-    },
-    theme2: {
-      primary: "green",
-      secondary: "blue",
-    },
+  {
+    theme: "theme1",
+    mode: "dark",
+    whitelist: ["active", "primary", "secondary"],
   },
-  modes: {
-    light: {
-      active: "primary",
-    },
-    dark: {
-      active: "secondary",
-    },
-  },
-  roles: {},
-});
+);
 ```
 
 3. Activate the module
@@ -58,8 +65,6 @@ export default defineNuxtConfig({
 });
 ```
 
-4. Look to the future, your tokens are done!
-
 ## Features
 
 The `nuxt-untheme` module installs [`untheme`](https://github.com/zoobzio/untheme) and implements your token configuration as a reactive design system that:
@@ -68,33 +73,34 @@ The `nuxt-untheme` module installs [`untheme`](https://github.com/zoobzio/unthem
 - Publishes tokens as CSS variables
 - Exposes utility functions/types to extend the design system
 
-### Untheme
+> [Read more](/packages/untheme/README.md)
 
-For more information about `untheme` and tokenized design systems, check out the [`untheme` documentation](https://github.com/zoobzio/untheme).
+Your tokens will be converted into global CSS variables which can be referenced in your components, changing the `theme` or `color mode` will automatically update the CSS variable values allowing seamless dynamic styling.
 
-For more information about design systems in general, check out the [Material 3](https://m3.material.io/foundations/design-tokens/overview) documentation that inspired the `untheme` project.
+### Utils
 
-### CSS Variables
+#### `untheme` aliases
 
-The token configuration is passed to a Nuxt plugin that uses [`unhead`](https://unhead.unjs.io/) to declare CSS variables that mirror the token configuration. If using the configuration from above, you would also have access to two themes (`theme1` & `theme2`) and two colors modes (`light` & `dark`).
+Several `untheme` utilities have been made available w/ aliases:
 
-Reference tokens have static values, so the `var(--blue)` token would always resolve to `#0096ff`.
+| Function                                        | Description                                                                                                |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `resolveUnthemeToken(theme, mode, token)`       | Resolve a given `theme`, `mode`, & `token` to the root CSS value the token references.                     |
+| `useUnthemeModes()`                             | Retrieve a list of available `mode` values.                                                                |
+| `useUnthemeThemes()`                            | Retrieve a list of available `theme` values.                                                               |
+| `useUnthemeTokens()`                            | Retrieve a list of available `token` values.                                                               |
+| `paintUnthemeVariables(theme, mode, whitelist)` | Paint your `untheme` tokens as CSS variables, optionally including a `whitelist` of token values to paint. |
 
-If the active theme was set to `theme2`, the `var(--primary)` system token would resolve to `#00a36c` and the `var(--secondary)` system token would resolve to `#0096ff`.
+#### `untheme` state
 
-If the active color mode was set to `dark` (with an active theme of `theme2`), the `var(--active)` system token would resolve to `#0096ff`.
+`nuxt-untheme` maintains some state variables across pages/components:
 
-Role tokens can be set to any of the above token values and will resolve according to the actively set `theme` & `mode`.
-
-### Utilities
-
-| Function           | Description                                                                             |
-| ------------------ | --------------------------------------------------------------------------------------- |
-| `useThemes()`      | Retrieve a literally-typed list of the available `theme` keys.                          |
-| `useTheme()`       | Access the reactive state of the currently active `theme`.                              |
-| `useMode()`        | Access the reactive state of the currently active `mode`.                               |
-| `useUntheme()`     | Access the currently active `untheme` service w/ `mode`, `theme`, & `tokens` properties |
-| `useUnthemeRoot()` | Build a reactive CSS declaration string to manage CSS variable values                   |
+| Function                | Description                                                                                                             |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `useUnthemeTheme()`     | Access the current `theme` state.                                                                                       |
+| `useUnthemeMode()`      | Access the current `color mode` state.                                                                                  |
+| `useUnthemeWhitelist()` | Access the current `whitelist` state which holds the list of tokens that should be resolvable as CSS variables.         |
+| `useUntheme()`          | Access all `untheme` state objects, compute the active token value, & resolve tokens using the active `theme` & `mode`. |
 
 ## License
 

@@ -1,15 +1,15 @@
 # untheme
 
-🎨 A universal tokenized theme manager to implement dynamic design systems.
+🎨 A universal tokenized theme manager for dynamic & type-safe design systems.
 
 [✨ &nbsp;Release Notes](/CHANGELOG.md)
 
-## Configuration
+## Getting started
 
 1. Install the module
 
 ```bash
-[npm|yarn|pnpm] add untheme
+pnpm add untheme
 ```
 
 2. Create an `untheme` instance w/ your design tokens
@@ -49,50 +49,62 @@ export default defineUntheme({
 });
 ```
 
-3. Paint a picture w/ Bob Ross, you are done!
+3. Paint the desired CSS variables to the DOM for use in components
+
+```ts
+import { paint } from "~/untheme";
+
+paint("theme1", "dark", ["button", "link"]); // paints `--button` & `--link` CSS variables
+```
 
 ## Features
 
-Taking inspiration from the [Material 3 Design Tokens specification](https://m3.material.io/foundations/design-tokens/overview), `untheme` was built to provide a system to implement a tokenized design system in JS/TS applications. Using `untheme`, we can define:
+Taking inspiration from the [Material 3 Design Tokens specification](https://m3.material.io/foundations/design-tokens/overview), `untheme` was built to provide a tokenized design system for frontend applications. Using `untheme`, we can define:
 
-- **Reference tokens** that represent static CSS values that will be applied for styling
+- **Reference tokens** that represent static CSS values that can be applied as styling
 - **Theme tokens** that resolve to any available reference tokens and comprise a unique theme
 - **Mode tokens** that resolve to any available reference or system tokens and implement color modes (light, dark)
 - **Role tokens** that resolve to any available reference, system, or mode tokens and are useful in components
 
-The configuration functions are full type-safe and any modern IDE will be able to take advantage of the extremely helpful type-hints.
+Tokens can then be converted to CSS variables using [`unhead`](https://unhead.unjs.io/) by providing the currently active `theme` & `color mode`, allowing your web components to reference dynamic style tokens rather than static CSS values.
 
-### Utilities
+### Config
 
-Instatiating an `untheme` config will expose several useful utilities:
+Create `untheme` design systems w/ the available configuration functions:
 
-```ts
-// ~/utils/example.ts
-import untheme from "~/untheme";
+| Function                        | Description                                                          |
+| ------------------------------- | -------------------------------------------------------------------- |
+| `isUnthemeConfig(template)`     | Check if a given template is a valid `untheme` config.               |
+| `defineUnthemeConfig(template)` | Validates a template & creates a type-safe config.                   |
+| `defineUntheme(config)`         | Constructs an `untheme` tokenized design systen from a valid config. |
 
-// access a flattened untheme config using a given theme/mode
-const unthemeConfig = untheme.use("theme1", "dark");
+### Utils
 
-// resolve a given token/theme/mode to it's base CSS value
-const unthemePrimaryValue = untheme.resolve("primary", "theme2", "light");
+An `untheme` design system give you access to utilities that allow you to interact w/ your token definitions & convert your tokens to CSS variables:
 
-// access a list of available themes
-const unthemeThemes = untheme.themes();
+| Function                                | Description                                                                                                |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `untheme.use(theme, mode)`              | Pass an active `theme` & `mode` value to retrieve a flat config object w/ all your tokens.                 |
+| `untheme.resolve(theme, mode, token)`   | Resolve a given `theme`, `mode`, & `token` to the root CSS value the token references.                     |
+| `untheme.modes()`                       | Retrieve a list of available `mode` values.                                                                |
+| `untheme.themes()`                      | Retrieve a list of available `theme` values.                                                               |
+| `untheme.tokens()`                      | Retrieve a list of available `token` values.                                                               |
+| `untheme.paint(theme, mode, whitelist)` | Paint your `untheme` tokens as CSS variables, optionally including a `whitelist` of token values to paint. |
 
-// access a list of available tokens
-const unthemeTokens = untheme.tokens();
-```
+> Read more:
+>
+> [`plugins`](/packages/untheme/src/plugins/README.md)
+>
+> [`kit`](/packages/untheme/src/kit/README.md)
 
-## Integrations
+### CSS Variables
 
-`untheme` can be integrated w/ frameworks like [`nuxt`](https://nuxt.com) & [`unocss`](https://unocss.dev) to take your design system further:
+Your `untheme` token definitions can be converted into CSS variables, which resolve as follows:
 
-| Project                                                   | Description |
-| --------------------------------------------------------- | ----------- |
-| [`nuxt-untheme`](https://github.com/zoobzio/nuxt-untheme) |             |
-| [`unocss-preset-untheme`](https://github.com/zoobzio/)    |             |
-
-If you have an idea for an integration, please let [me](https://github.com/zoobzio) know and I will see if I can help out!
+- Reference tokens have static values, so the `var(--blue)` token would always resolve to `#0096ff`.
+- If the active theme was set to `theme2`, the `var(--primary)` system token would resolve to `#00a36c` and the `var(--secondary)` system token would resolve to `#0096ff`.
+- If the active color mode was set to `dark` (with an active theme of `theme2`), the `var(--active)` system token would resolve to `#0096ff`.
+- Role tokens can be set to any of the above token values and will resolve according to the actively set `theme` & `mode`.
 
 ## License
 

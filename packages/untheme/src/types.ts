@@ -1,4 +1,4 @@
-export type UnthemeColorMode = "dark" | "light"; // consider adding more here? accessibility modes maybe?
+export type UnthemeColorMode = "dark" | "light"; // TODO consider adding 'accessibility' color modes
 
 export type UnthemeRefTokens<RefToken extends string> = {
   [T in RefToken]: string;

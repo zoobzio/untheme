@@ -19,20 +19,20 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./.dist/index.d.ts",
-      "import": "./.dist/index.mjs",
-      "require": "./.dist/index.cjs"
+      "types": "./.dist/preset.d.ts",
+      "import": "./.dist/preset.mjs",
+      "require": "./.dist/preset.cjs"
     }
   },
-  "main": ".dist/index.cjs",
-  "module": ".dist/index.mjs",
-  "types": ".dist/index.d.ts",
+  "main": ".dist/preset.cjs",
+  "module": ".dist/preset.mjs",
+  "types": ".dist/preset.d.ts",
   "files": [
     ".dist"
   ],
   "scripts": {
     "lint": "eslint .",
-    "typecheck": "tsc --outDir .dist",
+    "check": "tsc --outDir .dist",
     "build": "unbuild .",
     "stub": "unbuild . --stub",
     "release": "changelogen --release && git push --follow-tags"
