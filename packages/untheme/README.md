@@ -24,15 +24,9 @@ export default defineUntheme({
     green: "#00a36c",
     orange: "#ff5733",
   },
-  themes: {
-    theme1: {
-      primary: "blue",
-      secondary: "orange",
-    },
-    theme2: {
-      primary: "green",
-      secondary: "blue",
-    },
+  theme: {
+    primary: "blue",
+    secondary: "orange",
   },
   modes: {
     light: {
@@ -56,9 +50,11 @@ export default defineUntheme({
 Taking inspiration from the [Material 3 Design Tokens specification](https://m3.material.io/foundations/design-tokens/overview), `untheme` was built to provide a system to implement a tokenized design system in JS/TS applications. Using `untheme`, we can define:
 
 - **Reference tokens** that represent static CSS values that will be applied for styling
-- **Theme tokens** that resolve to any available reference tokens and comprise a unique theme
+- **System tokens** that resolve to any available reference tokens and define the theme structure
 - **Mode tokens** that resolve to any available reference or system tokens and implement color modes (light, dark)
 - **Role tokens** that resolve to any available reference, system, or mode tokens and are useful in components
+
+The key feature is that themes can be changed at runtime - you define the structure once at build time, then load different theme mappings from any source (database, API, etc.) at runtime.
 
 The configuration functions are full type-safe and any modern IDE will be able to take advantage of the extremely helpful type-hints.
 
@@ -70,14 +66,20 @@ Instatiating an `untheme` config will expose several useful utilities:
 // ~/utils/example.ts
 import untheme from "~/untheme";
 
-// access a flattened untheme config using a given theme/mode
-const unthemeConfig = untheme.use("theme1", "dark");
+// access a flattened untheme config using a given mode
+const unthemeConfig = untheme.use("dark");
 
-// resolve a given token/theme/mode to it's base CSS value
-const unthemePrimaryValue = untheme.resolve("primary", "theme2", "light");
+// resolve a given token/mode to it's base CSS value
+const unthemePrimaryValue = untheme.resolve("primary", "light");
 
-// access a list of available themes
-const unthemeThemes = untheme.themes();
+// dynamically change the theme at runtime
+untheme.setTheme({
+  primary: "green",
+  secondary: "blue",
+});
+
+// get the current theme (useful for saving to database)
+const currentTheme = untheme.getTheme();
 
 // access a list of available tokens
 const unthemeTokens = untheme.tokens();

@@ -34,8 +34,7 @@ export default defineNuxtModule<UnthemeTemplate>({
       getContents: () =>
         [
           `export type RefToken = ${_tokenize(options.tokens)};`,
-          `export type SysToken = ${_tokenize(options.themes[Object.keys(options.themes)[0]])};`,
-          `export type ThemeToken = ${_tokenize(options.themes)};`,
+          `export type SysToken = ${_tokenize(options.theme)};`,
           `export type ModeToken = ${_tokenize(options.modes.dark)};`,
           `export type RoleToken = ${_tokenize(options.roles)};`,
         ].join("\n"),

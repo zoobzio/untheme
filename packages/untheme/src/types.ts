@@ -11,14 +11,6 @@ export type UnthemeSysTokens<
   [S in SysToken]: NoInfer<RefToken>;
 };
 
-export type UnthemeThemes<
-  RefToken extends string,
-  SysToken extends string,
-  ThemeToken extends string,
-> = {
-  [T in ThemeToken]: UnthemeSysTokens<RefToken, SysToken>;
-};
-
 export type UnthemeModeTokens<
   RefToken extends string,
   SysToken extends string,
@@ -45,7 +37,7 @@ export type UnthemeToken<
 
 export type UnthemeTemplate = {
   tokens: Record<string, string>;
-  themes: Record<string, Record<string, string>>;
+  theme: Record<string, string>;
   modes: {
     [M in UnthemeColorMode]: Record<string, string>;
   };
@@ -55,12 +47,11 @@ export type UnthemeTemplate = {
 export interface UnthemeConfig<
   RefToken extends string,
   SysToken extends string,
-  ThemeToken extends string,
   ModeToken extends string,
   RoleToken extends string,
 > extends UnthemeTemplate {
   tokens: UnthemeRefTokens<RefToken>;
-  themes: UnthemeThemes<RefToken, SysToken, ThemeToken>;
+  theme: UnthemeSysTokens<RefToken, SysToken>;
   modes: {
     [M in UnthemeColorMode]: UnthemeModeTokens<RefToken, SysToken, ModeToken>;
   };
@@ -80,10 +71,8 @@ export type UnthemeTokens<
 export type UnthemeTokenUtil<
   RefToken extends string,
   SysToken extends string,
-  ThemeToken extends string,
   ModeToken extends string,
   RoleToken extends string,
 > = (
-  theme: ThemeToken,
   mode: UnthemeColorMode,
 ) => UnthemeTokens<RefToken, SysToken, ModeToken, RoleToken>;

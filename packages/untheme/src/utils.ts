@@ -2,55 +2,52 @@ import type {
   UnthemeColorMode,
   UnthemeConfig,
   UnthemeTokenUtil,
+  UnthemeSysTokens,
 } from "./types";
 
 export function defineUnthemeConfig<
   RefToken extends string,
   SysToken extends string,
-  ThemeToken extends string,
   ModeToken extends string,
   RoleToken extends string,
->(config: UnthemeConfig<RefToken, SysToken, ThemeToken, ModeToken, RoleToken>) {
+>(config: UnthemeConfig<RefToken, SysToken, ModeToken, RoleToken>) {
   return config;
 }
 
 export function defineUntheme<
   RefToken extends string,
   SysToken extends string,
-  ThemeToken extends string,
   ModeToken extends string,
   RoleToken extends string,
->(config: UnthemeConfig<RefToken, SysToken, ThemeToken, ModeToken, RoleToken>) {
-  const use: UnthemeTokenUtil<
-    RefToken,
-    SysToken,
-    ThemeToken,
-    ModeToken,
-    RoleToken
-  > = (theme, mode) => ({
+>(config: UnthemeConfig<RefToken, SysToken, ModeToken, RoleToken>) {
+  let currentTheme = config.theme;
+  const use: UnthemeTokenUtil<RefToken, SysToken, ModeToken, RoleToken> = (
+    mode,
+  ) => ({
     ...config.tokens,
-    ...config.themes[theme],
+    ...currentTheme,
     ...config.modes[mode],
     ...config.roles,
   });
 
   const resolve = (
     token: RefToken | SysToken | ModeToken | RoleToken,
-    theme: ThemeToken,
     mode: UnthemeColorMode,
   ) => {
-    const tkns = use(theme, mode);
+    const tkns = use(mode);
     const fTkn: (t: typeof token) => string = (tkn) =>
       tkns[tkn] in tkns ? fTkn(tkns[tkn]) : tkns[tkn];
     return fTkn(token);
   };
 
-  const themes: () => ThemeToken[] = () =>
-    Object.keys(config.themes) as ThemeToken[];
+  const setTheme = (theme: UnthemeSysTokens<RefToken, SysToken>) => {
+    currentTheme = theme;
+  };
+
+  const getTheme = () => currentTheme;
 
   const tokens = () => {
-    const theme = themes()[0]; // theme tokens are congruent, active theme doesn't matter here so just grab the first
-    const tokens = use(theme, "dark"); // mode tokens are congruent, just grab dark
+    const tokens = use("dark"); // mode tokens are congruent, just grab dark
     return Object.keys(tokens) as (
       | RefToken
       | SysToken
@@ -62,7 +59,8 @@ export function defineUntheme<
   return {
     use,
     resolve,
-    themes,
     tokens,
+    setTheme,
+    getTheme,
   };
 }

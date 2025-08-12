@@ -1,6 +1,6 @@
 # Untheme Monorepo
 
-<¨ A universal tokenized theme manager to implement dynamic design systems.
+<ï¿½ A universal tokenized theme manager to implement dynamic design systems.
 
 ## Overview
 
@@ -13,9 +13,10 @@ This monorepo contains three main packages:
 ### [`untheme`](./packages/untheme)
 The core theming library that provides:
 - **Reference tokens** - Static CSS values for styling
-- **Theme tokens** - Collections of reference tokens that define unique themes  
+- **System tokens** - Mappings to reference tokens that define a theme structure  
 - **Mode tokens** - Support for color modes (light/dark)
 - **Role tokens** - Semantic tokens for component usage
+- **Runtime themes** - Dynamic theme switching with database storage support
 
 ### [`unocss-preset-untheme`](./packages/unocss-preset-untheme)
 UnoCSS preset integration that enables using untheme tokens directly in your UnoCSS configuration.
@@ -45,15 +46,9 @@ export default defineUntheme({
     green: "#00a36c", 
     orange: "#ff5733",
   },
-  themes: {
-    theme1: {
-      primary: "blue",
-      secondary: "orange",
-    },
-    theme2: {
-      primary: "green", 
-      secondary: "blue",
-    },
+  theme: {
+    primary: "blue",
+    secondary: "orange",
   },
   modes: {
     light: {
@@ -74,23 +69,31 @@ export default defineUntheme({
 ```ts
 import untheme from "~/untheme";
 
-// Get flattened config for a theme/mode
-const config = untheme.use("theme1", "dark");
+// Get flattened config for a mode
+const config = untheme.use("dark");
 
 // Resolve token to CSS value
-const primaryColor = untheme.resolve("primary", "theme2", "light");
+const primaryColor = untheme.resolve("primary", "light");
 
-// Get available themes and tokens
-const themes = untheme.themes();
+// Runtime theme switching
+untheme.setTheme({
+  primary: "green",
+  secondary: "blue",
+});
+
+// Get current theme (for saving to database)
+const currentTheme = untheme.getTheme();
+
+// Get available tokens
 const tokens = untheme.tokens();
 ```
 
 ## Features
 
 - = **Type-safe** - Full TypeScript support with intelligent autocompletion
-- <¨ **Token-based** - Hierarchical design token system (reference ’ system ’ mode ’ role)
+- <ï¿½ **Token-based** - Hierarchical design token system (reference ï¿½ system ï¿½ mode ï¿½ role)
 - < **Multi-mode** - Built-in support for light/dark modes and custom modes
-- <¯ **Framework agnostic** - Works with any JavaScript framework
+- <ï¿½ **Framework agnostic** - Works with any JavaScript framework
 - =' **Extensible** - Plugin ecosystem for popular frameworks and tools
 
 ## Development
@@ -128,4 +131,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-MIT License © 2024-PRESENT [Alexander Thorwaldson](https://github.com/zoobzio)
+MIT License ï¿½ 2024-PRESENT [Alexander Thorwaldson](https://github.com/zoobzio)

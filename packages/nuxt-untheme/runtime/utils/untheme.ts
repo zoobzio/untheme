@@ -7,33 +7,42 @@ import config from "#build/untheme.config";
 import type {
   RefToken,
   SysToken,
-  ThemeToken,
   ModeToken,
   RoleToken,
 } from "#build/types/untheme.d.ts";
-import type { UnthemeConfig, UnthemeColorMode } from "untheme";
+import type {
+  UnthemeConfig,
+  UnthemeColorMode,
+  UnthemeSysTokens,
+} from "untheme";
 
 const untheme = defineUntheme(
-  config as UnthemeConfig<RefToken, SysToken, ThemeToken, ModeToken, RoleToken>,
+  config as UnthemeConfig<RefToken, SysToken, ModeToken, RoleToken>,
 );
-const themes = untheme.themes();
 
-export type Theme = (typeof themes)[number];
-
-export const useThemes = () => themes;
-export const useTheme = () => useState<Theme>("theme", () => themes[0]);
+export const useTheme = () =>
+  useState<UnthemeSysTokens<RefToken, SysToken>>("theme", () =>
+    untheme.getTheme(),
+  );
 export const useMode = () =>
   useState<UnthemeColorMode>("colormode", () => "dark");
 
 export function useUntheme() {
   const theme = useTheme();
   const mode = useMode();
-  const tokens = computed(() => reactive(untheme.use(theme.value, mode.value)));
+  const tokens = computed(() => {
+    untheme.setTheme(theme.value);
+    return reactive(untheme.use(mode.value));
+  });
   return {
     mode,
     theme,
     tokens,
-    resolve: untheme.resolve,
+    resolve: (token: RefToken | SysToken | ModeToken | RoleToken) =>
+      untheme.resolve(token, mode.value),
+    setTheme: (newTheme: UnthemeSysTokens<RefToken, SysToken>) => {
+      theme.value = newTheme;
+    },
   };
 }
 
