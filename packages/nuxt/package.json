@@ -1,0 +1,23 @@
+{
+  "name": "@untheme/nuxt",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/module.mjs",
+  "types": "./dist/types.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/module.mjs",
+      "types": "./dist/types.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "echo 'TODO: configure build'",
+    "dev": "echo 'TODO: configure dev'"
+  },
+  "dependencies": {
+    "@untheme/core": "workspace:*"
+  }
+}
