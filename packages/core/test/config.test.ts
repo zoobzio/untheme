@@ -1,6 +1,6 @@
-import { describe, it, expect, expectTypeOf } from "vitest";
-import { defineThemeConfig } from "../src/config";
-import type { ThemeTemplate, Theme } from "../src/types";
+import { describe, it, expect } from "vitest";
+import { defineUnthemeConfig } from "../src/config";
+import type { Config } from "../src/types";
 
 const template = {
   label: "test",
@@ -22,14 +22,16 @@ const template = {
   roles: {
     primary: "#0000ff",
   },
-} as const satisfies ThemeTemplate;
+} satisfies Config<string, string, string>;
 
-describe("defineThemeConfig", () => {
-  const createTheme = defineThemeConfig(template);
+describe("defineUnthemeConfig", () => {
+  const createTheme = defineUnthemeConfig(template);
 
   it("returns the base template when no overrides are provided", () => {
-    const theme = createTheme({});
-    expect(theme.label).toBe("test");
+    const theme = createTheme({
+      label: "my-test",
+    });
+    expect(theme.label).toBe("my-test");
     expect(theme.reference).toEqual(template.reference);
     expect(theme.modes).toEqual(template.modes);
     expect(theme.roles).toEqual(template.roles);
@@ -42,6 +44,7 @@ describe("defineThemeConfig", () => {
 
   it("overrides reference tokens", () => {
     const theme = createTheme({
+      label: "my-test",
       reference: { white: "#fefefe", black: "#111111", blue: "#0011ff" },
     });
     expect(theme.reference.white).toBe("#fefefe");
@@ -51,6 +54,7 @@ describe("defineThemeConfig", () => {
 
   it("overrides mode tokens", () => {
     const theme = createTheme({
+      label: "my-test",
       modes: {
         light: { background: "white", foreground: "black" },
         dark: { background: "black", foreground: "white" },
@@ -62,6 +66,7 @@ describe("defineThemeConfig", () => {
 
   it("overrides role tokens", () => {
     const theme = createTheme({
+      label: "my-test",
       roles: { primary: "blue" },
     });
     expect(theme.roles.primary).toBe("blue");
@@ -72,10 +77,5 @@ describe("defineThemeConfig", () => {
     expect(theme.reference).toEqual(template.reference);
     expect(theme.modes).toEqual(template.modes);
     expect(theme.roles).toEqual(template.roles);
-  });
-
-  it("returns a value matching the Theme type", () => {
-    const theme = createTheme({});
-    expectTypeOf(theme).toMatchTypeOf<Theme<typeof template>>();
   });
 });

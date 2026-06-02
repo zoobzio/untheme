@@ -1,5 +1,5 @@
 import { mockEvent } from "h3";
-import type { ThemeTemplate, ThemeMode } from "untheme";
+import type { ColorMode, Config } from "untheme";
 import type { AppTheme } from "../runtime/types";
 import type {
   ReferenceToken,
@@ -8,6 +8,8 @@ import type {
   Theme,
 } from "../stubs/build/types/untheme.d.ts";
 import { ref } from "vue";
+
+type Template = Config<string, string, string>;
 
 const themeData = {
   label: "Alpha",
@@ -58,11 +60,14 @@ const themeData = {
   },
 } as const;
 
-export const template: ThemeTemplate = themeData;
+export const template: Template = themeData;
 export const appTheme: AppTheme = themeData;
 
 /** Theme list matching the stub's Theme union. */
-export const themes: ReadonlyArray<{ key: Theme; label: string }> = [
+export const themes: ReadonlyArray<{
+  key: Theme;
+  label: string;
+}> = [
   { key: "alpha", label: "Alpha" },
   { key: "bravo", label: "Bravo" },
 ];
@@ -70,23 +75,48 @@ export const themes: ReadonlyArray<{ key: Theme; label: string }> = [
 /** Token arrays matching the stub's token types. */
 export const tokens = {
   reference: [
-    "white", "black", "slate", "blue", "indigo", "red", "green", "amber",
+    "white",
+    "black",
+    "slate",
+    "blue",
+    "indigo",
+    "red",
+    "green",
+    "amber",
   ] as readonly ReferenceToken[],
   system: [
-    "primary", "secondary", "neutral", "surface", "on_surface", "error", "success", "warning",
+    "primary",
+    "secondary",
+    "neutral",
+    "surface",
+    "on_surface",
+    "error",
+    "success",
+    "warning",
   ] as readonly SystemToken[],
   role: [
-    "text-color", "text-muted", "background-color", "border-color", "link-color",
-    "link-hover", "button-bg", "button-text", "error-text", "success-text", "warning-text",
+    "text-color",
+    "text-muted",
+    "background-color",
+    "border-color",
+    "link-color",
+    "link-hover",
+    "button-bg",
+    "button-text",
+    "error-text",
+    "success-text",
+    "warning-text",
   ] as readonly RoleToken[],
 };
 
 /** Creates a properly typed H3Event for handler tests. */
 export const createEvent = () => mockEvent("/");
 
-
 /** Module setup options fixture. */
-export const moduleOptions = (overrides?: { default?: string; themes?: Record<string, ThemeTemplate> }) => ({
+export const moduleOptions = (overrides?: {
+  default?: string;
+  themes?: Record<string, Template>;
+}) => ({
   default: overrides?.default ?? "alpha",
   themes: overrides?.themes ?? { alpha: template },
 });
@@ -95,9 +125,9 @@ export const moduleOptions = (overrides?: { default?: string; themes?: Record<st
 export const createStoreRefs = () => ({
   key: ref<Theme>("alpha"),
   theme: ref<AppTheme>({ ...appTheme }),
-  mode: ref<ThemeMode>("dark"),
+  mode: ref<ColorMode>("dark"),
   cookieKey: ref<Theme | null>(null),
-  cookieMode: ref<ThemeMode | null>(null),
+  cookieMode: ref<ColorMode | null>(null),
 });
 
 export type StoreRefs = ReturnType<typeof createStoreRefs>;

@@ -1,4 +1,4 @@
-import type { ThemeTemplate } from "untheme";
+import type { Config } from "untheme";
 import {
   defineNuxtModule,
   addTemplate,
@@ -11,14 +11,14 @@ import {
 } from "@nuxt/kit";
 
 /** Configuration options for the untheme Nuxt module. */
-export interface UnthemeNuxtConfig {
+export interface NuxtUnthemeConfig {
   /** The key of the theme to use as the initial active theme. */
   default: string;
-  /** A map of theme keys to their {@link ThemeTemplate} definitions. */
-  themes: Record<string, ThemeTemplate>;
+  /** A map of theme keys to their {@link Config} definitions. */
+  themes: Record<string, Config<string, string, string>>;
 }
 
-export default defineNuxtModule<UnthemeNuxtConfig>({
+export default defineNuxtModule<NuxtUnthemeConfig>({
   meta: {
     name: "untheme",
     configKey: "untheme",

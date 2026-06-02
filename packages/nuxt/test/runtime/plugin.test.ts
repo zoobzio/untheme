@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref } from "vue";
-import type { ThemeMode, ThemeTemplate } from "untheme";
+import type { ColorMode, Config } from "untheme";
 import type { AppTheme } from "../../runtime/types";
 import { appTheme } from "../fixtures";
 
-const mockMode = ref<ThemeMode>("dark");
+const mockMode = ref<ColorMode>("dark");
 const mockTheme = ref<AppTheme>({ ...appTheme });
 
 vi.mock("../../runtime/composable", () => ({
@@ -21,15 +21,21 @@ interface HeadInput {
 
 const headCalls: HeadInput[] = [];
 vi.mock("#imports", () => ({
-  useHead: (input: HeadInput) => { headCalls.push(input); },
+  useHead: (input: HeadInput) => {
+    headCalls.push(input);
+  },
 }));
 
 vi.mock("#app", () => ({
-  defineNuxtPlugin: (def: { name: string; setup: (nuxtApp?: unknown) => void }) => def,
+  defineNuxtPlugin: (def: {
+    name: string;
+    setup: (nuxtApp?: unknown) => void;
+  }) => def,
 }));
 
 vi.mock("untheme", () => ({
-  generateCSS: (theme: ThemeTemplate) => `/* css for ${theme.label} */`,
+  generateCSS: (theme: Config<string, string, string>) =>
+    `/* css for ${theme.label} */`,
 }));
 
 import plugin from "../../runtime/plugin";

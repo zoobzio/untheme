@@ -1,9 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Nuxt, ModuleDefinition } from "@nuxt/schema";
-import type { UnthemeNuxtConfig } from "../../src/module";
+import type { NuxtUnthemeConfig } from "../../src/module";
 import { moduleOptions } from "../fixtures";
 
-type ModuleDef = ModuleDefinition<UnthemeNuxtConfig, Partial<UnthemeNuxtConfig>, false>;
+type ModuleDef = ModuleDefinition<
+  NuxtUnthemeConfig,
+  Partial<NuxtUnthemeConfig>,
+  false
+>;
 
 const kit = vi.hoisted(() => ({
   addTemplate: vi.fn(),
@@ -27,8 +31,7 @@ vi.mock("@nuxt/kit", () => ({
 import module from "../../src/module";
 const mod = module as unknown as ModuleDef;
 
-const setup = (options = moduleOptions()) =>
-  mod.setup!(options, {} as Nuxt);
+const setup = (options = moduleOptions()) => mod.setup!(options, {} as Nuxt);
 
 describe("untheme nuxt module", () => {
   beforeEach(() => {
@@ -43,9 +46,9 @@ describe("untheme nuxt module", () => {
   });
 
   it("throws when default theme key is invalid", () => {
-    expect(() =>
-      setup(moduleOptions({ default: "missing" })),
-    ).toThrow("Invalid default theme");
+    expect(() => setup(moduleOptions({ default: "missing" }))).toThrow(
+      "Invalid default theme",
+    );
   });
 
   it("calls useLogger().fatal on invalid theme", () => {
@@ -76,7 +79,9 @@ describe("untheme nuxt module", () => {
   it("registers a server handler", () => {
     setup();
     expect(kit.addServerHandler).toHaveBeenCalledTimes(1);
-    expect(kit.addServerHandler.mock.calls[0][0].route).toBe("/api/theme/:theme");
+    expect(kit.addServerHandler.mock.calls[0][0].route).toBe(
+      "/api/theme/:theme",
+    );
   });
 
   it("registers a plugin", () => {
@@ -87,7 +92,10 @@ describe("untheme nuxt module", () => {
   it("registers auto-imports", () => {
     setup();
     expect(kit.addImports).toHaveBeenCalledTimes(1);
-    const imports = kit.addImports.mock.calls[0][0] as Array<{ name: string; from: string }>;
+    const imports = kit.addImports.mock.calls[0][0] as Array<{
+      name: string;
+      from: string;
+    }>;
     const names = imports.map((i) => i.name);
     expect(names).toContain("useTheme");
     expect(names).not.toContain("accessTheme");
@@ -96,7 +104,8 @@ describe("untheme nuxt module", () => {
 
   it("extracts token keys from the default theme", () => {
     setup();
-    const getContents = kit.addTypeTemplate.mock.calls[0][0].getContents as () => string;
+    const getContents = kit.addTypeTemplate.mock.calls[0][0]
+      .getContents as () => string;
     const content = getContents();
     expect(content).toContain("white");
     expect(content).toContain("primary");
@@ -105,7 +114,8 @@ describe("untheme nuxt module", () => {
 
   it("generates template content with correct exports", () => {
     setup();
-    const getContents = kit.addTemplate.mock.calls[0][0].getContents as () => string;
+    const getContents = kit.addTemplate.mock.calls[0][0]
+      .getContents as () => string;
     const content = getContents();
     expect(content).toContain('"alpha"');
     expect(content).toContain('"Alpha"');

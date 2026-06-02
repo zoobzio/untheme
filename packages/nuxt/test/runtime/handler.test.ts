@@ -45,7 +45,9 @@ describe("theme server handler", () => {
 
   it("returns 404 when theme file does not exist", () => {
     vi.mocked(getRouterParams).mockReturnValue({ theme: "alpha" });
-    vi.mocked(readFileSync).mockImplementation(() => { throw enoent(); });
+    vi.mocked(readFileSync).mockImplementation(() => {
+      throw enoent();
+    });
     const event = createEvent();
     handler(event);
     expect(event.res.status).toBe(404);

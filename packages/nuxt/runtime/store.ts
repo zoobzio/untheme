@@ -3,7 +3,7 @@ import { useCookie, useState } from "#imports";
 import { key as buildKey, theme as buildTheme } from "#build/untheme.mjs";
 
 import type { AppTheme } from "./types";
-import type { ThemeMode } from "untheme";
+import type { ColorMode } from "untheme";
 import type { Theme } from "#build/types/untheme.d.ts";
 
 /**
@@ -14,11 +14,11 @@ import type { Theme } from "#build/types/untheme.d.ts";
 export const accessTheme = () => {
   const key = useState<Theme>("untheme:key", () => buildKey);
   const theme = useState<AppTheme>("untheme:theme", () => buildTheme);
-  const mode = useState<ThemeMode>("untheme:mode", () => "dark");
+  const mode = useState<ColorMode>("untheme:mode", () => "dark");
 
   const cookies = {
     key: useCookie<Theme>("untheme-key"),
-    mode: useCookie<ThemeMode>("untheme-mode"),
+    mode: useCookie<ColorMode>("untheme-mode"),
   };
 
   return {

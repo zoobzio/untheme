@@ -1,15 +1,15 @@
-import { ThemeTemplate } from "./types";
+import { Config } from "./types";
 
 /**
- * Generates a CSS string of custom properties from a {@link ThemeTemplate}.
+ * Generates a CSS string of custom properties from a {@link Config}.
  *
  * Produces `:root` blocks for reference tokens, light/dark mode system tokens,
  * and role tokens. Values that reference other tokens are wrapped in `var()`.
  *
- * @param theme - The theme template to generate CSS from.
+ * @param theme - The config to generate CSS from.
  * @returns A CSS string containing custom property declarations.
  */
-export const generateCSS = (theme: ThemeTemplate) => {
+export const generateCSS = (theme: Config<string, string, string>) => {
   const lines: string[] = [];
 
   const tokenKeys = new Set([

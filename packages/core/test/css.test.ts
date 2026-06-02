@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { generateCSS } from "../src/css";
-import type { ThemeTemplate } from "../src/types";
+import type { Config } from "../src/types";
 
-const template: ThemeTemplate = {
+const template: Config<string, string, string> = {
   label: "test",
   reference: {
     white: "#ffffff",
@@ -55,7 +55,7 @@ describe("generateCSS", () => {
   });
 
   it("does not wrap values that are not token keys", () => {
-    const raw: ThemeTemplate = {
+    const raw: Config<string, string, string> = {
       label: "raw",
       reference: { red: "#ff0000" },
       modes: {

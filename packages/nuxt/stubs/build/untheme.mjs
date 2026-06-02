@@ -56,7 +56,37 @@ export const themes = [{ key: "default", label: "Default" }];
 
 /** @type {{ reference: readonly string[]; system: readonly string[]; role: readonly string[] }} */
 export const tokens = {
-  reference: ["white", "black", "slate", "blue", "indigo", "red", "green", "amber"],
-  system: ["primary", "secondary", "neutral", "surface", "on_surface", "error", "success", "warning"],
-  role: ["text-color", "text-muted", "background-color", "border-color", "link-color", "link-hover", "button-bg", "button-text", "error-text", "success-text", "warning-text"],
+  reference: [
+    "white",
+    "black",
+    "slate",
+    "blue",
+    "indigo",
+    "red",
+    "green",
+    "amber",
+  ],
+  system: [
+    "primary",
+    "secondary",
+    "neutral",
+    "surface",
+    "on_surface",
+    "error",
+    "success",
+    "warning",
+  ],
+  role: [
+    "text-color",
+    "text-muted",
+    "background-color",
+    "border-color",
+    "link-color",
+    "link-hover",
+    "button-bg",
+    "button-text",
+    "error-text",
+    "success-text",
+    "warning-text",
+  ],
 };
