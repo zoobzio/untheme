@@ -41,6 +41,15 @@ importers:
 
   packages/core: {}
 
+  packages/m3:
+    dependencies:
+      '@material/material-color-utilities':
+        specifier: ^0.4.0
+        version: 0.4.0
+      untheme:
+        specifier: workspace:*
+        version: link:../core
+
   packages/nuxt:
     dependencies:
       '@nuxt/kit':
@@ -826,6 +835,9 @@ packages:
     resolution: {integrity: sha512-uwPAhccfFJlsfCxMYTwOdVfOz3xqyj8xYL3zJj8f0pb30tLohnnFPhLuqp4/qoEz8sNxe4SESZedcBojRefIzg==}
     engines: {node: '>=18'}
     hasBin: true
+
+  '@material/material-color-utilities@0.4.0':
+    resolution: {integrity: sha512-dlq6VExJReb8dhjj3a/yTigr3ncNwoFmL5Iy2ENtbDX03EmNeOEdZ+vsaGrj7RTuO+mB7L58II4LCsl4NpM8uw==}
 
   '@napi-rs/wasm-runtime@1.1.4':
     resolution: {integrity: sha512-3NQNNgA1YSlJb/kMH1ildASP9HW7/7kYnRI2szWJaofaS1hWmbGI4H+d3+22aGzXXN9IJ+n+GiFVcGipJP18ow==}
@@ -5176,6 +5188,8 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
+
+  '@material/material-color-utilities@0.4.0': {}
 
   '@napi-rs/wasm-runtime@1.1.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
     dependencies:
