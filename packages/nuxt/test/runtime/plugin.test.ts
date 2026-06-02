@@ -1,16 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import type { ColorMode } from "untheme";
-import type { AppTheme } from "../../runtime/types";
-import { appTheme } from "../fixtures";
 
 const mockMode = ref<ColorMode>("dark");
-const mockTheme = ref<AppTheme>({ ...appTheme });
+const mockTokens = ref<Record<string, string>>({ white: "#ffffff" });
 
 vi.mock("../../runtime/composable", () => ({
   useTheme: () => ({
     mode: mockMode,
-    theme: mockTheme,
+    tokens: computed(() => mockTokens.value),
   }),
 }));
 
@@ -34,7 +32,8 @@ vi.mock("#app", () => ({
 }));
 
 vi.mock("untheme", () => ({
-  generateCSS: (theme: { label: string }) => `/* css for ${theme.label} */`,
+  generateCSS: (tokens: Record<string, string>) =>
+    `/* css ${Object.keys(tokens).join(",")} */`,
 }));
 
 import plugin from "../../runtime/plugin";
@@ -43,7 +42,7 @@ describe("untheme plugin", () => {
   beforeEach(() => {
     headCalls.length = 0;
     mockMode.value = "dark";
-    mockTheme.value = { ...appTheme };
+    mockTokens.value = { white: "#ffffff" };
   });
 
   it("has the name untheme", () => {
@@ -66,8 +65,8 @@ describe("untheme plugin", () => {
     expect(headCalls[0].htmlAttrs.class.value).not.toContain("dark");
   });
 
-  it("generates CSS from the theme", () => {
+  it("generates CSS from tokens", () => {
     plugin.setup();
-    expect(headCalls[0].style.value[0].innerHTML).toContain("css for Alpha");
+    expect(headCalls[0].style.value[0].innerHTML).toContain("css white");
   });
 });

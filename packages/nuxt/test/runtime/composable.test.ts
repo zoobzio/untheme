@@ -42,10 +42,10 @@ describe("useTheme", () => {
     expect(mode.value).toBe("dark");
   });
 
-  it("returns themes and tokens from build", () => {
+  it("returns themes and computed tokens", () => {
     const result = useTheme();
     expect(result.themes).toHaveLength(2);
-    expect(result.tokens.reference).toContain("white");
+    expect(result.tokens.value).toHaveProperty("white");
   });
 
   describe("toggle", () => {

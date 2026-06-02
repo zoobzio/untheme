@@ -36,6 +36,9 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
       roles: Object.keys(theme.roles),
     };
 
+    const tokenize = (values: string[]) =>
+      values.map((v) => `"${v}"`).join(" | ");
+
     addTemplate({
       filename: "untheme.config.mjs",
       write: true,
@@ -53,11 +56,10 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
       write: true,
       getContents: () =>
         [
-          `type Tokens = ${JSON.stringify(tokens)};`,
-          "export type ReferenceToken = Tokens['reference'][number];",
-          "export type SystemToken = Tokens['system'][number];",
-          "export type RoleToken = Tokens['roles'][number];",
-          `export type Theme = ${themes.map(({ key }) => `"${key}"`).join(" | ")};`,
+          `export type ReferenceToken = ${tokenize(tokens.reference)};`,
+          `export type SystemToken = ${tokenize(tokens.system)};`,
+          `export type RoleToken = ${tokenize(tokens.roles)};`,
+          `export type Theme = ${tokenize(themes.map(({ key }) => key))};`,
         ].join("\n"),
     });
 

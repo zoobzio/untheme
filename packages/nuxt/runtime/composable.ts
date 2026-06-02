@@ -1,11 +1,10 @@
 import type { Theme } from "#build/types/untheme.d.ts";
-import { themes, tokens } from "#build/untheme.mjs";
-
-import { useRequestFetch } from "#imports";
-import { readonly } from "vue";
-
-import { accessTheme } from "./store";
 import type { AppTheme } from "./types";
+
+import { themes } from "#build/untheme.mjs";
+import { useRequestFetch } from "#imports";
+import { readonly, computed } from "vue";
+import { accessTheme } from "./store";
 
 type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
@@ -21,8 +20,13 @@ type DeepPartial<T> = {
 export const useTheme = () => {
   const { key, theme, mode, cookies } = accessTheme();
 
-  const fetch = useRequestFetch();
+  const tokens = computed(() => ({
+    ...theme.value.reference,
+    ...theme.value.modes[mode.value],
+    ...theme.value.roles,
+  }));
 
+  const fetch = useRequestFetch();
   const load = () => fetch<AppTheme>(`/api/theme/${key.value}`);
 
   /** Syncs theme state from cookies, fetching the theme data if the key has changed. */

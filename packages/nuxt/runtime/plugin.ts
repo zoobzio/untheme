@@ -11,7 +11,7 @@ import { useTheme } from "./composable";
 export default defineNuxtPlugin({
   name: "untheme",
   setup: () => {
-    const { mode, theme } = useTheme();
+    const { mode, tokens } = useTheme();
     useHead({
       htmlAttrs: {
         class: computed(() => (mode.value === "dark" ? " dark" : "")),
@@ -19,7 +19,7 @@ export default defineNuxtPlugin({
       style: computed(() => [
         {
           key: "untheme",
-          innerHTML: generateCSS(theme.value, theme.value.roles),
+          innerHTML: generateCSS(tokens.value),
         },
       ]),
     });
