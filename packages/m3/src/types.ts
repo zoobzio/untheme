@@ -28,8 +28,69 @@ export type M3Palette =
   | "neutral"
   | "stone";
 
+/** Union of all M3 typography scale names. */
+export type M3TypeScale =
+  | "display-large"
+  | "display-medium"
+  | "display-small"
+  | "headline-large"
+  | "headline-medium"
+  | "headline-small"
+  | "title-large"
+  | "title-medium"
+  | "title-small"
+  | "body-large"
+  | "body-medium"
+  | "body-small"
+  | "label-large"
+  | "label-medium"
+  | "label-small";
+
+/** Union of all M3 typography property suffixes. */
+export type M3TypeProperty = "size" | "line-height" | "weight" | "tracking";
+
 /** Union of all M3 reference token keys. */
-export type M3Ref = `${M3Palette}-${M3Tone}`;
+export type M3Ref =
+  | `${M3Palette}-${M3Tone}`
+  | "font-brand"
+  | "font-plain"
+  | `${M3TypeScale}-${M3TypeProperty}`
+  | "shape-none"
+  | "shape-extra-small"
+  | "shape-small"
+  | "shape-medium"
+  | "shape-large"
+  | "shape-extra-large"
+  | "shape-full"
+  | "elevation-0"
+  | "elevation-1"
+  | "elevation-2"
+  | "elevation-3"
+  | "elevation-4"
+  | "elevation-5"
+  | "easing-standard"
+  | "easing-standard-decelerate"
+  | "easing-standard-accelerate"
+  | "easing-emphasized"
+  | "easing-emphasized-decelerate"
+  | "easing-emphasized-accelerate"
+  | "easing-linear"
+  | "duration-short-1"
+  | "duration-short-2"
+  | "duration-short-3"
+  | "duration-short-4"
+  | "duration-medium-1"
+  | "duration-medium-2"
+  | "duration-medium-3"
+  | "duration-medium-4"
+  | "duration-long-1"
+  | "duration-long-2"
+  | "duration-long-3"
+  | "duration-long-4"
+  | "duration-extra-long-1"
+  | "duration-extra-long-2"
+  | "duration-extra-long-3"
+  | "duration-extra-long-4";
 
 /** Union of all M3 system token keys. */
 export type M3Sys =

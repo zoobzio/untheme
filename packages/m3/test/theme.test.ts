@@ -36,16 +36,80 @@ describe("defineM3Theme", () => {
     expect(theme.label).toBe("Custom");
   });
 
-  it("includes all 22 tonal palettes in reference tokens", () => {
+  it("has 670 reference tokens", () => {
     const theme = defineM3Theme({ label: "test" });
-    const keys = Object.keys(theme.reference);
-    const prefixes = new Set(keys.map((k) => k.replace(/-\d+$/, "")));
+    expect(Object.keys(theme.reference)).toHaveLength(670);
+  });
+
+  it("includes all 22 tonal palettes", () => {
+    const theme = defineM3Theme({ label: "test" });
+    const colorKeys = Object.keys(theme.reference).filter(
+      (k) => /^[a-z]+-\d+$/.test(k) && !k.startsWith("elevation-"),
+    );
+    const prefixes = new Set(colorKeys.map((k) => k.replace(/-\d+$/, "")));
     expect(prefixes).toEqual(new Set(PALETTES));
   });
 
-  it("has 572 reference tokens (26 tones x 22 palettes)", () => {
+  it("includes typography typeface references", () => {
     const theme = defineM3Theme({ label: "test" });
-    expect(Object.keys(theme.reference)).toHaveLength(572);
+    expect(theme.reference["font-brand"]).toBe("Roboto, sans-serif");
+    expect(theme.reference["font-plain"]).toBe("Roboto, sans-serif");
+  });
+
+  it("includes all 15 typography scales with 4 properties each", () => {
+    const theme = defineM3Theme({ label: "test" });
+    const scales = [
+      "display-large",
+      "display-medium",
+      "display-small",
+      "headline-large",
+      "headline-medium",
+      "headline-small",
+      "title-large",
+      "title-medium",
+      "title-small",
+      "body-large",
+      "body-medium",
+      "body-small",
+      "label-large",
+      "label-medium",
+      "label-small",
+    ];
+    for (const scale of scales) {
+      expect(theme.reference[`${scale}-size`]).toBeDefined();
+      expect(theme.reference[`${scale}-line-height`]).toBeDefined();
+      expect(theme.reference[`${scale}-weight`]).toBeDefined();
+      expect(theme.reference[`${scale}-tracking`]).toBeDefined();
+    }
+  });
+
+  it("includes shape tokens", () => {
+    const theme = defineM3Theme({ label: "test" });
+    expect(theme.reference["shape-none"]).toBe("0px");
+    expect(theme.reference["shape-small"]).toBe("8px");
+    expect(theme.reference["shape-full"]).toBe("9999px");
+  });
+
+  it("includes elevation tokens", () => {
+    const theme = defineM3Theme({ label: "test" });
+    expect(theme.reference["elevation-0"]).toBe("none");
+    expect(theme.reference["elevation-1"]).toContain("rgb(");
+    expect(theme.reference["elevation-5"]).toBeDefined();
+  });
+
+  it("includes easing tokens", () => {
+    const theme = defineM3Theme({ label: "test" });
+    expect(theme.reference["easing-standard"]).toContain("cubic-bezier");
+    expect(theme.reference["easing-emphasized"]).toContain("cubic-bezier");
+    expect(theme.reference["easing-linear"]).toContain("cubic-bezier");
+  });
+
+  it("includes duration tokens", () => {
+    const theme = defineM3Theme({ label: "test" });
+    expect(theme.reference["duration-short-1"]).toBe("50ms");
+    expect(theme.reference["duration-medium-1"]).toBe("250ms");
+    expect(theme.reference["duration-long-1"]).toBe("450ms");
+    expect(theme.reference["duration-extra-long-4"]).toBe("1000ms");
   });
 
   it("maps light mode primary to violet", () => {

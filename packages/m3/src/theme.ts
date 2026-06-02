@@ -1,15 +1,13 @@
-import type { Config } from "untheme";
-import type { M3Ref, M3Sys } from "./types";
-
 import { defineUnthemeConfig } from "untheme";
 import { createM3ColorTokens } from "./colors";
 
 /**
  * Material Design 3 theme factory.
  *
- * Reference tokens provide a full spectrum of M3 tonal palettes using
- * Tailwind color family names as seeds. System tokens map them to semantic
- * roles per light/dark mode following the M3 color system specification.
+ * Reference tokens provide the full M3 token set: color palettes (Tailwind
+ * family names as seeds), typography scales, shape radii, elevation shadows,
+ * and motion easing/duration values. System tokens map color references to
+ * semantic roles per light/dark mode following the M3 color system specification.
  */
 export const defineM3Theme = defineUnthemeConfig({
   label: "Material 3",
@@ -38,6 +36,119 @@ export const defineM3Theme = defineUnthemeConfig({
     ...createM3ColorTokens("zinc", "#71717a"),
     ...createM3ColorTokens("neutral", "#737373"),
     ...createM3ColorTokens("stone", "#78716c"),
+    // Typography — typeface references
+    "font-brand": "Roboto, sans-serif",
+    "font-plain": "Roboto, sans-serif",
+    // Typography — display
+    "display-large-size": "57px",
+    "display-large-line-height": "64px",
+    "display-large-weight": "400",
+    "display-large-tracking": "-0.25px",
+    "display-medium-size": "45px",
+    "display-medium-line-height": "52px",
+    "display-medium-weight": "400",
+    "display-medium-tracking": "0px",
+    "display-small-size": "36px",
+    "display-small-line-height": "44px",
+    "display-small-weight": "400",
+    "display-small-tracking": "0px",
+    // Typography — headline
+    "headline-large-size": "32px",
+    "headline-large-line-height": "40px",
+    "headline-large-weight": "400",
+    "headline-large-tracking": "0px",
+    "headline-medium-size": "28px",
+    "headline-medium-line-height": "36px",
+    "headline-medium-weight": "400",
+    "headline-medium-tracking": "0px",
+    "headline-small-size": "24px",
+    "headline-small-line-height": "32px",
+    "headline-small-weight": "400",
+    "headline-small-tracking": "0px",
+    // Typography — title
+    "title-large-size": "22px",
+    "title-large-line-height": "28px",
+    "title-large-weight": "400",
+    "title-large-tracking": "0px",
+    "title-medium-size": "16px",
+    "title-medium-line-height": "24px",
+    "title-medium-weight": "500",
+    "title-medium-tracking": "0.15px",
+    "title-small-size": "14px",
+    "title-small-line-height": "20px",
+    "title-small-weight": "500",
+    "title-small-tracking": "0.1px",
+    // Typography — body
+    "body-large-size": "16px",
+    "body-large-line-height": "24px",
+    "body-large-weight": "400",
+    "body-large-tracking": "0.5px",
+    "body-medium-size": "14px",
+    "body-medium-line-height": "20px",
+    "body-medium-weight": "400",
+    "body-medium-tracking": "0.25px",
+    "body-small-size": "12px",
+    "body-small-line-height": "16px",
+    "body-small-weight": "400",
+    "body-small-tracking": "0.4px",
+    // Typography — label
+    "label-large-size": "14px",
+    "label-large-line-height": "20px",
+    "label-large-weight": "500",
+    "label-large-tracking": "0.1px",
+    "label-medium-size": "12px",
+    "label-medium-line-height": "16px",
+    "label-medium-weight": "500",
+    "label-medium-tracking": "0.5px",
+    "label-small-size": "11px",
+    "label-small-line-height": "16px",
+    "label-small-weight": "500",
+    "label-small-tracking": "0.5px",
+    // Shape
+    "shape-none": "0px",
+    "shape-extra-small": "4px",
+    "shape-small": "8px",
+    "shape-medium": "12px",
+    "shape-large": "16px",
+    "shape-extra-large": "28px",
+    "shape-full": "9999px",
+    // Elevation
+    "elevation-0": "none",
+    "elevation-1":
+      "0px 1px 2px 0px rgb(0 0 0 / 30%), 0px 1px 3px 1px rgb(0 0 0 / 15%)",
+    "elevation-2":
+      "0px 1px 2px 0px rgb(0 0 0 / 30%), 0px 2px 6px 2px rgb(0 0 0 / 15%)",
+    "elevation-3":
+      "0px 1px 3px 0px rgb(0 0 0 / 30%), 0px 4px 8px 3px rgb(0 0 0 / 15%)",
+    "elevation-4":
+      "0px 2px 3px 0px rgb(0 0 0 / 30%), 0px 6px 10px 4px rgb(0 0 0 / 15%)",
+    "elevation-5":
+      "0px 4px 4px 0px rgb(0 0 0 / 30%), 0px 8px 12px 6px rgb(0 0 0 / 15%)",
+    // Motion — easing
+    "easing-standard": "cubic-bezier(0.2, 0, 0, 1)",
+    "easing-standard-decelerate": "cubic-bezier(0, 0, 0, 1)",
+    "easing-standard-accelerate": "cubic-bezier(0.3, 0, 1, 1)",
+    "easing-emphasized": "cubic-bezier(0.05, 0.7, 0.1, 1)",
+    "easing-emphasized-decelerate": "cubic-bezier(0.05, 0.7, 0.1, 1)",
+    "easing-emphasized-accelerate": "cubic-bezier(0.3, 0, 0.8, 0.15)",
+    "easing-linear": "cubic-bezier(0, 0, 1, 1)",
+    // Motion — duration
+    "duration-short-1": "50ms",
+    "duration-short-2": "100ms",
+    "duration-short-3": "150ms",
+    "duration-short-4": "200ms",
+    "duration-medium-1": "250ms",
+    "duration-medium-2": "300ms",
+    "duration-medium-3": "350ms",
+    "duration-medium-4": "400ms",
+    "duration-long-1": "450ms",
+    "duration-long-2": "500ms",
+    "duration-long-3": "550ms",
+    "duration-long-4": "600ms",
+    "duration-extra-long-1": "700ms",
+    "duration-extra-long-2": "800ms",
+    "duration-extra-long-3": "900ms",
+    "duration-extra-long-4": "1000ms",
   },
   modes: {
     light: {
@@ -143,4 +254,4 @@ export const defineM3Theme = defineUnthemeConfig({
       scrim: "neutral-0",
     },
   },
-} satisfies Config<M3Ref, M3Sys>);
+});
