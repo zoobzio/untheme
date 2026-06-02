@@ -1,23 +1,35 @@
 {
-  "name": "@untheme/nuxt",
+  "name": "nuxt-untheme",
   "version": "0.0.0",
   "type": "module",
-  "main": "./dist/module.mjs",
-  "types": "./dist/types.d.ts",
+  "main": "./.dist/module.mjs",
+  "types": "./.dist/module.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/module.mjs",
-      "types": "./dist/types.d.ts"
+      "import": "./.dist/module.mjs",
+      "types": "./.dist/module.d.ts"
     }
   },
   "files": [
-    "dist"
+    ".dist"
   ],
   "scripts": {
-    "build": "echo 'TODO: configure build'",
-    "dev": "echo 'TODO: configure dev'"
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --root ../.."
   },
   "dependencies": {
-    "@untheme/core": "workspace:*"
+    "@nuxt/kit": "^4.4.6",
+    "h3": "2.0.1-rc.22",
+    "ltrl-http": "^0.0.25",
+    "untheme": "workspace:*",
+    "vue": "^3.5.35"
+  },
+  "devDependencies": {
+    "@nuxt/schema": "^4.4.6",
+    "@types/node": "^25.9.1",
+    "nuxt": "^4.4.6"
   }
 }

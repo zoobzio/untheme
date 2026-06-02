@@ -7,6 +7,14 @@ export default tseslint.config(
   tseslint.configs.recommended,
   prettierConfig,
   {
-    ignores: ["**/dist/", "**/.nuxt/", "**/.output/"],
+    ignores: ["**/dist/", "**/.dist/", "**/.nuxt/", "**/.output/"],
+  },
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
+    },
   },
 );

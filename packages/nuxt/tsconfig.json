@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": ".dist",
+    "rootDir": ".",
+    "paths": {
+      "#app": ["./stubs/app.d.ts"],
+      "#imports": ["./stubs/imports.d.ts"],
+      "#build/untheme.mjs": ["./stubs/build/untheme.d.mts"],
+      "#build/types/untheme.d.ts": ["./stubs/build/types/untheme.d.ts"]
+    }
+  },
+  "include": ["src", "runtime", "stubs", "test"]
+}
