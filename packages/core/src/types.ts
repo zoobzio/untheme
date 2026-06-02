@@ -1,12 +1,8 @@
 /** The supported color modes for a theme. */
 export type ColorMode = "light" | "dark";
 
-/** A theme configuration mapping reference, system, and role tokens. */
-export type Config<
-  Ref extends string,
-  Sys extends string,
-  Role extends string,
-> = {
+/** A theme configuration mapping reference and system tokens. */
+export type Config<Ref extends string, Sys extends string> = {
   /** A human-readable name for the config. */
   label: string;
   /** Reference tokens mapping token names to raw color values. */
@@ -14,9 +10,5 @@ export type Config<
   /** System tokens mapped to reference tokens for each color mode. */
   modes: {
     [M in ColorMode]: { [K in Sys]: Ref };
-  };
-  /** Role tokens mapped to reference or system tokens. */
-  roles: {
-    [K in Role]: Ref | Sys;
   };
 };

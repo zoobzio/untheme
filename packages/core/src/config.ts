@@ -11,12 +11,10 @@ type DeepPartial<T> = {
  * @returns A theme factory that accepts deep-partial overrides and returns a fully resolved {@link Config}.
  */
 export const defineUnthemeConfig =
-  <Ref extends string, Sys extends string, Role extends string>(
-    base: Config<Ref, Sys, Role>,
-  ) =>
+  <Ref extends string, Sys extends string>(base: Config<Ref, Sys>) =>
   (
-    theme: DeepPartial<Config<Ref, Sys, Role>> & { label: string },
-  ): Config<Ref, Sys, Role> => {
+    theme: DeepPartial<Config<Ref, Sys>> & { label: string },
+  ): Config<Ref, Sys> => {
     return {
       label: theme.label,
       reference: {
@@ -32,10 +30,6 @@ export const defineUnthemeConfig =
           ...base.modes.dark,
           ...(theme.modes?.dark ?? {}),
         },
-      },
-      roles: {
-        ...base.roles,
-        ...(theme.roles ?? {}),
       },
     };
   };

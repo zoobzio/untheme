@@ -9,7 +9,7 @@ import type {
 } from "../stubs/build/types/untheme.d.ts";
 import { ref } from "vue";
 
-type Template = Config<string, string, string>;
+type Template = Config<string, string> & { roles: Record<string, string> };
 
 const themeData = {
   label: "Alpha",

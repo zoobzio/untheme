@@ -1,7 +1,8 @@
 import type { Config } from "untheme";
+import type { M3Ref, M3Sys } from "./types";
+
 import { defineUnthemeConfig } from "untheme";
 import { createM3ColorTokens } from "./colors";
-import type { M3Ref, M3Sys } from "./types";
 
 /**
  * Material Design 3 theme factory.
@@ -142,5 +143,4 @@ export const defineM3Theme = defineUnthemeConfig({
       scrim: "neutral-0",
     },
   },
-  roles: {},
-} satisfies Config<M3Ref, M3Sys, never>);
+} satisfies Config<M3Ref, M3Sys>);

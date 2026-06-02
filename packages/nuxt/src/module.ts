@@ -1,4 +1,4 @@
-import type { Config } from "untheme";
+import type { NuxtUnthemeConfig } from "./types";
 import {
   defineNuxtModule,
   addTemplate,
@@ -9,14 +9,6 @@ import {
   createResolver,
   useLogger,
 } from "@nuxt/kit";
-
-/** Configuration options for the untheme Nuxt module. */
-export interface NuxtUnthemeConfig {
-  /** The key of the theme to use as the initial active theme. */
-  default: string;
-  /** A map of theme keys to their {@link Config} definitions. */
-  themes: Record<string, Config<string, string, string>>;
-}
 
 export default defineNuxtModule<NuxtUnthemeConfig>({
   meta: {
@@ -41,7 +33,7 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
     const tokens = {
       reference: Object.keys(theme.reference),
       system: Object.keys(theme.modes.light),
-      role: Object.keys(theme.roles),
+      roles: Object.keys(theme.roles),
     };
 
     addTemplate({
@@ -64,7 +56,7 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
           `type Tokens = ${JSON.stringify(tokens)};`,
           "export type ReferenceToken = Tokens['reference'][number];",
           "export type SystemToken = Tokens['system'][number];",
-          "export type RoleToken = Tokens['role'][number];",
+          "export type RoleToken = Tokens['roles'][number];",
           `export type Theme = ${themes.map(({ key }) => `"${key}"`).join(" | ")};`,
         ].join("\n"),
     });

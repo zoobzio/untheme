@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Nuxt, ModuleDefinition } from "@nuxt/schema";
-import type { NuxtUnthemeConfig } from "../../src/module";
+import type { NuxtUnthemeConfig } from "../../src/types";
 import { moduleOptions } from "../fixtures";
 
 type ModuleDef = ModuleDefinition<

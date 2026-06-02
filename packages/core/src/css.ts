@@ -3,13 +3,18 @@ import { Config } from "./types";
 /**
  * Generates a CSS string of custom properties from a {@link Config}.
  *
- * Produces `:root` blocks for reference tokens, light/dark mode system tokens,
- * and role tokens. Values that reference other tokens are wrapped in `var()`.
+ * Produces `:root` blocks for reference tokens and light/dark mode system tokens.
+ * Additional tokens can be passed via the `addon` parameter.
+ * Values that reference other tokens are wrapped in `var()`.
  *
  * @param theme - The config to generate CSS from.
+ * @param addon - Optional additional token entries to include (e.g. role tokens).
  * @returns A CSS string containing custom property declarations.
  */
-export const generateCSS = (theme: Config<string, string, string>) => {
+export const generateCSS = (
+  theme: Config<string, string>,
+  addon: Record<string, string> = {},
+) => {
   const lines: string[] = [];
 
   const tokenKeys = new Set([
@@ -36,8 +41,10 @@ export const generateCSS = (theme: Config<string, string, string>) => {
     Object.entries(theme.reference),
     Object.entries(theme.modes.light),
     Object.entries(theme.modes.dark),
-    Object.entries(theme.roles),
-  ].forEach(write);
+    Object.entries(addon),
+  ]
+    .filter((entries) => entries.length > 0)
+    .forEach(write);
 
   return lines.join("\n");
 };

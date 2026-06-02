@@ -19,7 +19,7 @@ export default defineNuxtPlugin({
       style: computed(() => [
         {
           key: "untheme",
-          innerHTML: generateCSS(theme.value),
+          innerHTML: generateCSS(theme.value, theme.value.roles),
         },
       ]),
     });

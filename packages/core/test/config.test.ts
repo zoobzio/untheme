@@ -19,10 +19,7 @@ const template = {
       foreground: "#ffffff",
     },
   },
-  roles: {
-    primary: "#0000ff",
-  },
-} satisfies Config<string, string, string>;
+} satisfies Config<string, string>;
 
 describe("defineUnthemeConfig", () => {
   const createTheme = defineUnthemeConfig(template);
@@ -34,7 +31,6 @@ describe("defineUnthemeConfig", () => {
     expect(theme.label).toBe("my-test");
     expect(theme.reference).toEqual(template.reference);
     expect(theme.modes).toEqual(template.modes);
-    expect(theme.roles).toEqual(template.roles);
   });
 
   it("overrides label", () => {
@@ -64,18 +60,9 @@ describe("defineUnthemeConfig", () => {
     expect(theme.modes.dark.foreground).toBe("white");
   });
 
-  it("overrides role tokens", () => {
-    const theme = createTheme({
-      label: "my-test",
-      roles: { primary: "blue" },
-    });
-    expect(theme.roles.primary).toBe("blue");
-  });
-
   it("preserves base values for non-overridden fields", () => {
     const theme = createTheme({ label: "partial" });
     expect(theme.reference).toEqual(template.reference);
     expect(theme.modes).toEqual(template.modes);
-    expect(theme.roles).toEqual(template.roles);
   });
 });

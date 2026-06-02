@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref } from "vue";
-import type { ColorMode, Config } from "untheme";
+import type { ColorMode } from "untheme";
 import type { AppTheme } from "../../runtime/types";
 import { appTheme } from "../fixtures";
 
@@ -34,8 +34,7 @@ vi.mock("#app", () => ({
 }));
 
 vi.mock("untheme", () => ({
-  generateCSS: (theme: Config<string, string, string>) =>
-    `/* css for ${theme.label} */`,
+  generateCSS: (theme: { label: string }) => `/* css for ${theme.label} */`,
 }));
 
 import plugin from "../../runtime/plugin";
