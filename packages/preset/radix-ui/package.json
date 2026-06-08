@@ -1,0 +1,32 @@
+{
+  "name": "@untheme/radix-ui",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./.dist/index.mjs",
+  "types": "./.dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./.dist/index.mjs",
+      "types": "./.dist/index.d.ts"
+    },
+    "./themes": {
+      "import": "./.dist/themes/index.mjs",
+      "types": "./.dist/themes/index.d.ts"
+    }
+  },
+  "files": [
+    ".dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --root ../.."
+  },
+  "dependencies": {
+    "@radix-ui/colors": "^3.0.0",
+    "@untheme/core": "workspace:*",
+    "@untheme/kit": "workspace:*"
+  }
+}

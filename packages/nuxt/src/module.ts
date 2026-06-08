@@ -37,12 +37,11 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
       throw new Error("Invalid preset");
     }
 
-    const isThemeKey = (v: string): v is keyof typeof themes => v in themes;
-    if (!isThemeKey(theme)) {
+    const def = Object.values(themes).find((t) => t.key === theme);
+    if (!def) {
       throw new Error("Invalid theme");
     }
 
-    const def = themes[theme];
     const merged: Theme<string, string, string> = {
       preset,
       key: def.key,
@@ -82,7 +81,7 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
 
     writeFileSync(join(publicDir, "options.json"), JSON.stringify(options));
 
-    for (const [, t] of Object.entries(themes)) {
+    for (const t of Object.values(themes)) {
       writeFileSync(join(publicDir, `${t.key}.json`), JSON.stringify(t));
     }
 

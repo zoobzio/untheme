@@ -6,14 +6,14 @@ untheme separates the **token contract** (what tokens exist and how they relate)
 
 ## Packages
 
-| Package                                              | Description                                          |
-| ---------------------------------------------------- | --------------------------------------------------- |
-| [`untheme`](./packages/untheme)                      | Umbrella package — core API, CSS gen, kit subpaths  |
-| [`@untheme/core`](./packages/core)                   | Token contract types and the runtime instance       |
-| [`@untheme/kit`](./packages/kit)                     | Toolkit for authoring reusable presets              |
-| [`@untheme/material-2`](./packages/preset/material-2) | Material Design 2 token preset + themes             |
-| [`@untheme/material-3`](./packages/preset/material-3) | Material Design 3 token preset + themes             |
-| [`@untheme/nuxt`](./packages/nuxt)                   | Nuxt module for runtime theming                     |
+| Package                                               | Description                                        |
+| ----------------------------------------------------- | -------------------------------------------------- |
+| [`untheme`](./packages/untheme)                       | Umbrella package — core API, CSS gen, kit subpaths |
+| [`@untheme/core`](./packages/core)                    | Token contract types and the runtime instance      |
+| [`@untheme/kit`](./packages/kit)                      | Toolkit for authoring reusable presets             |
+| [`@untheme/material-2`](./packages/preset/material-2) | Material Design 2 token preset + themes            |
+| [`@untheme/material-3`](./packages/preset/material-3) | Material Design 3 token preset + themes            |
+| [`@untheme/nuxt`](./packages/nuxt)                    | Nuxt module for runtime theming                    |
 
 ## Token Architecture
 

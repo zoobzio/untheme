@@ -47,13 +47,13 @@ await init();
 </script>
 ```
 
-| Property   | Description                                                          |
-| ---------- | ------------------------------------------------------------------- |
-| `mode`     | Reactive ref of the current color mode (`"light"` \| `"dark"`)      |
-| `theme`    | Reactive ref of the active resolved theme                           |
-| `themes`   | Available theme options (`{ key, label }`)                          |
-| `tokens`   | Reactive flat record of all tokens resolved for the current mode    |
-| `init()`   | Async; syncs mode and theme from cookies, switching theme if needed |
+| Property | Description                                                         |
+| -------- | ------------------------------------------------------------------- |
+| `mode`   | Reactive ref of the current color mode (`"light"` \| `"dark"`)      |
+| `theme`  | Reactive ref of the active resolved theme                           |
+| `themes` | Available theme options (`{ key, label }`)                          |
+| `tokens` | Reactive flat record of all tokens resolved for the current mode    |
+| `init()` | Async; syncs mode and theme from cookies, switching theme if needed |
 
 ## Plugin
 

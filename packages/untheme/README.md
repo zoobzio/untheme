@@ -10,11 +10,11 @@ pnpm add untheme
 
 ## Entry points
 
-| Import           | Re-exports                          | Provides                                              |
-| ---------------- | ----------------------------------- | ---------------------------------------------------- |
-| `untheme`        | [`@untheme/core`](../core)          | `Theme`, `ColorMode`, `Untheme`, `defineUntheme`, …  |
-| `untheme/css`    | —                                   | `generateCSS`                                         |
-| `untheme/kit`    | [`@untheme/kit`](../kit)            | `defineUnthemePreset`, `Preset`, `DeepPartial`, …    |
+| Import        | Re-exports                 | Provides                                            |
+| ------------- | -------------------------- | --------------------------------------------------- |
+| `untheme`     | [`@untheme/core`](../core) | `Theme`, `ColorMode`, `Untheme`, `defineUntheme`, … |
+| `untheme/css` | —                          | `generateCSS`                                       |
+| `untheme/kit` | [`@untheme/kit`](../kit)   | `defineUnthemePreset`, `Preset`, `DeepPartial`, …   |
 
 ## Usage
 

@@ -13,24 +13,24 @@ import themes from "@untheme/material-2/themes";
 
 ## Themes
 
-| Key           | Label             |
-| ------------- | ----------------- |
-| `ayu`         | Ayu               |
-| `catppuccin`  | Catppuccin Mocha  |
-| `cyberdream`  | Cyberdream        |
-| `dracula`     | Dracula           |
-| `everforest`  | Everforest        |
-| `github`      | GitHub            |
-| `gruvbox`     | Gruvbox           |
-| `horizon`     | Horizon           |
-| `kanagawa`    | Kanagawa          |
-| `monokai`     | Monokai           |
-| `night-owl`   | Night Owl         |
-| `nord`        | Nord              |
-| `one-dark`    | One Dark          |
+| Key           | Label              |
+| ------------- | ------------------ |
+| `ayu`         | Ayu                |
+| `catppuccin`  | Catppuccin Mocha   |
+| `cyberdream`  | Cyberdream         |
+| `dracula`     | Dracula            |
+| `everforest`  | Everforest         |
+| `github`      | GitHub             |
+| `gruvbox`     | Gruvbox            |
+| `horizon`     | Horizon            |
+| `kanagawa`    | Kanagawa           |
+| `monokai`     | Monokai            |
+| `night-owl`   | Night Owl          |
+| `nord`        | Nord               |
+| `one-dark`    | One Dark           |
 | `palenight`   | Material Palenight |
-| `rose_pine`   | Rosé Pine         |
-| `solarized`   | Solarized         |
-| `synthwave`   | Synthwave '84     |
-| `tokyo_night` | Tokyo Night       |
-| `vesper`      | Vesper            |
+| `rose_pine`   | Rosé Pine          |
+| `solarized`   | Solarized          |
+| `synthwave`   | Synthwave '84      |
+| `tokyo_night` | Tokyo Night        |
+| `vesper`      | Vesper             |

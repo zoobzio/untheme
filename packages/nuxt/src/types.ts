@@ -1,6 +1,7 @@
-import type { Theme, ColorMode } from "untheme";
 import type { M2Theme } from "@untheme/material-2/themes";
 import type { M3Theme } from "@untheme/material-3/themes";
+import type { RadixTheme } from "@untheme/radix-ui/themes";
+import type { ColorMode, Theme } from "untheme";
 
 import { presets } from "./preset";
 
@@ -8,6 +9,7 @@ import { presets } from "./preset";
 export type PresetMatrix = {
   m2: M2Theme;
   m3: M3Theme;
+  radix: RadixTheme;
 };
 
 /** The shape of the {@link presets} registry. */
@@ -38,17 +40,13 @@ export interface UserUnthemeConfig<
   preset: P;
   theme: keyof PresetTheme<P>;
   extend: {
-    reference?: { [K in Ref]: string } & {
-      [K in PresetRef<P>]?: string;
-    };
+    reference?: { [K in Ref]: string } & { [K in PresetRef<P>]?: string };
     modes?: {
       [M in ColorMode]: { [K in Sys]: NoInfer<Ref | PresetRef<P>> } & {
         [K in PresetSys<P>]?: NoInfer<Ref | PresetRef<P>>;
       };
     };
-    roles?: {
-      [K in Role]: NoInfer<Ref | Sys | PresetRef<P> | PresetSys<P>>;
-    };
+    roles?: { [K in Role]: NoInfer<Ref | Sys | PresetRef<P> | PresetSys<P>> };
   };
 }
 
