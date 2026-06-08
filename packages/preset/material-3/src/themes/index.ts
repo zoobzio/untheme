@@ -22,6 +22,7 @@ import vesper from "./data/vesper";
 
 export * from "./types";
 
+/** The collection of built-in M3 theme variants, keyed by theme key. */
 export default {
   ayu,
   catppuccin,

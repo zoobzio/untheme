@@ -1,3 +1,4 @@
+// Typecheck-only stub for the generated `#build/untheme.mjs` virtual module.
 import type { AppTheme } from "../../runtime/types.js";
 
 import { ColorMode } from "untheme";

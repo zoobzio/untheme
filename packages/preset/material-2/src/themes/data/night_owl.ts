@@ -1,6 +1,7 @@
 import { defineM2Theme } from "../../preset";
 import { createM2ColorTokens } from "../../colors";
 
+/** Night Owl theme — M2 token variant. */
 export default defineM2Theme({
   key: "night_owl",
   label: "Night Owl",

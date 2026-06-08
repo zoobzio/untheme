@@ -1,6 +1,7 @@
 import { defineM3Theme } from "../../preset";
 import { createM3ColorTokens } from "../../colors";
 
+/** Horizon theme — M3 token variant. */
 export default defineM3Theme({
   key: "horizon",
   label: "Horizon",

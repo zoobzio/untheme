@@ -1,6 +1,7 @@
 import { defineM2Theme } from "../../preset";
 import { createM2ColorTokens } from "../../colors";
 
+/** Catppuccin theme — M2 token variant. */
 export default defineM2Theme({
   key: "catppuccin",
   label: "Catppuccin",

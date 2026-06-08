@@ -2,15 +2,17 @@ import { toRefs } from "vue";
 import { accessTheme } from "./store";
 import { makeThemeClient, makeUntheme } from "./util";
 
+/** Accessor for the shared reactive {@link Untheme} service. */
 export const useUntheme = makeUntheme();
 
+/** Accessor for the theme client used to fetch theme layers on demand. */
 export const useThemeClient = makeThemeClient();
 
 /**
  * Composable for managing the active theme, color mode, and available themes.
  *
- * Exposes readonly reactive state for the current theme key, resolved theme data,
- * and color mode, along with methods to initialize from cookies and toggle the color mode.
+ * Exposes reactive `mode`, `theme`, `tokens`, and the list of available `themes`,
+ * plus an async `init` that syncs color mode and theme from cookies on hydration.
  */
 export const useTheme = () => {
   const { initialized, key, themes, cookies } = accessTheme();

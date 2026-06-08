@@ -1,6 +1,7 @@
 import { defineM3Theme } from "../../preset";
 import { createM3ColorTokens } from "../../colors";
 
+/** Tokyo Night theme — M3 token variant. */
 export default defineM3Theme({
   key: "tokyo_night",
   label: "Tokyo Night",

@@ -58,9 +58,9 @@ describe("untheme nuxt module", () => {
   });
 
   it("throws when the preset is unknown", () => {
-    expect(() =>
-      setup({ ...baseConfig, preset: "missing" as never }),
-    ).toThrow("Invalid preset");
+    expect(() => setup({ ...baseConfig, preset: "missing" as never })).toThrow(
+      "Invalid preset",
+    );
   });
 
   it("throws when the theme is not in the preset", () => {

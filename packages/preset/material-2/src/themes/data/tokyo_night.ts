@@ -1,6 +1,7 @@
 import { defineM2Theme } from "../../preset";
 import { createM2ColorTokens } from "../../colors";
 
+/** Tokyo Night theme — M2 token variant. */
 export default defineM2Theme({
   key: "tokyo_night",
   label: "Tokyo Night",

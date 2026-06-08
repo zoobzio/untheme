@@ -12,6 +12,10 @@ import { defineUntheme } from "untheme";
 import { reactive } from "vue";
 import { accessTheme } from "./store";
 
+/**
+ * Builds the {@link useUntheme} accessor. Lazily constructs a reactive
+ * {@link Untheme} service from the shared store state on first use.
+ */
 export const makeUntheme = () => {
   let _service: Untheme<ReferenceToken, SystemToken, RoleToken>;
   return () => {
@@ -26,6 +30,11 @@ export const makeUntheme = () => {
   };
 };
 
+/**
+ * Builds the {@link useThemeClient} accessor. Returns a client whose `get(id)`
+ * fetches `/themes/{id}.json`, validates the layer against the active token set,
+ * and re-applies the configured `extend` overrides.
+ */
 export const makeThemeClient = () => {
   let _client: ThemeClient;
   return () => {

@@ -1,31 +1,22 @@
-# untheme
+# @untheme/kit
 
-Core package for the untheme design token system.
+Authoring toolkit for building reusable untheme presets.
+
+A **preset** defines the reference + system token structure once; the factory it produces then accepts deep-partial overrides to create unlimited variants. The [`@untheme/material-2`](../preset/material-2) and [`@untheme/material-3`](../preset/material-3) packages are both built with this kit.
 
 ## Exports
 
-### `Config<Ref, Sys>`
+### `defineUnthemePreset(preset)`
 
-Type-safe token configuration with two tiers:
-
-- `reference` — Raw values keyed by `Ref` (e.g. color hex codes, sizes, shadows)
-- `modes` — Light/dark mappings from `Sys` keys to `Ref` keys
+Creates a theme factory from a base [`Preset`](#presetref-sys). The returned function takes `{ key, label }` plus optional deep-partial `reference`/`modes` overrides and returns a fully resolved preset.
 
 ```ts
-import type { Config } from "untheme";
+import { defineUnthemePreset } from "@untheme/kit";
 
-type MyConfig = Config<"blue" | "white" | "black", "primary" | "surface">;
-```
-
-### `defineUnthemeConfig(base)`
-
-Creates a theme factory from a base config. Returns a function that accepts deep-partial overrides to produce variants.
-
-```ts
-import { defineUnthemeConfig } from "untheme";
-
-const defineMyTheme = defineUnthemeConfig({
-  label: "Base",
+const defineMyPreset = defineUnthemePreset({
+  preset: "my",
+  key: "my",
+  label: "My Preset",
   reference: { blue: "#3b82f6", white: "#fff", black: "#000" },
   modes: {
     light: { primary: "blue", surface: "white" },
@@ -33,29 +24,26 @@ const defineMyTheme = defineUnthemeConfig({
   },
 });
 
-const variant = defineMyTheme({
+const variant = defineMyPreset({
+  key: "brand",
   label: "Brand",
-  reference: { blue: "#1e40af" },
+  reference: { blue: "#1e40af" }, // overrides merge over the base
 });
 ```
 
-### `generateCSS(tokens)`
+### `Preset<Ref, Sys>`
 
-Generates a `:root` block of CSS custom properties from a flat token record. Values that reference other token keys are automatically wrapped in `var()`.
+A [`Theme`](../core) without `roles` — the reference + per-mode system token contract that a preset defines. Roles are layered on later by the consumer (e.g. the Nuxt module).
 
-```ts
-import { generateCSS } from "untheme";
+### `PresetFactory`
 
-const css = generateCSS({
-  blue: "#3b82f6",
-  primary: "blue", // → var(--blue)
-});
-// :root {
-//   --blue: #3b82f6;
-//   --primary: var(--blue);
-// }
-```
+The signature returned by `defineUnthemePreset`.
 
-### `ColorMode`
+### `DeepPartial<T>`
 
-Union type: `"light" | "dark"`.
+Recursively makes every property of `T` optional — used for the override argument.
+
+## Related
+
+- [`@untheme/core`](../core) — the token contract and runtime instance.
+- [`untheme`](../untheme) — umbrella package; `untheme/kit` re-exports this package.

@@ -1,19 +1,20 @@
-# untheme-preset-m3
+# @untheme/material-3
 
-Material Design 3 theme implementation for untheme.
+Material Design 3 token preset for untheme.
 
-Provides a complete M3 baseline with 670 reference tokens and 49 system tokens, ready to use or customize via the theme factory.
+Provides a complete M3 baseline with 670 reference tokens and 49 system tokens, ready to use or customize via the theme factory, plus 19 ready-made themed variants.
 
 ## Usage
 
 ```ts
-import { defineM3Theme } from "untheme-preset-m3";
+import { defineM3Theme } from "@untheme/material-3";
 
 // Create a theme with the M3 baseline defaults
-const theme = defineM3Theme({ label: "My App" });
+const theme = defineM3Theme({ key: "app", label: "My App" });
 
 // Or override specific reference tokens
 const brand = defineM3Theme({
+  key: "brand",
   label: "Brand",
   reference: { "violet-40": "#1e40af" },
 });
@@ -83,8 +84,20 @@ Color system tokens mapped per light/dark mode following the M3 color system spe
 Generate your own M3 tonal palettes from any hex color:
 
 ```ts
-import { createM3ColorTokens } from "untheme-preset-m3";
+import { createM3ColorTokens } from "@untheme/material-3";
 
 const tokens = createM3ColorTokens("brand", "#6750A4");
 // { "brand-0": "#000000", "brand-4": "...", ..., "brand-100": "#ffffff" }
 ```
+
+## Themes
+
+19 built-in themed variants are available via the `/themes` entry point:
+
+```ts
+import themes from "@untheme/material-3/themes";
+
+const dracula = themes.dracula;
+```
+
+See [src/themes/README.md](./src/themes/README.md) for the full list.

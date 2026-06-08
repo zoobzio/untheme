@@ -1,3 +1,4 @@
+// Typecheck-only stub for the Nuxt `#app` virtual module.
 interface NuxtPluginDef {
   name: string;
   setup: () => void | Promise<void>;

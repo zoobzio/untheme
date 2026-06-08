@@ -10,22 +10,32 @@ from the scheme's canonical colors) and **mode tokens** (semantic role mappings
 that reflect how the original scheme actually uses its colors). The goal is
 maximum fidelity to the source material — not pattern-matching across themes.
 
+Import the full set from the package's `/themes` entry point:
+
+```ts
+import themes from "@untheme/material-3/themes";
+```
+
 ## Themes
 
-| Theme | Inspiration | Character |
-| --- | --- | --- |
-| Gruvbox | [morhetz/gruvbox](https://github.com/morhetz/gruvbox) | Warm retro, earthy browns and muted accents |
-| Catppuccin | [catppuccin/catppuccin](https://github.com/catppuccin/catppuccin) (Mocha) | Pastel accents on a warm dark base |
-| Dracula | [dracula/dracula-theme](https://github.com/dracula/dracula-theme) | Saturated purple/pink/green on cool dark |
-| Nord | [nordtheme/nord](https://github.com/nordtheme/nord) | Muted arctic blues, clean and restrained |
-| Rose Pine | [rose-pine/rose-pine-theme](https://github.com/rose-pine/rose-pine-theme) | Soft, desaturated, romantic darks |
-| Tokyo Night | [enkia/tokyo-night-vscode-theme](https://github.com/enkia/tokyo-night-vscode-theme) | Cool blue/indigo on deep navy |
-
-## Status
-
-- [ ] Gruvbox
-- [ ] Catppuccin
-- [ ] Dracula
-- [ ] Nord
-- [ ] Rose Pine
-- [ ] Tokyo Night
+| Key           | Label              |
+| ------------- | ------------------ |
+| `ayu`         | Ayu                |
+| `catppuccin`  | Catppuccin Mocha   |
+| `cyberdream`  | Cyberdream         |
+| `dracula`     | Dracula            |
+| `everforest`  | Everforest         |
+| `github`      | GitHub             |
+| `gruvbox`     | Gruvbox            |
+| `horizon`     | Horizon            |
+| `kanagawa`    | Kanagawa           |
+| `monokai`     | Monokai            |
+| `night-owl`   | Night Owl          |
+| `nord`        | Nord               |
+| `one-dark`    | One Dark           |
+| `palenight`   | Material Palenight |
+| `rose_pine`   | Rosé Pine          |
+| `solarized`   | Solarized          |
+| `synthwave`   | Synthwave '84      |
+| `tokyo_night` | Tokyo Night        |
+| `vesper`      | Vesper             |

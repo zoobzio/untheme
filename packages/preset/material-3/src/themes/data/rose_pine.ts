@@ -1,6 +1,7 @@
 import { defineM3Theme } from "../../preset";
 import { createM3ColorTokens } from "../../colors";
 
+/** Rosé Pine theme — M3 token variant. */
 export default defineM3Theme({
   key: "rose_pine",
   label: "Rosé Pine",

@@ -1,6 +1,7 @@
 import { createM3ColorTokens } from "../../colors";
 import { defineM3Theme } from "../../preset";
 
+/** Nord theme — M3 token variant. */
 export default defineM3Theme({
   key: "nord",
   label: "Nord",

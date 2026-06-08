@@ -1,3 +1,4 @@
+// Typecheck-only stub for the generated `#build/types/untheme.d.ts` virtual module.
 export type ReferenceToken =
   | "white"
   | "black"

@@ -1,6 +1,7 @@
 import { defineM3Theme } from "../../preset";
 import { createM3ColorTokens } from "../../colors";
 
+/** Material Palenight theme — M3 token variant. */
 export default defineM3Theme({
   key: "palenight",
   label: "Material Palenight",

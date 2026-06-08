@@ -14,6 +14,15 @@ import {
 import { presets } from "./preset";
 import { Theme } from "untheme";
 
+/**
+ * Nuxt module for untheme.
+ *
+ * At build time it resolves the configured `preset` and `theme`, deep-merges the
+ * `extend` overrides (reference, modes, roles), writes the resolved theme set to
+ * `public/themes/*.json`, and registers the `untheme.mjs` build template, the
+ * `types/untheme.d.ts` token-type template, the runtime plugin, and the
+ * `useTheme` auto-import.
+ */
 export default defineNuxtModule<NuxtUnthemeConfig>({
   meta: {
     name: "untheme",
