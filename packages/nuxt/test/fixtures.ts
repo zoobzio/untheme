@@ -1,17 +1,17 @@
-import { mockEvent } from "h3";
-import type { ColorMode, Config } from "untheme";
-import type { AppTheme } from "../runtime/types";
+import type { ColorMode, Theme } from "untheme";
+import type { AppTheme } from "../src/runtime/types";
 import type {
   ReferenceToken,
   SystemToken,
   RoleToken,
-  Theme,
-} from "../stubs/build/types/untheme.d.ts";
+} from "../src/stubs/build/types/untheme";
 import { ref } from "vue";
 
-type Template = Config<string, string> & { roles: Record<string, string> };
+type Template = Theme<string, string, string>;
 
 const themeData = {
+  preset: "m3",
+  key: "alpha",
   label: "Alpha",
   reference: {
     white: "#ffffff",
@@ -60,17 +60,19 @@ const themeData = {
   },
 } as const;
 
+const bravoData = {
+  ...themeData,
+  key: "bravo",
+  label: "Bravo",
+} as const;
+
 export const template: Template = themeData;
 export const appTheme: AppTheme = themeData;
 
-/** Theme list matching the stub's Theme union. */
-export const themes: ReadonlyArray<{
-  key: Theme;
-  label: string;
-}> = [
-  { key: "alpha", label: "Alpha" },
-  { key: "bravo", label: "Bravo" },
-];
+export const themesMap: Record<string, AppTheme> = {
+  alpha: themeData,
+  bravo: bravoData,
+};
 
 /** Token arrays matching the stub's token types. */
 export const tokens = {
@@ -109,24 +111,13 @@ export const tokens = {
   ] as readonly RoleToken[],
 };
 
-/** Creates a properly typed H3Event for handler tests. */
-export const createEvent = () => mockEvent("/");
-
-/** Module setup options fixture. */
-export const moduleOptions = (overrides?: {
-  default?: string;
-  themes?: Record<string, Template>;
-}) => ({
-  default: overrides?.default ?? "alpha",
-  themes: overrides?.themes ?? { alpha: template },
-});
-
 /** Creates the mutable refs that back the composable's store. */
 export const createStoreRefs = () => ({
-  key: ref<Theme>("alpha"),
+  key: ref<string>("alpha"),
   theme: ref<AppTheme>({ ...appTheme }),
   mode: ref<ColorMode>("dark"),
-  cookieKey: ref<Theme | null>(null),
+  themes: themesMap,
+  cookieKey: ref<string | null>(null),
   cookieMode: ref<ColorMode | null>(null),
 });
 

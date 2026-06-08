@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Nuxt, ModuleDefinition } from "@nuxt/schema";
 import type { NuxtUnthemeConfig } from "../../src/types";
-import { moduleOptions } from "../fixtures";
 
 type ModuleDef = ModuleDefinition<
   NuxtUnthemeConfig,
@@ -14,13 +13,17 @@ const kit = vi.hoisted(() => ({
   addTypeTemplate: vi.fn(),
   addPlugin: vi.fn(),
   addImports: vi.fn(),
-  addServerHandler: vi.fn(),
   createResolver: vi.fn(() => ({
     resolve: (p: string) => `/resolved${p}`,
   })),
-  useLogger: vi.fn(() => ({
-    fatal: vi.fn(),
+  useNuxt: vi.fn(() => ({
+    options: { srcDir: "/project", dir: { public: "public" } },
   })),
+}));
+
+const fs = vi.hoisted(() => ({
+  mkdirSync: vi.fn(),
+  writeFileSync: vi.fn(),
 }));
 
 vi.mock("@nuxt/kit", () => ({
@@ -28,10 +31,19 @@ vi.mock("@nuxt/kit", () => ({
   ...kit,
 }));
 
+vi.mock("fs", () => fs);
+
 import module from "../../src/module";
 const mod = module as unknown as ModuleDef;
 
-const setup = (options = moduleOptions()) => mod.setup!(options, {} as Nuxt);
+const baseConfig: NuxtUnthemeConfig = {
+  preset: "m3",
+  theme: "dracula",
+  extend: {},
+};
+
+const setup = (options: NuxtUnthemeConfig = baseConfig) =>
+  mod.setup!(options, {} as Nuxt);
 
 describe("untheme nuxt module", () => {
   beforeEach(() => {
@@ -45,26 +57,23 @@ describe("untheme nuxt module", () => {
     });
   });
 
-  it("throws when default theme key is invalid", () => {
-    expect(() => setup(moduleOptions({ default: "missing" }))).toThrow(
-      "Invalid default theme",
-    );
+  it("throws when the preset is unknown", () => {
+    expect(() =>
+      setup({ ...baseConfig, preset: "missing" as never }),
+    ).toThrow("Invalid preset");
   });
 
-  it("calls useLogger().fatal on invalid theme", () => {
-    const logger = { fatal: vi.fn() };
-    kit.useLogger.mockReturnValueOnce(logger);
-    expect(() =>
-      setup(moduleOptions({ default: "bad", themes: {} })),
-    ).toThrow();
-    expect(logger.fatal).toHaveBeenCalledWith("bad is not a valid theme.");
+  it("throws when the theme is not in the preset", () => {
+    expect(() => setup({ ...baseConfig, theme: "missing" })).toThrow(
+      "Invalid theme",
+    );
   });
 
   it("registers a build template", () => {
     setup();
     expect(kit.addTemplate).toHaveBeenCalledTimes(1);
     const call = kit.addTemplate.mock.calls[0][0];
-    expect(call.filename).toBe("untheme.config.mjs");
+    expect(call.filename).toBe("untheme.mjs");
     expect(call.write).toBe(true);
     expect(typeof call.getContents).toBe("function");
   });
@@ -74,14 +83,6 @@ describe("untheme nuxt module", () => {
     expect(kit.addTypeTemplate).toHaveBeenCalledTimes(1);
     const call = kit.addTypeTemplate.mock.calls[0][0];
     expect(call.filename).toBe("types/untheme.d.ts");
-  });
-
-  it("registers a server handler", () => {
-    setup();
-    expect(kit.addServerHandler).toHaveBeenCalledTimes(1);
-    expect(kit.addServerHandler.mock.calls[0][0].route).toBe(
-      "/api/theme/:theme",
-    );
   });
 
   it("registers a plugin", () => {
@@ -99,25 +100,36 @@ describe("untheme nuxt module", () => {
     const names = imports.map((i) => i.name);
     expect(names).toContain("useTheme");
     expect(names).not.toContain("accessTheme");
-    expect(names).not.toContain("AppTheme");
   });
 
-  it("extracts token keys from the default theme", () => {
+  it("writes the public theme files", () => {
     setup();
-    const getContents = kit.addTypeTemplate.mock.calls[0][0]
-      .getContents as () => string;
-    const content = getContents();
-    expect(content).toContain("white");
-    expect(content).toContain("primary");
-    expect(content).toContain("text-color");
+    expect(fs.mkdirSync).toHaveBeenCalled();
+    const files = fs.writeFileSync.mock.calls.map((c) => c[0]);
+    expect(files.some((f: string) => f.endsWith("options.json"))).toBe(true);
+    expect(files.some((f: string) => f.endsWith("dracula.json"))).toBe(true);
   });
 
-  it("generates template content with correct exports", () => {
+  it("generates a build template exporting theme data", () => {
     setup();
     const getContents = kit.addTemplate.mock.calls[0][0]
       .getContents as () => string;
     const content = getContents();
-    expect(content).toContain('"alpha"');
-    expect(content).toContain('"Alpha"');
+    expect(content).toContain("export const theme =");
+    expect(content).toContain("export const extend =");
+    expect(content).toContain("export const options =");
+    expect(content).toContain("export const ref =");
+    expect(content).toContain("export const sys =");
+    expect(content).toContain("export const role =");
+  });
+
+  it("generates a type template deriving token types", () => {
+    setup();
+    const getContents = kit.addTypeTemplate.mock.calls[0][0]
+      .getContents as () => string;
+    const content = getContents();
+    expect(content).toContain("ReferenceToken");
+    expect(content).toContain("SystemToken");
+    expect(content).toContain("RoleToken");
   });
 });

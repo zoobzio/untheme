@@ -1,0 +1,35 @@
+{
+  "name": "untheme",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./.dist/index.mjs",
+  "types": "./.dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./.dist/index.mjs",
+      "types": "./.dist/index.d.ts"
+    },
+    "./css": {
+      "import": "./.dist/css.mjs",
+      "types": "./.dist/index.d.ts"
+    },
+    "./kit": {
+      "import": "./.dist/kit.mjs",
+      "types": "./.dist/kit.d.ts"
+    }
+  },
+  "files": [
+    ".dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --root ../.."
+  },
+  "dependencies": {
+    "@untheme/core": "workspace:*",
+    "@untheme/kit": "workspace:*"
+  }
+}

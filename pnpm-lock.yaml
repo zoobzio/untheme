@@ -41,12 +41,9 @@ importers:
 
   packages/core: {}
 
-  packages/m3:
+  packages/kit:
     dependencies:
-      '@material/material-color-utilities':
-        specifier: ^0.4.0
-        version: 0.4.0
-      untheme:
+      '@untheme/core':
         specifier: workspace:*
         version: link:../core
 
@@ -55,15 +52,18 @@ importers:
       '@nuxt/kit':
         specifier: ^4.4.6
         version: 4.4.6(magicast@0.5.3)
+      '@untheme/material-2':
+        specifier: workspace:*
+        version: link:../preset/material-2
+      '@untheme/material-3':
+        specifier: workspace:*
+        version: link:../preset/material-3
       h3:
         specifier: 2.0.1-rc.22
         version: 2.0.1-rc.22(crossws@0.4.5(srvx@0.11.16))
-      ltrl-http:
-        specifier: ^0.0.25
-        version: 0.0.25
       untheme:
         specifier: workspace:*
-        version: link:../core
+        version: link:../untheme
       vue:
         specifier: ^3.5.35
         version: 3.5.35(typescript@6.0.3)
@@ -77,6 +77,39 @@ importers:
       nuxt:
         specifier: ^4.4.6
         version: 4.4.6(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7))(@parcel/watcher@2.5.6)(@types/node@25.9.1)(@vue/compiler-sfc@3.5.35)(cac@6.7.14)(db0@0.3.4)(eslint@10.4.1(jiti@2.7.0))(ioredis@5.11.0)(lightningcss@1.32.0)(magicast@0.5.3)(optionator@0.9.4)(rolldown@1.0.3)(rollup-plugin-visualizer@7.0.1(rolldown@1.0.3)(rollup@4.61.0))(rollup@4.61.0)(srvx@0.11.16)(terser@5.48.0)(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.1)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0))(yaml@2.9.0)
+
+  packages/preset/material-2:
+    dependencies:
+      '@material/material-color-utilities':
+        specifier: ^0.4.0
+        version: 0.4.0
+      '@untheme/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@untheme/kit':
+        specifier: workspace:*
+        version: link:../../kit
+
+  packages/preset/material-3:
+    dependencies:
+      '@material/material-color-utilities':
+        specifier: ^0.4.0
+        version: 0.4.0
+      '@untheme/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@untheme/kit':
+        specifier: workspace:*
+        version: link:../../kit
+
+  packages/untheme:
+    dependencies:
+      '@untheme/core':
+        specifier: workspace:*
+        version: link:../core
+      '@untheme/kit':
+        specifier: workspace:*
+        version: link:../kit
 
 packages:
 
@@ -3061,12 +3094,6 @@ packages:
 
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
-
-  ltrl-http@0.0.25:
-    resolution: {integrity: sha512-Ok73f6TZISMgPxaVS+Ty9qb8EweUoojMARMCjSyVTWM8siYlAXhRTSIq273S6AgSqFgoyAZRRH8Amdx8OfJm2A==}
-
-  ltrl@0.0.25:
-    resolution: {integrity: sha512-XjtystBeDTlJE7xWXTTLrezjYaU1UG6GYrFec2hqYvrva+jICHN93/HePi0wRXcICYZL8aO3zCmjIileN3P7WQ==}
 
   magic-regexp@0.11.0:
     resolution: {integrity: sha512-LG77Z/gVnwz7oaDpD4heX6ryl+lcr4l1B2gnP4MMvt2pGhGC1Dfj7dl1pXpP4ih+VQFLuAadeKVa+lARAzfW+Q==}
@@ -7415,12 +7442,6 @@ snapshots:
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
-
-  ltrl-http@0.0.25:
-    dependencies:
-      ltrl: 0.0.25
-
-  ltrl@0.0.25: {}
 
   magic-regexp@0.11.0:
     dependencies:

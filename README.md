@@ -9,7 +9,7 @@ untheme separates the **token contract** (what tokens exist and how they relate)
 | Package                           | Description                                   |
 | --------------------------------- | --------------------------------------------- |
 | [`untheme`](./packages/core)      | Core types, theme factory, and CSS generation |
-| [`@untheme/m3`](./packages/m3)    | Material Design 3 theme with full token set   |
+| [`untheme-preset-m3`](./packages/m3)    | Material Design 3 theme with full token set   |
 | [`nuxt-untheme`](./packages/nuxt) | Nuxt module for runtime theming               |
 
 ## Token Architecture
@@ -56,7 +56,7 @@ const brand = defineMyTheme({
 ## Using Material Design 3
 
 ```ts
-import { defineM3Theme } from "@untheme/m3";
+import { defineM3Theme } from "untheme-preset-m3";
 
 const theme = defineM3Theme({ label: "My App" });
 // 670 reference tokens (color, typography, shape, elevation, motion)

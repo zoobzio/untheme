@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ref, computed } from "vue";
+import { ref, computed, nextTick } from "vue";
 import type { ColorMode } from "untheme";
 
 const mockMode = ref<ColorMode>("dark");
 const mockTokens = ref<Record<string, string>>({ white: "#ffffff" });
 
-vi.mock("../../runtime/composable", () => ({
+vi.mock("../../src/runtime/composable", () => ({
   useTheme: () => ({
     mode: mockMode,
     tokens: computed(() => mockTokens.value),
@@ -31,12 +31,12 @@ vi.mock("#app", () => ({
   }) => def,
 }));
 
-vi.mock("untheme", () => ({
+vi.mock("untheme/css", () => ({
   generateCSS: (tokens: Record<string, string>) =>
     `/* css ${Object.keys(tokens).join(",")} */`,
 }));
 
-import plugin from "../../runtime/plugin";
+import plugin from "../../src/runtime/plugin";
 
 describe("untheme plugin", () => {
   beforeEach(() => {
@@ -68,5 +68,23 @@ describe("untheme plugin", () => {
   it("generates CSS from tokens", () => {
     plugin.setup();
     expect(headCalls[0].style.value[0].innerHTML).toContain("css white");
+  });
+
+  describe("reactivity", () => {
+    it("class updates when mode changes after setup", async () => {
+      plugin.setup();
+      expect(headCalls[0].htmlAttrs.class.value).toContain("dark");
+      mockMode.value = "light";
+      await nextTick();
+      expect(headCalls[0].htmlAttrs.class.value).not.toContain("dark");
+    });
+
+    it("CSS updates when tokens change after setup", async () => {
+      plugin.setup();
+      expect(headCalls[0].style.value[0].innerHTML).toContain("css white");
+      mockTokens.value = { blue: "#0000ff" };
+      await nextTick();
+      expect(headCalls[0].style.value[0].innerHTML).toContain("css blue");
+    });
   });
 });

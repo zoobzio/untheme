@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-untheme",
+  "name": "@untheme/nuxt",
   "version": "0.0.0",
   "type": "module",
   "main": "./.dist/module.mjs",
@@ -22,8 +22,9 @@
   },
   "dependencies": {
     "@nuxt/kit": "^4.4.6",
+    "@untheme/material-2": "workspace:*",
+    "@untheme/material-3": "workspace:*",
     "h3": "2.0.1-rc.22",
-    "ltrl-http": "^0.0.25",
     "untheme": "workspace:*",
     "vue": "^3.5.35"
   },

@@ -1,54 +1,95 @@
 import type { NuxtUnthemeConfig } from "./types";
+
+import { mkdirSync, writeFileSync } from "fs";
+import { join } from "path";
 import {
   defineNuxtModule,
   addTemplate,
   addTypeTemplate,
   addPlugin,
   addImports,
-  addServerHandler,
   createResolver,
-  useLogger,
+  useNuxt,
 } from "@nuxt/kit";
+import { presets } from "./preset";
+import { Theme } from "untheme";
 
 export default defineNuxtModule<NuxtUnthemeConfig>({
   meta: {
     name: "untheme",
     configKey: "untheme",
   },
-  setup: (options) => {
-    const logger = useLogger();
+  setup: ({ preset, theme, extend }) => {
+    const nuxt = useNuxt();
     const resolver = createResolver(import.meta.url);
 
-    const theme = options.themes[options.default];
-    if (theme === undefined) {
-      logger.fatal(`${options.default} is not a valid theme.`);
-      throw new Error("Invalid default theme");
+    const themes = presets[preset];
+    if (!themes) {
+      throw new Error("Invalid preset");
     }
 
-    const themes = Object.entries(options.themes).map(([key, { label }]) => ({
+    const isThemeKey = (v: string): v is keyof typeof themes => v in themes;
+    if (!isThemeKey(theme)) {
+      throw new Error("Invalid theme");
+    }
+
+    const def = themes[theme];
+    const merged: Theme<string, string, string> = {
+      preset,
+      key: def.key,
+      label: def.label,
+      reference: {
+        ...def.reference,
+        ...(extend.reference ?? {}),
+      },
+      modes: {
+        light: {
+          ...def.modes.light,
+          ...(extend.modes?.light ?? {}),
+        },
+        dark: {
+          ...def.modes.dark,
+          ...(extend.modes?.dark ?? {}),
+        },
+      },
+      roles: extend.roles ?? {},
+    };
+
+    const ref = Object.keys(merged.reference);
+    const sys = Object.keys(merged.modes.dark);
+    const role = Object.keys(merged.roles);
+
+    const options = Object.values(themes).map(({ key, label }) => ({
       key,
       label,
     }));
 
-    const tokens = {
-      reference: Object.keys(theme.reference),
-      system: Object.keys(theme.modes.light),
-      roles: Object.keys(theme.roles),
-    };
+    const publicDir = join(
+      nuxt.options.srcDir,
+      nuxt.options.dir.public,
+      "themes",
+    );
+    mkdirSync(publicDir, { recursive: true });
 
-    const tokenize = (values: string[]) =>
-      values.map((v) => `"${v}"`).join(" | ");
+    writeFileSync(join(publicDir, "options.json"), JSON.stringify(options));
+
+    for (const [, t] of Object.entries(themes)) {
+      writeFileSync(join(publicDir, `${t.key}.json`), JSON.stringify(t));
+    }
 
     addTemplate({
-      filename: "untheme.config.mjs",
+      filename: "untheme.mjs",
       write: true,
-      getContents: () =>
-        [
-          `export const key = "${options.default}";`,
-          `export const theme = ${JSON.stringify(theme)};`,
-          `export const themes = ${JSON.stringify(themes)};`,
-          `export const tokens = ${JSON.stringify(tokens)};`,
-        ].join("\n"),
+      getContents: () => {
+        return [
+          `export const theme = ${JSON.stringify(merged)};`,
+          `export const extend = ${JSON.stringify(extend)};`,
+          `export const options = ${JSON.stringify(options)};`,
+          `export const ref = ${JSON.stringify(ref)};`,
+          `export const sys = ${JSON.stringify(sys)};`,
+          `export const role = ${JSON.stringify(role)};`,
+        ].join("\n");
+      },
     });
 
     addTypeTemplate({
@@ -56,25 +97,19 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
       write: true,
       getContents: () =>
         [
-          `export type ReferenceToken = ${tokenize(tokens.reference)};`,
-          `export type SystemToken = ${tokenize(tokens.system)};`,
-          `export type RoleToken = ${tokenize(tokens.roles)};`,
-          `export type Theme = ${tokenize(themes.map(({ key }) => key))};`,
+          `export type ReferenceToken = "${ref.join('" | "')}";`,
+          `export type SystemToken = "${sys.join('" | "')}";`,
+          `export type RoleToken = "${role.join('" | "')}";`,
         ].join("\n"),
     });
 
-    addServerHandler({
-      route: "/api/theme/:theme",
-      handler: resolver.resolve("../runtime/server/untheme"),
-    });
-
     addPlugin({
-      src: resolver.resolve("../runtime/plugin"),
+      src: resolver.resolve("./runtime/plugin"),
     });
 
     addImports([
       {
-        from: resolver.resolve("../runtime/composable"),
+        from: resolver.resolve("./runtime/composable"),
         name: "useTheme",
       },
     ]);

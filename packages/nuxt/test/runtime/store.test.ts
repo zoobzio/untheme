@@ -14,12 +14,18 @@ vi.mock("#imports", () => mocks);
 
 vi.mock("#build/untheme.mjs", async () => {
   const { appTheme } = await import("../fixtures");
-  return { key: "alpha", theme: appTheme };
+  return {
+    theme: appTheme,
+    options: [
+      { key: "alpha", label: "Alpha" },
+      { key: "bravo", label: "Bravo" },
+    ],
+  };
 });
 
 vi.mock("#build/types/untheme.d.ts", () => ({}));
 
-import { accessTheme } from "../../runtime/store";
+import { accessTheme } from "../../src/runtime/store";
 
 describe("accessTheme", () => {
   beforeEach(() => {
@@ -28,22 +34,37 @@ describe("accessTheme", () => {
     mocks.useCookie.mockImplementation(() => ref(null));
   });
 
-  it("returns key, theme, mode, and cookies", () => {
+  it("returns initialized, key, theme, themes, mode, and cookies", () => {
     const result = accessTheme();
+    expect(result).toHaveProperty("initialized");
     expect(result).toHaveProperty("key");
     expect(result).toHaveProperty("theme");
+    expect(result).toHaveProperty("themes");
     expect(result).toHaveProperty("mode");
     expect(result).toHaveProperty("cookies");
   });
 
-  it("initializes key from build-time value", () => {
+  it("starts uninitialized", () => {
+    const { initialized } = accessTheme();
+    expect(initialized.value).toBe(false);
+  });
+
+  it("initializes key to the default 'system'", () => {
     const { key } = accessTheme();
-    expect(key.value).toBe("alpha");
+    expect(key.value).toBe("system");
   });
 
   it("initializes theme from build-time value", () => {
     const { theme } = accessTheme();
     expect(theme.value.label).toBe("Alpha");
+  });
+
+  it("exposes the bundled theme options", () => {
+    const { themes } = accessTheme();
+    expect(themes.value).toEqual([
+      { key: "alpha", label: "Alpha" },
+      { key: "bravo", label: "Bravo" },
+    ]);
   });
 
   it("initializes mode as dark", () => {
@@ -61,8 +82,10 @@ describe("accessTheme", () => {
   it("calls useState with correct keys", () => {
     accessTheme();
     const stateKeys = mocks.useState.mock.calls.map((c) => c[0]);
+    expect(stateKeys).toContain("untheme:initialized");
     expect(stateKeys).toContain("untheme:key");
     expect(stateKeys).toContain("untheme:theme");
     expect(stateKeys).toContain("untheme:mode");
+    expect(stateKeys).toContain("untheme:themes");
   });
 });

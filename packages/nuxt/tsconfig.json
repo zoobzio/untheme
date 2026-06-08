@@ -8,14 +8,16 @@
     "skipLibCheck": true,
     "declaration": true,
     "declarationMap": true,
-    "outDir": ".dist",
-    "rootDir": ".",
+    "outDir": "../nuxt/.dist",
+    "rootDir": "../nuxt",
     "paths": {
-      "#app": ["./stubs/app.d.ts"],
-      "#imports": ["./stubs/imports.d.ts"],
-      "#build/untheme.mjs": ["./stubs/build/untheme.d.mts"],
-      "#build/types/untheme.d.ts": ["./stubs/build/types/untheme.d.ts"]
+      "#app": ["../nuxt/src/stubs/app.d.ts"],
+      "#imports": ["../nuxt/src/stubs/imports.d.ts"],
+      "#build/untheme.mjs": ["../nuxt/src/stubs/build/untheme.d.mts"],
+      "#build/types/untheme.d.ts": [
+        "../nuxt/src/stubs/build/types/untheme.d.ts"
+      ]
     }
   },
-  "include": ["src", "runtime", "stubs", "test"]
+  "include": ["../nuxt/src", "../nuxt/test"]
 }
