@@ -1,0 +1,31 @@
+{
+  "name": "@untheme/schema",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./.dist/index.mjs",
+  "types": "./.dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./.dist/index.mjs",
+      "types": "./.dist/index.d.ts"
+    }
+  },
+  "files": [
+    ".dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --root ../.."
+  },
+  "dependencies": {
+    "@untheme/core": "workspace:*",
+    "css-tree": "^3.2.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/css-tree": "^2.3.11"
+  }
+}

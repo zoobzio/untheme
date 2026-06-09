@@ -26,6 +26,7 @@
     "@untheme/material-2": "workspace:*",
     "@untheme/material-3": "workspace:*",
     "@untheme/radix-ui": "workspace:*",
+    "@untheme/schema": "workspace:*",
     "h3": "2.0.1-rc.22",
     "untheme": "workspace:*",
     "vue": "^3.5.35"

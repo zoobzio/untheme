@@ -3,14 +3,15 @@ import type {
   RoleToken,
   SystemToken,
 } from "#build/types/untheme.d.ts";
-import type { AppThemeLayer, ThemeClient } from "./types";
+import type { ThemeClient } from "./types";
 import type { Untheme } from "untheme";
 
-import { extend, ref, sys } from "#build/untheme.mjs";
+import { extend } from "#build/untheme.mjs";
 import { useRequestFetch } from "#imports";
 import { defineUntheme } from "untheme";
 import { reactive } from "vue";
 import { accessTheme } from "./store";
+import { schema } from "./schema";
 
 /**
  * Builds the {@link useUntheme} accessor. Lazily constructs a reactive
@@ -44,51 +45,22 @@ export const makeThemeClient = () => {
 
     const fetch = useRequestFetch();
 
-    // TODO use a zod schema
-    const check = (v: unknown): v is AppThemeLayer => {
-      if (
-        typeof v === "object" &&
-        v !== null &&
-        "reference" in v &&
-        "modes" in v &&
-        typeof v["reference"] == "object" &&
-        v["reference"] !== null &&
-        typeof v["modes"] === "object" &&
-        v["modes"] !== null &&
-        "dark" in v["modes"] &&
-        typeof v["modes"]["dark"] === "object" &&
-        v["modes"]["dark"] !== null
-      ) {
-        const layerRef = Object.keys(v.reference);
-        const layerSys = Object.keys(v.modes.dark);
-        return (
-          layerRef.every((r) => ref.includes(r)) &&
-          layerSys.every((s) => sys.includes(s))
-        );
-      }
-      return false;
-    };
-
     _client = {
       async get(id) {
         const res = await fetch(`/themes/${id}.json`);
         const data = await res.json();
-
-        if (check(data)) {
-          return {
-            preset: data.preset,
-            key: data.key,
-            label: data.label,
-            reference: { ...data.reference, ...(extend.reference ?? {}) },
-            modes: {
-              light: { ...data.modes.light, ...(extend.modes?.light ?? {}) },
-              dark: { ...data.modes.dark, ...(extend.modes?.dark ?? {}) },
-            },
-            roles: extend.roles,
-          };
-        }
-
-        throw new Error("Invalid theme data");
+        const layer = schema.partial.parse(data);
+        return schema.theme.parse({
+          preset: layer.preset,
+          key: layer.key,
+          label: layer.label,
+          reference: { ...layer.reference, ...(extend.reference ?? {}) },
+          modes: {
+            light: { ...layer.modes.light, ...(extend.modes?.light ?? {}) },
+            dark: { ...layer.modes.dark, ...(extend.modes?.dark ?? {}) },
+          },
+          roles: extend.roles,
+        });
       },
     };
 
