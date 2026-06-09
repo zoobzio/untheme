@@ -61,6 +61,13 @@ describe("cssType helper", () => {
     expect(color.safeParse("#ggg").success).toBe(false);
     expect(color.safeParse("16px").success).toBe(false);
   });
+
+  it("fails rather than throws for an unknown css type name", () => {
+    // css-tree throws "Bad syntax reference" for an unrecognized type; the
+    // helper must catch it and report invalid instead of propagating.
+    const bogus = cssType("notarealtype");
+    expect(bogus.safeParse("anything").success).toBe(false);
+  });
 });
 
 describe("theme schema (complete)", () => {

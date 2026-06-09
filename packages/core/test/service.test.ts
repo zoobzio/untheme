@@ -110,6 +110,55 @@ describe("defineUntheme", () => {
       ut.update("primary", "background");
       expect(ut.tokens.primary).toBe("background");
     });
+
+    it("ignores an unknown token (no matching tier)", () => {
+      const ut = defineUntheme(structuredClone(theme), "dark");
+      const before = { ...ut.tokens };
+      // @ts-expect-error - exercising the runtime no-op for an unknown token
+      ut.update("nonsense", "white");
+      expect(ut.tokens).toEqual(before);
+    });
+
+    it("ignores a system token assigned a non-reference value", () => {
+      const ut = defineUntheme(structuredClone(theme), "dark");
+      // "primary" is a role name, not a reference — guard requires isRef(value)
+      // @ts-expect-error - exercising the runtime no-op for an invalid value tier
+      ut.update("background", "primary");
+      expect(ut.tokens.background).toBe("black");
+    });
+
+    it("ignores a role token assigned a non-token value", () => {
+      const ut = defineUntheme(structuredClone(theme), "dark");
+      // @ts-expect-error - exercising the runtime no-op for an invalid value tier
+      ut.update("primary", "nonsense");
+      expect(ut.tokens.primary).toBe("foreground");
+    });
+  });
+
+  describe("tokens precedence", () => {
+    // Names deliberately collide across tiers to pin the spread order:
+    // reference < mode < role (last write wins).
+    const collide = {
+      preset: "collide",
+      key: "collide",
+      label: "collide",
+      reference: { a: "ref-a", b: "ref-b" },
+      modes: {
+        light: { a: "mode-a", b: "mode-b" },
+        dark: { a: "mode-a", b: "mode-b" },
+      },
+      roles: { b: "role-b" },
+    } satisfies Theme<string, string, string>;
+
+    it("mode tokens override reference tokens on key collision", () => {
+      const ut = defineUntheme(collide, "dark");
+      expect(ut.tokens.a).toBe("mode-a");
+    });
+
+    it("role tokens override mode and reference tokens on key collision", () => {
+      const ut = defineUntheme(collide, "dark");
+      expect(ut.tokens.b).toBe("role-b");
+    });
   });
 
   describe("isRef", () => {

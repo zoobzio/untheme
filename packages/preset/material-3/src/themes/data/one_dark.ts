@@ -3,7 +3,7 @@ import { createM3ColorTokens } from "../../colors";
 
 /** One Dark theme — M3 token variant. */
 export default defineM3Theme({
-  key: "one-dark",
+  key: "one_dark",
   label: "One Dark",
   reference: {
     // Chromatic palettes — One Dark's warm, vivid syntax hues

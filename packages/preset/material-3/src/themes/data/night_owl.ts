@@ -3,7 +3,7 @@ import { createM3ColorTokens } from "../../colors";
 
 /** Night Owl theme — M3 token variant. */
 export default defineM3Theme({
-  key: "night-owl",
+  key: "night_owl",
   label: "Night Owl",
   reference: {
     // Chromatic palettes — Night Owl's rich, accessible accents

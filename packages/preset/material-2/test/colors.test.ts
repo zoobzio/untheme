@@ -40,4 +40,8 @@ describe("createM2ColorTokens", () => {
     const red = createM2ColorTokens("red", "#FF0000");
     expect(red["red-500"]).not.toBe(tokens["blue-500"]);
   });
+
+  it("throws on an empty hex value", () => {
+    expect(() => createM2ColorTokens("x", "")).toThrow();
+  });
 });
