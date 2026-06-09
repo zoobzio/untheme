@@ -11,5 +11,14 @@ export default defineConfig({
         inline: ["@material/material-color-utilities"],
       },
     },
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+      reportsDirectory: ".coverage",
+      include: [
+        "packages/*/src/**/*.{ts,vue}",
+        "packages/preset/*/src/**/*.{ts,vue}",
+      ],
+    },
   },
 });
