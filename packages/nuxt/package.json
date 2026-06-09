@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@nuxt/kit": "^4.4.6",
+    "@untheme/carbon": "workspace:*",
     "@untheme/kit": "workspace:*",
     "@untheme/material-2": "workspace:*",
     "@untheme/material-3": "workspace:*",

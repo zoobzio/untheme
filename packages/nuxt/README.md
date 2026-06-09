@@ -11,7 +11,7 @@ Pick a preset and a base theme, layer on your own role tokens, and the module ha
 export default defineNuxtConfig({
   modules: ["@untheme/nuxt"],
   untheme: {
-    preset: "m3", // "m2" | "m3"
+    preset: "m3", // "m2" | "m3" | "radix" | "carbon"
     theme: "dracula", // a built-in theme key from the preset
     extend: {
       // optional reference / mode overrides

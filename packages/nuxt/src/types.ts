@@ -1,6 +1,7 @@
 import type { M2Theme } from "@untheme/material-2/themes";
 import type { M3Theme } from "@untheme/material-3/themes";
 import type { RadixTheme } from "@untheme/radix-ui/themes";
+import type { CarbonTheme } from "@untheme/carbon/themes";
 import type { ColorMode, Theme } from "untheme";
 
 import { presets } from "./preset";
@@ -10,6 +11,7 @@ export type PresetMatrix = {
   m2: M2Theme;
   m3: M3Theme;
   radix: RadixTheme;
+  carbon: CarbonTheme;
 };
 
 /** The shape of the {@link presets} registry. */
