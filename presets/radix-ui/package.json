@@ -9,9 +9,9 @@
       "import": "./.dist/index.mjs",
       "types": "./.dist/index.d.ts"
     },
-    "./themes": {
-      "import": "./.dist/themes/index.mjs",
-      "types": "./.dist/themes/index.d.ts"
+    "./themes/*": {
+      "import": "./.dist/themes/*.mjs",
+      "types": "./.dist/themes/*.d.ts"
     }
   },
   "files": [
@@ -28,5 +28,8 @@
     "@radix-ui/colors": "^3.0.0",
     "@untheme/core": "workspace:*",
     "@untheme/kit": "workspace:*"
+  },
+  "devDependencies": {
+    "@untheme/schema": "workspace:*"
   }
 }

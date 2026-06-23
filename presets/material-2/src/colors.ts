@@ -11,10 +11,14 @@ import {
   M2_ACCENT_TONE_MAP,
 } from "./constant";
 
-/** Chroma multiplier for accent shades — produces more vivid colors. */
+/**
+ * Chroma multiplier for accent shades — produces more vivid colors.
+ */
 const ACCENT_CHROMA_BOOST = 1.5;
 
-/** Converts an ARGB integer to a 6-digit hex string. */
+/**
+ * Converts an ARGB integer to a 6-digit hex string.
+ */
 const argbToHex = (argb: number): string => {
   const r = (argb >> 16) & 0xff;
   const g = (argb >> 8) & 0xff;

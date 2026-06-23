@@ -2,17 +2,17 @@ import { defineUnthemePreset } from "@untheme/kit";
 import { createM3ColorTokens } from "./colors";
 
 /**
- * Material Design 3 theme factory.
+ * The Material Design 3 preset.
  *
  * Reference tokens provide the full M3 token set: color palettes (Tailwind
  * family names as seeds), typography scales, shape radii, elevation shadows,
  * and motion easing/duration values. System tokens map color references to
- * semantic roles per light/dark mode following the M3 color system specification.
+ * semantic roles per light/dark mode following the M3 color system
+ * specification.
  */
-export const defineM3Theme = defineUnthemePreset({
-  preset: "m3",
-  key: "m3",
-  label: "Material 3",
+export const preset = defineUnthemePreset({
+  id: "material-3",
+  name: "Material 3",
   reference: {
     // Chromatic palettes
     ...createM3ColorTokens("red", "#ef4444"),
@@ -152,7 +152,7 @@ export const defineM3Theme = defineUnthemePreset({
     "duration-extra-long-3": "900ms",
     "duration-extra-long-4": "1000ms",
   },
-  modes: {
+  system: {
     light: {
       primary: "violet-40",
       "on-primary": "violet-100",
@@ -256,4 +256,7 @@ export const defineM3Theme = defineUnthemePreset({
       scrim: "neutral-0",
     },
   },
+  roles: {},
 });
+
+export default preset;

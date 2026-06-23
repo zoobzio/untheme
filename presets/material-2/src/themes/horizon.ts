@@ -1,0 +1,65 @@
+import preset from "../preset";
+import { createM2ColorTokens } from "../colors";
+
+/**
+ * Horizon theme — M2 token variant.
+ */
+export default preset.define({
+  id: "horizon",
+  name: "Horizon",
+  reference: {
+    ...createM2ColorTokens("red", "#F43E5C"),
+    ...createM2ColorTokens("orange", "#FAB795"),
+    ...createM2ColorTokens("amber", "#FAC29A"),
+    ...createM2ColorTokens("yellow", "#FAC29A"),
+    ...createM2ColorTokens("lime", "#29D398"),
+    ...createM2ColorTokens("green", "#27D797"),
+    ...createM2ColorTokens("emerald", "#21BFC2"),
+    ...createM2ColorTokens("teal", "#25B0BC"),
+    ...createM2ColorTokens("cyan", "#59E1E3"),
+    ...createM2ColorTokens("sky", "#26BBD9"),
+    ...createM2ColorTokens("blue", "#26BBD9"),
+    ...createM2ColorTokens("indigo", "#26BBD9"),
+    ...createM2ColorTokens("violet", "#B877DB"),
+    ...createM2ColorTokens("purple", "#B877DB"),
+    ...createM2ColorTokens("fuchsia", "#EE64AC"),
+    ...createM2ColorTokens("pink", "#E95378"),
+    ...createM2ColorTokens("rose", "#E95378"),
+    ...createM2ColorTokens("slate", "#6C6F93"),
+    ...createM2ColorTokens("gray", "#6C6F93"),
+    ...createM2ColorTokens("zinc", "#2E303E"),
+    ...createM2ColorTokens("neutral", "#1C1E26"),
+    ...createM2ColorTokens("stone", "#6C6F93"),
+  },
+  system: {
+    light: {
+      primary: "pink-500",
+      "primary-variant": "pink-700",
+      "on-primary": "neutral-50",
+      secondary: "violet-500",
+      "secondary-variant": "violet-700",
+      "on-secondary": "neutral-50",
+      background: "neutral-50",
+      "on-background": "neutral-900",
+      surface: "neutral-50",
+      "on-surface": "neutral-900",
+      error: "red-500",
+      "on-error": "neutral-50",
+    },
+    dark: {
+      primary: "pink-200",
+      "primary-variant": "pink-700",
+      "on-primary": "neutral-900",
+      secondary: "violet-200",
+      "secondary-variant": "violet-200",
+      "on-secondary": "neutral-900",
+      background: "neutral-900",
+      "on-background": "neutral-50",
+      surface: "neutral-900",
+      "on-surface": "neutral-50",
+      error: "red-200",
+      "on-error": "neutral-900",
+    },
+  },
+  roles: {},
+});

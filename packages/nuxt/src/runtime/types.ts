@@ -2,25 +2,62 @@ import type {
   ReferenceToken,
   RoleToken,
   SystemToken,
+  ThemeKey,
 } from "#build/types/untheme.d.ts";
-import type { Theme } from "untheme";
+import type {
+  Config,
+  Contract,
+  Layer,
+  Mode,
+  Patch,
+  Theme,
+  Token,
+  Untheme,
+} from "untheme";
 
 /**
- * A resolved theme instance with typed token keys derived from the build-time
- * template.
+ * The active token contract, derived from the build-time template.
  */
-export type AppTheme = Theme<ReferenceToken, SystemToken, RoleToken>;
+export type AppContract = Contract<ReferenceToken, SystemToken, RoleToken>;
 
-/** A theme without its roles — the portion fetched and swapped at runtime. */
-export type AppThemeLayer = Omit<AppTheme, "roles">;
+/**
+ * A resolved theme instance with typed token keys.
+ */
+export type AppTheme = Theme<AppContract>;
 
-/** A selectable theme entry: its key and human-readable label. */
-export type AppThemeOption = {
-  key: string;
-  label: string;
-};
+/**
+ * A theme without its roles — the portion swapped at runtime.
+ */
+export type AppThemeLayer = Layer<AppContract>;
 
-/** Fetches resolved themes by key for runtime theme switching. */
-export interface ThemeClient {
-  get: (id: string) => Promise<AppTheme>;
+/**
+ * The build-time catalog of switchable layers, keyed by its known theme keys.
+ */
+export type AppThemes = Record<ThemeKey, AppThemeLayer>;
+
+/**
+ * The caller-owned state container the service operates on.
+ */
+export type AppConfig = Config<AppContract>;
+
+/**
+ * The runtime theme service bound to the app's contract.
+ */
+export type AppUntheme = Untheme<AppContract>;
+
+declare module "#app" {
+  interface NuxtApp {
+    $untheme: AppUntheme;
+  }
+
+  interface RuntimeNuxtHooks {
+    "untheme:ready": (theme: AppTheme) => void;
+    "untheme:mode": (mode: Mode) => void;
+    "untheme:set": (token: Token<AppContract>, value: string) => void;
+    "untheme:update": (patch: Patch<AppContract>) => void;
+    "untheme:apply": (theme: AppTheme) => void;
+    "untheme:reset": () => void;
+    "untheme:create": (theme: AppTheme) => void;
+    "untheme:extract": (theme: AppTheme) => void;
+  }
 }

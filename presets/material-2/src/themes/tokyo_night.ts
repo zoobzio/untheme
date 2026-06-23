@@ -1,0 +1,65 @@
+import preset from "../preset";
+import { createM2ColorTokens } from "../colors";
+
+/**
+ * Tokyo Night theme — M2 token variant.
+ */
+export default preset.define({
+  id: "tokyo_night",
+  name: "Tokyo Night",
+  reference: {
+    ...createM2ColorTokens("red", "#f7768e"),
+    ...createM2ColorTokens("orange", "#ff9e64"),
+    ...createM2ColorTokens("amber", "#e0af68"),
+    ...createM2ColorTokens("yellow", "#e0af68"),
+    ...createM2ColorTokens("lime", "#9ece6a"),
+    ...createM2ColorTokens("green", "#9ece6a"),
+    ...createM2ColorTokens("emerald", "#73daca"),
+    ...createM2ColorTokens("teal", "#73daca"),
+    ...createM2ColorTokens("cyan", "#7dcfff"),
+    ...createM2ColorTokens("sky", "#2ac3de"),
+    ...createM2ColorTokens("blue", "#7aa2f7"),
+    ...createM2ColorTokens("indigo", "#3d59a1"),
+    ...createM2ColorTokens("violet", "#bb9af7"),
+    ...createM2ColorTokens("purple", "#9d7cd8"),
+    ...createM2ColorTokens("fuchsia", "#bb9af7"),
+    ...createM2ColorTokens("pink", "#f7768e"),
+    ...createM2ColorTokens("rose", "#f7768e"),
+    ...createM2ColorTokens("slate", "#565f89"),
+    ...createM2ColorTokens("gray", "#414868"),
+    ...createM2ColorTokens("zinc", "#363b54"),
+    ...createM2ColorTokens("neutral", "#1a1b26"),
+    ...createM2ColorTokens("stone", "#515670"),
+  },
+  system: {
+    light: {
+      primary: "blue-500",
+      "primary-variant": "blue-700",
+      "on-primary": "neutral-50",
+      secondary: "violet-500",
+      "secondary-variant": "violet-700",
+      "on-secondary": "neutral-50",
+      background: "neutral-50",
+      "on-background": "neutral-900",
+      surface: "neutral-50",
+      "on-surface": "neutral-900",
+      error: "red-500",
+      "on-error": "neutral-50",
+    },
+    dark: {
+      primary: "blue-200",
+      "primary-variant": "blue-700",
+      "on-primary": "neutral-900",
+      secondary: "violet-200",
+      "secondary-variant": "violet-200",
+      "on-secondary": "neutral-900",
+      background: "neutral-900",
+      "on-background": "neutral-50",
+      surface: "neutral-900",
+      "on-surface": "neutral-50",
+      error: "red-200",
+      "on-error": "neutral-900",
+    },
+  },
+  roles: {},
+});

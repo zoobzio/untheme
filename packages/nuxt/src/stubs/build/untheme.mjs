@@ -1,88 +1,64 @@
 export const theme = {
-  preset: "m3",
-  key: "alpha",
-  label: "Alpha",
+  id: "alpha",
+  name: "Alpha",
   reference: {
     white: "#ffffff",
     black: "#000000",
     slate: "#64748b",
     blue: "#3b82f6",
     indigo: "#6366f1",
-    red: "#ef4444",
-    green: "#22c55e",
-    amber: "#f59e0b",
   },
-  modes: {
+  system: {
     light: {
       primary: "blue",
-      secondary: "indigo",
-      neutral: "slate",
       surface: "white",
-      on_surface: "black",
-      error: "red",
-      success: "green",
-      warning: "amber",
+      "on-surface": "black",
+      muted: "slate",
     },
     dark: {
       primary: "indigo",
-      secondary: "blue",
-      neutral: "slate",
       surface: "black",
-      on_surface: "white",
-      error: "red",
-      success: "green",
-      warning: "amber",
+      "on-surface": "white",
+      muted: "slate",
     },
   },
   roles: {
-    "text-color": "on_surface",
-    "text-muted": "neutral",
+    "text-color": "on-surface",
     "background-color": "surface",
-    "border-color": "neutral",
     "link-color": "primary",
-    "link-hover": "secondary",
-    "button-bg": "primary",
-    "button-text": "surface",
-    "error-text": "error",
-    "success-text": "success",
-    "warning-text": "warning",
   },
 };
 
-export const extend = {
-  reference: {
-    amber: "#f39e0b",
-  },
-  modes: {
-    light: {
-      warning: "amber",
+export const themes = {
+  alpha: theme,
+  bravo: {
+    id: "bravo",
+    name: "Bravo",
+    reference: {
+      white: "#fafafa",
+      black: "#111111",
+      slate: "#475569",
+      blue: "#2563eb",
+      indigo: "#4f46e5",
     },
-    dark: {
-      warning: "amber",
+    system: {
+      light: {
+        primary: "blue",
+        surface: "white",
+        "on-surface": "black",
+        muted: "slate",
+      },
+      dark: {
+        primary: "indigo",
+        surface: "black",
+        "on-surface": "white",
+        muted: "slate",
+      },
     },
-  },
-  roles: {
-    "text-color": "on_surface",
-    "text-muted": "neutral",
-    "background-color": "surface",
-    "border-color": "neutral",
-    "link-color": "primary",
-    "link-hover": "secondary",
-    "button-bg": "primary",
-    "button-text": "surface",
-    "error-text": "error",
-    "success-text": "success",
-    "warning-text": "warning",
+    roles: {
+      "text-color": "on-surface",
+      "background-color": "surface",
+      "link-color": "primary",
+    },
   },
 };
-
-export const options = [
-  { key: "alpha", label: "Alpha" },
-  { key: "bravo", label: "Bravo" },
-];
-
-export const ref = Object.keys(theme.reference);
-
-export const sys = Object.keys(theme.modes.dark);
-
-export const role = Object.keys(theme.roles);

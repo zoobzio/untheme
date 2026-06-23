@@ -6,19 +6,23 @@ faithful translation of a well-known color scheme into M3 design tokens.
 ## Approach
 
 Every theme overrides both **reference tokens** (custom tonal palettes generated
-from the scheme's canonical colors) and **mode tokens** (semantic role mappings
+from the scheme's canonical colors) and **system tokens** (semantic role mappings
 that reflect how the original scheme actually uses its colors). The goal is
 maximum fidelity to the source material — not pattern-matching across themes.
 
-Import the full set from the package's `/themes` entry point:
+Each theme is a `preset.define` variant, importable by path; pack the ones you
+want with `preset.use(...)` to get fully resolved themes:
 
 ```ts
-import themes from "@untheme/material-3/themes";
+import preset from "@untheme/material-3";
+import dracula from "@untheme/material-3/themes/dracula";
+
+const bundle = preset.use(dracula);
 ```
 
 ## Themes
 
-| Key           | Label              |
+| Id            | Name               |
 | ------------- | ------------------ |
 | `ayu`         | Ayu                |
 | `catppuccin`  | Catppuccin Mocha   |
@@ -30,9 +34,9 @@ import themes from "@untheme/material-3/themes";
 | `horizon`     | Horizon            |
 | `kanagawa`    | Kanagawa           |
 | `monokai`     | Monokai            |
-| `night-owl`   | Night Owl          |
+| `night_owl`   | Night Owl          |
 | `nord`        | Nord               |
-| `one-dark`    | One Dark           |
+| `one_dark`    | One Dark           |
 | `palenight`   | Material Palenight |
 | `rose_pine`   | Rosé Pine          |
 | `solarized`   | Solarized          |

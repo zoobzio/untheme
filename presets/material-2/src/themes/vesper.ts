@@ -1,0 +1,65 @@
+import preset from "../preset";
+import { createM2ColorTokens } from "../colors";
+
+/**
+ * Vesper theme — M2 token variant.
+ */
+export default preset.define({
+  id: "vesper",
+  name: "Vesper",
+  reference: {
+    ...createM2ColorTokens("red", "#FF8080"),
+    ...createM2ColorTokens("orange", "#FFC799"),
+    ...createM2ColorTokens("amber", "#FFC799"),
+    ...createM2ColorTokens("yellow", "#FFC799"),
+    ...createM2ColorTokens("lime", "#99FFE4"),
+    ...createM2ColorTokens("green", "#99FFE4"),
+    ...createM2ColorTokens("emerald", "#99FFE4"),
+    ...createM2ColorTokens("teal", "#99FFE4"),
+    ...createM2ColorTokens("cyan", "#99FFE4"),
+    ...createM2ColorTokens("sky", "#99FFE4"),
+    ...createM2ColorTokens("blue", "#99FFE4"),
+    ...createM2ColorTokens("indigo", "#99FFE4"),
+    ...createM2ColorTokens("violet", "#FFC799"),
+    ...createM2ColorTokens("purple", "#FFC799"),
+    ...createM2ColorTokens("fuchsia", "#FF8080"),
+    ...createM2ColorTokens("pink", "#FF8080"),
+    ...createM2ColorTokens("rose", "#FF8080"),
+    ...createM2ColorTokens("slate", "#A0A0A0"),
+    ...createM2ColorTokens("gray", "#7E7E7E"),
+    ...createM2ColorTokens("zinc", "#505050"),
+    ...createM2ColorTokens("neutral", "#101010"),
+    ...createM2ColorTokens("stone", "#8B8B8B"),
+  },
+  system: {
+    light: {
+      primary: "orange-500",
+      "primary-variant": "orange-700",
+      "on-primary": "neutral-50",
+      secondary: "green-500",
+      "secondary-variant": "green-700",
+      "on-secondary": "neutral-50",
+      background: "neutral-50",
+      "on-background": "neutral-900",
+      surface: "neutral-50",
+      "on-surface": "neutral-900",
+      error: "red-500",
+      "on-error": "neutral-50",
+    },
+    dark: {
+      primary: "orange-200",
+      "primary-variant": "orange-700",
+      "on-primary": "neutral-900",
+      secondary: "green-200",
+      "secondary-variant": "green-200",
+      "on-secondary": "neutral-900",
+      background: "neutral-900",
+      "on-background": "neutral-50",
+      surface: "neutral-900",
+      "on-surface": "neutral-50",
+      error: "red-200",
+      "on-error": "neutral-900",
+    },
+  },
+  roles: {},
+});

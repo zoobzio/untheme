@@ -5,18 +5,22 @@ faithful translation of a well-known color scheme into M2 design tokens —
 overriding both reference tokens (custom palettes generated from the scheme's
 canonical colors) and mode tokens (semantic role mappings).
 
-Import the full set from the package's `/themes` entry point:
+Each theme is a `preset.define` variant, importable by path; pack the ones you
+want with `preset.use(...)` to get fully resolved themes:
 
 ```ts
-import themes from "@untheme/material-2/themes";
+import preset from "@untheme/material-2";
+import dracula from "@untheme/material-2/themes/dracula";
+
+const bundle = preset.use(dracula);
 ```
 
 ## Themes
 
-| Key           | Label              |
+| Id            | Name               |
 | ------------- | ------------------ |
 | `ayu`         | Ayu                |
-| `catppuccin`  | Catppuccin Mocha   |
+| `catppuccin`  | Catppuccin         |
 | `cyberdream`  | Cyberdream         |
 | `dracula`     | Dracula            |
 | `everforest`  | Everforest         |
@@ -25,12 +29,12 @@ import themes from "@untheme/material-2/themes";
 | `horizon`     | Horizon            |
 | `kanagawa`    | Kanagawa           |
 | `monokai`     | Monokai            |
-| `night-owl`   | Night Owl          |
+| `night_owl`   | Night Owl          |
 | `nord`        | Nord               |
-| `one-dark`    | One Dark           |
-| `palenight`   | Material Palenight |
-| `rose_pine`   | Rosé Pine          |
+| `one_dark`    | One Dark           |
+| `palenight`   | Palenight          |
+| `rose_pine`   | Rose Pine          |
 | `solarized`   | Solarized          |
-| `synthwave`   | Synthwave '84      |
+| `synthwave`   | Synthwave          |
 | `tokyo_night` | Tokyo Night        |
 | `vesper`      | Vesper             |

@@ -2,21 +2,24 @@
 
 Material Design 3 token preset for untheme.
 
-Provides a complete M3 baseline with 670 reference tokens and 49 system tokens, ready to use or customize via the theme factory, plus 19 ready-made themed variants.
+Provides a complete M3 baseline with 670 reference tokens and 49 system tokens as an untheme preset, plus 19 ready-made theme variants importable by path.
 
 ## Usage
 
 ```ts
-import { defineM3Theme } from "@untheme/material-3";
+import preset from "@untheme/material-3";
+import dracula from "@untheme/material-3/themes/dracula";
 
-// Create a theme with the M3 baseline defaults
-const theme = defineM3Theme({ key: "app", label: "My App" });
+// Pack the base and the variants you want into a bundle —
+// every entry is a complete theme, resolved over the M3 base.
+const bundle = preset.use(dracula);
 
-// Or override specific reference tokens
-const brand = defineM3Theme({
-  key: "brand",
-  label: "Brand",
+// Or author your own variant against the preset's contract
+const brand = preset.define({
+  id: "brand",
+  name: "Brand",
   reference: { "violet-40": "#1e40af" },
+  system: { light: {}, dark: {} },
 });
 ```
 
@@ -92,12 +95,11 @@ const tokens = createM3ColorTokens("brand", "#6750A4");
 
 ## Themes
 
-19 built-in themed variants are available via the `/themes` entry point:
+19 built-in theme variants ship as individual subpath exports — only the ones you import enter your module graph:
 
 ```ts
-import themes from "@untheme/material-3/themes";
-
-const dracula = themes.dracula;
+import dracula from "@untheme/material-3/themes/dracula";
+import nord from "@untheme/material-3/themes/nord";
 ```
 
 See [src/themes/README.md](./src/themes/README.md) for the full list.

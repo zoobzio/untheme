@@ -1,10 +1,15 @@
 /**
- * The union of CSS value types a reference token may hold.
- *
- * Broad enough to accept any value the presets emit — colors, lengths, times,
- * numbers, multi-layer shadows, easing functions, and font-family lists — while
- * still rejecting structurally invalid CSS (e.g. `#ggg`, unbalanced functions,
- * empty strings).
+ * The color modes every system token must be defined for.
  */
-export const CSS_VALUE_SYNTAX =
-  "<color> | <length> | <time> | <number> | <percentage> | <angle> | <shadow># | <easing-function> | [ <generic-family> | <family-name> ]#";
+export const COLOR_MODES = ["light", "dark"] as const;
+
+/**
+ * Sequences that let a value escape its declaration (statements, blocks,
+ * comments, tag closers, escapes) or fetch a resource (url()).
+ */
+export const CSS_BREAKOUT = /[;{}\\]|\/\*|<\/|\burl\(/i;
+
+/**
+ * Available keys on a theme template.
+ */
+export const SECTIONS = ["id", "name", "reference", "system", "roles"] as const;

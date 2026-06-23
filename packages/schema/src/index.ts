@@ -1,4 +1,4 @@
 export * from "./constant";
-export * from "./css";
+export * from "./error";
 export * from "./schema";
 export * from "./types";

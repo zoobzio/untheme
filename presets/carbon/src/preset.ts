@@ -16,21 +16,23 @@ import {
 import { createCarbonColorTokens } from "./colors";
 
 /**
- * IBM Carbon Design System theme factory.
+ * The Carbon preset.
  *
  * Reference tokens provide the full Carbon token set: the 12 IBM color families
- * (each a mode-independent 10-grade palette) plus white/black, the IBM Plex type
- * scale, the spacing scale, and motion easing/duration values. System tokens map
+ * (each a mode-independent 10-grade palette) plus white/black, the IBM Plex
+ * type
+ * scale, the spacing scale, and motion easing/duration values. System tokens
+ * map
  * those references onto Carbon's semantic roles per light/dark mode.
  *
- * The base pairs Carbon's two default themes — **White** (light) and **Gray 100**
+ * The base pairs Carbon's two default themes — **White** (light) and **Gray
+ * 100**
  * (dark). The other official pairings (White/Gray 90, Gray 10/Gray 90,
  * Gray 10/Gray 100) ship as theme variants under `@untheme/carbon/themes`.
  */
-export const defineCarbonTheme = defineUnthemePreset({
-  preset: "carbon",
-  key: "carbon",
-  label: "Carbon",
+export const preset = defineUnthemePreset({
+  id: "white-g100",
+  name: "Carbon",
   reference: {
     // Color families — IBM Carbon palette (mode-independent 10-grade scales)
     ...createCarbonColorTokens("blue", blue),
@@ -144,7 +146,7 @@ export const defineCarbonTheme = defineUnthemePreset({
     "easing-expressive-entrance": "cubic-bezier(0, 0, 0.3, 1)",
     "easing-expressive-exit": "cubic-bezier(0.4, 0.14, 1, 1)",
   },
-  modes: {
+  system: {
     // Light — Carbon "White" theme
     light: {
       background: "white",
@@ -214,4 +216,9 @@ export const defineCarbonTheme = defineUnthemePreset({
       interactive: "blue-50",
     },
   },
+  // Carbon's semantic layer lives entirely in `system`; it declares no
+  // further role-tier aliases.
+  roles: {},
 });
+
+export default preset;

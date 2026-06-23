@@ -1,74 +1,73 @@
 # @untheme/schema
 
-Runtime [zod](https://zod.dev) schemas for untheme's token contract.
+Types and runtime guards for untheme's token contract. Dependency-free.
 
-Given a theme's reference, system, and role token names as arrays, `createUnthemeSchema`
-builds a bundle of zod validators that mirror untheme's three-tier model — and enforce the
-relationships between tiers that the type system expresses with `NoInfer`. Use these to
-validate untrusted theme objects at runtime (e.g. JSON loaded from disk) instead of the
-`Untheme` instance typeguards.
+A **template** declares the token contract: which reference, system, and role tokens exist. `defineSchema` derives a bundle of type guards from a template, narrowed to its token vocabulary. Use them to validate untrusted theme objects at runtime (e.g. JSON loaded from disk) — anything that passes is contract-bound and safe to render.
+
+## Token tiers
+
+- **reference** tokens hold a raw CSS **value** (`"#0090ff"`, `"3px"`).
+- **system** tokens alias a **reference** token, per color mode (`light`/`dark`).
+- **role** tokens alias a **reference or system** token.
 
 ## Usage
 
 ```ts
-import { createUnthemeSchema } from "@untheme/schema";
+import { defineSchema } from "@untheme/schema";
 
-const schema = createUnthemeSchema(
-  ["bg", "accent-9", "radius-1"], // reference tokens
-  ["surface", "solid", "text"], // system tokens
-  ["brand", "danger"], // role tokens
-);
+const schema = defineSchema(template);
 
-const result = schema.preset.safeParse(await res.json());
-if (!result.success) throw new Error(result.error.message);
+const candidate = await res.json();
+if (!schema.theme(candidate)) throw new Error("not a valid theme");
 ```
 
-## What it validates
+## The guard chain
 
-The three tiers are validated by their value constraints:
+The structural guards build on each other:
 
-- **reference** tokens hold a raw **CSS value** (`cssValue`).
-- **system** tokens, per mode (`light`/`dark`), must alias a real **reference** token (`ref`).
-- **role** tokens must alias a real reference **or** system token (`ref | sys`).
+- `template` — shape: identity strings plus token records keyed by known token names. Per-tier key placement is not checked yet.
+- `layer` — a template whose keys all belong to their own tier and whose values satisfy each tier's rule: reference holds containment-safe values, system aliases references, roles alias either. Tokens may be omitted.
+- `theme` — a layer that is also complete: every contract token present, with light and dark structurally identical.
 
-Reference, mode, and role records are **exhaustive**: every declared key must be present, and
-unknown keys are rejected. A system token aliasing a non-reference value (a dangling alias)
-fails with the exact path, e.g. `modes.dark.text`; a dangling role fails at `roles.brand`.
+`patch` stands apart: an anonymous set of overrides where every facet (and each mode) is optional, but anything present must stay within the contract. Unlike a layer, a patch carries no identity.
 
-## `preset` vs `theme`
+## Value containment
 
-- `schema.preset` validates a theme **without** roles — the shape a preset ships and the shape
-  of the raw theme layers swapped at runtime.
-- `schema.theme` extends `preset` with the required `roles` record — a complete theme.
+`value` validates **containment, not vocabulary**. Browsers ignore invalid declarations, so a value doesn't need to be meaningful CSS — it only needs to be unable to escape the declaration it's interpolated into. Rejected:
 
-## CSS value validation
-
-`cssValue` validates reference values against a union of common CSS types via
-[`css-tree`](https://github.com/csstree/csstree) — colors, lengths, times, numbers,
-multi-layer shadows, easing functions, and font-family lists. Structurally invalid CSS
-(`#ggg`, unbalanced functions, empty strings) is rejected.
-
-To tighten a specific token to a single CSS type, use `cssType`:
-
-```ts
-import { cssType } from "@untheme/schema";
-
-const color = cssType("color");
-color.parse("#0090ff"); // ok
-color.parse("#ggg"); // throws
-```
+- breakout sequences: `;`, `{`, `}`, backslash escapes, `/*`, `</`, and `url(` in any casing
+- unbalanced parens and unclosed quotes
+- non-strings and blank strings
 
 ## The bundle
 
-`createUnthemeSchema` returns:
+`defineSchema(template)` returns a `Schema<T>` of type guards:
 
-| Field    | Schema                              | Validates                        |
-| -------- | ----------------------------------- | -------------------------------- |
-| `ref`    | `z.enum(reference)`                 | a reference token name           |
-| `sys`    | `z.enum(system)`                    | a system token name              |
-| `role`   | `z.enum(roles)`                     | a role token name                |
-| `preset` | `z.object({ …, reference, modes })` | a theme definition without roles |
-| `theme`  | `preset.extend({ roles })`          | a complete theme definition      |
+| Guard       | Checks                                                       |
+| ----------- | ------------------------------------------------------------ |
+| `mode`      | a supported color mode (`"light"` \| `"dark"`)               |
+| `value`     | a containment-safe CSS value                                 |
+| `reference` | a reference token name                                       |
+| `system`    | a system token name (either mode)                            |
+| `role`      | a role token name                                            |
+| `alias`     | a name a role may point to: reference or system              |
+| `token`     | any token name                                               |
+| `tokens`    | a record of known token names holding aliases or raw values  |
+| `template`  | a template-shaped object                                     |
+| `patch`     | a partial, contract-bound set of overrides                   |
+| `layer`     | a contract-bound overlay (tokens may be omitted)             |
+| `theme`     | a complete, mode-balanced instantiation of the template      |
 
-Within them, `reference` is `z.record(ref, cssValue)`, each mode is `z.record(sys, ref)`, and
-`roles` is `z.record(role, z.union([ref, sys]))`.
+## Types
+
+- `Template` — the token contract; its keys define which tokens exist.
+- `Contract<Ref, Sys, Rol>` — a template parameterized by its token name unions, for call sites that infer the contract from a literal theme. `NoInfer` keeps system and role values anchored to names declared elsewhere in the contract.
+- `Layer<T>` / `Theme<T>` / `Patch<T>` — the candidate shapes the guards narrow to.
+- `Reference<T>` / `System<T>` / `Role<T>` / `Alias<T>` / `Token<T>` — token name unions derived from a template.
+- `Tokens<T>` — the flat token map for a template.
+- `Mode` / `Value` — a color mode; a raw CSS value.
+
+## Related
+
+- [`@untheme/core`](../core) — the runtime theme service built on these guards.
+- [`untheme`](../untheme) — umbrella package re-exporting core and schema.

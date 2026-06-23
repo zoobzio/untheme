@@ -1,4 +1,5 @@
-import type { NuxtUnthemeConfigFactory } from "./types";
+import type { Template } from "untheme";
+import type { NuxtUnthemeUserConfig } from "./types";
 
 /**
  * Identity helper that types an untheme module config and infers the preset,
@@ -7,4 +8,6 @@ import type { NuxtUnthemeConfigFactory } from "./types";
  * @param config - The untheme module configuration.
  * @returns The same config, narrowed to its inferred types.
  */
-export const defineUnthemeConfig: NuxtUnthemeConfigFactory = (config) => config;
+export const defineUnthemeConfig = <T extends Template, K extends string>(
+  config: NuxtUnthemeUserConfig<T, K>,
+) => config;

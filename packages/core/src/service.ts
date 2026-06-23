@@ -1,76 +1,197 @@
-import type { UnthemeFactory } from "./types";
+import type {
+  Contract,
+  Layer,
+  Mode,
+  Patch,
+  Schema,
+  Theme,
+  Token,
+  Tokens,
+} from "@untheme/schema";
+import type { Config, Untheme } from "./types";
+
+import { defineSchema } from "@untheme/schema";
+import { clone, diff, merge } from "@untheme/utils";
 
 /**
- * Creates a runtime {@link Untheme} instance from a {@link Theme} definition.
+ * Creates a runtime {@link Untheme} service over a state container.
  *
- * @param theme - The theme definition containing reference, system, and role tokens.
- * @param mode - The initial color mode.
- * @returns An {@link Untheme} instance for token access, mutation, and mode toggling.
+ * The service is pure behavior: every read and write goes through `config`,
+ * so the caller decides whether state is plain (tests, node) or a reactive
+ * proxy (Vue) — reactivity threads through property access on the container,
+ * never through the service itself.
+ *
+ * Alongside the live state, the service keeps the creation baseline plus a
+ * per-id cache of every applied theme's pristine state: `create` resolves
+ * against the baseline, while `dirty` and `reset` work against the active
+ * id's cache entry.
+ *
+ * Inputs are validated against the contract at every boundary; violations
+ * throw from the semantic error stable in `error.ts`, never a bare `Error`.
+ *
+ * @param config - The caller-owned container holding the active theme and mode.
+ * @param themes - Layers applicable to the theme, validated up front.
+ * @returns An {@link Untheme} service bound to the container.
+ * @throws InvalidThemeError when the theme violates its own contract.
+ * @throws InvalidLayerError when a registry layer steps outside the contract.
  */
-export const defineUntheme: UnthemeFactory = (theme, mode) => {
-  type Theme = typeof theme;
-  type Ref = keyof Theme["reference"];
-  type Sys = keyof Theme["modes"]["dark"];
-  type Role = keyof Theme["roles"];
+export const defineUntheme = <
+  Ref extends string,
+  Sys extends string,
+  Rol extends string,
+>(
+  config: Config<Contract<Ref, Sys, Rol>>,
+  themes: Record<string, Layer<Contract<Ref, Sys, Rol>>> = {},
+): Untheme<Contract<Ref, Sys, Rol>> => {
+  type T = Contract<Ref, Sys, Rol>;
+
+  /**
+   * The baseline: a snapshot of the full theme at creation containing all available tokens.
+   */
+  const base = clone(config.theme);
+
+  /**
+   * Per-id baselines: each applied theme's pristine state, keyed by id.
+   * `dirty` and `reset` work against the active id's entry.
+   */
+  const cache: Record<string, Theme<T>> = {
+    [base.id]: clone(base),
+  };
+
+  /**
+   * Guards derived from the baseline — a complete theme is itself a valid
+   * template.
+   */
+  const schema: Schema<T> = defineSchema(base);
+
+  /**
+   * Flat token map for `mode` (default: active): roles shadow system, system
+   * shadows reference on name collision.
+   */
+  const tokens = (mode: Mode = config.mode) => {
+    return {
+      ...config.theme.reference,
+      ...config.theme.system[mode],
+      ...config.theme.roles,
+    };
+  };
+
+  /**
+   * One-hop read: the token's current binding (alias name or raw value),
+   * unresolved.
+   */
+  const get = <K extends Token<T>>(token: K) => {
+    return tokens(config.mode)[token];
+  };
+
+  /**
+   * Guarded write: roles take aliases, system tokens take references (current
+   * mode only), references take containment-safe values. Anything else is a
+   * silent no-op.
+   */
+  const set = <K extends Token<T>>(token: K, value: Tokens<T>[K]) => {
+    if (schema.guard.role(token) && schema.guard.alias(value)) {
+      config.theme.roles[token] = value;
+      return;
+    }
+    if (schema.guard.system(token) && schema.guard.reference(value)) {
+      config.theme.system[config.mode][token] = value;
+      return;
+    }
+    if (schema.guard.reference(token) && schema.guard.value(value)) {
+      config.theme.reference[token] = value;
+      return;
+    }
+  };
+
+  /**
+   * Follows the alias chain to a raw value. Any value equal to a token name
+   * is treated as an alias and followed. Throws {@link CircularAliasError}
+   * when the chain loops back on itself.
+   */
+  const resolve = <K extends Token<T>>(token: K): string => {
+    const value = get(token);
+    if (schema.guard.token(value)) {
+      return resolve(value);
+    }
+    return value;
+  };
+
+  /**
+   * Merges a patch's bindings over the active theme; identity is preserved.
+   * Throws {@link InvalidPatchError} when the patch steps outside the
+   * contract.
+   */
+  const update = (patch: Patch<T>) => {
+    schema.assert.patch(patch);
+    config.theme = merge(config.theme, patch);
+  };
+
+  /**
+   * Adopts a layer: becomes that theme — the layer resolved against the
+   * baseline — and caches the result as the id's pristine state. Throws
+   * {@link InvalidLayerError} when the layer steps outside the contract.
+   */
+  const apply = (layer: Layer<T>) => {
+    schema.assert.layer(layer);
+    config.theme = merge(base, layer);
+    cache[config.theme.id] = clone(config.theme);
+  };
+
+  /**
+   * Resolves a layer against the baseline into a complete theme: the layer's
+   * identity and bindings, gaps backfilled from the baseline. The active
+   * theme is not touched. Throws {@link InvalidLayerError} when the layer
+   * steps outside the contract.
+   */
+  const create = (layer: Layer<T>): Theme<T> => {
+    schema.assert.layer(layer);
+    return merge(base, layer);
+  };
+
+  /**
+   * Snapshots the active theme — including unsaved edits — as a detached
+   * theme under a new identity.
+   */
+  const extract = (id: string, name: string): Theme<T> => {
+    return merge(config.theme, { id, name });
+  };
+
+  /**
+   * Whether any active binding deviates from the active theme's baseline —
+   * the cached state it was applied with.
+   */
+  const dirty = () => {
+    const deviation = diff(cache[config.theme.id] ?? base, config.theme);
+    return [
+      deviation.reference,
+      deviation.system.light,
+      deviation.system.dark,
+      deviation.roles,
+    ].some((facet) => Object.keys(facet).length > 0);
+  };
+
+  /**
+   * Restores the active theme to its cached baseline, discarding edits made
+   * since it was applied. An id with no cache entry falls back to the base.
+   */
+  const reset = () => {
+    config.theme = merge(base, cache[config.theme.id] ?? {});
+  };
+
   return {
-    get theme() {
-      return theme;
-    },
-
-    set theme(t) {
-      theme = t;
-    },
-
-    get mode() {
-      return mode;
-    },
-
-    set mode(m) {
-      mode = m;
-    },
-
-    get tokens() {
-      return {
-        ...this.theme.reference,
-        ...this.theme.modes[mode],
-        ...this.theme.roles,
-      };
-    },
-
-    resolve(token) {
-      const val = this.tokens[token];
-      return this.isToken(val) ? this.resolve(val) : val;
-    },
-
-    update(token, value) {
-      if (this.isRole(token) && (this.isRef(value) || this.isSys(value))) {
-        this.theme.roles[token] = value;
-        return;
-      }
-      if (this.isSys(token) && this.isRef(value)) {
-        this.theme.modes[mode][token] = value;
-        return;
-      }
-      if (this.isRef(token)) {
-        this.theme.reference[token] = value;
-        return;
-      }
-    },
-
-    isRef(v: string): v is Ref {
-      return v in this.theme.reference;
-    },
-
-    isSys(v: string): v is Sys {
-      return v in this.theme.modes[this.mode];
-    },
-
-    isRole(v: string): v is Role {
-      return v in this.theme.roles;
-    },
-
-    isToken(v: string): v is Ref | Sys | Role {
-      return this.isRef(v) || this.isSys(v) || this.isRole(v);
-    },
+    config,
+    themes,
+    schema,
+    tokens,
+    get,
+    set,
+    resolve,
+    update,
+    apply,
+    create,
+    extract,
+    dirty,
+    reset,
   };
 };

@@ -21,6 +21,8 @@
     "test": "vitest run --root ../.."
   },
   "dependencies": {
-    "@untheme/core": "workspace:*"
+    "@untheme/core": "workspace:*",
+    "@untheme/schema": "workspace:*",
+    "@untheme/utils": "workspace:*"
   }
 }

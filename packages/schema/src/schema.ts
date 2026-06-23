@@ -1,63 +1,43 @@
-import * as z from "zod";
-import { cssValue } from "./css";
-import { SchemaTokens } from "./types";
+import type { Template, Schema, Assert } from "./types";
+
+import { defineLexicon } from "./lexicon";
+import { defineGuard } from "./guard";
+import { defineAssert } from "./assert";
+import { defineParse } from "./parse";
 
 /**
- * Builds a bundle of zod schemas for a theme's token contract.
+ * Builds the runtime validation {@link Schema} for a template's token
+ * contract.
  *
- * Given the reference, system, and role token names as arrays, this returns
- * runtime validators that mirror untheme's three-tier model and enforce the
- * relationships between tiers that the type system expresses with `NoInfer`:
+ * The factories layer over a shared rule set: `lexicon` derives the template's
+ * token {@link Set}s and a list of {@link Rule}s per tier, composed from the
+ * type-agnostic atoms in `util`. `guard` runs those rules as boolean type
+ * predicates; `assert` runs them too, but collects every {@link Issue} and
+ * throws a {@link SchemaError}; `parse` asserts and returns the value narrowed.
  *
- * - **reference** tokens hold raw CSS values (`cssValue`).
- * - **system** tokens, per mode (`light`/`dark`), must alias a real reference token (`ref`).
- * - **role** tokens must alias a real reference or system token (`ref | sys`).
+ * The tiers range from scalars (`mode`, `value`, the token-name tiers) to the
+ * composite shapes (`tokens`, `patch`, `layer`, `theme`), each validating
+ * progressively more of the contract — membership, tier aliasing, value
+ * containment, completeness, and light/dark parity.
  *
- * Returns a `theme` validator — a complete theme, every token required — and a
- * `partial` validator — a theme *layer*, where any token present must satisfy
- * its tier's rule but tokens may be omitted (unknown keys and invalid values are
- * still rejected). Use `partial` for layers that get merged into a full theme,
- * then `theme` to confirm the merged result is complete.
- *
- * @param reference - Reference token names.
- * @param system - System token names.
- * @param roles - Role token names.
- * @returns A bundle of zod schemas: token-name enums and structural validators.
+ * @param base - The template whose keys define the token contract.
+ * @returns A schema of token sets and guard/assert/parse bundles, all
+ *   narrowed to the template's token unions.
  */
-export const createUnthemeSchema = <
-  const Ref extends string,
-  const Sys extends string,
-  const Role extends string,
->(
-  tokens: SchemaTokens<Ref, Sys, Role>,
-) => {
-  const ref = z.enum(tokens.ref);
-  const sys = z.enum(tokens.sys);
-  const role = z.enum(tokens.role);
+export const defineSchema = <const T extends Template>(base: T): Schema<T> => {
+  const lexicon = defineLexicon(base);
+  const guard = defineGuard(lexicon);
+  const assert: Assert<T> = defineAssert(lexicon);
+  const parse = defineParse(assert);
 
-  const theme = z.object({
-    preset: z.string(),
-    key: z.string(),
-    label: z.string(),
-    reference: z.record(ref, cssValue),
-    modes: z.object({
-      light: z.record(sys, ref),
-      dark: z.record(sys, ref),
-    }),
-    roles: z.record(role, z.union([ref, sys])),
-  });
+  // baseline check - ensures base template follows structural rules
+  assert.theme(base);
 
-  const partial = z.object({
-    preset: z.string(),
-    key: z.string(),
-    label: z.string(),
-    reference: z.partialRecord(ref, cssValue),
-    modes: z.object({
-      light: z.partialRecord(sys, ref),
-      dark: z.partialRecord(sys, ref),
-    }),
-    roles: z.partialRecord(role, z.union([ref, sys])).optional(),
-  });
-
-  return { ref, sys, role, theme, partial };
+  return {
+    base,
+    lexicon,
+    guard,
+    assert,
+    parse,
+  };
 };

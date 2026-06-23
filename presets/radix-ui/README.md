@@ -2,21 +2,24 @@
 
 Radix UI token preset for untheme.
 
-Provides a complete [Radix Colors](https://www.radix-ui.com/colors) baseline with 801 reference tokens and 49 system tokens, ready to use or customize via the theme factory, plus 6 ready-made accent variants.
+Provides a complete [Radix Colors](https://www.radix-ui.com/colors) baseline with 801 reference tokens and 49 system tokens as an untheme preset, plus 6 ready-made accent variants importable by path.
 
 ## Usage
 
 ```ts
-import { defineRadixTheme } from "@untheme/radix-ui";
+import preset from "@untheme/radix-ui";
+import blue from "@untheme/radix-ui/themes/blue";
 
-// Create a theme with the Radix baseline defaults (indigo accent, slate gray)
-const theme = defineRadixTheme({ key: "app", label: "My App" });
+// Pack the base and the variants you want into a bundle —
+// every entry is a complete theme, resolved over the Radix base.
+const bundle = preset.use(blue);
 
-// Or override specific reference tokens
-const brand = defineRadixTheme({
-  key: "brand",
-  label: "Brand",
+// Or author your own variant against the preset's contract
+const brand = preset.define({
+  id: "brand",
+  name: "Brand",
   reference: { "indigo-9": "#1e40af" },
+  system: { light: {}, dark: {} },
 });
 ```
 
@@ -82,10 +85,13 @@ System tokens follow Radix's [12-step semantic scale](https://www.radix-ui.com/c
 
 ## Themes
 
-Built-in accent variants, each pairing a Radix accent with its recommended gray:
+6 built-in accent variants ship as individual subpath exports — only the ones you import enter your module graph. Each pairs a Radix accent with its recommended gray:
 
 ```ts
-import themes from "@untheme/radix-ui/themes";
+import blue from "@untheme/radix-ui/themes/blue";
+import teal from "@untheme/radix-ui/themes/teal";
 ```
 
 `blue` (slate), `cyan` (slate), `teal` (sage), `grass` (sage), `crimson` (mauve), `orange` (sand).
+
+See [src/themes/README.md](./src/themes/README.md) for the full list.

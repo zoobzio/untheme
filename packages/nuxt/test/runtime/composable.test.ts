@@ -1,140 +1,134 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { reactive, ref, nextTick, type Ref } from "vue";
-import { defineUntheme, type Untheme } from "untheme";
-import {
-  appTheme,
-  themesMap,
-  createStoreRefs,
-  type StoreRefs,
-} from "../fixtures";
+import { reactive, nextTick, type Ref } from "vue";
+import { defineUntheme, clone, type Mode } from "untheme";
+import type { AppConfig, AppUntheme } from "../../src/runtime/types";
+import { theme, themes } from "../fixtures";
 
-let store: StoreRefs;
-let initialized: Ref<boolean>;
-let untheme: Untheme<string, string, string>;
+let cookies: Record<string, Ref<unknown>>;
+let service: AppUntheme;
+let nuxtApp: { $untheme: AppUntheme; callHook: ReturnType<typeof vi.fn> };
 
-const client = { get: vi.fn(async (id: string) => ({ ...themesMap[id] })) };
+vi.mock("#build/untheme.mjs", () => ({ theme, themes }));
 
-vi.mock("../../src/runtime/store", () => ({
-  accessTheme: () => ({
-    initialized,
-    key: store.key,
-    themes: store.themes,
-    cookies: {
-      key: store.cookieKey,
-      mode: store.cookieMode,
-    },
-  }),
+vi.mock("#app", () => ({
+  useNuxtApp: () => nuxtApp,
 }));
 
-vi.mock("../../src/runtime/util", () => ({
-  makeUntheme: () => () => untheme,
-  makeThemeClient: () => () => client,
+vi.mock("#imports", () => ({
+  useCookie: (key: string) => {
+    cookies[key] ??= reactive({ value: null }) as unknown as Ref<unknown>;
+    return cookies[key];
+  },
 }));
 
-import { useTheme } from "../../src/runtime/composable";
+import { useUntheme } from "../../src/runtime/composable";
 
-describe("useTheme", () => {
+describe("useUntheme", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    store = createStoreRefs();
-    initialized = ref(false);
-    untheme = reactive(
-      defineUntheme({ ...appTheme }, "dark"),
-    ) as unknown as Untheme<string, string, string>;
-    client.get.mockImplementation(async (id: string) => ({
-      ...themesMap[id],
-    }));
+    cookies = {};
+    const config = reactive<AppConfig>({ mode: "dark", theme: clone(theme) });
+    service = defineUntheme(config, themes);
+    nuxtApp = { $untheme: service, callHook: vi.fn() };
   });
 
-  it("returns mode, theme, themes, tokens, and init", () => {
-    const result = useTheme();
-    expect(result).toHaveProperty("mode");
-    expect(result).toHaveProperty("theme");
-    expect(result).toHaveProperty("themes");
-    expect(result).toHaveProperty("tokens");
-    expect(result).toHaveProperty("init");
+  it("exposes reactive state and the instrumented actions", () => {
+    const u = useUntheme();
+    for (const key of [
+      "mode",
+      "theme",
+      "tokens",
+      "themes",
+      "setMode",
+      "apply",
+      "set",
+      "update",
+      "reset",
+      "create",
+      "extract",
+      "get",
+      "resolve",
+    ]) {
+      expect(u).toHaveProperty(key);
+    }
   });
 
-  it("exposes the initial mode as a ref", () => {
-    const { mode } = useTheme();
+  it("reflects the service's current mode, theme, and tokens", () => {
+    const { mode, theme: active, tokens } = useUntheme();
     expect(mode.value).toBe("dark");
+    expect(active.value.id).toBe("alpha");
+    expect(tokens.value.primary).toBe("indigo");
   });
 
-  it("exposes the theme as a ref", () => {
-    const { theme } = useTheme();
-    expect(theme.value.label).toBe("Alpha");
-  });
+  describe("setMode", () => {
+    it("updates the service, persists the cookie, and emits untheme:mode", () => {
+      const { setMode, mode } = useUntheme();
+      setMode("light");
+      expect(service.config.mode).toBe("light");
+      expect(mode.value).toBe("light");
+      expect(cookies["untheme-mode"].value).toBe("light");
+      expect(nuxtApp.callHook).toHaveBeenCalledWith("untheme:mode", "light");
+    });
 
-  it("exposes tokens as a ref", () => {
-    const { tokens } = useTheme();
-    expect(tokens.value).toHaveProperty("white");
-    expect(tokens.value).toHaveProperty("primary");
-  });
-
-  describe("reactivity", () => {
-    it("tokens ref updates when mode changes", async () => {
-      const { mode, tokens } = useTheme();
+    it("recomputes tokens when the mode flips", async () => {
+      const { setMode, tokens } = useUntheme();
       expect(tokens.value.primary).toBe("indigo");
-      mode.value = "light";
+      setMode("light");
       await nextTick();
       expect(tokens.value.primary).toBe("blue");
     });
+  });
 
-    it("theme ref updates when theme is replaced", async () => {
-      const { theme } = useTheme();
-      expect(theme.value.label).toBe("Alpha");
-      theme.value = { ...appTheme, label: "Replaced" };
-      await nextTick();
-      expect(theme.value.label).toBe("Replaced");
-    });
-
-    it("tokens ref reflects token updates", async () => {
-      const { tokens } = useTheme();
-      expect(tokens.value.white).toBe("#ffffff");
-      untheme.update("white", "#fefefe");
-      await nextTick();
-      expect(tokens.value.white).toBe("#fefefe");
+  describe("apply", () => {
+    it("switches theme, persists the key cookie, and emits untheme:apply", () => {
+      const { apply, theme: active } = useUntheme();
+      apply("bravo");
+      expect(service.config.theme.id).toBe("bravo");
+      expect(active.value.id).toBe("bravo");
+      expect(cookies["untheme-key"].value).toBe("bravo");
+      expect(nuxtApp.callHook).toHaveBeenCalledWith(
+        "untheme:apply",
+        expect.objectContaining({ id: "bravo" }),
+      );
     });
   });
 
-  describe("init", () => {
-    it("syncs mode from cookie", async () => {
-      store.cookieMode.value = "light";
-      const { init, mode } = useTheme();
-      await init();
-      expect(mode.value).toBe("light");
+  describe("set / update", () => {
+    it("set delegates to the service and emits untheme:set without a cookie", () => {
+      const { set } = useUntheme();
+      set("text-color", "primary");
+      expect(service.get("text-color")).toBe("primary");
+      expect(nuxtApp.callHook).toHaveBeenCalledWith(
+        "untheme:set",
+        "text-color",
+        "primary",
+      );
+      expect(cookies["untheme-key"].value).toBeNull();
     });
 
-    it("does not change mode if cookie matches", async () => {
-      store.cookieMode.value = "dark";
-      const { init, mode } = useTheme();
-      await init();
-      expect(mode.value).toBe("dark");
+    it("update merges a patch and emits untheme:update", () => {
+      const { update } = useUntheme();
+      update({ reference: { white: "#eeeeee" } });
+      expect(service.config.theme.reference.white).toBe("#eeeeee");
+      expect(nuxtApp.callHook).toHaveBeenCalledWith("untheme:update", {
+        reference: { white: "#eeeeee" },
+      });
     });
+  });
 
-    it("switches theme via the client when cookie key differs", async () => {
-      store.cookieKey.value = "bravo";
-      const { init, theme } = useTheme();
-      await init();
-      expect(client.get).toHaveBeenCalledWith("bravo");
-      expect(store.key.value).toBe("bravo");
-      expect(theme.value.label).toBe("Bravo");
+  describe("reset", () => {
+    it("delegates to the service and emits untheme:reset", () => {
+      const { set, reset } = useUntheme();
+      set("text-color", "primary");
+      reset();
+      expect(service.get("text-color")).not.toBe("primary");
+      expect(nuxtApp.callHook).toHaveBeenCalledWith("untheme:reset");
     });
+  });
 
-    it("does not switch when cookie key matches", async () => {
-      store.cookieKey.value = "alpha";
-      const { init } = useTheme();
-      await init();
-      expect(client.get).not.toHaveBeenCalled();
-      expect(store.key.value).toBe("alpha");
-    });
-
-    it("does nothing when already initialized", async () => {
-      initialized.value = true;
-      store.cookieMode.value = "light";
-      const { init, mode } = useTheme();
-      await init();
-      expect(mode.value).toBe("dark");
-    });
+  it("guards the mode union at the type level", () => {
+    const { setMode } = useUntheme();
+    const mode: Mode = "light";
+    setMode(mode);
+    expect(service.config.mode).toBe("light");
   });
 });

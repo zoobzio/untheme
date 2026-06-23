@@ -1,34 +1,37 @@
 import { describe, it, expect } from "vitest";
-import themes from "../src/themes";
+import { defineSchema } from "@untheme/schema";
+import preset from "../src/preset";
 
-const entries = Object.entries(themes);
+import g10g90 from "../src/themes/g10-g90";
+import g10g100 from "../src/themes/g10-g100";
+import whiteg90 from "../src/themes/white-g90";
+
+const themes = {
+  "g10-g90": g10g90,
+  "g10-g100": g10g100,
+  "white-g90": whiteg90,
+};
+
+// The base scheme is its own contract; variants may not step outside it.
+const schema = defineSchema(preset.use("light").theme);
 
 describe("Carbon theme variants", () => {
-  it("exports built variants", () => {
-    expect(entries.length).toBeGreaterThan(0);
+  it("resolves every variant to a distinct id", () => {
+    expect(
+      Object.values(themes)
+        .map((t) => t.id)
+        .sort(),
+    ).toEqual(Object.keys(themes).sort());
   });
 
-  for (const [name, theme] of entries) {
-    describe(name, () => {
-      it("keys its variant under its own theme key", () => {
-        expect(theme.key).toBe(name);
+  for (const [key, variant] of Object.entries(themes)) {
+    describe(key, () => {
+      it("carries an id matching its file name", () => {
+        expect(variant.id).toBe(key);
       });
 
-      it("has matching light and dark system token keys", () => {
-        expect(Object.keys(theme.modes.light).sort()).toEqual(
-          Object.keys(theme.modes.dark).sort(),
-        );
-      });
-
-      it("aliases only real reference tokens from every system token", () => {
-        const refKeys = new Set(Object.keys(theme.reference));
-        const aliases = [
-          ...Object.values(theme.modes.light),
-          ...Object.values(theme.modes.dark),
-        ];
-        for (const alias of aliases) {
-          expect(refKeys.has(alias)).toBe(true);
-        }
+      it("resolves to a complete, contract-bound theme", () => {
+        expect(schema.guard.theme(variant)).toBe(true);
       });
     });
   }

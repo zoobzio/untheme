@@ -30,6 +30,8 @@
   },
   "dependencies": {
     "@untheme/core": "workspace:*",
-    "@untheme/kit": "workspace:*"
+    "@untheme/kit": "workspace:*",
+    "@untheme/schema": "workspace:*",
+    "@untheme/utils": "workspace:*"
   }
 }

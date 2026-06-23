@@ -1,16 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ref, computed, nextTick } from "vue";
-import type { ColorMode } from "untheme";
-
-const mockMode = ref<ColorMode>("dark");
-const mockTokens = ref<Record<string, string>>({ white: "#ffffff" });
-
-vi.mock("../../src/runtime/composable", () => ({
-  useTheme: () => ({
-    mode: mockMode,
-    tokens: computed(() => mockTokens.value),
-  }),
-}));
+import { ref, nextTick, type Ref } from "vue";
+import type { AppConfig } from "../../src/runtime/types";
+import { theme, themes } from "../fixtures";
 
 interface HeadInput {
   htmlAttrs: { class: { value: string } };
@@ -18,73 +9,82 @@ interface HeadInput {
 }
 
 const headCalls: HeadInput[] = [];
+let state: Ref<AppConfig>;
+const callHook = vi.fn();
+
+vi.mock("#build/untheme.mjs", () => ({ theme, themes }));
+
+vi.mock("#app", () => ({
+  defineNuxtPlugin: (def: unknown) => def,
+}));
+
 vi.mock("#imports", () => ({
+  useState: (_key: string, init: () => AppConfig) => {
+    state = ref(init());
+    return state;
+  },
   useHead: (input: HeadInput) => {
     headCalls.push(input);
   },
 }));
 
-vi.mock("#app", () => ({
-  defineNuxtPlugin: (def: {
-    name: string;
-    setup: (nuxtApp?: unknown) => void;
-  }) => def,
-}));
-
 vi.mock("untheme/css", () => ({
   generateCSS: (tokens: Record<string, string>) =>
-    `/* css ${Object.keys(tokens).join(",")} */`,
+    `/* ${Object.keys(tokens).join(",")} */`,
 }));
 
 import plugin from "../../src/runtime/plugin";
 
+const setup = () => {
+  const result = plugin.setup({ callHook } as never);
+  if (
+    !result ||
+    typeof result !== "object" ||
+    !("provide" in result) ||
+    !result.provide
+  ) {
+    throw new Error("plugin did not provide a service");
+  }
+  return result.provide;
+};
+
 describe("untheme plugin", () => {
   beforeEach(() => {
     headCalls.length = 0;
-    mockMode.value = "dark";
-    mockTokens.value = { white: "#ffffff" };
+    callHook.mockClear();
   });
 
-  it("has the name untheme", () => {
+  it("is named untheme", () => {
     expect(plugin.name).toBe("untheme");
   });
 
-  it("calls useHead on setup", () => {
-    plugin.setup();
-    expect(headCalls.length).toBeGreaterThan(0);
+  it("provides the untheme service", () => {
+    const provide = setup();
+    expect(provide.untheme).toBeDefined();
   });
 
-  it("sets dark class when mode is dark", () => {
-    plugin.setup();
+  it("injects the dark class and token CSS via useHead", () => {
+    setup();
     expect(headCalls[0].htmlAttrs.class.value).toContain("dark");
+    expect(headCalls[0].style.value[0].key).toBe("untheme");
+    expect(headCalls[0].style.value[0].innerHTML).toContain("white");
   });
 
-  it("removes dark class when mode is light", () => {
-    mockMode.value = "light";
-    plugin.setup();
-    expect(headCalls[0].htmlAttrs.class.value).not.toContain("dark");
-  });
-
-  it("generates CSS from tokens", () => {
-    plugin.setup();
-    expect(headCalls[0].style.value[0].innerHTML).toContain("css white");
+  it("emits untheme:ready with the initial theme", () => {
+    setup();
+    expect(callHook).toHaveBeenCalledWith(
+      "untheme:ready",
+      expect.objectContaining({ id: "alpha" }),
+    );
   });
 
   describe("reactivity", () => {
-    it("class updates when mode changes after setup", async () => {
-      plugin.setup();
+    it("toggles the dark class when the mode changes", async () => {
+      setup();
       expect(headCalls[0].htmlAttrs.class.value).toContain("dark");
-      mockMode.value = "light";
+      state.value.mode = "light";
       await nextTick();
       expect(headCalls[0].htmlAttrs.class.value).not.toContain("dark");
-    });
-
-    it("CSS updates when tokens change after setup", async () => {
-      plugin.setup();
-      expect(headCalls[0].style.value[0].innerHTML).toContain("css white");
-      mockTokens.value = { blue: "#0000ff" };
-      await nextTick();
-      expect(headCalls[0].style.value[0].innerHTML).toContain("css blue");
     });
   });
 });

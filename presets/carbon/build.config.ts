@@ -1,10 +1,6 @@
 import { defineBuildConfig } from "unbuild";
 
 export default defineBuildConfig({
-  entries: ["src/index", "src/themes/index"],
-  outDir: ".dist",
+  entries: [{ builder: "mkdist", input: "src", outDir: ".dist" }],
   declaration: true,
-  rollup: {
-    emitCJS: false,
-  },
 });

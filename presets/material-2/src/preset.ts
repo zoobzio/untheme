@@ -2,7 +2,7 @@ import { defineUnthemePreset } from "@untheme/kit";
 import { createM2ColorTokens } from "./colors";
 
 /**
- * Material Design 2 theme factory.
+ * The Material Design 2 preset.
  *
  * Reference tokens provide the full M2 token set: color palettes (Tailwind
  * family names as seeds with 50–900 + A100–A700 shades), typography scales,
@@ -10,10 +10,9 @@ import { createM2ColorTokens } from "./colors";
  * tokens map color references to semantic roles per light/dark mode following
  * the M2 color system specification.
  */
-export const defineM2Theme = defineUnthemePreset({
-  preset: "m2",
-  key: "m2",
-  label: "Material 2",
+export const preset = defineUnthemePreset({
+  id: "material-2",
+  name: "Material 2",
   reference: {
     // Chromatic palettes
     ...createM2ColorTokens("red", "#ef4444"),
@@ -167,7 +166,7 @@ export const defineM2Theme = defineUnthemePreset({
     "duration-entering": "225ms",
     "duration-leaving": "195ms",
   },
-  modes: {
+  system: {
     light: {
       primary: "violet-500",
       "primary-variant": "violet-700",
@@ -197,4 +196,7 @@ export const defineM2Theme = defineUnthemePreset({
       "on-error": "neutral-900",
     },
   },
+  roles: {},
 });
+
+export default preset;

@@ -1,7 +1,10 @@
 import type { RadixLightRef, RadixDarkRef } from "./types";
 import { RADIX_STEPS } from "./constant";
 
-/** A raw Radix scale object, e.g. `{ blue1: "#fbfdff", ..., blue12: "#113264" }`. */
+/**
+ * A raw Radix scale object, e.g. `{ blue1: "#fbfdff", ..., blue12: "#113264"
+ * }`.
+ */
 export type RadixScaleObject = Record<string, string>;
 
 /**
@@ -15,7 +18,8 @@ export type RadixScaleObject = Record<string, string>;
  *
  * @param name - Prefix for the token keys (e.g. "blue", "slate").
  * @param light - The light scale object from `@radix-ui/colors` (e.g. `blue`).
- * @param dark - The dark scale object from `@radix-ui/colors` (e.g. `blueDark`).
+ * @param dark - The dark scale object from `@radix-ui/colors` (e.g.
+ * `blueDark`).
  * @returns A record of `{name}-{step}` and `{name}-dark-{step}` to hex values.
  */
 export const createRadixColorTokens = <N extends string>(

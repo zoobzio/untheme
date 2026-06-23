@@ -2,21 +2,24 @@
 
 IBM Carbon Design System token preset for untheme.
 
-Provides a complete [Carbon](https://carbondesignsystem.com) baseline with 210 reference tokens and 31 system tokens, ready to use or customize via the theme factory, plus the official Carbon theme pairings as ready-made variants.
+Provides a complete [Carbon](https://carbondesignsystem.com) baseline with 210 reference tokens and 31 system tokens as an untheme preset, plus the official Carbon theme pairings as ready-made variants importable by path.
 
 ## Usage
 
 ```ts
-import { defineCarbonTheme } from "@untheme/carbon";
+import preset from "@untheme/carbon";
+import g10g90 from "@untheme/carbon/themes/g10-g90";
 
-// Create a theme with the Carbon baseline defaults (White light / Gray 100 dark)
-const theme = defineCarbonTheme({ key: "app", label: "My App" });
+// Pack the base and the variants you want into a bundle —
+// every entry is a complete theme, resolved over the Carbon base.
+const bundle = preset.use(g10g90);
 
-// Or override specific reference tokens
-const brand = defineCarbonTheme({
-  key: "brand",
-  label: "Brand",
+// Or author your own variant against the preset's contract
+const brand = preset.define({
+  id: "brand",
+  name: "Brand",
   reference: { "blue-60": "#1e40af" },
+  system: { light: {}, dark: {} },
 });
 ```
 
@@ -64,10 +67,12 @@ System tokens follow Carbon's semantic color roles, each mapped to a palette gra
 
 ## Themes
 
-Each untheme theme bundles a light **and** a dark mode, so the four official single-tone Carbon themes (White, Gray 10, Gray 90, Gray 100) are surfaced as light/dark pairings. The base preset is **White / Gray 100** (Carbon's default); the other three pairings ship as variants:
+Each untheme theme bundles a light **and** a dark mode, so the four official single-tone Carbon themes (White, Gray 10, Gray 90, Gray 100) are surfaced as light/dark pairings. The base preset is **White / Gray 100** (Carbon's default); the other three pairings ship as individual subpath exports — only the ones you import enter your module graph:
 
 ```ts
-import themes from "@untheme/carbon/themes";
+import whiteg90 from "@untheme/carbon/themes/white-g90";
+import g10g100 from "@untheme/carbon/themes/g10-g100";
+import g10g90 from "@untheme/carbon/themes/g10-g90";
 ```
 
 | Theme        | Light   | Dark      |

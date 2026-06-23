@@ -1,49 +1,73 @@
 # @untheme/kit
 
-Authoring toolkit for building reusable untheme presets.
+Authoring toolkit for untheme presets.
 
-A **preset** defines the reference + system token structure once; the factory it produces then accepts deep-partial overrides to create unlimited variants. The [`@untheme/material-2`](../preset/material-2) and [`@untheme/material-3`](../preset/material-3) packages are both built with this kit.
+A preset ships a complete base theme — reference, system, and role tokens. `defineUnthemePreset(base)` returns the authoring handle that presets use to define theme variants and that apps use to boot a service from them.
 
-## Exports
-
-### `defineUnthemePreset(preset)`
-
-Creates a theme factory from a base [`Preset`](#presetref-sys). The returned function takes `{ key, label }` plus optional deep-partial `reference`/`modes` overrides and returns a fully resolved preset.
+## Usage
 
 ```ts
+// preset.ts — the base theme the preset ships as its default
 import { defineUnthemePreset } from "@untheme/kit";
 
-const defineMyPreset = defineUnthemePreset({
-  preset: "my",
-  key: "my",
-  label: "My Preset",
-  reference: { blue: "#3b82f6", white: "#fff", black: "#000" },
-  modes: {
+export const preset = defineUnthemePreset({
+  id: "my",
+  name: "My Preset",
+  reference: { blue: "#3b82f6", white: "#ffffff", black: "#000000" },
+  system: {
     light: { primary: "blue", surface: "white" },
     dark: { primary: "blue", surface: "black" },
   },
-});
-
-const variant = defineMyPreset({
-  key: "brand",
-  label: "Brand",
-  reference: { blue: "#1e40af" }, // overrides merge over the base
+  roles: { accent: "primary" },
 });
 ```
 
-### `Preset<Ref, Sys>`
+```ts
+// themes/brand.ts — a variant resolved against the base
+import { preset } from "../preset";
 
-A [`Theme`](../core) without `roles` — the reference + per-mode system token contract that a preset defines. Roles are layered on later by the consumer (e.g. the Nuxt module).
+export default preset.define({
+  id: "brand",
+  name: "Brand",
+  reference: { blue: "#1e40af" },
+  system: { light: {}, dark: {} },
+  roles: {},
+});
+```
 
-### `PresetFactory`
+```ts
+// app — a ready config for the runtime service
+import { defineUntheme } from "@untheme/core";
+import { preset } from "my-preset";
+import brand from "my-preset/themes/brand";
 
-The signature returned by `defineUnthemePreset`.
+const ut = defineUntheme(preset.use("dark"), { brand });
+```
 
-### `DeepPartial<T>`
+```ts
+// app, customized — derive a widened preset before booting
+const app = preset.configure({
+  id: "app",
+  name: "App",
+  reference: { red: "#ff0000" }, // joins the contract
+  system: { light: { danger: "red" }, dark: { danger: "red" } },
+  roles: { alert: "danger" },
+});
 
-Recursively makes every property of `T` optional — used for the override argument.
+const ut = defineUntheme(app.use("dark"));
+```
+
+## The authoring handle
+
+`defineUnthemePreset(base)` returns a `Preset` with three methods:
+
+- `define(layer)` — resolves a variant layer against the base into a complete theme: the layer's identity, its overrides merged over the base tokens. Powered by [`merge`](../utils).
+- `configure(theme)` — derives a new preset whose base is this one widened by the theme: base tokens overridden where the theme binds them, new tokens joining the contract, identity from the theme. Powered by [`extend`](../utils).
+- `use(mode)` — builds a ready `Config` for [`defineUntheme`](../core): the given mode and a detached copy of the base.
 
 ## Related
 
-- [`@untheme/core`](../core) — the token contract and runtime instance.
-- [`untheme`](../untheme) — umbrella package; `untheme/kit` re-exports this package.
+- [`@untheme/schema`](../schema) — token contract types and runtime guards.
+- [`@untheme/utils`](../utils) — the clone/merge/extend primitives.
+- [`@untheme/core`](../core) — the runtime theme service.
+- [`untheme`](../untheme) — umbrella package.

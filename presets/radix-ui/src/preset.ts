@@ -66,19 +66,20 @@ import {
 import { createRadixColorTokens } from "./colors";
 
 /**
- * Radix UI theme factory.
+ * The Radix UI preset.
  *
- * Reference tokens provide the full Radix Colors set — 31 scales (25 chromatic
- * + 6 neutral), each as a light (`{scale}-{step}`) and dark (`{scale}-dark-{step}`)
+ * Reference tokens provide the full Radix Colors set — 31 scales (25
+ * chromatic
+ * + 6 neutral), each as a light (`{scale}-{step}`) and dark
+ * (`{scale}-dark-{step}`)
  * 12-step palette — alongside Radix Themes radius, spacing, typography, and
  * shadow tokens. System tokens map those references onto Radix's 12-step
  * semantic roles per light/dark mode: accent and gray scales plus error,
  * success, warning, and info status colors.
  */
-export const defineRadixTheme = defineUnthemePreset({
-  preset: "radix",
-  key: "radix",
-  label: "Radix UI",
+export const preset = defineUnthemePreset({
+  id: "radix-ui",
+  name: "Radix UI",
   reference: {
     // Chromatic scales
     ...createRadixColorTokens("tomato", tomato, tomatoDark),
@@ -186,7 +187,7 @@ export const defineRadixTheme = defineUnthemePreset({
     "shadow-6":
       "0 24px 48px -12px rgb(0 0 0 / 24%), 0 8px 16px -8px rgb(0 0 0 / 12%)",
   },
-  modes: {
+  system: {
     light: {
       // Accent — indigo
       "accent-app-bg": "indigo-1",
@@ -304,4 +305,7 @@ export const defineRadixTheme = defineUnthemePreset({
       overlay: "black",
     },
   },
+  roles: {},
 });
+
+export default preset;

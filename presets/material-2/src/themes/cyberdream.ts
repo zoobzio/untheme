@@ -1,0 +1,65 @@
+import preset from "../preset";
+import { createM2ColorTokens } from "../colors";
+
+/**
+ * Cyberdream theme — M2 token variant.
+ */
+export default preset.define({
+  id: "cyberdream",
+  name: "Cyberdream",
+  reference: {
+    ...createM2ColorTokens("red", "#ff6e5e"),
+    ...createM2ColorTokens("orange", "#ffbd5e"),
+    ...createM2ColorTokens("amber", "#ffbd5e"),
+    ...createM2ColorTokens("yellow", "#f1ff5e"),
+    ...createM2ColorTokens("lime", "#5eff6c"),
+    ...createM2ColorTokens("green", "#5eff6c"),
+    ...createM2ColorTokens("emerald", "#5ef1ff"),
+    ...createM2ColorTokens("teal", "#5ef1ff"),
+    ...createM2ColorTokens("cyan", "#5ef1ff"),
+    ...createM2ColorTokens("sky", "#5ea1ff"),
+    ...createM2ColorTokens("blue", "#5ea1ff"),
+    ...createM2ColorTokens("indigo", "#5ea1ff"),
+    ...createM2ColorTokens("violet", "#bd5eff"),
+    ...createM2ColorTokens("purple", "#bd5eff"),
+    ...createM2ColorTokens("fuchsia", "#ff5ef1"),
+    ...createM2ColorTokens("pink", "#ff5ea0"),
+    ...createM2ColorTokens("rose", "#ff6e5e"),
+    ...createM2ColorTokens("slate", "#7b8496"),
+    ...createM2ColorTokens("gray", "#7b8496"),
+    ...createM2ColorTokens("zinc", "#3c4048"),
+    ...createM2ColorTokens("neutral", "#1e2124"),
+    ...createM2ColorTokens("stone", "#7b8496"),
+  },
+  system: {
+    light: {
+      primary: "blue-500",
+      "primary-variant": "blue-700",
+      "on-primary": "neutral-50",
+      secondary: "violet-500",
+      "secondary-variant": "violet-700",
+      "on-secondary": "neutral-50",
+      background: "neutral-50",
+      "on-background": "neutral-900",
+      surface: "neutral-50",
+      "on-surface": "neutral-900",
+      error: "red-500",
+      "on-error": "neutral-50",
+    },
+    dark: {
+      primary: "blue-200",
+      "primary-variant": "blue-700",
+      "on-primary": "neutral-900",
+      secondary: "violet-200",
+      "secondary-variant": "violet-200",
+      "on-secondary": "neutral-900",
+      background: "neutral-900",
+      "on-background": "neutral-50",
+      surface: "neutral-900",
+      "on-surface": "neutral-50",
+      error: "red-200",
+      "on-error": "neutral-900",
+    },
+  },
+  roles: {},
+});

@@ -19,13 +19,5 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --root ../.."
-  },
-  "dependencies": {
-    "@untheme/core": "workspace:*",
-    "css-tree": "^3.2.1",
-    "zod": "^4.4.3"
-  },
-  "devDependencies": {
-    "@types/css-tree": "^2.3.11"
   }
 }

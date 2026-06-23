@@ -1,0 +1,65 @@
+import preset from "../preset";
+import { createM2ColorTokens } from "../colors";
+
+/**
+ * Synthwave theme — M2 token variant.
+ */
+export default preset.define({
+  id: "synthwave",
+  name: "Synthwave",
+  reference: {
+    ...createM2ColorTokens("red", "#fe4450"),
+    ...createM2ColorTokens("orange", "#ff8b39"),
+    ...createM2ColorTokens("amber", "#fede5d"),
+    ...createM2ColorTokens("yellow", "#fede5d"),
+    ...createM2ColorTokens("lime", "#72f1b8"),
+    ...createM2ColorTokens("green", "#72f1b8"),
+    ...createM2ColorTokens("emerald", "#72f1b8"),
+    ...createM2ColorTokens("teal", "#36f9f6"),
+    ...createM2ColorTokens("cyan", "#36f9f6"),
+    ...createM2ColorTokens("sky", "#03edf9"),
+    ...createM2ColorTokens("blue", "#03edf9"),
+    ...createM2ColorTokens("indigo", "#495495"),
+    ...createM2ColorTokens("violet", "#614D85"),
+    ...createM2ColorTokens("purple", "#614D85"),
+    ...createM2ColorTokens("fuchsia", "#ff7edb"),
+    ...createM2ColorTokens("pink", "#fc28a8"),
+    ...createM2ColorTokens("rose", "#fe4450"),
+    ...createM2ColorTokens("slate", "#848bbd"),
+    ...createM2ColorTokens("gray", "#848bbd"),
+    ...createM2ColorTokens("zinc", "#2a2139"),
+    ...createM2ColorTokens("neutral", "#262335"),
+    ...createM2ColorTokens("stone", "#b6b1b1"),
+  },
+  system: {
+    light: {
+      primary: "fuchsia-500",
+      "primary-variant": "fuchsia-700",
+      "on-primary": "neutral-50",
+      secondary: "cyan-500",
+      "secondary-variant": "cyan-700",
+      "on-secondary": "neutral-50",
+      background: "neutral-50",
+      "on-background": "neutral-900",
+      surface: "neutral-50",
+      "on-surface": "neutral-900",
+      error: "red-500",
+      "on-error": "neutral-50",
+    },
+    dark: {
+      primary: "fuchsia-200",
+      "primary-variant": "fuchsia-700",
+      "on-primary": "neutral-900",
+      secondary: "cyan-200",
+      "secondary-variant": "cyan-200",
+      "on-secondary": "neutral-900",
+      background: "neutral-900",
+      "on-background": "neutral-50",
+      surface: "neutral-900",
+      "on-surface": "neutral-50",
+      error: "red-200",
+      "on-error": "neutral-900",
+    },
+  },
+  roles: {},
+});

@@ -1,6 +1,7 @@
 /**
  * The 10 grades in every Carbon color family, ordered from 10 (lightest) to
- * 100 (darkest). Carbon grades are mode-independent — a grade carries the same
+ * 100 (darkest). Carbon grades are mode-independent — a grade carries the
+ * same
  * raw value in every theme; only the semantic token → grade mapping changes.
  */
 export const CARBON_GRADES = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100] as const;

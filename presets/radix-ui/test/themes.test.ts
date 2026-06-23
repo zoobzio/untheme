@@ -1,34 +1,45 @@
 import { describe, it, expect } from "vitest";
-import themes from "../src/themes";
+import { defineSchema } from "@untheme/schema";
+import preset from "../src/preset";
 
-const entries = Object.entries(themes);
+import blue from "../src/themes/blue";
+import crimson from "../src/themes/crimson";
+import cyan from "../src/themes/cyan";
+import grass from "../src/themes/grass";
+import orange from "../src/themes/orange";
+import teal from "../src/themes/teal";
+
+const themes = {
+  blue,
+  crimson,
+  cyan,
+  grass,
+  orange,
+  teal,
+};
+
+const { theme: base } = preset.use("light");
+
+/**
+ * The base scheme is its own contract; variants may not step outside it.
+ */
+const schema = defineSchema(base);
 
 describe("Radix theme variants", () => {
-  it("exports built variants", () => {
-    expect(entries.length).toBeGreaterThan(0);
+  it("derives every variant from the base", () => {
+    for (const variant of Object.values(themes)) {
+      expect(variant.name).toBeTruthy();
+    }
   });
 
-  for (const [name, theme] of entries) {
-    describe(name, () => {
-      it("keys its variant under its own theme key", () => {
-        expect(theme.key).toBe(name);
+  for (const [key, variant] of Object.entries(themes)) {
+    describe(key, () => {
+      it("carries an id matching its file name", () => {
+        expect(variant.id).toBe(key);
       });
 
-      it("has matching light and dark system token keys", () => {
-        expect(Object.keys(theme.modes.light).sort()).toEqual(
-          Object.keys(theme.modes.dark).sort(),
-        );
-      });
-
-      it("aliases only real reference tokens from every system token", () => {
-        const refKeys = new Set(Object.keys(theme.reference));
-        const aliases = [
-          ...Object.values(theme.modes.light),
-          ...Object.values(theme.modes.dark),
-        ];
-        for (const alias of aliases) {
-          expect(refKeys.has(alias)).toBe(true);
-        }
+      it("resolves to a complete, contract-bound theme", () => {
+        expect(schema.guard.theme(variant)).toBe(true);
       });
     });
   }

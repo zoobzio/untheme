@@ -1,4 +1,7 @@
-/** The 12 steps in every Radix color scale, ordered from 1 (lightest backdrop) to 12 (highest-contrast text). */
+/**
+ * The 12 steps in every Radix color scale, ordered from 1 (lightest backdrop)
+ * to 12 (highest-contrast text).
+ */
 export const RADIX_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
 
 /**
@@ -34,7 +37,9 @@ export const RADIX_COLORS = [
   "bronze",
 ] as const;
 
-/** The neutral Radix scales, each tuned to pair with a family of accent colors. */
+/**
+ * The neutral Radix scales, each tuned to pair with a family of accent colors.
+ */
 export const RADIX_GRAYS = [
   "gray",
   "mauve",
@@ -44,5 +49,7 @@ export const RADIX_GRAYS = [
   "sand",
 ] as const;
 
-/** Every Radix scale name (chromatic + neutral). */
+/**
+ * Every Radix scale name (chromatic + neutral).
+ */
 export const RADIX_SCALES = [...RADIX_COLORS, ...RADIX_GRAYS] as const;

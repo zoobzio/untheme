@@ -19,5 +19,9 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --root ../.."
+  },
+  "dependencies": {
+    "@untheme/schema": "workspace:*",
+    "@untheme/utils": "workspace:*"
   }
 }

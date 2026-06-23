@@ -2,21 +2,24 @@
 
 Material Design 2 token preset for untheme.
 
-Provides a complete M2 baseline — color palettes, typography, shape, elevation, and motion — ready to use or customize via the theme factory, plus 19 ready-made themed variants.
+Provides a complete M2 baseline — color palettes, typography, shape, elevation, and motion — as an untheme preset, plus 19 ready-made theme variants importable by path.
 
 ## Usage
 
 ```ts
-import { defineM2Theme } from "@untheme/material-2";
+import preset from "@untheme/material-2";
+import dracula from "@untheme/material-2/themes/dracula";
 
-// Create a theme with the M2 baseline defaults
-const theme = defineM2Theme({ key: "app", label: "My App" });
+// Pack the base and the variants you want into a bundle —
+// every entry is a complete theme, resolved over the M2 base.
+const bundle = preset.use(dracula);
 
-// Or override specific reference tokens
-const brand = defineM2Theme({
-  key: "brand",
-  label: "Brand",
+// Or author your own variant against the preset's contract
+const brand = preset.define({
+  id: "brand",
+  name: "Brand",
   reference: { "violet-500": "#1e40af" },
+  system: { light: {}, dark: {} },
 });
 ```
 
@@ -74,12 +77,11 @@ const tokens = createM2ColorTokens("brand", "#6750A4");
 
 ## Themes
 
-19 built-in themed variants are available via the `/themes` entry point:
+19 built-in theme variants ship as individual subpath exports — only the ones you import enter your module graph:
 
 ```ts
-import themes from "@untheme/material-2/themes";
-
-const dracula = themes.dracula;
+import dracula from "@untheme/material-2/themes/dracula";
+import nord from "@untheme/material-2/themes/nord";
 ```
 
 See [src/themes/README.md](./src/themes/README.md) for the full list.
