@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generateCSS } from "../src/css";
+import { generateCSS } from "../src/index";
 
 describe("generateCSS", () => {
   const tokens: Record<string, string> = {

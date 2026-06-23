@@ -51,6 +51,8 @@ importers:
         specifier: workspace:*
         version: link:../utils
 
+  packages/css: {}
+
   packages/kit:
     dependencies:
       '@untheme/core':
@@ -95,6 +97,9 @@ importers:
       '@untheme/core':
         specifier: workspace:*
         version: link:../core
+      '@untheme/css':
+        specifier: workspace:*
+        version: link:../css
       '@untheme/kit':
         specifier: workspace:*
         version: link:../kit

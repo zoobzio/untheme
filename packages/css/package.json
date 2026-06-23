@@ -1,5 +1,5 @@
 {
-  "name": "untheme",
+  "name": "@untheme/css",
   "version": "0.0.0",
   "type": "module",
   "main": "./.dist/index.mjs",
@@ -8,14 +8,6 @@
     ".": {
       "import": "./.dist/index.mjs",
       "types": "./.dist/index.d.ts"
-    },
-    "./css": {
-      "import": "./.dist/css.mjs",
-      "types": "./.dist/index.d.ts"
-    },
-    "./kit": {
-      "import": "./.dist/kit.mjs",
-      "types": "./.dist/kit.d.ts"
     }
   },
   "files": [
@@ -27,12 +19,5 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --root ../.."
-  },
-  "dependencies": {
-    "@untheme/core": "workspace:*",
-    "@untheme/css": "workspace:*",
-    "@untheme/kit": "workspace:*",
-    "@untheme/schema": "workspace:*",
-    "@untheme/utils": "workspace:*"
   }
 }
