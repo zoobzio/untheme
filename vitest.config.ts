@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     include: [
       "packages/*/test/**/*.test.ts",
+      "integrations/*/test/**/*.test.ts",
       "presets/*/test/**/*.test.ts",
       "examples/*/test/**/*.test.ts",
     ],
@@ -16,7 +17,11 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html"],
       reportsDirectory: ".coverage",
-      include: ["packages/*/src/**/*.{ts,vue}", "presets/*/src/**/*.{ts,vue}"],
+      include: [
+        "packages/*/src/**/*.{ts,vue}",
+        "integrations/*/src/**/*.{ts,vue}",
+        "presets/*/src/**/*.{ts,vue}",
+      ],
     },
   },
 });

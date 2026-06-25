@@ -9,4 +9,5 @@
 | [`@untheme/material-2`](./preset/material-2) | `packages/preset/material-2` | Material Design 2 token preset + themes            |
 | [`@untheme/material-3`](./preset/material-3) | `packages/preset/material-3` | Material Design 3 token preset + themes            |
 | [`@untheme/radix-ui`](./preset/radix-ui)     | `packages/preset/radix-ui`   | Radix UI / Radix Colors token preset + themes      |
-| [`@untheme/nuxt`](./nuxt)                    | `packages/nuxt`              | Nuxt module for runtime theming                    |
+
+Framework integrations (e.g. the Nuxt module) live in [`../integrations`](../integrations).

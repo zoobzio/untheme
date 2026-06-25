@@ -1,3 +1,5 @@
+import type { AppUntheme } from "./types";
+
 import { useNuxtApp } from "#app";
 
 /**
@@ -9,7 +11,7 @@ import { useNuxtApp } from "#app";
  * Cookies carry only the selection — `mode` and the chosen theme `key` — never
  * arbitrary edits, so `set`/`update` report without persisting.
  */
-export const useUntheme = () => {
+export const useUntheme = (): AppUntheme => {
   const { $untheme } = useNuxtApp();
   return $untheme;
 };

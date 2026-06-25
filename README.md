@@ -13,7 +13,7 @@ untheme separates the **token contract** (what tokens exist and how they relate)
 | [`@untheme/kit`](./packages/kit)                      | Toolkit for authoring reusable presets             |
 | [`@untheme/material-2`](./packages/preset/material-2) | Material Design 2 token preset + themes            |
 | [`@untheme/material-3`](./packages/preset/material-3) | Material Design 3 token preset + themes            |
-| [`@untheme/nuxt`](./packages/nuxt)                    | Nuxt module for runtime theming                    |
+| [`@untheme/nuxt`](./integrations/nuxt)                | Nuxt module for runtime theming                    |
 
 ## Token Architecture
 
@@ -71,7 +71,7 @@ const brand = defineMyPreset({
 });
 ```
 
-For Nuxt apps, see [`@untheme/nuxt`](./packages/nuxt).
+For Nuxt apps, see [`@untheme/nuxt`](./integrations/nuxt).
 
 ## Development
 

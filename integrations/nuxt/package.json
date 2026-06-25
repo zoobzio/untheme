@@ -11,7 +11,7 @@
     },
     "./config": {
       "import": "./.dist/config.mjs",
-      "types": "./.dist.config.d.ts"
+      "types": "./.dist/config.d.ts"
     }
   },
   "files": [
