@@ -62,12 +62,11 @@ describe("makeUntheme", () => {
   });
 
   describe("config.mode", () => {
-    it("updates the service, persists the cookie, and emits untheme:mode", () => {
+    it("updates the service and persists the cookie", () => {
       const u = make();
       u.config.mode = "light";
       expect(u.config.mode).toBe("light");
       expect(cookies["untheme-mode"].value).toBe("light");
-      expect(nuxtApp.callHook).toHaveBeenCalledWith("untheme:mode", "light");
     });
 
     it("recomputes tokens when the mode flips", async () => {
@@ -80,48 +79,48 @@ describe("makeUntheme", () => {
   });
 
   describe("apply", () => {
-    it("switches theme, persists the key cookie, and emits untheme:apply", () => {
+    it("switches theme, persists the key cookie, and emits untheme:theme", () => {
       const u = make();
       u.apply(themes.bravo);
       expect(u.config.theme.id).toBe("bravo");
       expect(cookies["untheme-key"].value).toBe("bravo");
       expect(nuxtApp.callHook).toHaveBeenCalledWith(
-        "untheme:apply",
+        "untheme:theme",
         expect.objectContaining({ id: "bravo" }),
       );
     });
   });
 
   describe("set / update", () => {
-    it("set delegates and emits untheme:set without a cookie", () => {
+    it("set applies the value without emitting or persisting", () => {
       const u = make();
       u.set("text-color", "primary");
       expect(u.get("text-color")).toBe("primary");
-      expect(nuxtApp.callHook).toHaveBeenCalledWith(
-        "untheme:set",
-        "text-color",
-        "primary",
-      );
+      expect(nuxtApp.callHook).not.toHaveBeenCalled();
       expect(cookies["untheme-key"]?.value ?? null).toBeNull();
     });
 
-    it("update merges a patch and emits untheme:update", () => {
+    it("update merges a patch and emits untheme:theme", () => {
       const u = make();
       u.update({ reference: { white: "#eeeeee" } });
       expect(u.config.theme.reference.white).toBe("#eeeeee");
-      expect(nuxtApp.callHook).toHaveBeenCalledWith("untheme:update", {
-        reference: { white: "#eeeeee" },
-      });
+      expect(nuxtApp.callHook).toHaveBeenCalledWith(
+        "untheme:theme",
+        expect.objectContaining({ id: "alpha" }),
+      );
     });
   });
 
   describe("reset", () => {
-    it("delegates to the service and emits untheme:reset", () => {
+    it("restores the theme and emits untheme:theme", () => {
       const u = make();
       u.set("text-color", "primary");
       u.reset();
       expect(u.get("text-color")).not.toBe("primary");
-      expect(nuxtApp.callHook).toHaveBeenCalledWith("untheme:reset");
+      expect(nuxtApp.callHook).toHaveBeenCalledWith(
+        "untheme:theme",
+        expect.objectContaining({ id: "alpha" }),
+      );
     });
   });
 });

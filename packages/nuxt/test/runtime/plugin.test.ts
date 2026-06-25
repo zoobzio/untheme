@@ -80,12 +80,9 @@ describe("untheme plugin", () => {
     expect(headCalls[0].style.value[0].innerHTML).toContain("white");
   });
 
-  it("emits untheme:ready with the initial theme", () => {
-    setup();
-    expect(callHook).toHaveBeenCalledWith(
-      "untheme:ready",
-      expect.objectContaining({ id: "alpha" }),
-    );
+  it("emits untheme:ready with the service", () => {
+    const provide = setup();
+    expect(callHook).toHaveBeenCalledWith("untheme:ready", provide.untheme);
   });
 
   describe("reactivity", () => {

@@ -20,6 +20,51 @@ export type Config<T extends Template> = {
 };
 
 /**
+ * Construction options for an {@link Untheme} service.
+ *
+ * `get` and `set` register read/write middleware over the state container:
+ * each slot intercepts the corresponding `config`/`themes` access to transform
+ * the value as it passes through, leaving the container the source of truth.
+ */
+export type Options<T extends Template> = {
+  /**
+   * Read middleware: intercept each read and transform the value on its way
+   * out. Each receives what the container holds and returns what the service
+   * exposes; the container stays the source of truth. Omit a slot to read it
+   * through untouched.
+   */
+  get?: {
+    config?: {
+      /** Transforms the active mode on read. */
+      mode?: (mode: Mode) => Mode;
+      /** Transforms the active theme on read. */
+      theme?: (theme: Theme<T>) => Theme<T>;
+    };
+    themes?: {
+      /** Transforms the registry layer filed under `key` on read. */
+      [key: string]: (layer: Layer<T>) => Layer<T>;
+    };
+  };
+  /**
+   * Write middleware: intercept each write and transform the value on its way
+   * in. Each receives the incoming value and returns what gets stored in the
+   * container. Omit a slot to store it untouched.
+   */
+  set?: {
+    config?: {
+      /** Transforms the active mode on write. */
+      mode?: (mode: Mode) => Mode;
+      /** Transforms the active theme on write. */
+      theme?: (theme: Theme<T>) => Theme<T>;
+    };
+    themes?: {
+      /** Transforms the registry layer filed under `key` on write. */
+      [key: string]: (layer: Layer<T>) => Layer<T>;
+    };
+  };
+};
+
+/**
  * A runtime theme service: token access and alias resolution, tier-aware
  * mutation, and a mutable catalog of switchable themes.
  */

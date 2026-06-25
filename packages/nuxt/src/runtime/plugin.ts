@@ -30,7 +30,7 @@ export default defineNuxtPlugin({
       ]),
     });
 
-    nuxtApp.callHook("untheme:ready", untheme.config.theme);
+    nuxtApp.callHook("untheme:ready", untheme);
 
     return {
       provide: {

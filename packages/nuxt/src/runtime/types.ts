@@ -3,16 +3,7 @@ import type {
   RoleToken,
   SystemToken,
 } from "#build/types/untheme.d.ts";
-import type {
-  Config,
-  Contract,
-  Layer,
-  Mode,
-  Patch,
-  Theme,
-  Token,
-  Untheme,
-} from "untheme";
+import type { Config, Contract, Layer, Mode, Theme, Untheme } from "untheme";
 
 /**
  * The active token contract, derived from the build-time template.
@@ -46,17 +37,12 @@ export type AppUntheme = Untheme<AppContract>;
 
 /**
  * The runtime hooks the service emits, keyed by event name. Shared between the
- * `#app` augmentation and {@link UnthemeHookCaller} so the two never drift.
+ * `#app` augmentation and {@link UnthemeNuxtApp} so the two never drift.
  */
 export interface UnthemeHooks {
-  "untheme:ready": (theme: AppTheme) => void;
+  "untheme:ready": (service: AppUntheme) => void;
   "untheme:mode": (mode: Mode) => void;
-  "untheme:set": (token: Token<AppContract>, value: string) => void;
-  "untheme:update": (patch: Patch<AppContract>) => void;
-  "untheme:apply": (theme: AppTheme) => void;
-  "untheme:reset": () => void;
-  "untheme:create": (theme: AppTheme) => void;
-  "untheme:extract": (theme: AppTheme) => void;
+  "untheme:theme": (theme: AppTheme) => void;
 }
 
 /**
@@ -65,7 +51,7 @@ export interface UnthemeHooks {
  * `AppUntheme` → `makeUntheme` cycle that otherwise makes the augmentation
  * recursive.
  */
-export interface UnthemeHookCaller {
+export interface UnthemeNuxtApp {
   callHook<H extends keyof UnthemeHooks>(
     name: H,
     ...args: Parameters<UnthemeHooks[H]>

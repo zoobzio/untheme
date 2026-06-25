@@ -8,7 +8,7 @@ import type {
   Token,
   Tokens,
 } from "@untheme/schema";
-import type { Config, Untheme } from "./types";
+import type { Config, Options, Untheme } from "./types";
 
 import { defineSchema } from "@untheme/schema";
 import { clone, diff, merge } from "@untheme/utils";
@@ -44,6 +44,8 @@ import {
  * @param config - The caller-owned container holding the active theme and mode.
  * @param themes - The catalog of applicable layers, validated up front; the
  *   target of `select`, `create`, and `remove`.
+ * @param options - Read/write middleware: `get`/`set` transform values as they
+ *   pass in and out of `config` and `themes`.
  * @returns An {@link Untheme} service bound to the container.
  * @throws InvalidThemeError when the theme violates its own contract.
  * @throws InvalidLayerError when a registry layer steps outside the contract.
@@ -53,10 +55,79 @@ export const defineUntheme = <
   Sys extends string,
   Rol extends string,
 >(
-  config: Config<Contract<Ref, Sys, Rol>>,
-  themes: Record<string, Layer<Contract<Ref, Sys, Rol>>> = {},
+  state: Config<Contract<Ref, Sys, Rol>>,
+  registry: Record<string, Layer<Contract<Ref, Sys, Rol>>> = {},
+  options: Options<Contract<Ref, Sys, Rol>> = {},
 ): Untheme<Contract<Ref, Sys, Rol>> => {
   type T = Contract<Ref, Sys, Rol>;
+
+  /**
+   * The active state, fronted by get/set middleware. Reads pull the raw value
+   * from the container and pipe it through the matching `options.get`
+   * middleware on the way out; writes pipe the incoming value through
+   * `options.set` before storing it. The container stays the source of truth;
+   * a missing middleware is a passthrough.
+   */
+  const config: Config<T> = {
+    get mode() {
+      const through = options.get?.config?.mode;
+      if (through) {
+        return through(state.mode);
+      }
+      return state.mode;
+    },
+    set mode(value) {
+      const through = options.set?.config?.mode;
+      if (through) {
+        state.mode = through(value);
+        return;
+      }
+      state.mode = value;
+    },
+    get theme() {
+      const through = options.get?.config?.theme;
+      if (through) {
+        return through(state.theme);
+      }
+      return state.theme;
+    },
+    set theme(value) {
+      const through = options.set?.config?.theme;
+      if (through) {
+        state.theme = through(value);
+        return;
+      }
+      state.theme = value;
+    },
+  };
+
+  /**
+   * The registry, fronted by per-key get/set middleware with the same
+   * passthrough semantics as {@link config}. A Proxy rather than fixed properties
+   * because `create` and `remove` add and drop keys at runtime; deletes pass
+   * straight through to the container.
+   */
+  const themes: Record<string, Layer<T>> = new Proxy(registry, {
+    get(target, key, receiver) {
+      const value = Reflect.get(target, key, receiver);
+      if (typeof key === "string") {
+        const through = options.get?.themes?.[key];
+        if (through) {
+          return through(value);
+        }
+      }
+      return value;
+    },
+    set(target, key, value, receiver) {
+      if (typeof key === "string") {
+        const through = options.set?.themes?.[key];
+        if (through) {
+          return Reflect.set(target, key, through(value), receiver);
+        }
+      }
+      return Reflect.set(target, key, value, receiver);
+    },
+  });
 
   /**
    * The baseline: a snapshot of the full theme at creation containing all available tokens.
@@ -92,7 +163,7 @@ export const defineUntheme = <
    * Flat token map for `mode` (default: active): roles shadow system, system
    * shadows reference on name collision.
    */
-  const tokens = (mode: Mode = config.mode) => {
+  const tokens = (mode: Mode = config.mode): Tokens<T> => {
     return {
       ...config.theme.reference,
       ...config.theme.system[mode],
