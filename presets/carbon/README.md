@@ -7,12 +7,14 @@ Provides a complete [Carbon](https://carbondesignsystem.com) baseline with 210 r
 ## Usage
 
 ```ts
+import { defineUntheme } from "@untheme/core";
 import preset from "@untheme/carbon";
 import g10g90 from "@untheme/carbon/themes/g10-g90";
 
-// Pack the base and the variants you want into a bundle —
-// every entry is a complete theme, resolved over the Carbon base.
-const bundle = preset.use(g10g90);
+// Boot a service from the preset (preset.use(mode) yields its Config),
+// registering the variants you want to switch to at runtime.
+const ut = defineUntheme(preset.use("dark"), { "g10-g90": g10g90 });
+ut.select("g10-g90"); // switch to a registered variant
 
 // Or author your own variant against the preset's contract
 const brand = preset.define({

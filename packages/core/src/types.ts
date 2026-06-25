@@ -20,7 +20,8 @@ export type Config<T extends Template> = {
 };
 
 /**
- * A runtime theme service providing token access, mutation, and mode toggling.
+ * A runtime theme service: token access and alias resolution, tier-aware
+ * mutation, and a mutable catalog of switchable themes.
  */
 export interface Untheme<T extends Template> {
   /**
@@ -30,8 +31,9 @@ export interface Untheme<T extends Template> {
   config: Config<T>;
 
   /**
-   * A set of theme layers that satisfy the token contract and are applicable to
-   * the active theme.
+   * The mutable catalog of theme layers applicable to the active theme:
+   * `select` switches to an entry by key, `create` files new themes in, and
+   * `remove` deletes them.
    */
   themes: Record<string, Layer<T>>;
 
@@ -60,7 +62,7 @@ export interface Untheme<T extends Template> {
    * Recursively resolves a token through its alias chain to a raw value;
    * throws `CircularAliasError` on a looping chain.
    */
-  resolve: <K extends Token<T>>(token: K, chain?: Set<Token<T>>) => string;
+  resolve: <K extends Token<T>>(token: K) => string;
 
   /**
    * Merges a patch of token overrides; theme identity is unchanged. Throws
@@ -76,17 +78,30 @@ export interface Untheme<T extends Template> {
   apply: (layer: Layer<T>) => void;
 
   /**
-   * Resolves a layer against the baseline into a complete theme; the active
-   * theme is untouched. Throws `InvalidLayerError` when the layer steps
-   * outside the contract.
+   * Switches to the registry layer filed under `key` — `apply` addressed by
+   * name. Throws `UnknownThemeError` when no theme is registered under `key`.
+   */
+  select: (key: string) => void;
+
+  /**
+   * Resolves a layer against the baseline into a complete theme and files it in
+   * the registry under its id, where `select` can switch to it; the active
+   * theme is untouched. Throws `InvalidLayerError` when the layer steps outside
+   * the contract.
    */
   create: (layer: Layer<T>) => Theme<T>;
 
   /**
    * Snapshots the active theme — including unsaved edits — as a detached
-   * theme under a new identity.
+   * theme under a new identity. The snapshot is returned, not registered.
    */
   extract: (id: string, name: string) => Theme<T>;
+
+  /**
+   * Drops a theme from the registry by id; a no-op when absent. The active
+   * theme is unaffected.
+   */
+  remove: (id: string) => void;
 
   /**
    * Whether any active binding deviates from the active theme's cached

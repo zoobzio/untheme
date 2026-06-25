@@ -7,12 +7,14 @@ Provides a complete M3 baseline with 670 reference tokens and 49 system tokens a
 ## Usage
 
 ```ts
+import { defineUntheme } from "@untheme/core";
 import preset from "@untheme/material-3";
 import dracula from "@untheme/material-3/themes/dracula";
 
-// Pack the base and the variants you want into a bundle —
-// every entry is a complete theme, resolved over the M3 base.
-const bundle = preset.use(dracula);
+// Boot a service from the preset (preset.use(mode) yields its Config),
+// registering the variants you want to switch to at runtime.
+const ut = defineUntheme(preset.use("dark"), { dracula });
+ut.select("dracula"); // switch to a registered variant
 
 // Or author your own variant against the preset's contract
 const brand = preset.define({

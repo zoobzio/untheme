@@ -12,6 +12,14 @@ import type { Config, Untheme } from "./types";
 
 import { defineSchema } from "@untheme/schema";
 import { clone, diff, merge } from "@untheme/utils";
+import {
+  CircularAliasError,
+  InvalidLayerError,
+  InvalidPatchError,
+  InvalidThemeError,
+  UnknownThemeError,
+  reframe,
+} from "./error";
 
 /**
  * Creates a runtime {@link Untheme} service over a state container.
@@ -26,11 +34,16 @@ import { clone, diff, merge } from "@untheme/utils";
  * against the baseline, while `dirty` and `reset` work against the active
  * id's cache entry.
  *
+ * The `themes` argument is a mutable catalog of switchable layers: `select`
+ * switches to an entry by key, `create` files resolved themes into it, and
+ * `remove` drops them.
+ *
  * Inputs are validated against the contract at every boundary; violations
  * throw from the semantic error stable in `error.ts`, never a bare `Error`.
  *
  * @param config - The caller-owned container holding the active theme and mode.
- * @param themes - Layers applicable to the theme, validated up front.
+ * @param themes - The catalog of applicable layers, validated up front; the
+ *   target of `select`, `create`, and `remove`.
  * @returns An {@link Untheme} service bound to the container.
  * @throws InvalidThemeError when the theme violates its own contract.
  * @throws InvalidLayerError when a registry layer steps outside the contract.
@@ -62,7 +75,18 @@ export const defineUntheme = <
    * Guards derived from the baseline — a complete theme is itself a valid
    * template.
    */
-  const schema: Schema<T> = defineSchema(base);
+  const schema: Schema<T> = reframe(InvalidThemeError, () =>
+    defineSchema(base),
+  );
+
+  // Fail fast on a malformed seed registry. This is an early check only —
+  // `apply` (and so `select`) still re-validates every layer at the call
+  // site, since the registry can be mutated after construction.
+  reframe(InvalidLayerError, () => {
+    for (const layer of Object.values(themes)) {
+      schema.assert.layer(layer);
+    }
+  });
 
   /**
    * Flat token map for `mode` (default: active): roles shadow system, system
@@ -105,14 +129,21 @@ export const defineUntheme = <
   };
 
   /**
-   * Follows the alias chain to a raw value. Any value equal to a token name
-   * is treated as an alias and followed. Throws {@link CircularAliasError}
-   * when the chain loops back on itself.
+   * Follows the alias chain to a raw value. Any value equal to a token name is
+   * treated as an alias and followed. Visited tokens accumulate in `chain`, so
+   * a chain that loops back on itself throws {@link CircularAliasError} instead
+   * of recursing until the call stack overflows.
    */
-  const resolve = <K extends Token<T>>(token: K): string => {
+  const resolve = <K extends Token<T>>(
+    token: K,
+    chain: Set<Token<T>> = new Set(),
+  ): string => {
+    if (chain.has(token)) {
+      throw new CircularAliasError([...chain, token]);
+    }
     const value = get(token);
     if (schema.guard.token(value)) {
-      return resolve(value);
+      return resolve(value, chain.add(token));
     }
     return value;
   };
@@ -123,7 +154,7 @@ export const defineUntheme = <
    * contract.
    */
   const update = (patch: Patch<T>) => {
-    schema.assert.patch(patch);
+    reframe(InvalidPatchError, () => schema.assert.patch(patch));
     config.theme = merge(config.theme, patch);
   };
 
@@ -133,20 +164,37 @@ export const defineUntheme = <
    * {@link InvalidLayerError} when the layer steps outside the contract.
    */
   const apply = (layer: Layer<T>) => {
-    schema.assert.layer(layer);
+    reframe(InvalidLayerError, () => schema.assert.layer(layer));
     config.theme = merge(base, layer);
     cache[config.theme.id] = clone(config.theme);
   };
 
   /**
-   * Resolves a layer against the baseline into a complete theme: the layer's
-   * identity and bindings, gaps backfilled from the baseline. The active
-   * theme is not touched. Throws {@link InvalidLayerError} when the layer
-   * steps outside the contract.
+   * Switches to the registry layer filed under `key`: resolves it from the
+   * registry and hands it to {@link apply}, which validates it like any other
+   * layer. Throws {@link UnknownThemeError} when no theme is registered under
+   * `key`.
+   */
+  const select = (key: string) => {
+    const layer = themes[key];
+    if (!layer) {
+      throw new UnknownThemeError(key);
+    }
+    apply(layer);
+  };
+
+  /**
+   * Resolves a layer against the baseline into a complete theme — the layer's
+   * identity and bindings, gaps backfilled from the baseline — and files it in
+   * the registry under its id, where {@link select} can switch to it. The
+   * active theme is not touched. Throws {@link InvalidLayerError} when the
+   * layer steps outside the contract.
    */
   const create = (layer: Layer<T>): Theme<T> => {
-    schema.assert.layer(layer);
-    return merge(base, layer);
+    reframe(InvalidLayerError, () => schema.assert.layer(layer));
+    const theme = merge(base, layer);
+    themes[theme.id] = theme;
+    return theme;
   };
 
   /**
@@ -155,6 +203,16 @@ export const defineUntheme = <
    */
   const extract = (id: string, name: string): Theme<T> => {
     return merge(config.theme, { id, name });
+  };
+
+  /**
+   * Drops a theme from the registry by id; a no-op when nothing is filed
+   * under it. The active theme is independent of the registry, so removing
+   * the live theme's entry leaves it standing — it just can no longer be
+   * reached by {@link select}.
+   */
+  const remove = (id: string) => {
+    delete themes[id];
   };
 
   /**
@@ -189,8 +247,10 @@ export const defineUntheme = <
     resolve,
     update,
     apply,
+    select,
     create,
     extract,
+    remove,
     dirty,
     reset,
   };

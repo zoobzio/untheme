@@ -7,12 +7,14 @@ Provides a complete [Radix Colors](https://www.radix-ui.com/colors) baseline wit
 ## Usage
 
 ```ts
+import { defineUntheme } from "@untheme/core";
 import preset from "@untheme/radix-ui";
 import blue from "@untheme/radix-ui/themes/blue";
 
-// Pack the base and the variants you want into a bundle —
-// every entry is a complete theme, resolved over the Radix base.
-const bundle = preset.use(blue);
+// Boot a service from the preset (preset.use(mode) yields its Config),
+// registering the variants you want to switch to at runtime.
+const ut = defineUntheme(preset.use("dark"), { blue });
+ut.select("blue"); // switch to a registered variant
 
 // Or author your own variant against the preset's contract
 const brand = preset.define({

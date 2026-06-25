@@ -17,7 +17,7 @@ untheme models tokens in three tiers:
 ```ts
 import { defineUntheme } from "@untheme/core";
 
-const ut = defineUntheme({ mode: "dark", theme });
+const ut = defineUntheme({ mode: "dark", theme }, { midnight });
 
 ut.resolve("primary"); // follow the alias chain to a raw value
 ut.set("background", "blue"); // tier-aware mutation, active mode only
@@ -25,6 +25,10 @@ ut.config.mode = "light"; // switch modes
 
 ut.dirty(); // true — bindings deviate from the theme's pristine state
 ut.reset(); // back to the pristine state
+
+ut.select("midnight"); // switch to a catalogued theme by key
+ut.create(draftLayer); // resolve + file a new theme into the catalog
+ut.remove("midnight"); // drop a theme from the catalog
 ```
 
 Presets built with [`@untheme/kit`](../kit) produce the config for you: `defineUntheme(preset.use("dark"))`.
@@ -38,7 +42,7 @@ The service is pure behavior: every read and write goes through `config`, the ca
 `defineUntheme(config, themes?)` returns an `Untheme<T>`:
 
 - `config` — the caller-owned container; the single place state is read or written raw.
-- `themes` — the registry of applicable theme layers handed to `defineUntheme` (optional second argument; defaults to empty).
+- `themes` — the mutable catalog of theme layers (optional second argument; defaults to empty). `select` switches to an entry by key, `create` files new themes into it, and `remove` deletes them.
 - `schema` — guard vocabulary for the theme's token contract, from [`defineSchema`](../schema).
 - `tokens(mode?)` — the flat token map for a mode (default: the active one), without touching `config.mode`.
 - `get(token)` — the token's current binding (alias name or raw value), unresolved.
@@ -46,8 +50,10 @@ The service is pure behavior: every read and write goes through `config`, the ca
 - `set(token, value)` — guarded single-token write: roles take aliases, system tokens take references (current mode only), references take containment-safe values. Invalid writes are silent no-ops.
 - `update(patch)` — merges a patch of token overrides; theme identity is unchanged. Throws `InvalidPatchError` outside the contract.
 - `apply(layer)` — becomes that theme: the layer resolved against the baseline, cached as that id's pristine state. Throws `InvalidLayerError` outside the contract.
-- `create(layer)` — resolves a layer against the baseline into a complete, detached theme; the active theme is untouched. Throws `InvalidLayerError` outside the contract.
-- `extract(id, name)` — snapshots the active theme, including unsaved edits, as a detached theme under a new identity.
+- `select(key)` — switches to the catalog layer filed under `key` (`apply` addressed by name). Throws `UnknownThemeError` when nothing is registered under `key`.
+- `create(layer)` — resolves a layer against the baseline into a complete theme and files it in the catalog under its id, where `select` can switch to it; the active theme is untouched. Throws `InvalidLayerError` outside the contract.
+- `extract(id, name)` — snapshots the active theme, including unsaved edits, as a detached theme under a new identity; returned, not filed in the catalog.
+- `remove(id)` — drops a theme from the catalog by id; a no-op when absent. The active theme is unaffected.
 - `dirty()` — whether any active binding deviates from the active theme's pristine state.
 - `reset()` — restores the active theme to its pristine state, discarding edits made since it was applied.
 
@@ -57,12 +63,18 @@ The service keeps a snapshot of the theme it was created with — the baseline �
 
 ## Errors
 
-Every input boundary validates against the [`@untheme/schema`](../schema) guards and throws a semantic error — all subclasses of `UnthemeError`, so one `catch` covers them:
+Every boundary throws a semantic error rather than a bare `Error`, in two families.
 
-- `InvalidThemeError` — the theme handed to `defineUntheme` violates its own contract.
-- `InvalidLayerError` — a layer (registry entry, `apply`, `create`) steps outside the contract.
+**Contract violations** — subclasses of [`SchemaError`](../schema), carrying the underlying `issues` so callers can react to each failure:
+
+- `InvalidThemeError` — the baseline theme handed to `defineUntheme` violates its own contract.
+- `InvalidLayerError` — a layer (registry seed, `apply`, `create`) steps outside the contract.
 - `InvalidPatchError` — a patch handed to `update` steps outside the contract.
-- `CircularAliasError` — `resolve` hit an alias chain that loops back on itself.
+
+**Resolution failures** — subclasses of plain `Error`, carrying the offending lookup:
+
+- `UnknownThemeError` — `select` was handed a `key` that names no theme in the catalog.
+- `CircularAliasError` — `resolve` hit an alias `chain` that loops back on itself; detected by tracking visited tokens, so the stack never overflows.
 
 `set` is the deliberate exception: as the hot-path interactive write it validates with the same guards but treats invalid writes as silent no-ops rather than throwing.
 

@@ -55,8 +55,10 @@ export const makeUntheme = (nuxtApp: UnthemeHookCaller): AppUntheme => {
     themes: service.themes,
     schema: service.schema,
     tokens: service.tokens,
+    select: service.select,
     get: service.get,
     resolve: service.resolve,
+    remove: service.remove,
     dirty: service.dirty,
 
     set: <K extends Token<AppContract>>(

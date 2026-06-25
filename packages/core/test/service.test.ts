@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { defineUntheme } from "../src/service";
+import {
+  CircularAliasError,
+  InvalidLayerError,
+  InvalidPatchError,
+  InvalidThemeError,
+  UnknownThemeError,
+} from "../src/error";
 import { SchemaError } from "@untheme/schema";
 
 const base = {
@@ -53,6 +60,81 @@ describe("defineUntheme", () => {
     });
   });
 
+  describe("semantic errors", () => {
+    it("constructor throws InvalidThemeError for a broken base", () => {
+      const broken = structuredClone(base);
+      broken.roles.primary = "primary";
+      expect(() => defineUntheme({ mode: "dark", theme: broken })).toThrow(
+        InvalidThemeError,
+      );
+    });
+
+    it("constructor throws InvalidLayerError for a broken registry layer", () => {
+      expect(() =>
+        defineUntheme(
+          { mode: "dark", theme: structuredClone(base) },
+          {
+            bad: {
+              id: "bad",
+              name: "Bad",
+              reference: {},
+              system: { light: { background: "ghost" }, dark: {} },
+              roles: {},
+            },
+          },
+        ),
+      ).toThrow(InvalidLayerError);
+    });
+
+    it("update throws InvalidPatchError", () => {
+      const ut = make();
+      expect(() => ut.update({ reference: { ghost: "#000000" } })).toThrow(
+        InvalidPatchError,
+      );
+    });
+
+    it("apply throws InvalidLayerError", () => {
+      const ut = make();
+      expect(() =>
+        ut.apply({
+          id: "bad",
+          name: "Bad",
+          reference: {},
+          system: { light: { background: "ghost" }, dark: {} },
+          roles: {},
+        }),
+      ).toThrow(InvalidLayerError);
+    });
+
+    it("create throws InvalidLayerError", () => {
+      const ut = make();
+      expect(() =>
+        ut.create({
+          id: "bad",
+          name: "Bad",
+          reference: {},
+          system: { light: {}, dark: {} },
+          roles: { primary: "primary" },
+        }),
+      ).toThrow(InvalidLayerError);
+    });
+
+    it("remains a SchemaError carrying the underlying issues", () => {
+      const ut = make();
+      let caught: unknown;
+      try {
+        ut.update({ reference: { ghost: "#000000" } });
+      } catch (error) {
+        caught = error;
+      }
+      expect(caught).toBeInstanceOf(SchemaError);
+      expect(caught).toBeInstanceOf(InvalidPatchError);
+      if (caught instanceof InvalidPatchError) {
+        expect(caught.issues.length).toBeGreaterThan(0);
+      }
+    });
+  });
+
   describe("config", () => {
     it("exposes the caller-owned container", () => {
       const ut = make();
@@ -92,6 +174,23 @@ describe("defineUntheme", () => {
     it("defaults to an empty registry", () => {
       const ut = make();
       expect(ut.themes).toEqual({});
+    });
+
+    it("validates registry layers up front", () => {
+      expect(() =>
+        defineUntheme(
+          { mode: "dark", theme: structuredClone(base) },
+          {
+            bad: {
+              id: "bad",
+              name: "Bad",
+              reference: {},
+              system: { light: { background: "ghost" }, dark: {} },
+              roles: {},
+            },
+          },
+        ),
+      ).toThrow(SchemaError);
     });
   });
 
@@ -154,13 +253,30 @@ describe("defineUntheme", () => {
       expect(ut.resolve("primary")).toBe("#000000");
     });
 
-    it("overflows the stack on a circular alias chain", () => {
+    it("throws CircularAliasError on a circular alias chain", () => {
       const ut = make();
-      // reference values equal to token names are followed as aliases;
-      // resolve recurses unconditionally, so a loop blows the call stack
+      // reference values equal to token names are followed as aliases; the
+      // loop is caught via the visited-token chain, not a stack overflow
       ut.set("white", "black");
       ut.set("black", "white");
-      expect(() => ut.resolve("white")).toThrow(RangeError);
+      expect(() => ut.resolve("white")).toThrow(CircularAliasError);
+    });
+
+    it("reports the looping chain", () => {
+      const ut = make();
+      ut.set("white", "black");
+      ut.set("black", "white");
+      let caught: unknown;
+      try {
+        ut.resolve("white");
+      } catch (error) {
+        caught = error;
+      }
+      expect(caught).toBeInstanceOf(CircularAliasError);
+      if (caught instanceof CircularAliasError) {
+        expect(caught.chain).toContain("white");
+        expect(caught.chain).toContain("black");
+      }
     });
   });
 
@@ -283,6 +399,40 @@ describe("defineUntheme", () => {
     });
   });
 
+  describe("select", () => {
+    const seeded = () =>
+      defineUntheme(
+        { mode: "dark", theme: structuredClone(base) },
+        {
+          night: {
+            id: "night",
+            name: "Night",
+            reference: { blue: "#0090ff" },
+            system: { light: {}, dark: { foreground: "blue" } },
+            roles: {},
+          },
+        },
+      );
+
+    it("switches to a registered layer by key", () => {
+      const ut = seeded();
+      ut.select("night");
+      expect(ut.config.theme.id).toBe("night");
+      expect(ut.resolve("primary")).toBe("#0090ff");
+    });
+
+    it("re-baselines the selected theme, like apply", () => {
+      const ut = seeded();
+      ut.select("night");
+      expect(ut.dirty()).toBe(false);
+    });
+
+    it("throws UnknownThemeError for an unregistered key", () => {
+      const ut = seeded();
+      expect(() => ut.select("ghost")).toThrow(UnknownThemeError);
+    });
+  });
+
   describe("create", () => {
     it("resolves a layer against the baseline into a complete theme", () => {
       const ut = make();
@@ -331,6 +481,21 @@ describe("defineUntheme", () => {
       expect(ut.resolve("blue")).toBe("#0000ff");
     });
 
+    it("registers the result so select can switch to it", () => {
+      const ut = make();
+      ut.create({
+        id: "night",
+        name: "Night",
+        reference: { blue: "#0090ff" },
+        system: { light: {}, dark: {} },
+        roles: {},
+      });
+      expect(ut.themes.night).toBeDefined();
+      ut.select("night");
+      expect(ut.config.theme.id).toBe("night");
+      expect(ut.resolve("blue")).toBe("#0090ff");
+    });
+
     it("throws SchemaError for a layer outside the contract", () => {
       const ut = make();
       expect(() =>
@@ -360,6 +525,47 @@ describe("defineUntheme", () => {
       const theme = ut.extract("snap", "Snapshot");
       theme.reference.white = "#111111";
       expect(ut.resolve("white")).toBe("#ffffff");
+    });
+
+    it("does not register the snapshot", () => {
+      const ut = make();
+      ut.extract("snap", "Snapshot");
+      expect(ut.themes.snap).toBeUndefined();
+    });
+  });
+
+  describe("remove", () => {
+    it("drops a theme from the registry", () => {
+      const ut = make();
+      ut.create({
+        id: "night",
+        name: "Night",
+        reference: {},
+        system: { light: {}, dark: {} },
+        roles: {},
+      });
+      ut.remove("night");
+      expect(ut.themes.night).toBeUndefined();
+      expect(() => ut.select("night")).toThrow(UnknownThemeError);
+    });
+
+    it("is a no-op for an unknown id", () => {
+      const ut = make();
+      expect(() => ut.remove("ghost")).not.toThrow();
+    });
+
+    it("leaves the active theme standing when its entry is removed", () => {
+      const ut = make();
+      ut.create({
+        id: "night",
+        name: "Night",
+        reference: {},
+        system: { light: {}, dark: {} },
+        roles: {},
+      });
+      ut.select("night");
+      ut.remove("night");
+      expect(ut.config.theme.id).toBe("night");
     });
   });
 
