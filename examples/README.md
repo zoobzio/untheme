@@ -4,12 +4,12 @@ Runnable Nuxt apps, one per untheme preset. Each wires a preset's themes into
 the `@untheme/nuxt` module and demos `useUntheme()` — a theme switcher, a
 light/dark toggle, and a showcase built in that design system's own idiom.
 
-| Example                              | Preset                | Showcases                                  |
-| ------------------------------------ | --------------------- | ------------------------------------------ |
-| [`nuxt-material-3`](./nuxt-material-3) | `@untheme/material-3` | M3 tonal roles, surface containers, FAB    |
-| [`nuxt-material-2`](./nuxt-material-2) | `@untheme/material-2` | M2 elevation, app bar, contained buttons   |
-| [`nuxt-carbon`](./nuxt-carbon)         | `@untheme/carbon`     | Carbon UI shell, data table, layer tokens  |
-| [`nuxt-radix-ui`](./nuxt-radix-ui)     | `@untheme/radix-ui`   | The 12-step accent + gray scales           |
+| Example                                | Preset                | Showcases                                 |
+| -------------------------------------- | --------------------- | ----------------------------------------- |
+| [`nuxt-material-3`](./nuxt-material-3) | `@untheme/material-3` | M3 tonal roles, surface containers, FAB   |
+| [`nuxt-material-2`](./nuxt-material-2) | `@untheme/material-2` | M2 elevation, app bar, contained buttons  |
+| [`nuxt-carbon`](./nuxt-carbon)         | `@untheme/carbon`     | Carbon UI shell, data table, layer tokens |
+| [`nuxt-radix-ui`](./nuxt-radix-ui)     | `@untheme/radix-ui`   | The 12-step accent + gray scales          |
 
 ## How it works
 

@@ -10,11 +10,11 @@ pnpm add untheme
 
 ## Entry points
 
-| Import        | Re-exports                                                                          | Provides                                                            |
-| ------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Import        | Re-exports                                                                               | Provides                                                                                                                    |
+| ------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `untheme`     | [`@untheme/core`](../core), [`@untheme/schema`](../schema), [`@untheme/utils`](../utils) | `defineUntheme`, `Untheme`, `Config`, `defineSchema`, `Theme`, `Layer`, `Patch`, `Mode`, `clone`/`merge`/`extend`/`diff`, … |
-| `untheme/css` | [`@untheme/css`](../css)                                                             | `generateCSS`                                                       |
-| `untheme/kit` | [`@untheme/kit`](../kit)                                                             | `defineUnthemePreset`, `Preset`                                     |
+| `untheme/css` | [`@untheme/css`](../css)                                                                 | `generateCSS`                                                                                                               |
+| `untheme/kit` | [`@untheme/kit`](../kit)                                                                 | `defineUnthemePreset`, `Preset`                                                                                             |
 
 ## Usage
 

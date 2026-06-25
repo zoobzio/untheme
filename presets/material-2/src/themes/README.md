@@ -17,24 +17,24 @@ const bundle = preset.use(dracula);
 
 ## Themes
 
-| Id            | Name               |
-| ------------- | ------------------ |
-| `ayu`         | Ayu                |
-| `catppuccin`  | Catppuccin         |
-| `cyberdream`  | Cyberdream         |
-| `dracula`     | Dracula            |
-| `everforest`  | Everforest         |
-| `github`      | GitHub             |
-| `gruvbox`     | Gruvbox            |
-| `horizon`     | Horizon            |
-| `kanagawa`    | Kanagawa           |
-| `monokai`     | Monokai            |
-| `night_owl`   | Night Owl          |
-| `nord`        | Nord               |
-| `one_dark`    | One Dark           |
-| `palenight`   | Palenight          |
-| `rose_pine`   | Rose Pine          |
-| `solarized`   | Solarized          |
-| `synthwave`   | Synthwave          |
-| `tokyo_night` | Tokyo Night        |
-| `vesper`      | Vesper             |
+| Id            | Name        |
+| ------------- | ----------- |
+| `ayu`         | Ayu         |
+| `catppuccin`  | Catppuccin  |
+| `cyberdream`  | Cyberdream  |
+| `dracula`     | Dracula     |
+| `everforest`  | Everforest  |
+| `github`      | GitHub      |
+| `gruvbox`     | Gruvbox     |
+| `horizon`     | Horizon     |
+| `kanagawa`    | Kanagawa    |
+| `monokai`     | Monokai     |
+| `night_owl`   | Night Owl   |
+| `nord`        | Nord        |
+| `one_dark`    | One Dark    |
+| `palenight`   | Palenight   |
+| `rose_pine`   | Rose Pine   |
+| `solarized`   | Solarized   |
+| `synthwave`   | Synthwave   |
+| `tokyo_night` | Tokyo Night |
+| `vesper`      | Vesper      |

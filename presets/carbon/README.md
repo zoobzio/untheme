@@ -55,15 +55,15 @@ Values come directly from `@carbon/colors` via `createCarbonColorTokens(name, sc
 
 System tokens follow Carbon's semantic color roles, each mapped to a palette grade per light/dark mode:
 
-| Group        | Tokens                                                                                  |
-| ------------ | --------------------------------------------------------------------------------------- |
-| **Surface**  | `background`, `background-inverse`, `layer-01/02/03`, `field-01/02`                      |
-| **Text**     | `text-primary`, `text-secondary`, `text-on-color`, `text-helper`, `text-error`, `text-inverse` |
-| **Link**     | `link-primary`, `link-secondary`, `link-visited`                                         |
-| **Border**   | `border-subtle-00/01`, `border-strong-01`, `border-inverse`, `border-interactive`       |
-| **Icon**     | `icon-primary`, `icon-secondary`, `icon-on-color`, `icon-inverse`                        |
-| **Support**  | `support-error`, `support-success`, `support-warning`, `support-info`                    |
-| **Other**    | `focus`, `interactive`                                                                   |
+| Group       | Tokens                                                                                         |
+| ----------- | ---------------------------------------------------------------------------------------------- |
+| **Surface** | `background`, `background-inverse`, `layer-01/02/03`, `field-01/02`                            |
+| **Text**    | `text-primary`, `text-secondary`, `text-on-color`, `text-helper`, `text-error`, `text-inverse` |
+| **Link**    | `link-primary`, `link-secondary`, `link-visited`                                               |
+| **Border**  | `border-subtle-00/01`, `border-strong-01`, `border-inverse`, `border-interactive`              |
+| **Icon**    | `icon-primary`, `icon-secondary`, `icon-on-color`, `icon-inverse`                              |
+| **Support** | `support-error`, `support-success`, `support-warning`, `support-info`                          |
+| **Other**   | `focus`, `interactive`                                                                         |
 
 > Carbon's interaction-state tokens (`background-hover`, `background-selected`, `text-placeholder`, disabled states, button colors) are derived via alpha compositing rather than aliasing a solid palette grade, so they fall outside the reference→system alias contract and are left to the consuming role layer.
 
@@ -77,9 +77,9 @@ import g10g100 from "@untheme/carbon/themes/g10-g100";
 import g10g90 from "@untheme/carbon/themes/g10-g90";
 ```
 
-| Theme        | Light   | Dark      |
-| ------------ | ------- | --------- |
-| _(base)_     | White   | Gray 100  |
-| `white-g90`  | White   | Gray 90   |
-| `g10-g100`   | Gray 10 | Gray 100  |
-| `g10-g90`    | Gray 10 | Gray 90   |
+| Theme       | Light   | Dark     |
+| ----------- | ------- | -------- |
+| _(base)_    | White   | Gray 100 |
+| `white-g90` | White   | Gray 90  |
+| `g10-g100`  | Gray 10 | Gray 100 |
+| `g10-g90`   | Gray 10 | Gray 90  |

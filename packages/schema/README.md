@@ -58,16 +58,16 @@ The composite tiers build on each other, validating progressively more of the co
 
 Each of `guard`, `assert`, and `parse` has one entry per tier:
 
-| Tier        | Validates                                                       |
-| ----------- | -------------------------------------------------------------- |
-| `mode`      | a supported color mode (`"light"` \| `"dark"`)                 |
-| `value`     | a containment-safe CSS value                                   |
-| `reference` | a reference token name                                         |
+| Tier        | Validates                                                     |
+| ----------- | ------------------------------------------------------------- |
+| `mode`      | a supported color mode (`"light"` \| `"dark"`)                |
+| `value`     | a containment-safe CSS value                                  |
+| `reference` | a reference token name                                        |
 | `system`    | a system token name (defined in either mode)                  |
-| `role`      | a role token name                                              |
+| `role`      | a role token name                                             |
 | `alias`     | a name a role may point to: reference or system               |
-| `token`     | any token name (reference, system, or role)                  |
-| `tokens`    | a flat map keyed by token name, each value valid for its tier  |
+| `token`     | any token name (reference, system, or role)                   |
+| `tokens`    | a flat map keyed by token name, each value valid for its tier |
 | `patch`     | a partial, contract-bound set of overrides (no identity)      |
 | `layer`     | a full-structured overlay (individual tokens may be omitted)  |
 | `theme`     | a complete, mode-balanced instantiation of the template       |

@@ -22,11 +22,11 @@ generateCSS({
 
 ```css
 :root {
- --white: #ffffff;
- --black: #000000;
- --background: var(--white);
- --foreground: var(--black);
- --primary: var(--foreground);
+  --white: #ffffff;
+  --black: #000000;
+  --background: var(--white);
+  --foreground: var(--black);
+  --primary: var(--foreground);
 }
 ```
 
