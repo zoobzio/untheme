@@ -1,11 +1,8 @@
-import type { AppConfig } from "./types";
-
 import { defineNuxtPlugin } from "#app";
-import { useHead, useState } from "#imports";
+import { useHead } from "#imports";
 import { computed } from "vue";
-import { defineUntheme } from "untheme";
 import { generateCSS } from "untheme/css";
-import { theme as buildTheme, themes as buildThemes } from "#build/untheme.mjs";
+import { makeUntheme } from "./client";
 
 /**
  * Nuxt plugin that builds the untheme service over an SSR-serializable,
@@ -19,30 +16,25 @@ import { theme as buildTheme, themes as buildThemes } from "#build/untheme.mjs";
 export default defineNuxtPlugin({
   name: "untheme",
   setup: (nuxtApp) => {
-    const config = useState<AppConfig>("untheme", () => ({
-      mode: "dark",
-      theme: buildTheme,
-    }));
-
-    const service = defineUntheme(config.value, buildThemes);
+    const untheme = makeUntheme(nuxtApp);
 
     useHead({
       htmlAttrs: {
-        class: computed(() => (service.config.mode === "dark" ? "dark" : "")),
+        class: computed(() => (untheme.config.mode === "dark" ? "dark" : "")),
       },
       style: computed(() => [
         {
           key: "untheme",
-          innerHTML: generateCSS(service.tokens()),
+          innerHTML: generateCSS(untheme.tokens()),
         },
       ]),
     });
 
-    nuxtApp.callHook("untheme:ready", service.config.theme);
+    nuxtApp.callHook("untheme:ready", untheme.config.theme);
 
     return {
       provide: {
-        untheme: service,
+        untheme,
       },
     };
   },

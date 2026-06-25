@@ -2,7 +2,11 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    include: ["packages/*/test/**/*.test.ts", "presets/*/test/**/*.test.ts"],
+    include: [
+      "packages/*/test/**/*.test.ts",
+      "presets/*/test/**/*.test.ts",
+      "examples/*/test/**/*.test.ts",
+    ],
     server: {
       deps: {
         inline: ["@material/material-color-utilities"],

@@ -1,0 +1,21 @@
+{
+  "name": "@untheme/example-nuxt-material-3",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@untheme/material-3": "workspace:*",
+    "@untheme/nuxt": "workspace:*",
+    "nuxt": "^4.4.6",
+    "untheme": "workspace:*"
+  },
+  "devDependencies": {
+    "vue-tsc": "^3.3.5"
+  }
+}

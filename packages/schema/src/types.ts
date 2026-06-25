@@ -96,8 +96,8 @@ export type Theme<T extends Template> = {
   id: string;
   name: string;
   reference: { [K in Reference<T>]: string };
-  system: { [M in Mode]: { [K in System<T>]: Reference<T> } };
-  roles: { [K in Role<T>]: Reference<T> | System<T> };
+  system: { [M in Mode]: { [K in System<T>]: NoInfer<Reference<T>> } };
+  roles: { [K in Role<T>]: NoInfer<Reference<T> | System<T>> };
 };
 
 /**

@@ -177,8 +177,9 @@ export const shape =
       }
     }
     for (const key of Object.keys(fields)) {
-      if (key in v) {
-        for (const rule of fields[key]) {
+      const rules = fields[key];
+      if (rules && key in v) {
+        for (const rule of rules) {
           const issue = rule(v[key]);
           if (issue) {
             return nest(key, issue);

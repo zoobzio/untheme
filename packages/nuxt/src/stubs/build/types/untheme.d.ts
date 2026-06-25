@@ -4,5 +4,3 @@ export type ReferenceToken = "white" | "black" | "slate" | "blue" | "indigo";
 export type SystemToken = "primary" | "surface" | "on-surface" | "muted";
 
 export type RoleToken = "text-color" | "background-color" | "link-color";
-
-export type ThemeKey = "alpha" | "bravo";

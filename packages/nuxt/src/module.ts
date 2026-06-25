@@ -33,7 +33,17 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
     const ref = Array.from(schema.lexicon.tokens.reference);
     const sys = Array.from(schema.lexicon.tokens.system);
     const role = Array.from(schema.lexicon.tokens.role);
-    const keys = Object.keys(options.themes);
+
+    addTypeTemplate({
+      filename: "types/untheme.d.ts",
+      write: true,
+      getContents: () =>
+        [
+          `export type ReferenceToken = "${ref.join('" | "')}";`,
+          `export type SystemToken = "${sys.join('" | "')}";`,
+          `export type RoleToken = "${role.join('" | "')}";`,
+        ].join("\n"),
+    });
 
     addTemplate({
       filename: "untheme.mjs",
@@ -46,15 +56,21 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
       },
     });
 
-    addTypeTemplate({
-      filename: "types/untheme.d.ts",
+    // Declaration co-located with the `untheme.mjs` data template above: a
+    // sibling `.d.mts` overrides TypeScript's inference from the `.mjs`, which
+    // would otherwise type the resolved theme as a loose all-`string` object
+    // that fails the strict token contract. Written with `addTemplate` because
+    // `addTypeTemplate` only accepts `.d.ts`.
+    addTemplate({
+      filename: "untheme.d.mts",
       write: true,
       getContents: () =>
         [
-          `export type ReferenceToken = "${ref.join('" | "')}";`,
-          `export type SystemToken = "${sys.join('" | "')}";`,
-          `export type RoleToken = "${role.join('" | "')}";`,
-          `export type ThemeKey = "${keys.join('" | "')}";`,
+          `import type { Theme, Layer, Contract } from "untheme";`,
+          `import type { ReferenceToken, SystemToken, RoleToken } from "./types/untheme";`,
+          `type AppContract = Contract<ReferenceToken, SystemToken, RoleToken>;`,
+          `export const theme: Theme<AppContract>;`,
+          `export const themes: Record<string, Layer<AppContract>>;`,
         ].join("\n"),
     });
 
@@ -62,16 +78,27 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
       src: resolver.resolve("./runtime/plugin"),
     });
 
-    addPlugin({
-      src: resolver.resolve("./runtime/plugin.server"),
-      mode: "server",
-    });
-
     addImports([
       {
         from: resolver.resolve("./runtime/composable"),
         name: "useUntheme",
       },
+      {
+        from: resolver.resolve("./runtime/store"),
+        name: "accessUntheme",
+      },
+      ...[
+        "AppContract",
+        "AppTheme",
+        "AppThemeLayer",
+        "AppThemes",
+        "AppConfig",
+        "AppUntheme",
+      ].map((name) => ({
+        from: resolver.resolve("./runtime/types"),
+        name,
+        type: true,
+      })),
     ]);
   },
 });

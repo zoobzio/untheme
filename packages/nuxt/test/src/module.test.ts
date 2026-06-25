@@ -39,7 +39,7 @@ describe("untheme module", () => {
 
   it("registers a build template exporting theme and themes", () => {
     mod.setup(options);
-    expect(kit.addTemplate).toHaveBeenCalledTimes(1);
+    expect(kit.addTemplate).toHaveBeenCalledTimes(2);
     const template = kit.addTemplate.mock.calls[0][0];
     expect(template.filename).toBe("untheme.mjs");
     expect(template.write).toBe(true);
@@ -48,27 +48,29 @@ describe("untheme module", () => {
     expect(content).toContain("export const themes =");
   });
 
-  it("registers a type template with the token and key unions", () => {
+  it("registers a declaration for the build template", () => {
+    mod.setup(options);
+    const template = kit.addTemplate.mock.calls[1][0];
+    expect(template.filename).toBe("untheme.d.mts");
+    const content = template.getContents();
+    expect(content).toContain("export const theme:");
+    expect(content).toContain("export const themes:");
+  });
+
+  it("registers a type template with the token unions", () => {
     mod.setup(options);
     const template = kit.addTypeTemplate.mock.calls[0][0];
     expect(template.filename).toBe("types/untheme.d.ts");
     const content = template.getContents();
-    for (const union of [
-      "ReferenceToken",
-      "SystemToken",
-      "RoleToken",
-      "ThemeKey",
-    ]) {
+    for (const union of ["ReferenceToken", "SystemToken", "RoleToken"]) {
       expect(content).toContain(union);
     }
-    expect(content).toContain('"alpha" | "bravo"');
   });
 
-  it("registers the runtime plugin and the server cookie plugin", () => {
+  it("registers the runtime plugin", () => {
     mod.setup(options);
-    expect(kit.addPlugin).toHaveBeenCalledTimes(2);
-    const modes = kit.addPlugin.mock.calls.map((call) => call[0].mode);
-    expect(modes).toContain("server");
+    expect(kit.addPlugin).toHaveBeenCalledTimes(1);
+    expect(kit.addPlugin.mock.calls[0][0].src).toContain("runtime/plugin");
   });
 
   it("auto-imports useUntheme", () => {

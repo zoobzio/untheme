@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ref, nextTick, type Ref } from "vue";
+import { ref, reactive, nextTick, type Ref } from "vue";
+import { clone } from "untheme";
 import type { AppConfig } from "../../src/runtime/types";
 import { theme, themes } from "../fixtures";
 
@@ -9,20 +10,28 @@ interface HeadInput {
 }
 
 const headCalls: HeadInput[] = [];
-let state: Ref<AppConfig>;
+let config: Ref<AppConfig>;
+let cookies: Record<string, { value: unknown }>;
 const callHook = vi.fn();
 
-vi.mock("#build/untheme.mjs", () => ({ theme, themes }));
+vi.mock("#build/untheme.mjs", () => ({
+  get theme() {
+    return clone(theme);
+  },
+  themes,
+}));
 
 vi.mock("#app", () => ({
   defineNuxtPlugin: (def: unknown) => def,
 }));
 
 vi.mock("#imports", () => ({
-  useState: (_key: string, init: () => AppConfig) => {
-    state = ref(init());
+  useState: (key: string, init: () => AppConfig) => {
+    const state = ref(init());
+    if (key === "untheme:config") config = state;
     return state;
   },
+  useCookie: (key: string) => (cookies[key] ??= reactive({ value: null })),
   useHead: (input: HeadInput) => {
     headCalls.push(input);
   },
@@ -51,6 +60,7 @@ const setup = () => {
 describe("untheme plugin", () => {
   beforeEach(() => {
     headCalls.length = 0;
+    cookies = {};
     callHook.mockClear();
   });
 
@@ -82,7 +92,7 @@ describe("untheme plugin", () => {
     it("toggles the dark class when the mode changes", async () => {
       setup();
       expect(headCalls[0].htmlAttrs.class.value).toContain("dark");
-      state.value.mode = "light";
+      config.value.mode = "light";
       await nextTick();
       expect(headCalls[0].htmlAttrs.class.value).not.toContain("dark");
     });

@@ -8,9 +8,9 @@ export interface NuxtUnthemeConfig {
   themes: Record<string, Theme<Template>>;
 }
 
-export interface NuxtUnthemeUserConfig<T extends Template, K extends string> {
+export interface NuxtUnthemeUserConfig<T extends Template> {
   base: Theme<T>;
   themes: {
-    [Key in K]: Layer<T>;
+    [key: string]: Layer<T>;
   };
 }

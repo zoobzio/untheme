@@ -8,6 +8,10 @@
     ".": {
       "import": "./.dist/module.mjs",
       "types": "./.dist/module.d.ts"
+    },
+    "./config": {
+      "import": "./.dist/config.mjs",
+      "types": "./.dist.config.d.ts"
     }
   },
   "files": [
@@ -15,7 +19,7 @@
   ],
   "scripts": {
     "build": "unbuild",
-    "dev": "unbuild --stub",
+    "stub": "unbuild --stub",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --root ../.."

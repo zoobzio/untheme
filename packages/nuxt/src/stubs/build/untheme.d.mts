@@ -4,7 +4,6 @@ import type {
   ReferenceToken,
   SystemToken,
   RoleToken,
-  ThemeKey,
 } from "#build/types/untheme.d.ts";
 
 export declare const theme: Theme<
@@ -12,6 +11,6 @@ export declare const theme: Theme<
 >;
 
 export declare const themes: Record<
-  ThemeKey,
+  string,
   Layer<Contract<ReferenceToken, SystemToken, RoleToken>>
 >;

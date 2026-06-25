@@ -8,6 +8,6 @@ import type { NuxtUnthemeUserConfig } from "./types";
  * @param config - The untheme module configuration.
  * @returns The same config, narrowed to its inferred types.
  */
-export const defineUnthemeConfig = <T extends Template, K extends string>(
-  config: NuxtUnthemeUserConfig<T, K>,
+export const defineUnthemeConfig = <T extends Template>(
+  config: NuxtUnthemeUserConfig<T>,
 ) => config;

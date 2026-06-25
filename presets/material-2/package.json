@@ -6,12 +6,12 @@
   "types": "./.dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./.dist/index.mjs",
-      "types": "./.dist/index.d.ts"
+      "types": "./.dist/index.d.ts",
+      "import": "./.dist/index.mjs"
     },
     "./themes/*": {
-      "import": "./.dist/themes/*.mjs",
-      "types": "./.dist/themes/*.d.ts"
+      "types": "./.dist/themes/*.d.ts",
+      "import": "./.dist/themes/*.mjs"
     }
   },
   "files": [
