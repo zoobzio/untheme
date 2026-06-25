@@ -6,7 +6,7 @@ import type { COLOR_MODES, SECTIONS } from "./constant";
 export type Mode = (typeof COLOR_MODES)[number];
 
 /**
- * A key of the core template.
+ * A key of a theme {@link Template}.
  */
 export type Section = (typeof SECTIONS)[number];
 
