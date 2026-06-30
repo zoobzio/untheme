@@ -1,56 +1,64 @@
-import type { Template, Parse, Assert } from "./types";
+import type { Assert, Parse, Template } from "./types";
 
 /**
- * Builds the {@link Parse} bundle: each tier asserts the value and returns it
- * narrowed to the tier type, or lets the {@link SchemaError} from {@link Assert}
- * propagate.
+ * Builds the {@link Parse} bundle: each kind asserts the value and returns it
+ * narrowed to the kind type, or lets the {@link SchemaError} from
+ * {@link Assert} propagate.
  */
 export const defineParse = <T extends Template>(
   assert: Assert<T>,
 ): Parse<T> => {
   return {
-    mode: (v: unknown) => {
-      assert.mode(v);
+    modifier: (v: unknown) => {
+      assert.modifier(v);
       return v;
     },
     value: (v: unknown) => {
       assert.value(v);
       return v;
     },
+    token: (v: unknown) => {
+      assert.token(v);
+      return v;
+    },
     reference: (v: unknown) => {
       assert.reference(v);
       return v;
     },
-    system: (v: unknown) => {
-      assert.system(v);
+    binding: (v: unknown) => {
+      assert.binding(v);
       return v;
     },
-    role: (v: unknown) => {
-      assert.role(v);
-      return v;
-    },
-    alias: (v: unknown) => {
-      assert.alias(v);
-      return v;
-    },
-    token: (v: unknown) => {
-      assert.token(v);
+    overrides: (v: unknown) => {
+      assert.overrides(v);
       return v;
     },
     tokens: (v: unknown) => {
       assert.tokens(v);
       return v;
     },
-    patch: (v: unknown) => {
-      assert.patch(v);
+    modifiers: (v: unknown) => {
+      assert.modifiers(v);
+      return v;
+    },
+    order: (v: unknown) => {
+      assert.order(v);
+      return v;
+    },
+    input: (v: unknown) => {
+      assert.input(v);
+      return v;
+    },
+    theme: (v: unknown) => {
+      assert.theme(v);
       return v;
     },
     layer: (v: unknown) => {
       assert.layer(v);
       return v;
     },
-    theme: (v: unknown) => {
-      assert.theme(v);
+    patch: (v: unknown) => {
+      assert.patch(v);
       return v;
     },
   };

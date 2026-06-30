@@ -4,16 +4,20 @@ import { merge } from "../src/merge";
 const base = {
   id: "test",
   name: "Test",
-  reference: {
+  tokens: {
     white: "#ffffff",
     black: "#000000",
     blue: "#0000ff",
+    background: "{white}",
+    foreground: "{black}",
   },
-  system: {
-    light: { background: "white", foreground: "black" },
-    dark: { background: "black", foreground: "white" },
+  modifiers: {
+    color: {
+      light: { background: "{white}", foreground: "{black}" },
+      dark: { background: "{black}", foreground: "{white}" },
+    },
   },
-  roles: { primary: "foreground" },
+  order: ["color"],
 };
 
 describe("merge", () => {
@@ -34,80 +38,67 @@ describe("merge", () => {
   });
 
   it("preserves the theme's identity when the overlay has none", () => {
-    const theme = merge(base, { reference: { white: "#fafafa" } });
+    const theme = merge(base, { tokens: { white: "#fafafa" } });
     expect(theme.id).toBe("test");
     expect(theme.name).toBe("Test");
   });
 
-  it("merges overlay bindings over the theme, facet by facet", () => {
+  it("merges overlay bindings token by token and context by context", () => {
     const theme = merge(base, {
-      reference: { blue: "#0090ff" },
-      system: { dark: { foreground: "blue" } },
-      roles: { primary: "background" },
+      tokens: { blue: "#0090ff" },
+      modifiers: { color: { dark: { foreground: "{blue}" } } },
     });
-    expect(theme.reference).toEqual({
-      white: "#ffffff",
-      black: "#000000",
-      blue: "#0090ff",
+    expect(theme.tokens.blue).toBe("#0090ff");
+    expect(theme.tokens.white).toBe("#ffffff");
+    expect(theme.modifiers.color.light).toEqual(base.modifiers.color.light);
+    expect(theme.modifiers.color.dark).toEqual({
+      background: "{black}",
+      foreground: "{blue}",
     });
-    expect(theme.system.light).toEqual(base.system.light);
-    expect(theme.system.dark).toEqual({
-      background: "black",
-      foreground: "blue",
-    });
-    expect(theme.roles).toEqual({ primary: "background" });
   });
 
-  it("merges a single mode without touching the other", () => {
-    const theme = merge(base, { system: { light: { background: "blue" } } });
-    expect(theme.system.light.background).toBe("blue");
-    expect(theme.system.dark).toEqual(base.system.dark);
+  it("merges a single context without touching the other", () => {
+    const theme = merge(base, {
+      modifiers: { color: { light: { background: "{blue}" } } },
+    });
+    expect(theme.modifiers.color.light.background).toBe("{blue}");
+    expect(theme.modifiers.color.dark).toEqual(base.modifiers.color.dark);
   });
 
   it("applies overlays left to right: the last binding wins", () => {
     const theme = merge(
       base,
-      { reference: { white: "#fafafa", blue: "#0090ff" } },
-      { reference: { white: "#f0f0f0" } },
+      { tokens: { white: "#fafafa", blue: "#0090ff" } },
+      { tokens: { white: "#f0f0f0" } },
     );
-    expect(theme.reference.white).toBe("#f0f0f0");
-    expect(theme.reference.blue).toBe("#0090ff");
+    expect(theme.tokens.white).toBe("#f0f0f0");
+    expect(theme.tokens.blue).toBe("#0090ff");
   });
 
   it("takes identity from the last overlay that carries one", () => {
     const theme = merge(
       base,
       { id: "first", name: "First" },
-      { reference: { white: "#fafafa" } },
+      { tokens: { white: "#fafafa" } },
       { id: "last", name: "Last" },
     );
     expect(theme.id).toBe("last");
     expect(theme.name).toBe("Last");
   });
 
-  it("keeps an adopted identity through identity-less overlays", () => {
-    const theme = merge(
-      base,
-      { id: "other", name: "Other" },
-      { roles: { primary: "background" } },
-    );
-    expect(theme.id).toBe("other");
-    expect(theme.roles.primary).toBe("background");
-  });
-
   it("mutates neither input", () => {
-    const overlay = { reference: { white: "#fafafa" } };
+    const overlay = { tokens: { white: "#fafafa" } };
     const theme = merge(base, overlay);
     expect(theme).not.toBe(base);
-    expect(base.reference.white).toBe("#ffffff");
-    expect(overlay).toEqual({ reference: { white: "#fafafa" } });
+    expect(base.tokens.white).toBe("#ffffff");
+    expect(overlay).toEqual({ tokens: { white: "#fafafa" } });
   });
 
   it("returns detached records", () => {
     const theme = merge(base, {});
-    theme.reference.white = "#111111";
-    theme.system.light.background = "blue";
-    expect(base.reference.white).toBe("#ffffff");
-    expect(base.system.light.background).toBe("white");
+    theme.tokens.white = "#111111";
+    theme.modifiers.color.light.background = "{blue}";
+    expect(base.tokens.white).toBe("#ffffff");
+    expect(base.modifiers.color.light.background).toBe("{white}");
   });
 });

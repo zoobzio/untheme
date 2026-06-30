@@ -18,22 +18,21 @@ import { createCarbonColorTokens } from "./colors";
 /**
  * The Carbon preset.
  *
- * Reference tokens provide the full Carbon token set: the 12 IBM color families
- * (each a mode-independent 10-grade palette) plus white/black, the IBM Plex
- * type
- * scale, the spacing scale, and motion easing/duration values. System tokens
- * map
- * those references onto Carbon's semantic roles per light/dark mode.
+ * The base `tokens` map provides the full Carbon token set: the 12 IBM color
+ * families (each a mode-independent 10-grade palette) plus white/black, the IBM
+ * Plex type scale, the spacing scale, and motion easing/duration values, plus
+ * Carbon's semantic roles bound by reference onto those palette tokens. The
+ * base defaults to the **White** (light) scheme; the `color` modifier carries
+ * the light and dark schemes, with `dark` remapping the roles onto **Gray 100**.
  *
  * The base pairs Carbon's two default themes — **White** (light) and **Gray
- * 100**
- * (dark). The other official pairings (White/Gray 90, Gray 10/Gray 90,
+ * 100** (dark). The other official pairings (White/Gray 90, Gray 10/Gray 90,
  * Gray 10/Gray 100) ship as theme variants under `@untheme/carbon/themes`.
  */
 export const preset = defineUnthemePreset({
   id: "white-g100",
   name: "Carbon",
-  reference: {
+  tokens: {
     // Color families — IBM Carbon palette (mode-independent 10-grade scales)
     ...createCarbonColorTokens("blue", blue),
     ...createCarbonColorTokens("cyan", cyan),
@@ -145,80 +144,81 @@ export const preset = defineUnthemePreset({
     "easing-expressive-standard": "cubic-bezier(0.4, 0.14, 0.3, 1)",
     "easing-expressive-entrance": "cubic-bezier(0, 0, 0.3, 1)",
     "easing-expressive-exit": "cubic-bezier(0.4, 0.14, 1, 1)",
+    // Semantic roles — default to the White (light) scheme
+    background: "{white}",
+    "background-inverse": "{gray-80}",
+    "layer-01": "{gray-10}",
+    "layer-02": "{white}",
+    "layer-03": "{gray-10}",
+    "field-01": "{gray-10}",
+    "field-02": "{white}",
+    "text-primary": "{gray-100}",
+    "text-secondary": "{gray-70}",
+    "text-on-color": "{white}",
+    "text-helper": "{gray-60}",
+    "text-error": "{red-60}",
+    "text-inverse": "{white}",
+    "link-primary": "{blue-60}",
+    "link-secondary": "{blue-70}",
+    "link-visited": "{purple-60}",
+    "border-subtle-00": "{gray-20}",
+    "border-subtle-01": "{gray-30}",
+    "border-strong-01": "{gray-50}",
+    "border-inverse": "{gray-100}",
+    "border-interactive": "{blue-60}",
+    "icon-primary": "{gray-100}",
+    "icon-secondary": "{gray-70}",
+    "icon-on-color": "{white}",
+    "icon-inverse": "{white}",
+    "support-error": "{red-60}",
+    "support-success": "{green-50}",
+    "support-warning": "{yellow-30}",
+    "support-info": "{blue-70}",
+    focus: "{blue-60}",
+    interactive: "{blue-60}",
   },
-  system: {
-    // Light — Carbon "White" theme
-    light: {
-      background: "white",
-      "background-inverse": "gray-80",
-      "layer-01": "gray-10",
-      "layer-02": "white",
-      "layer-03": "gray-10",
-      "field-01": "gray-10",
-      "field-02": "white",
-      "text-primary": "gray-100",
-      "text-secondary": "gray-70",
-      "text-on-color": "white",
-      "text-helper": "gray-60",
-      "text-error": "red-60",
-      "text-inverse": "white",
-      "link-primary": "blue-60",
-      "link-secondary": "blue-70",
-      "link-visited": "purple-60",
-      "border-subtle-00": "gray-20",
-      "border-subtle-01": "gray-30",
-      "border-strong-01": "gray-50",
-      "border-inverse": "gray-100",
-      "border-interactive": "blue-60",
-      "icon-primary": "gray-100",
-      "icon-secondary": "gray-70",
-      "icon-on-color": "white",
-      "icon-inverse": "white",
-      "support-error": "red-60",
-      "support-success": "green-50",
-      "support-warning": "yellow-30",
-      "support-info": "blue-70",
-      focus: "blue-60",
-      interactive: "blue-60",
-    },
-    // Dark — Carbon "Gray 100" theme
-    dark: {
-      background: "gray-100",
-      "background-inverse": "gray-10",
-      "layer-01": "gray-90",
-      "layer-02": "gray-80",
-      "layer-03": "gray-70",
-      "field-01": "gray-90",
-      "field-02": "gray-80",
-      "text-primary": "gray-10",
-      "text-secondary": "gray-30",
-      "text-on-color": "white",
-      "text-helper": "gray-40",
-      "text-error": "red-40",
-      "text-inverse": "gray-100",
-      "link-primary": "blue-40",
-      "link-secondary": "blue-30",
-      "link-visited": "purple-40",
-      "border-subtle-00": "gray-80",
-      "border-subtle-01": "gray-70",
-      "border-strong-01": "gray-60",
-      "border-inverse": "gray-10",
-      "border-interactive": "blue-50",
-      "icon-primary": "gray-10",
-      "icon-secondary": "gray-30",
-      "icon-on-color": "white",
-      "icon-inverse": "gray-100",
-      "support-error": "red-50",
-      "support-success": "green-40",
-      "support-warning": "yellow-30",
-      "support-info": "blue-50",
-      focus: "white",
-      interactive: "blue-50",
+  modifiers: {
+    // Color scheme — the base tokens carry the White (light) scheme, so `light`
+    // is empty; `dark` remaps the semantic roles onto Carbon's Gray 100.
+    color: {
+      light: {},
+      // Dark — Carbon "Gray 100" theme
+      dark: {
+        background: "{gray-100}",
+        "background-inverse": "{gray-10}",
+        "layer-01": "{gray-90}",
+        "layer-02": "{gray-80}",
+        "layer-03": "{gray-70}",
+        "field-01": "{gray-90}",
+        "field-02": "{gray-80}",
+        "text-primary": "{gray-10}",
+        "text-secondary": "{gray-30}",
+        "text-on-color": "{white}",
+        "text-helper": "{gray-40}",
+        "text-error": "{red-40}",
+        "text-inverse": "{gray-100}",
+        "link-primary": "{blue-40}",
+        "link-secondary": "{blue-30}",
+        "link-visited": "{purple-40}",
+        "border-subtle-00": "{gray-80}",
+        "border-subtle-01": "{gray-70}",
+        "border-strong-01": "{gray-60}",
+        "border-inverse": "{gray-10}",
+        "border-interactive": "{blue-50}",
+        "icon-primary": "{gray-10}",
+        "icon-secondary": "{gray-30}",
+        "icon-on-color": "{white}",
+        "icon-inverse": "{gray-100}",
+        "support-error": "{red-50}",
+        "support-success": "{green-40}",
+        "support-warning": "{yellow-30}",
+        "support-info": "{blue-50}",
+        focus: "{white}",
+        interactive: "{blue-50}",
+      },
     },
   },
-  // Carbon's semantic layer lives entirely in `system`; it declares no
-  // further role-tier aliases.
-  roles: {},
+  order: ["color"],
 });
 
 export default preset;

@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+
 import { defineUntheme } from "../src/service";
 import {
   CircularAliasError,
@@ -7,629 +8,329 @@ import {
   InvalidThemeError,
   UnknownThemeError,
 } from "../src/error";
-import { SchemaError } from "@untheme/schema";
 
-const base = {
-  id: "test",
-  name: "Test",
-  reference: {
+const theme = {
+  id: "demo",
+  name: "Demo",
+  tokens: {
     white: "#ffffff",
     black: "#000000",
-    blue: "#0000ff",
+    accent: "#0090ff",
+    bg: "{white}",
+    fg: "{black}",
+    ring: "{accent}",
   },
-  system: {
-    light: { background: "white", foreground: "black" },
-    dark: { background: "black", foreground: "white" },
+  modifiers: {
+    color: {
+      light: { bg: "{white}", fg: "{black}" },
+      dark: { bg: "{black}", fg: "{white}" },
+    },
+    contrast: {
+      normal: {},
+      high: { fg: "{black}" },
+    },
   },
-  roles: { primary: "foreground" },
+  order: ["color", "contrast"],
 };
 
-/**
- * A fresh service over an isolated copy of the base theme.
- */
-const make = (mode: "light" | "dark" = "dark") =>
-  defineUntheme({ mode, theme: structuredClone(base) });
+const makeConfig = () => ({
+  theme: structuredClone(theme),
+  input: { color: "light", contrast: "normal" },
+  override: {},
+});
 
-describe("defineUntheme", () => {
-  describe("validation", () => {
-    it("throws SchemaError when the theme breaks its own contract", () => {
-      const broken = structuredClone(base);
-      broken.reference.white = "red;} body{background:red}";
-      expect(() => defineUntheme({ mode: "dark", theme: broken })).toThrow(
-        SchemaError,
-      );
-      expect(() => defineUntheme({ mode: "dark", theme: broken })).toThrow(
-        "reference.white",
-      );
+describe("construction", () => {
+  it("builds over a valid theme and selection", () => {
+    expect(() => defineUntheme(makeConfig())).not.toThrow();
+  });
+
+  it("rejects an incomplete selection", () => {
+    expect(() =>
+      defineUntheme({ ...makeConfig(), input: { color: "light" } }),
+    ).toThrow(InvalidThemeError);
+  });
+
+  it("rejects a cross-axis or unknown context", () => {
+    expect(() =>
+      defineUntheme({
+        ...makeConfig(),
+        input: { color: "high", contrast: "normal" },
+      }),
+    ).toThrow(InvalidThemeError);
+  });
+
+  it("rejects a malformed seed layer", () => {
+    expect(() =>
+      defineUntheme(makeConfig(), {
+        bad: { id: "bad", name: "Bad", tokens: { ghost: "#000" } },
+      }),
+    ).toThrow(InvalidLayerError);
+  });
+});
+
+describe("modifiers / contexts", () => {
+  it("lists the axes in composition order", () => {
+    expect(defineUntheme(makeConfig()).modifiers()).toEqual([
+      "color",
+      "contrast",
+    ]);
+  });
+
+  it("lists the contexts of an axis", () => {
+    const u = defineUntheme(makeConfig());
+    expect(u.contexts("color")).toEqual(["light", "dark"]);
+    expect(u.contexts("contrast")).toEqual(["normal", "high"]);
+  });
+});
+
+describe("tokens / get", () => {
+  it("composes base, then the selected context of each modifier", () => {
+    const u = defineUntheme(makeConfig());
+    expect(u.get("bg")).toBe("{white}");
+    expect(u.get("fg")).toBe("{black}");
+    expect(u.get("ring")).toBe("{accent}");
+  });
+
+  it("applies later modifiers in order over earlier ones", () => {
+    const u = defineUntheme({
+      ...makeConfig(),
+      input: { color: "dark", contrast: "high" },
     });
+    // color.dark sets fg "{white}"; contrast.high (later) overrides it "{black}"
+    expect(u.get("bg")).toBe("{black}");
+    expect(u.get("fg")).toBe("{black}");
+  });
 
-    it("throws SchemaError when the modes are unbalanced", () => {
-      const broken = structuredClone(base);
-      Reflect.deleteProperty(broken.system.dark, "foreground");
-      expect(() => defineUntheme({ mode: "dark", theme: broken })).toThrow(
-        SchemaError,
-      );
-    });
+  it("peeks at another selection without changing the active one", () => {
+    const u = defineUntheme(makeConfig());
+    expect(u.tokens({ color: "dark", contrast: "normal" }).bg).toBe("{black}");
+    expect(u.config.input.color).toBe("light");
+    expect(u.get("bg")).toBe("{white}");
+  });
+});
 
-    it("throws SchemaError when a role aliases itself", () => {
-      const broken = structuredClone(base);
-      broken.roles.primary = "primary";
-      expect(() => defineUntheme({ mode: "dark", theme: broken })).toThrow(
-        SchemaError,
-      );
+describe("swap", () => {
+  it("selects a context and re-resolves", () => {
+    const u = defineUntheme(makeConfig());
+    u.swap("color", "dark");
+    expect(u.config.input.color).toBe("dark");
+    expect(u.get("bg")).toBe("{black}");
+  });
+
+  it("touches only the named axis", () => {
+    const u = defineUntheme(makeConfig());
+    u.swap("color", "dark");
+    expect(u.config.input.contrast).toBe("normal");
+  });
+});
+
+describe("set / dirty / reset (the override)", () => {
+  it("set wins over the composed value", () => {
+    const u = defineUntheme(makeConfig());
+    u.set("bg", "#123456");
+    expect(u.get("bg")).toBe("#123456");
+  });
+
+  it("the override is selection-independent", () => {
+    const u = defineUntheme(makeConfig());
+    u.set("bg", "#123456");
+    u.swap("color", "dark");
+    expect(u.get("bg")).toBe("#123456");
+  });
+
+  it("is a no-op on an unknown token or invalid value", () => {
+    const u = defineUntheme(makeConfig());
+    u.set("ghost", "#000");
+    u.set("bg", "red;}");
+    u.set("bg", "{ghost}");
+    expect(u.dirty()).toBe(false);
+  });
+
+  it("dirty tracks the override; reset clears it", () => {
+    const u = defineUntheme(makeConfig());
+    expect(u.dirty()).toBe(false);
+    u.set("bg", "#123456");
+    expect(u.dirty()).toBe(true);
+    u.reset();
+    expect(u.dirty()).toBe(false);
+    expect(u.get("bg")).toBe("{white}");
+  });
+});
+
+describe("resolve", () => {
+  it("follows a reference chain to a literal", () => {
+    const u = defineUntheme(makeConfig());
+    expect(u.resolve("bg")).toBe("#ffffff"); // bg -> {white} -> #ffffff
+    expect(u.resolve("ring")).toBe("#0090ff"); // ring -> {accent} -> #0090ff
+  });
+
+  it("returns a literal binding as-is", () => {
+    expect(defineUntheme(makeConfig()).resolve("white")).toBe("#ffffff");
+  });
+
+  it("resolves through the override", () => {
+    const u = defineUntheme(makeConfig());
+    u.set("bg", "{accent}");
+    expect(u.resolve("bg")).toBe("#0090ff");
+  });
+
+  it("throws on a reference cycle", () => {
+    const u = defineUntheme(makeConfig());
+    u.set("bg", "{fg}");
+    u.set("fg", "{bg}");
+    expect(() => u.resolve("bg")).toThrow(CircularAliasError);
+  });
+});
+
+describe("update", () => {
+  it("merges a patch into the definition and keeps the override", () => {
+    const u = defineUntheme(makeConfig());
+    u.set("ring", "#111111");
+    u.update({ tokens: { bg: "{accent}" } });
+    expect(u.config.theme.tokens.bg).toBe("{accent}");
+    expect(u.dirty()).toBe(true);
+    expect(u.get("ring")).toBe("#111111");
+  });
+
+  it("rejects a patch outside the contract", () => {
+    const u = defineUntheme(makeConfig());
+    expect(() => u.update({ tokens: { ghost: "#000" } })).toThrow(
+      InvalidPatchError,
+    );
+  });
+});
+
+describe("delta", () => {
+  it("is all-empty when nothing has drifted from the baseline", () => {
+    const u = defineUntheme(makeConfig());
+    expect(u.delta()).toEqual({
+      tokens: {},
+      modifiers: {
+        color: { light: {}, dark: {} },
+        contrast: { normal: {}, high: {} },
+      },
     });
   });
 
-  describe("semantic errors", () => {
-    it("constructor throws InvalidThemeError for a broken base", () => {
-      const broken = structuredClone(base);
-      broken.roles.primary = "primary";
-      expect(() => defineUntheme({ mode: "dark", theme: broken })).toThrow(
-        InvalidThemeError,
-      );
+  it("captures both the override and the definition drift", () => {
+    const u = defineUntheme(makeConfig());
+    u.set("ring", "#111111");
+    u.update({
+      tokens: { bg: "{accent}" },
+      modifiers: { color: { dark: { bg: "{accent}" } } },
     });
+    const d = u.delta();
+    expect(d.tokens).toEqual({ ring: "#111111", bg: "{accent}" });
+    expect(d.modifiers.color.dark).toEqual({ bg: "{accent}" });
+  });
 
-    it("constructor throws InvalidLayerError for a broken registry layer", () => {
-      expect(() =>
-        defineUntheme(
-          { mode: "dark", theme: structuredClone(base) },
-          {
-            bad: {
-              id: "bad",
-              name: "Bad",
-              reference: {},
-              system: { light: { background: "ghost" }, dark: {} },
-              roles: {},
+  it("round-trips: updating a fresh baseline with the delta reproduces the drift", () => {
+    const u = defineUntheme(makeConfig());
+    u.set("ring", "#111111");
+    u.update({ tokens: { bg: "{accent}" } });
+
+    const fresh = defineUntheme(makeConfig());
+    fresh.update(u.delta());
+    expect(fresh.config.theme.tokens.bg).toBe("{accent}");
+    expect(fresh.config.theme.tokens.ring).toBe("#111111");
+  });
+});
+
+describe("apply / select", () => {
+  it("becomes the layer over the baseline and clears the override", () => {
+    const u = defineUntheme(makeConfig());
+    u.set("bg", "#123456");
+    u.apply({ id: "alt", name: "Alt", tokens: { ring: "{white}" } });
+    expect(u.config.theme.id).toBe("alt");
+    expect(u.dirty()).toBe(false);
+    expect(u.get("ring")).toBe("{white}");
+  });
+
+  it("resolves each apply against the baseline, not the prior theme", () => {
+    const u = defineUntheme(makeConfig());
+    u.apply({ id: "l1", name: "L1", tokens: { ring: "{white}" } });
+    u.apply({ id: "l2", name: "L2", tokens: { bg: "{accent}" } });
+    // l1's ring change is gone — l2 resolved against the baseline
+    expect(u.get("ring")).toBe("{accent}");
+  });
+
+  it("select applies a catalog layer; an unknown key throws", () => {
+    const u = defineUntheme(makeConfig(), {
+      alt: { id: "alt", name: "Alt", tokens: { ring: "{white}" } },
+    });
+    u.select("alt");
+    expect(u.config.theme.id).toBe("alt");
+    expect(u.get("ring")).toBe("{white}");
+    expect(() => u.select("missing")).toThrow(UnknownThemeError);
+  });
+});
+
+describe("create / extract / remove", () => {
+  it("create files a resolved theme without touching the active one", () => {
+    const u = defineUntheme(makeConfig());
+    const made = u.create({
+      id: "made",
+      name: "Made",
+      tokens: { bg: "{accent}" },
+    });
+    expect(made.tokens.bg).toBe("{accent}");
+    expect(u.themes.made).toBeDefined();
+    expect(u.config.theme.id).toBe("demo");
+  });
+
+  it("extract bakes the override into a detached snapshot", () => {
+    const u = defineUntheme(makeConfig());
+    u.set("bg", "#123456");
+    const snap = u.extract("snap", "Snap");
+    expect(snap.id).toBe("snap");
+    expect(snap.tokens.bg).toBe("#123456");
+    expect(u.themes.snap).toBeUndefined();
+    expect(u.config.theme.id).toBe("demo");
+  });
+
+  it("remove drops a catalog entry", () => {
+    const u = defineUntheme(makeConfig(), {
+      alt: { id: "alt", name: "Alt", tokens: {} },
+    });
+    expect(u.themes.alt).toBeDefined();
+    u.remove("alt");
+    expect(u.themes.alt).toBeUndefined();
+  });
+});
+
+describe("Options middleware", () => {
+  it("intercepts reads of the selection", () => {
+    const u = defineUntheme(
+      makeConfig(),
+      {},
+      {
+        get: {
+          config: { input: () => ({ color: "dark", contrast: "normal" }) },
+        },
+      },
+    );
+    // reads see dark regardless of the stored selection
+    expect(u.get("bg")).toBe("{black}");
+  });
+
+  it("intercepts writes of the override", () => {
+    const writes: unknown[] = [];
+    const u = defineUntheme(
+      makeConfig(),
+      {},
+      {
+        set: {
+          config: {
+            override: (o) => {
+              writes.push(o);
+              return o;
             },
           },
-        ),
-      ).toThrow(InvalidLayerError);
-    });
-
-    it("update throws InvalidPatchError", () => {
-      const ut = make();
-      expect(() => ut.update({ reference: { ghost: "#000000" } })).toThrow(
-        InvalidPatchError,
-      );
-    });
-
-    it("apply throws InvalidLayerError", () => {
-      const ut = make();
-      expect(() =>
-        ut.apply({
-          id: "bad",
-          name: "Bad",
-          reference: {},
-          system: { light: { background: "ghost" }, dark: {} },
-          roles: {},
-        }),
-      ).toThrow(InvalidLayerError);
-    });
-
-    it("create throws InvalidLayerError", () => {
-      const ut = make();
-      expect(() =>
-        ut.create({
-          id: "bad",
-          name: "Bad",
-          reference: {},
-          system: { light: {}, dark: {} },
-          roles: { primary: "primary" },
-        }),
-      ).toThrow(InvalidLayerError);
-    });
-
-    it("remains a SchemaError carrying the underlying issues", () => {
-      const ut = make();
-      let caught: unknown;
-      try {
-        ut.update({ reference: { ghost: "#000000" } });
-      } catch (error) {
-        caught = error;
-      }
-      expect(caught).toBeInstanceOf(SchemaError);
-      expect(caught).toBeInstanceOf(InvalidPatchError);
-      if (caught instanceof InvalidPatchError) {
-        expect(caught.issues.length).toBeGreaterThan(0);
-      }
-    });
-  });
-
-  describe("config", () => {
-    it("exposes the caller-owned container", () => {
-      const ut = make();
-      expect(ut.config.mode).toBe("dark");
-      expect(ut.config.theme.id).toBe("test");
-    });
-
-    it("reads flow through the container, not a snapshot", () => {
-      const ut = make();
-      ut.config.mode = "light";
-      expect(ut.resolve("background")).toBe("#ffffff");
-
-      ut.config.theme = {
-        ...structuredClone(base),
-        reference: { ...base.reference, white: "#fafafa" },
-      };
-      expect(ut.resolve("background")).toBe("#fafafa");
-    });
-  });
-
-  describe("themes", () => {
-    it("exposes the given theme registry", () => {
-      const night = {
-        id: "night",
-        name: "Night",
-        reference: {},
-        system: { light: {}, dark: { background: "blue" } },
-        roles: {},
-      };
-      const ut = defineUntheme(
-        { mode: "dark", theme: structuredClone(base) },
-        { night },
-      );
-      expect(ut.themes.night).toBe(night);
-    });
-
-    it("defaults to an empty registry", () => {
-      const ut = make();
-      expect(ut.themes).toEqual({});
-    });
-
-    it("validates registry layers up front", () => {
-      expect(() =>
-        defineUntheme(
-          { mode: "dark", theme: structuredClone(base) },
-          {
-            bad: {
-              id: "bad",
-              name: "Bad",
-              reference: {},
-              system: { light: { background: "ghost" }, dark: {} },
-              roles: {},
-            },
-          },
-        ),
-      ).toThrow(SchemaError);
-    });
-  });
-
-  describe("schema", () => {
-    it("exposes guards bound to the theme contract", () => {
-      const ut = make();
-      expect(ut.schema.guard.reference("white")).toBe(true);
-      expect(ut.schema.guard.role("primary")).toBe(true);
-      expect(ut.schema.guard.token("ghost")).toBe(false);
-    });
-  });
-
-  describe("tokens", () => {
-    it("merges reference, the given mode's system bindings, and roles", () => {
-      const ut = make();
-      expect(ut.tokens("dark")).toEqual({
-        white: "#ffffff",
-        black: "#000000",
-        blue: "#0000ff",
-        background: "black",
-        foreground: "white",
-        primary: "foreground",
-      });
-    });
-
-    it("reads any mode without touching the active one", () => {
-      const ut = make();
-      expect(ut.tokens("light").background).toBe("white");
-      expect(ut.config.mode).toBe("dark");
-    });
-
-    it("defaults to the active mode", () => {
-      const ut = make();
-      expect(ut.tokens()).toEqual(ut.tokens("dark"));
-      ut.config.mode = "light";
-      expect(ut.tokens().background).toBe("white");
-    });
-  });
-
-  describe("get", () => {
-    it("returns the current binding without resolving", () => {
-      const ut = make();
-      expect(ut.get("primary")).toBe("foreground");
-      expect(ut.get("background")).toBe("black");
-      expect(ut.get("white")).toBe("#ffffff");
-    });
-  });
-
-  describe("resolve", () => {
-    it("follows the alias chain to a raw value", () => {
-      const ut = make();
-      // primary -> foreground -> white -> #ffffff
-      expect(ut.resolve("primary")).toBe("#ffffff");
-      expect(ut.resolve("background")).toBe("#000000");
-      expect(ut.resolve("white")).toBe("#ffffff");
-    });
-
-    it("resolves through the active mode", () => {
-      const ut = make("light");
-      expect(ut.resolve("primary")).toBe("#000000");
-    });
-
-    it("throws CircularAliasError on a circular alias chain", () => {
-      const ut = make();
-      // reference values equal to token names are followed as aliases; the
-      // loop is caught via the visited-token chain, not a stack overflow
-      ut.set("white", "black");
-      ut.set("black", "white");
-      expect(() => ut.resolve("white")).toThrow(CircularAliasError);
-    });
-
-    it("reports the looping chain", () => {
-      const ut = make();
-      ut.set("white", "black");
-      ut.set("black", "white");
-      let caught: unknown;
-      try {
-        ut.resolve("white");
-      } catch (error) {
-        caught = error;
-      }
-      expect(caught).toBeInstanceOf(CircularAliasError);
-      if (caught instanceof CircularAliasError) {
-        expect(caught.chain).toContain("white");
-        expect(caught.chain).toContain("black");
-      }
-    });
-  });
-
-  describe("set", () => {
-    it("points a role at another alias", () => {
-      const ut = make();
-      ut.set("primary", "background");
-      expect(ut.get("primary")).toBe("background");
-      expect(ut.resolve("primary")).toBe("#000000");
-    });
-
-    it("rebinds a system token in the active mode only", () => {
-      const ut = make();
-      ut.set("background", "blue");
-      expect(ut.tokens("dark").background).toBe("blue");
-      expect(ut.tokens("light").background).toBe("white");
-    });
-
-    it("sets a reference value", () => {
-      const ut = make();
-      ut.set("white", "#fafafa");
-      expect(ut.resolve("white")).toBe("#fafafa");
-    });
-
-    it("ignores writes that break tier rules", () => {
-      const ut = make();
-      ut.set("primary", "ghost");
-      ut.set("background", "#123456");
-      ut.set("white", "red;} body{background:red}");
-      expect(ut.get("primary")).toBe("foreground");
-      expect(ut.get("background")).toBe("black");
-      expect(ut.get("white")).toBe("#ffffff");
-    });
-  });
-
-  describe("update", () => {
-    it("merges patch bindings and preserves identity", () => {
-      const ut = make();
-      ut.update({ reference: { white: "#f0f0f0" } });
-      expect(ut.config.theme.id).toBe("test");
-      expect(ut.resolve("white")).toBe("#f0f0f0");
-      expect(ut.resolve("black")).toBe("#000000");
-    });
-
-    it("patches a single mode without touching the other", () => {
-      const ut = make();
-      ut.update({ system: { dark: { background: "blue" } } });
-      expect(ut.tokens("dark").background).toBe("blue");
-      expect(ut.tokens("light").background).toBe("white");
-    });
-
-    it("leaves the theme intact for an empty patch", () => {
-      const ut = make();
-      const before = structuredClone(ut.config.theme);
-      ut.update({});
-      expect(ut.config.theme).toEqual(before);
-    });
-
-    it("throws SchemaError and leaves the theme intact", () => {
-      const ut = make();
-      const before = structuredClone(ut.config.theme);
-      expect(() => ut.update({ reference: { ghost: "#000000" } })).toThrow(
-        SchemaError,
-      );
-      expect(() =>
-        ut.update({ reference: { white: "red;} body{background:red}" } }),
-      ).toThrow(SchemaError);
-      expect(ut.config.theme).toEqual(before);
-    });
-  });
-
-  describe("apply", () => {
-    it("adopts the layer's identity and merges its bindings", () => {
-      const ut = make();
-      ut.apply({
-        id: "other",
-        name: "Other",
-        reference: { blue: "#0090ff" },
-        system: { light: {}, dark: { foreground: "blue" } },
-        roles: {},
-      });
-      expect(ut.config.theme.id).toBe("other");
-      expect(ut.config.theme.name).toBe("Other");
-      // merged: untouched tokens survive, overridden ones change
-      expect(ut.resolve("white")).toBe("#ffffff");
-      expect(ut.resolve("primary")).toBe("#0090ff");
-    });
-
-    it("throws SchemaError and leaves the theme intact", () => {
-      const ut = make();
-      const before = structuredClone(ut.config.theme);
-      expect(() =>
-        ut.apply({
-          id: "bad",
-          name: "Bad",
-          reference: {},
-          system: { light: { background: "ghost" }, dark: {} },
-          roles: {},
-        }),
-      ).toThrow(SchemaError);
-      expect(ut.config.theme).toEqual(before);
-    });
-
-    it("re-baselines: the applied theme is the new reference point", () => {
-      const ut = make();
-      ut.apply({
-        id: "other",
-        name: "Other",
-        reference: { blue: "#0090ff" },
-        system: { light: {}, dark: {} },
-        roles: {},
-      });
-      expect(ut.dirty()).toBe(false);
-      ut.set("white", "#fafafa");
-      ut.reset();
-      // reset returns to the applied theme, not the original
-      expect(ut.config.theme.id).toBe("other");
-      expect(ut.resolve("blue")).toBe("#0090ff");
-      expect(ut.resolve("white")).toBe("#ffffff");
-    });
-  });
-
-  describe("select", () => {
-    const seeded = () =>
-      defineUntheme(
-        { mode: "dark", theme: structuredClone(base) },
-        {
-          night: {
-            id: "night",
-            name: "Night",
-            reference: { blue: "#0090ff" },
-            system: { light: {}, dark: { foreground: "blue" } },
-            roles: {},
-          },
         },
-      );
-
-    it("switches to a registered layer by key", () => {
-      const ut = seeded();
-      ut.select("night");
-      expect(ut.config.theme.id).toBe("night");
-      expect(ut.resolve("primary")).toBe("#0090ff");
-    });
-
-    it("re-baselines the selected theme, like apply", () => {
-      const ut = seeded();
-      ut.select("night");
-      expect(ut.dirty()).toBe(false);
-    });
-
-    it("throws UnknownThemeError for an unregistered key", () => {
-      const ut = seeded();
-      expect(() => ut.select("ghost")).toThrow(UnknownThemeError);
-    });
-  });
-
-  describe("create", () => {
-    it("resolves a layer against the baseline into a complete theme", () => {
-      const ut = make();
-      const theme = ut.create({
-        id: "night",
-        name: "Night",
-        reference: { blue: "#0090ff" },
-        system: { light: {}, dark: { foreground: "blue" } },
-        roles: {},
-      });
-      expect(theme).toEqual({
-        id: "night",
-        name: "Night",
-        reference: { white: "#ffffff", black: "#000000", blue: "#0090ff" },
-        system: {
-          light: { background: "white", foreground: "black" },
-          dark: { background: "black", foreground: "blue" },
-        },
-        roles: { primary: "foreground" },
-      });
-    });
-
-    it("backfills from the baseline, not the edited active theme", () => {
-      const ut = make();
-      ut.set("white", "#fafafa");
-      const theme = ut.create({
-        id: "night",
-        name: "Night",
-        reference: {},
-        system: { light: {}, dark: {} },
-        roles: {},
-      });
-      expect(theme.reference.white).toBe("#ffffff");
-    });
-
-    it("leaves the active theme untouched", () => {
-      const ut = make();
-      ut.create({
-        id: "night",
-        name: "Night",
-        reference: { blue: "#0090ff" },
-        system: { light: {}, dark: {} },
-        roles: {},
-      });
-      expect(ut.config.theme.id).toBe("test");
-      expect(ut.resolve("blue")).toBe("#0000ff");
-    });
-
-    it("registers the result so select can switch to it", () => {
-      const ut = make();
-      ut.create({
-        id: "night",
-        name: "Night",
-        reference: { blue: "#0090ff" },
-        system: { light: {}, dark: {} },
-        roles: {},
-      });
-      expect(ut.themes.night).toBeDefined();
-      ut.select("night");
-      expect(ut.config.theme.id).toBe("night");
-      expect(ut.resolve("blue")).toBe("#0090ff");
-    });
-
-    it("throws SchemaError for a layer outside the contract", () => {
-      const ut = make();
-      expect(() =>
-        ut.create({
-          id: "bad",
-          name: "Bad",
-          reference: {},
-          system: { light: {}, dark: {} },
-          roles: { primary: "primary" },
-        }),
-      ).toThrow(SchemaError);
-    });
-  });
-
-  describe("extract", () => {
-    it("snapshots the active theme under a new identity", () => {
-      const ut = make();
-      ut.set("white", "#fafafa");
-      const theme = ut.extract("snap", "Snapshot");
-      expect(theme.id).toBe("snap");
-      expect(theme.name).toBe("Snapshot");
-      expect(theme.reference.white).toBe("#fafafa");
-    });
-
-    it("returns a detached copy", () => {
-      const ut = make();
-      const theme = ut.extract("snap", "Snapshot");
-      theme.reference.white = "#111111";
-      expect(ut.resolve("white")).toBe("#ffffff");
-    });
-
-    it("does not register the snapshot", () => {
-      const ut = make();
-      ut.extract("snap", "Snapshot");
-      expect(ut.themes.snap).toBeUndefined();
-    });
-  });
-
-  describe("remove", () => {
-    it("drops a theme from the registry", () => {
-      const ut = make();
-      ut.create({
-        id: "night",
-        name: "Night",
-        reference: {},
-        system: { light: {}, dark: {} },
-        roles: {},
-      });
-      ut.remove("night");
-      expect(ut.themes.night).toBeUndefined();
-      expect(() => ut.select("night")).toThrow(UnknownThemeError);
-    });
-
-    it("is a no-op for an unknown id", () => {
-      const ut = make();
-      expect(() => ut.remove("ghost")).not.toThrow();
-    });
-
-    it("leaves the active theme standing when its entry is removed", () => {
-      const ut = make();
-      ut.create({
-        id: "night",
-        name: "Night",
-        reference: {},
-        system: { light: {}, dark: {} },
-        roles: {},
-      });
-      ut.select("night");
-      ut.remove("night");
-      expect(ut.config.theme.id).toBe("night");
-    });
-  });
-
-  describe("dirty", () => {
-    it("is false for an untouched service", () => {
-      const ut = make();
-      expect(ut.dirty()).toBe(false);
-    });
-
-    it("is true after any binding deviates", () => {
-      const ut = make();
-      ut.set("white", "#fafafa");
-      expect(ut.dirty()).toBe(true);
-    });
-
-    it("tracks patches across every facet", () => {
-      const ut = make();
-      ut.update({ system: { light: { background: "blue" } } });
-      expect(ut.dirty()).toBe(true);
-    });
-
-    it("is false again once bindings return to the baseline", () => {
-      const ut = make();
-      ut.set("white", "#fafafa");
-      ut.set("white", "#ffffff");
-      expect(ut.dirty()).toBe(false);
-    });
-
-    it("falls back to the creation baseline for an uncached theme id", () => {
-      const ut = make();
-      ut.config.theme = ut.create({
-        id: "night",
-        name: "Night",
-        reference: { blue: "#0090ff" },
-        system: { light: {}, dark: {} },
-        roles: {},
-      });
-      expect(ut.dirty()).toBe(true);
-    });
-  });
-
-  describe("reset", () => {
-    it("restores the baseline and clears dirt", () => {
-      const ut = make();
-      ut.set("white", "#fafafa");
-      ut.update({ roles: { primary: "background" } });
-      ut.reset();
-      expect(ut.dirty()).toBe(false);
-      expect(ut.resolve("white")).toBe("#ffffff");
-      expect(ut.get("primary")).toBe("foreground");
-    });
-
-    it("restores through the container, so a swapped theme is replaced", () => {
-      const ut = make();
-      const before = structuredClone(ut.config.theme);
-      ut.config.theme = ut.create({
-        id: "night",
-        name: "Night",
-        reference: { blue: "#0090ff" },
-        system: { light: {}, dark: {} },
-        roles: {},
-      });
-      ut.reset();
-      expect(ut.config.theme).toEqual(before);
-    });
+      },
+    );
+    u.set("bg", "#123456");
+    expect(writes).toHaveLength(1);
+    expect(writes[0]).toEqual({ bg: "#123456" });
   });
 });

@@ -1,20 +1,16 @@
 import { fileURLToPath } from "node:url";
 import { defineNuxtConfig } from "nuxt/config";
 
-import dracula from "@untheme/material-3/themes/dracula";
-import nord from "@untheme/material-3/themes/nord";
-import tokyoNight from "@untheme/material-3/themes/tokyo_night";
-import catppuccin from "@untheme/material-3/themes/catppuccin";
-import gruvbox from "@untheme/material-3/themes/gruvbox";
-import rosePine from "@untheme/material-3/themes/rose_pine";
+import untheme from "./untheme.config";
 
 /**
  * Material Design 3 example.
  *
- * `base` is the theme the app boots with; `themes` is the catalog the
- * `useUntheme().apply(key)` switcher chooses from. Every entry is a complete
- * M3 theme from `@untheme/material-3` — the module flattens its tokens into
- * `--token` CSS variables for the active mode on every render.
+ * The theme wiring lives in `untheme.config.ts`: `base` is the theme the app
+ * boots with, `themes` is the catalog the `useUntheme()` switcher chooses from,
+ * and `input` is the initial selection (one context per modifier). Every entry
+ * is a complete M3 theme from `@untheme/material-3` — the module flattens the
+ * active selection's tokens into `--token` CSS variables on every render.
  */
 const src = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -60,15 +56,5 @@ export default defineNuxtConfig({
       ],
     },
   },
-  untheme: {
-    base: dracula,
-    themes: {
-      dracula,
-      nord,
-      tokyo_night: tokyoNight,
-      catppuccin,
-      gruvbox,
-      rose_pine: rosePine,
-    },
-  },
+  untheme,
 });

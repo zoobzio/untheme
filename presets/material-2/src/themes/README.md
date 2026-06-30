@@ -2,17 +2,19 @@
 
 Themed variations built on the M2 base preset. Each theme is an independent,
 faithful translation of a well-known color scheme into M2 design tokens —
-overriding both reference tokens (custom palettes generated from the scheme's
-canonical colors) and mode tokens (semantic role mappings).
+overriding both palette tokens (custom palettes generated from the scheme's
+canonical colors) and the semantic roles (the light scheme in `tokens`, the dark
+scheme in the `color.dark` context).
 
-Each theme is a `preset.define` variant, importable by path; pack the ones you
-want with `preset.use(...)` to get fully resolved themes:
+Each theme is a `preset.define` variant, importable by path; register the ones
+you want with `defineUntheme` and select between them at runtime:
 
 ```ts
+import { defineUntheme } from "@untheme/core";
 import preset from "@untheme/material-2";
 import dracula from "@untheme/material-2/themes/dracula";
 
-const bundle = preset.use(dracula);
+const ut = defineUntheme(preset.use({ color: "light" }), { dracula });
 ```
 
 ## Themes

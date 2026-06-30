@@ -11,4 +11,5 @@ export default defineUnthemeConfig({
     "g10-g90": g10G90,
     "g10-g100": g10G100,
   },
+  input: { color: "light" },
 });

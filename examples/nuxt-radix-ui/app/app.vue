@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import type { Mode } from "untheme";
+// Auto-imported by @untheme/nuxt. `apply` swaps the accent hue; `swap` flips
+// the light/dark scale via the `color` modifier. Both persist via cookies
+// through SSR.
+const { config, themes, apply, swap } = useUntheme();
 
-// Auto-imported by @untheme/nuxt. `apply` swaps the accent hue; `setMode`
-// flips the light/dark scale. Both persist via cookies through SSR.
-const { config, themes, apply } = useUntheme();
-
-const setMode = (m: Mode) => {
-  config.mode = m;
+const toggleMode = () => {
+  swap("color", config.input.color === "dark" ? "light" : "dark");
 };
 
 // The 12 Radix steps in spec order, mapped to this preset's token names.
@@ -50,18 +49,17 @@ const grayScale = steps.map((s, i) => ({ step: i + 1, key: `gray-${s}` }));
             {{ t.name }}
           </button>
         </div>
-        <button
-          class="mode-btn"
-          @click="setMode(config.mode === 'dark' ? 'light' : 'dark')"
-        >
-          {{ config.mode === "dark" ? "Dark" : "Light" }}
+        <button class="mode-btn" @click="toggleMode">
+          {{ config.input.color === "dark" ? "Dark" : "Light" }}
         </button>
       </div>
     </header>
 
     <main class="content">
       <section class="intro">
-        <span class="badge">{{ config.theme.name }} · {{ config.mode }}</span>
+        <span class="badge"
+          >{{ config.theme.name }} · {{ config.input.color }}</span
+        >
         <h1>One contract, every hue.</h1>
         <p>
           The twelve-step scale never changes shape — only its values. Pick an

@@ -4,16 +4,17 @@ import { createM2ColorTokens } from "./colors";
 /**
  * The Material Design 2 preset.
  *
- * Reference tokens provide the full M2 token set: color palettes (Tailwind
- * family names as seeds with 50–900 + A100–A700 shades), typography scales,
- * shape radii, elevation shadows, and motion easing/duration values. System
- * tokens map color references to semantic roles per light/dark mode following
- * the M2 color system specification.
+ * The base `tokens` map provides the full M2 token set: color palettes
+ * (Tailwind family names as seeds with 50–900 + A100–A700 shades), typography
+ * scales, shape radii, elevation shadows, and motion easing/duration values,
+ * plus the semantic roles bound onto those palette tokens following the M2
+ * color system specification. The base defaults to the light scheme; the
+ * `color` modifier's `dark` context remaps the roles for dark mode.
  */
 export const preset = defineUnthemePreset({
   id: "material-2",
   name: "Material 2",
-  reference: {
+  tokens: {
     // Chromatic palettes
     ...createM2ColorTokens("red", "#ef4444"),
     ...createM2ColorTokens("orange", "#f97316"),
@@ -165,38 +166,42 @@ export const preset = defineUnthemePreset({
     "duration-complex": "375ms",
     "duration-entering": "225ms",
     "duration-leaving": "195ms",
+    // Semantic roles — default to the light scheme
+    primary: "{violet-500}",
+    "primary-variant": "{violet-700}",
+    "on-primary": "{neutral-50}",
+    secondary: "{teal-500}",
+    "secondary-variant": "{teal-700}",
+    "on-secondary": "{neutral-50}",
+    background: "{neutral-50}",
+    "on-background": "{neutral-900}",
+    surface: "{neutral-50}",
+    "on-surface": "{neutral-900}",
+    error: "{red-500}",
+    "on-error": "{neutral-50}",
   },
-  system: {
-    light: {
-      primary: "violet-500",
-      "primary-variant": "violet-700",
-      "on-primary": "neutral-50",
-      secondary: "teal-500",
-      "secondary-variant": "teal-700",
-      "on-secondary": "neutral-50",
-      background: "neutral-50",
-      "on-background": "neutral-900",
-      surface: "neutral-50",
-      "on-surface": "neutral-900",
-      error: "red-500",
-      "on-error": "neutral-50",
-    },
-    dark: {
-      primary: "violet-200",
-      "primary-variant": "violet-700",
-      "on-primary": "neutral-900",
-      secondary: "teal-200",
-      "secondary-variant": "teal-200",
-      "on-secondary": "neutral-900",
-      background: "neutral-900",
-      "on-background": "neutral-50",
-      surface: "neutral-900",
-      "on-surface": "neutral-50",
-      error: "red-200",
-      "on-error": "neutral-900",
+  modifiers: {
+    // Color scheme — the base tokens carry the light scheme, so `light` is
+    // empty; `dark` remaps the semantic roles for dark mode.
+    color: {
+      light: {},
+      dark: {
+        primary: "{violet-200}",
+        "primary-variant": "{violet-700}",
+        "on-primary": "{neutral-900}",
+        secondary: "{teal-200}",
+        "secondary-variant": "{teal-200}",
+        "on-secondary": "{neutral-900}",
+        background: "{neutral-900}",
+        "on-background": "{neutral-50}",
+        surface: "{neutral-900}",
+        "on-surface": "{neutral-50}",
+        error: "{red-200}",
+        "on-error": "{neutral-900}",
+      },
     },
   },
-  roles: {},
+  order: ["color"],
 });
 
 export default preset;

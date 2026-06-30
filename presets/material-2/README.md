@@ -11,21 +11,20 @@ import { defineUntheme } from "@untheme/core";
 import preset from "@untheme/material-2";
 import dracula from "@untheme/material-2/themes/dracula";
 
-// Boot a service from the preset (preset.use(mode) yields its Config),
+// Boot a service from the preset (preset.use(input) yields its Config),
 // registering the variants you want to switch to at runtime.
-const ut = defineUntheme(preset.use("dark"), { dracula });
+const ut = defineUntheme(preset.use({ color: "dark" }), { dracula });
 ut.select("dracula"); // switch to a registered variant
 
 // Or author your own variant against the preset's contract
 const brand = preset.define({
   id: "brand",
   name: "Brand",
-  reference: { "violet-500": "#1e40af" },
-  system: { light: {}, dark: {} },
+  tokens: { "violet-500": "#1e40af" },
 });
 ```
 
-## Reference Tokens
+## Base Tokens
 
 ### Color (308)
 
@@ -53,9 +52,9 @@ A typeface reference plus the M2 type scale (`headline-1…6`, `subtitle-1…2`,
 
 4 easing curves (`easing-*`) and 7 durations (`duration-*`).
 
-## System Tokens (12 per mode)
+## Semantic Roles (12)
 
-Color roles mapped per light/dark mode: `primary`, `primary-variant`, `on-primary`, `secondary`, `secondary-variant`, `on-secondary`, `background`, `on-background`, `surface`, `on-surface`, `error`, `on-error`.
+Color roles bound to the light scheme in the base `tokens`, with the `color` modifier's `dark` context remapping them for dark mode: `primary`, `primary-variant`, `on-primary`, `secondary`, `secondary-variant`, `on-secondary`, `background`, `on-background`, `surface`, `on-surface`, `error`, `on-error`.
 
 ### Default Mappings
 

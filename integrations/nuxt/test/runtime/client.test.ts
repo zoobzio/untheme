@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref, reactive, nextTick, type Ref } from "vue";
-import { clone } from "untheme";
-import { theme, themes } from "../fixtures";
+import { theme, themes, input } from "../fixtures";
 
 let states: Record<string, Ref<unknown>>;
 let cookies: Record<string, { value: unknown }>;
@@ -12,9 +11,10 @@ let nuxtApp: { callHook: ReturnType<typeof vi.fn> };
 // proxy) would pollute the shared baseline read by the next.
 vi.mock("#build/untheme.mjs", () => ({
   get theme() {
-    return clone(theme);
+    return structuredClone(theme);
   },
   themes,
+  input,
 }));
 
 vi.mock("#imports", () => ({
@@ -42,6 +42,7 @@ describe("makeUntheme", () => {
       "tokens",
       "get",
       "resolve",
+      "swap",
       "dirty",
       "set",
       "update",
@@ -54,27 +55,27 @@ describe("makeUntheme", () => {
     }
   });
 
-  it("reflects the initial mode, theme, and tokens", () => {
+  it("reflects the initial input, theme, and tokens", () => {
     const u = make();
-    expect(u.config.mode).toBe("dark");
+    expect(u.config.input.color).toBe("light");
     expect(u.config.theme.id).toBe("alpha");
-    expect(u.tokens().primary).toBe("indigo");
+    expect(u.tokens().primary).toBe("{blue}");
   });
 
-  describe("config.mode", () => {
-    it("updates the service and persists the cookie", () => {
+  describe("swap", () => {
+    it("updates the selection and persists the cookie", () => {
       const u = make();
-      u.config.mode = "light";
-      expect(u.config.mode).toBe("light");
-      expect(cookies["untheme-mode"].value).toBe("light");
+      u.swap("color", "dark");
+      expect(u.config.input.color).toBe("dark");
+      expect(cookies["untheme-input"].value).toEqual({ color: "dark" });
     });
 
-    it("recomputes tokens when the mode flips", async () => {
+    it("recomputes tokens when the context flips", async () => {
       const u = make();
-      expect(u.tokens().primary).toBe("indigo");
-      u.config.mode = "light";
+      expect(u.tokens().primary).toBe("{blue}");
+      u.swap("color", "dark");
       await nextTick();
-      expect(u.tokens().primary).toBe("blue");
+      expect(u.tokens().primary).toBe("{indigo}");
     });
   });
 
@@ -94,16 +95,16 @@ describe("makeUntheme", () => {
   describe("set / update", () => {
     it("set applies the value without emitting or persisting", () => {
       const u = make();
-      u.set("text-color", "primary");
-      expect(u.get("text-color")).toBe("primary");
+      u.set("primary", "{indigo}");
+      expect(u.get("primary")).toBe("{indigo}");
       expect(nuxtApp.callHook).not.toHaveBeenCalled();
       expect(cookies["untheme-key"]?.value ?? null).toBeNull();
     });
 
     it("update merges a patch and emits untheme:theme", () => {
       const u = make();
-      u.update({ reference: { white: "#eeeeee" } });
-      expect(u.config.theme.reference.white).toBe("#eeeeee");
+      u.update({ tokens: { white: "#eeeeee" } });
+      expect(u.config.theme.tokens.white).toBe("#eeeeee");
       expect(nuxtApp.callHook).toHaveBeenCalledWith(
         "untheme:theme",
         expect.objectContaining({ id: "alpha" }),
@@ -112,15 +113,14 @@ describe("makeUntheme", () => {
   });
 
   describe("reset", () => {
-    it("restores the theme and emits untheme:theme", () => {
+    it("clears the override without emitting or persisting", () => {
       const u = make();
-      u.set("text-color", "primary");
+      u.set("primary", "{indigo}");
+      expect(u.dirty()).toBe(true);
       u.reset();
-      expect(u.get("text-color")).not.toBe("primary");
-      expect(nuxtApp.callHook).toHaveBeenCalledWith(
-        "untheme:theme",
-        expect.objectContaining({ id: "alpha" }),
-      );
+      expect(u.dirty()).toBe(false);
+      expect(u.get("primary")).toBe("{blue}");
+      expect(nuxtApp.callHook).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import type { Mode } from "untheme";
-
-const { config, themes, apply } = useUntheme();
+const { config, themes, apply, swap } = useUntheme();
 
 const rows = [
   { name: "load-balancer-01", status: "Active", region: "us-south", cpu: 42 },
@@ -30,8 +28,9 @@ const notifications = [
 
 const supportVar = (kind: string) => `var(--support-${kind})`;
 
-const setMode = (m: Mode) => {
-  config.mode = m;
+// Light/dark is the `color` modifier; `swap` selects its context and persists.
+const toggleMode = () => {
+  swap("color", config.input.color === "dark" ? "light" : "dark");
 };
 </script>
 
@@ -59,11 +58,8 @@ const setMode = (m: Mode) => {
             {{ theme.name }}
           </button>
         </div>
-        <button
-          class="mode-toggle"
-          @click="setMode(config.mode === 'dark' ? 'light' : 'dark')"
-        >
-          {{ config.mode === "dark" ? "Dark" : "Light" }}
+        <button class="mode-toggle" @click="toggleMode">
+          {{ config.input.color === "dark" ? "Dark" : "Light" }}
         </button>
       </div>
     </header>

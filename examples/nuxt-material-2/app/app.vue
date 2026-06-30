@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import type { Mode } from "untheme";
+const { config, themes, apply, swap } = useUntheme();
 
-const { config, themes, apply } = useUntheme();
-
-const setMode = (m: Mode) => {
-  config.mode = m;
+// Light/dark is the `color` modifier; `swap` selects its context and persists.
+const toggleMode = () => {
+  swap("color", config.input.color === "dark" ? "light" : "dark");
 };
 
 // Resolve the change event's DOM string back to a theme in the catalog.
@@ -39,11 +38,8 @@ const palette = [
             {{ t.name }}
           </option>
         </select>
-        <button
-          class="appbar-btn"
-          @click="setMode(config.mode === 'dark' ? 'light' : 'dark')"
-        >
-          {{ config.mode === "dark" ? "Dark" : "Light" }}
+        <button class="appbar-btn" @click="toggleMode">
+          {{ config.input.color === "dark" ? "Dark" : "Light" }}
         </button>
       </div>
     </header>

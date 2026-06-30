@@ -2,7 +2,7 @@
 
 IBM Carbon Design System token preset for untheme.
 
-Provides a complete [Carbon](https://carbondesignsystem.com) baseline with 210 reference tokens and 31 system tokens as an untheme preset, plus the official Carbon theme pairings as ready-made variants importable by path.
+Provides a complete [Carbon](https://carbondesignsystem.com) baseline — 210 palette tokens plus 31 semantic roles, with a `color` modifier carrying the light and dark schemes — as an untheme preset, plus the official Carbon theme pairings as ready-made variants importable by path.
 
 ## Usage
 
@@ -11,25 +11,24 @@ import { defineUntheme } from "@untheme/core";
 import preset from "@untheme/carbon";
 import g10g90 from "@untheme/carbon/themes/g10-g90";
 
-// Boot a service from the preset (preset.use(mode) yields its Config),
+// Boot a service from the preset (preset.use(input) yields its Config),
 // registering the variants you want to switch to at runtime.
-const ut = defineUntheme(preset.use("dark"), { "g10-g90": g10g90 });
+const ut = defineUntheme(preset.use({ color: "dark" }), { "g10-g90": g10g90 });
 ut.select("g10-g90"); // switch to a registered variant
 
 // Or author your own variant against the preset's contract
 const brand = preset.define({
   id: "brand",
   name: "Brand",
-  reference: { "blue-60": "#1e40af" },
-  system: { light: {}, dark: {} },
+  tokens: { "blue-60": "#1e40af" },
 });
 ```
 
-## Reference Tokens (210)
+## Palette Tokens (210)
 
 ### Color (122)
 
-The 12 IBM Carbon color families — **blue, cyan, teal, green, gray, cool-gray, warm-gray, red, magenta, purple, orange, yellow** — each a 10-grade palette (`{family}-10` … `{family}-100`). Unlike Radix, Carbon's palette is **mode-independent**: a grade carries the same raw value in every theme, and light/dark divergence happens entirely in the system tokens, which alias different grades per mode.
+The 12 IBM Carbon color families — **blue, cyan, teal, green, gray, cool-gray, warm-gray, red, magenta, purple, orange, yellow** — each a 10-grade palette (`{family}-10` … `{family}-100`). Unlike Radix, Carbon's palette is **mode-independent**: a grade carries the same raw value in every theme, and light/dark divergence happens entirely in the semantic roles, which reference different grades per context.
 
 Values come directly from `@carbon/colors` via `createCarbonColorTokens(name, scale)`.
 
@@ -51,9 +50,9 @@ Values come directly from `@carbon/colors` via `createCarbonColorTokens(name, sc
 - 6 durations: `duration-fast-01/02`, `duration-moderate-01/02`, `duration-slow-01/02`
 - 6 easing curves: productive `easing-standard/entrance/exit` and `easing-expressive-standard/entrance/exit`, as CSS `cubic-bezier()` values
 
-## System Tokens (31 per mode)
+## Semantic Roles (31)
 
-System tokens follow Carbon's semantic color roles, each mapped to a palette grade per light/dark mode:
+The semantic roles follow Carbon's color roles, each referencing a palette grade. They are bound to the White (light) scheme in the base `tokens`; the `color` modifier's `dark` context remaps them onto Gray 100:
 
 | Group       | Tokens                                                                                         |
 | ----------- | ---------------------------------------------------------------------------------------------- |
@@ -65,7 +64,7 @@ System tokens follow Carbon's semantic color roles, each mapped to a palette gra
 | **Support** | `support-error`, `support-success`, `support-warning`, `support-info`                          |
 | **Other**   | `focus`, `interactive`                                                                         |
 
-> Carbon's interaction-state tokens (`background-hover`, `background-selected`, `text-placeholder`, disabled states, button colors) are derived via alpha compositing rather than aliasing a solid palette grade, so they fall outside the reference→system alias contract and are left to the consuming role layer.
+> Carbon's interaction-state tokens (`background-hover`, `background-selected`, `text-placeholder`, disabled states, button colors) are derived via alpha compositing rather than referencing a solid palette grade, so they fall outside the palette→role reference contract and are left to the consuming role layer.
 
 ## Themes
 

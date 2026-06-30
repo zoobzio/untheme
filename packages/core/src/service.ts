@@ -1,12 +1,15 @@
 import type {
   Contract,
   Layer,
-  Mode,
   Patch,
   Schema,
   Theme,
   Token,
-  Tokens,
+  Value,
+  Binding,
+  Modifier,
+  Context,
+  Input,
 } from "@untheme/schema";
 import type { Config, Options, Untheme } from "./types";
 
@@ -24,42 +27,38 @@ import {
 /**
  * Creates a runtime {@link Untheme} service over a state container.
  *
- * The service is pure behavior: every read and write goes through `config`,
- * so the caller decides whether state is plain (tests, node) or a reactive
- * proxy (Vue) — reactivity threads through property access on the container,
- * never through the service itself.
+ * Every read and write goes through `config`, so the caller decides whether
+ * state is plain (tests, node) or a reactive proxy (Vue); `options` can
+ * intercept and transform each read and write on the way through. Reads resolve
+ * the active selection — base tokens overlaid with the selected context of each
+ * modifier in `order` — then apply the user override on top. `set` writes only
+ * the override; `swap` selects a modifier's context; `update` / `apply` /
+ * `select` change the definition. Switching theme (`apply` / `select`) clears
+ * the override.
  *
- * Alongside the live state, the service keeps the creation baseline plus a
- * per-id cache of every applied theme's pristine state: `create` resolves
- * against the baseline, while `dirty` and `reset` work against the active
- * id's cache entry.
+ * The baseline — a snapshot of the theme at construction — is what `apply` and
+ * `create` resolve layers against.
  *
- * The `themes` argument is a mutable catalog of switchable layers: `select`
- * switches to an entry by key, `create` files resolved themes into it, and
- * `remove` drops them.
- *
- * Inputs are validated against the contract at every boundary; violations
- * throw from the semantic error stable in `error.ts`, never a bare `Error`.
- *
- * @param config - The caller-owned container holding the active theme and mode.
- * @param themes - The catalog of applicable layers, validated up front; the
+ * @param state - The caller-owned container: active theme, selection, override.
+ * @param registry - The catalog of switchable layers, validated up front; the
  *   target of `select`, `create`, and `remove`.
- * @param options - Read/write middleware: `get`/`set` transform values as they
- *   pass in and out of `config` and `themes`.
+ * @param options - Read/write middleware over `config` and `themes`.
  * @returns An {@link Untheme} service bound to the container.
- * @throws InvalidThemeError when the theme violates its own contract.
+ * @throws InvalidThemeError when the theme or selection violates the contract.
  * @throws InvalidLayerError when a registry layer steps outside the contract.
  */
 export const defineUntheme = <
-  Ref extends string,
-  Sys extends string,
-  Rol extends string,
+  Tok extends string,
+  Mod extends Record<
+    string,
+    Record<string, Partial<Record<NoInfer<Tok>, `{${Tok}}` | Value>>>
+  >,
 >(
-  state: Config<Contract<Ref, Sys, Rol>>,
-  registry: Record<string, Layer<Contract<Ref, Sys, Rol>>> = {},
-  options: Options<Contract<Ref, Sys, Rol>> = {},
-): Untheme<Contract<Ref, Sys, Rol>> => {
-  type T = Contract<Ref, Sys, Rol>;
+  state: Config<Contract<Tok, Mod>>,
+  registry: Record<string, Layer<Contract<Tok, Mod>>> = {},
+  options: Options<Contract<Tok, Mod>> = {},
+): Untheme<Contract<Tok, Mod>> => {
+  type T = Contract<Tok, Mod>;
 
   /**
    * The active state, fronted by get/set middleware. Reads pull the raw value
@@ -69,21 +68,6 @@ export const defineUntheme = <
    * a missing middleware is a passthrough.
    */
   const config: Config<T> = {
-    get mode() {
-      const through = options.get?.config?.mode;
-      if (through) {
-        return through(state.mode);
-      }
-      return state.mode;
-    },
-    set mode(value) {
-      const through = options.set?.config?.mode;
-      if (through) {
-        state.mode = through(value);
-        return;
-      }
-      state.mode = value;
-    },
     get theme() {
       const through = options.get?.config?.theme;
       if (through) {
@@ -98,6 +82,36 @@ export const defineUntheme = <
         return;
       }
       state.theme = value;
+    },
+    get input() {
+      const through = options.get?.config?.input;
+      if (through) {
+        return through(state.input);
+      }
+      return state.input;
+    },
+    set input(value) {
+      const through = options.set?.config?.input;
+      if (through) {
+        state.input = through(value);
+        return;
+      }
+      state.input = value;
+    },
+    get override() {
+      const through = options.get?.config?.override;
+      if (through) {
+        return through(state.override);
+      }
+      return state.override;
+    },
+    set override(value) {
+      const through = options.set?.config?.override;
+      if (through) {
+        state.override = through(value);
+        return;
+      }
+      state.override = value;
     },
   };
 
@@ -135,20 +149,15 @@ export const defineUntheme = <
   const base = clone(config.theme);
 
   /**
-   * Per-id baselines: each applied theme's pristine state, keyed by id.
-   * `dirty` and `reset` work against the active id's entry.
-   */
-  const cache: Record<string, Theme<T>> = {
-    [base.id]: clone(base),
-  };
-
-  /**
-   * Guards derived from the baseline — a complete theme is itself a valid
+   * Validation derived from the baseline — a complete theme is itself a valid
    * template.
    */
   const schema: Schema<T> = reframe(InvalidThemeError, () =>
     defineSchema(base),
   );
+
+  // The seed selection must name a real context for every modifier.
+  reframe(InvalidThemeError, () => schema.assert.input(config.input));
 
   // Fail fast on a malformed seed registry. This is an early check only —
   // `apply` (and so `select`) still re-validates every layer at the call
@@ -160,50 +169,47 @@ export const defineUntheme = <
   });
 
   /**
-   * Flat token map for `mode` (default: active): roles shadow system, system
-   * shadows reference on name collision.
+   * The flat token map for a selection (default: active): base tokens, then the
+   * selected context of each modifier in `order`, then the user override last.
    */
-  const tokens = (mode: Mode = config.mode): Tokens<T> => {
-    return {
-      ...config.theme.reference,
-      ...config.theme.system[mode],
-      ...config.theme.roles,
-    };
+  const tokens = (
+    input: Input<T> = config.input,
+  ): { [K in Token<T>]: Binding<T> } => {
+    const map = { ...config.theme.tokens };
+    const modifiers = config.theme.modifiers;
+    const selection = input;
+    for (const modifier of config.theme.order) {
+      Object.assign(map, modifiers[modifier]?.[selection[modifier]]);
+    }
+    Object.assign(map, config.override);
+    return map;
   };
 
   /**
-   * One-hop read: the token's current binding (alias name or raw value),
-   * unresolved.
+   * A token's effective binding for the active selection, override included.
    */
-  const get = <K extends Token<T>>(token: K) => {
-    return tokens(config.mode)[token];
+  const get = <K extends Token<T>>(token: K): Binding<T> => {
+    return tokens()[token];
   };
 
   /**
-   * Guarded write: roles take aliases, system tokens take references (current
-   * mode only), references take containment-safe values. Anything else is a
-   * silent no-op.
+   * Writes a token into the user override layer — the topmost resolution layer,
+   * applied over the active selection. A write outside the contract is a silent
+   * no-op. Tracked by `dirty`, cleared by `reset`.
    */
-  const set = <K extends Token<T>>(token: K, value: Tokens<T>[K]) => {
-    if (schema.guard.role(token) && schema.guard.alias(value)) {
-      config.theme.roles[token] = value;
+  const set = <K extends Token<T>>(token: K, value: Binding<T>) => {
+    if (!schema.check.token(token) || !schema.check.binding(value)) {
       return;
     }
-    if (schema.guard.system(token) && schema.guard.reference(value)) {
-      config.theme.system[config.mode][token] = value;
-      return;
-    }
-    if (schema.guard.reference(token) && schema.guard.value(value)) {
-      config.theme.reference[token] = value;
-      return;
-    }
+    config.override = { ...config.override, [token]: value };
   };
 
   /**
-   * Follows the alias chain to a raw value. Any value equal to a token name is
-   * treated as an alias and followed. Visited tokens accumulate in `chain`, so
-   * a chain that loops back on itself throws {@link CircularAliasError} instead
-   * of recursing until the call stack overflows.
+   * Follows a token's reference chain to a literal value. A binding in `{name}`
+   * form is a reference; its target is followed until a literal is reached.
+   * Visited tokens accumulate in `chain`, so a chain that loops back on itself
+   * throws {@link CircularAliasError} instead of recursing until the call stack
+   * overflows.
    */
   const resolve = <K extends Token<T>>(
     token: K,
@@ -212,11 +218,37 @@ export const defineUntheme = <
     if (chain.has(token)) {
       throw new CircularAliasError([...chain, token]);
     }
-    const value = get(token);
-    if (schema.guard.token(value)) {
-      return resolve(value, chain.add(token));
+    const binding = get(token);
+    if (schema.check.reference(binding)) {
+      const inner = binding.slice(1, -1);
+      if (schema.check.token(inner)) {
+        return resolve(inner, chain.add(token));
+      }
     }
-    return value;
+    return binding;
+  };
+
+  /**
+   * The modifiers (axes) the contract declares, in composition order.
+   */
+  const modifiers = () => config.theme.order;
+
+  /**
+   * The context names a modifier offers.
+   */
+  const contexts = (modifier: Modifier<T>): string[] => {
+    return Object.keys(config.theme.modifiers[modifier]);
+  };
+
+  /**
+   * Selects a context for a modifier, replacing the selection so reactive reads
+   * re-resolve.
+   */
+  const swap = <M extends Modifier<T>, C extends Context<T, M>>(
+    modifier: M,
+    context: C,
+  ) => {
+    config.input = { ...config.input, [modifier]: context };
   };
 
   /**
@@ -231,13 +263,13 @@ export const defineUntheme = <
 
   /**
    * Adopts a layer: becomes that theme — the layer resolved against the
-   * baseline — and caches the result as the id's pristine state. Throws
-   * {@link InvalidLayerError} when the layer steps outside the contract.
+   * baseline — and clears the user override. Throws {@link InvalidLayerError}
+   * when the layer steps outside the contract.
    */
   const apply = (layer: Layer<T>) => {
     reframe(InvalidLayerError, () => schema.assert.layer(layer));
     config.theme = merge(base, layer);
-    cache[config.theme.id] = clone(config.theme);
+    config.override = {};
   };
 
   /**
@@ -269,11 +301,12 @@ export const defineUntheme = <
   };
 
   /**
-   * Snapshots the active theme — including unsaved edits — as a detached
-   * theme under a new identity.
+   * Snapshots the active theme with the user override baked into its base
+   * tokens, as a detached theme under a new identity. The snapshot is returned,
+   * not registered.
    */
   const extract = (id: string, name: string): Theme<T> => {
-    return merge(config.theme, { id, name });
+    return merge(config.theme, { id, name, tokens: config.override });
   };
 
   /**
@@ -287,42 +320,46 @@ export const defineUntheme = <
   };
 
   /**
-   * Whether any active binding deviates from the active theme's baseline —
-   * the cached state it was applied with.
+   * The effective drift from the baseline: the active theme with the user
+   * override baked into its tokens, diffed against the baseline. Bindings that
+   * still match the baseline drop out, leaving a patch of everything `set` /
+   * `update` / `apply` changed. Identity is not compared.
    */
-  const dirty = () => {
-    const deviation = diff(cache[config.theme.id] ?? base, config.theme);
-    return [
-      deviation.reference,
-      deviation.system.light,
-      deviation.system.dark,
-      deviation.roles,
-    ].some((facet) => Object.keys(facet).length > 0);
+  const delta = (): Patch<T> => {
+    return diff(base, merge(config.theme, { tokens: config.override }));
   };
 
   /**
-   * Restores the active theme to its cached baseline, discarding edits made
-   * since it was applied. An id with no cache entry falls back to the base.
+   * Whether the user override holds any edits.
+   */
+  const dirty = () => Object.keys(config.override).length > 0;
+
+  /**
+   * Clears the user override, discarding the live edits.
    */
   const reset = () => {
-    config.theme = merge(base, cache[config.theme.id] ?? {});
+    config.override = {};
   };
 
   return {
     config,
     themes,
     schema,
+    modifiers,
+    contexts,
     tokens,
     get,
-    set,
     resolve,
+    swap,
+    set,
+    delta,
+    dirty,
+    reset,
     update,
     apply,
     select,
     create,
     extract,
     remove,
-    dirty,
-    reset,
   };
 };

@@ -18,7 +18,7 @@ const themes = {
   teal,
 };
 
-const { theme: base } = preset.use("light");
+const { theme: base } = preset.use({ color: "light" });
 
 /**
  * The base scheme is its own contract; variants may not step outside it.
@@ -39,7 +39,7 @@ describe("Radix theme variants", () => {
       });
 
       it("resolves to a complete, contract-bound theme", () => {
-        expect(schema.guard.theme(variant)).toBe(true);
+        expect(schema.check.theme(variant)).toBe(true);
       });
     });
   }

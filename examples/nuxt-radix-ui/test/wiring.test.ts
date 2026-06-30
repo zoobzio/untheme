@@ -1,28 +1,33 @@
 import { describe, it, expect } from "vitest";
 
-import blue from "@untheme/radix-ui/themes/blue";
-import crimson from "@untheme/radix-ui/themes/crimson";
-import cyan from "@untheme/radix-ui/themes/cyan";
-import grass from "@untheme/radix-ui/themes/grass";
-import orange from "@untheme/radix-ui/themes/orange";
-import teal from "@untheme/radix-ui/themes/teal";
+import config from "../untheme.config";
 
-// The example's wiring, mirrored from nuxt.config.ts.
-const base = blue;
-const themes = { blue, crimson, cyan, grass, orange, teal };
+const { base, themes, input } = config;
 
 describe("nuxt-radix-ui wiring", () => {
   it("boots from a theme that is in the switchable catalog", () => {
     expect(Object.values(themes)).toContain(base);
   });
 
-  it("every catalog entry is a complete, light/dark theme", () => {
+  it("boots with a complete, light/dark base theme", () => {
+    expect(base.id).toBeTruthy();
+    expect(base.name).toBeTruthy();
+    expect(Object.keys(base.tokens).length).toBeGreaterThan(0);
+    expect(base.order).toContain("color");
+    expect(base.modifiers.color.light).toBeDefined();
+    expect(Object.keys(base.modifiers.color.dark).length).toBeGreaterThan(0);
+  });
+
+  it("seeds a selection the contract offers", () => {
+    for (const modifier of base.order) {
+      expect(base.modifiers[modifier]).toHaveProperty(input[modifier]);
+    }
+  });
+
+  it("gives every catalog entry an identity", () => {
     for (const theme of Object.values(themes)) {
       expect(theme.id).toBeTruthy();
       expect(theme.name).toBeTruthy();
-      expect(Object.keys(theme.reference).length).toBeGreaterThan(0);
-      expect(Object.keys(theme.system.light).length).toBeGreaterThan(0);
-      expect(Object.keys(theme.system.dark).length).toBeGreaterThan(0);
     }
   });
 

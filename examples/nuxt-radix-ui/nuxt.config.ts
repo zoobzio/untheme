@@ -1,19 +1,15 @@
 import { fileURLToPath } from "node:url";
 import { defineNuxtConfig } from "nuxt/config";
 
-import blue from "@untheme/radix-ui/themes/blue";
-import crimson from "@untheme/radix-ui/themes/crimson";
-import cyan from "@untheme/radix-ui/themes/cyan";
-import grass from "@untheme/radix-ui/themes/grass";
-import orange from "@untheme/radix-ui/themes/orange";
-import teal from "@untheme/radix-ui/themes/teal";
+import untheme from "./untheme.config";
 
 /**
  * Radix UI example.
  *
- * Radix themes are 12-step accent + gray scales. `apply(key)` swaps the accent
+ * Radix themes are 12-step accent + gray scales. The switcher swaps the accent
  * hue while the gray scale and the whole step contract stay put — the clearest
- * demo of untheme's "same contract, swapped values" idea.
+ * demo of untheme's "same contract, swapped values" idea. The theme catalog and
+ * initial selection live in `untheme.config.ts`.
  */
 const src = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -59,8 +55,5 @@ export default defineNuxtConfig({
       ],
     },
   },
-  untheme: {
-    base: blue,
-    themes: { blue, crimson, cyan, grass, orange, teal },
-  },
+  untheme,
 });

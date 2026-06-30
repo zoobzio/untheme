@@ -2,53 +2,55 @@ import type { Contract } from "@untheme/schema";
 import type { Extension } from "./types";
 
 /**
- * Widens a base theme with an {@link Extension} into a fresh, complete theme
- * over the union contract: extension bindings win where both bind a token,
- * new tokens join the contract, and identity transfers when the extension
- * carries one. Neither input is mutated; an all-empty extension yields a
- * plain copy of the base.
+ * Widens a base contract with an {@link Extension} into a fresh contract over
+ * the union token and modifier sets. Neither input is mutated.
  *
- * Unlike `merge`, which stays within one contract, `extend` is the widening
- * primitive: the result's token unions grow to include the extension's.
+ * Two behaviors with different merge semantics:
+ *   - `extend` adds new tokens and new modifiers — a **spread**, since there is
+ *     nothing existing to preserve.
+ *   - `override` rebinds existing tokens (a spread — a token binding is a single
+ *     value) and rebinds existing modifier contexts (a **deep merge**, since a
+ *     context holds a token map that must merge token by token, not be replaced).
  */
 export const extend = <
-  Ref extends string,
-  Sys extends string,
-  Rol extends string,
-  XRef extends string,
-  XSys extends string,
-  XRol extends string,
+  Tok extends string,
+  Mod extends Record<string, Record<string, Partial<Record<string, string>>>>,
+  XTok extends string,
+  XMod extends Record<string, Record<string, Partial<Record<string, string>>>>,
 >(
-  base: Contract<Ref, Sys, Rol>,
-  extension: Extension<
-    NoInfer<Ref>,
-    NoInfer<Sys>,
-    NoInfer<Rol>,
-    XRef,
-    XSys,
-    XRol
-  >,
-): Contract<Ref | XRef, Sys | XSys, Rol | XRol> => {
-  return {
-    id: extension.id ?? base.id,
-    name: extension.name ?? base.name,
-    reference: {
-      ...base.reference,
-      ...extension.reference,
-    },
-    system: {
-      light: {
-        ...base.system.light,
-        ...extension.system.light,
-      },
-      dark: {
-        ...base.system.dark,
-        ...extension.system.dark,
-      },
-    },
-    roles: {
-      ...base.roles,
-      ...extension.roles,
-    },
-  };
+  base: Contract<Tok, Mod>,
+  extension: Extension<Tok, Mod, XTok, XMod>,
+): Contract<Tok | XTok, Mod & XMod> => {
+  const tokens = { ...base.tokens, ...extension.tokens };
+
+  const modifiers = structuredClone({
+    ...extension.modifiers,
+    ...base.modifiers,
+  });
+  for (const mod of Object.keys(extension.modifiers)) {
+    if (mod in base.modifiers) {
+      for (const ctx of Object.keys(extension.modifiers[mod])) {
+        if (ctx in base.modifiers[mod]) {
+          Object.assign(modifiers[mod][ctx], {
+            ...base.modifiers[mod][ctx],
+            ...extension.modifiers[mod][ctx],
+          });
+        }
+      }
+    }
+  }
+
+  const listed = new Set(extension.order);
+  const order = [
+    ...base.order.filter((mod) => !listed.has(mod)),
+    ...extension.order,
+  ];
+
+  return structuredClone({
+    id: extension.id,
+    name: extension.name,
+    tokens,
+    modifiers,
+    order,
+  });
 };

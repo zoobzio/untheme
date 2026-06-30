@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+
 import { defineSchema } from "../src/schema";
 import { SchemaError } from "../src/error";
 import type { Template } from "../src/types";
@@ -6,348 +7,230 @@ import type { Template } from "../src/types";
 const base = {
   id: "demo",
   name: "Demo",
-  reference: {
-    bg: "#ffffff",
+  tokens: {
+    "bg-base": "#ffffff",
     "accent-9": "#0090ff",
     "radius-1": "3px",
-    font: "Roboto, sans-serif",
-    shadow: "0 1px 2px rgb(0 0 0 / 8%)",
+    surface: "{bg-base}",
+    text: "{accent-9}",
+    brand: "{accent-9}",
   },
-  system: {
-    light: { surface: "bg", solid: "accent-9", text: "accent-9" },
-    dark: { surface: "accent-9", solid: "accent-9", text: "bg" },
+  modifiers: {
+    color: {
+      light: { surface: "{bg-base}", text: "{accent-9}" },
+      dark: { surface: "{accent-9}", text: "{bg-base}" },
+    },
+    contrast: {
+      normal: {},
+      high: { text: "{bg-base}" },
+    },
   },
-  roles: { brand: "accent-9", danger: "text" },
+  order: ["color", "contrast"],
 } satisfies Template;
 
-const { guard, assert, parse, lexicon } = defineSchema(base);
+const { rules, check, assert, parse, inspect } = defineSchema(base);
 
-describe("config", () => {
-  it("derives the token-name sets from the template", () => {
-    expect([...lexicon.tokens.reference]).toEqual([
-      "bg",
-      "accent-9",
-      "radius-1",
-      "font",
-      "shadow",
-    ]);
-    expect([...lexicon.tokens.system]).toEqual(["surface", "solid", "text"]);
-    expect([...lexicon.tokens.role]).toEqual(["brand", "danger"]);
+describe("defineSchema", () => {
+  it("derives the token, modifier, and context sets", () => {
+    expect([...rules.sets.tokens]).toContain("surface");
+    expect([...rules.sets.modifiers]).toEqual(["color", "contrast"]);
+    expect([...rules.sets.contexts.color]).toEqual(["light", "dark"]);
+    expect([...rules.sets.contexts.contrast]).toEqual(["normal", "high"]);
   });
 
-  it("composes alias from reference+system and all from every tier", () => {
-    expect(lexicon.tokens.alias.has("accent-9")).toBe(true);
-    expect(lexicon.tokens.alias.has("surface")).toBe(true);
-    expect(lexicon.tokens.alias.has("brand")).toBe(false);
-    expect(lexicon.tokens.all.has("brand")).toBe(true);
-  });
-
-  it("holds a list of rules per tier", () => {
-    expect(lexicon.rules.value.length).toBeGreaterThan(0);
-    expect(lexicon.rules.theme.length).toBeGreaterThan(0);
+  it("rejects a malformed base at construction", () => {
+    expect(() =>
+      defineSchema({
+        id: "bad",
+        name: "Bad",
+        tokens: { a: "red;}" },
+        modifiers: {},
+        order: [],
+      }),
+    ).toThrow(SchemaError);
   });
 });
 
-describe("guard.mode", () => {
-  it("accepts the supported color modes", () => {
-    expect(guard.mode("light")).toBe(true);
-    expect(guard.mode("dark")).toBe(true);
+describe("check.modifier / check.token / check.reference", () => {
+  it("modifier accepts axis names, not context names", () => {
+    expect(check.modifier("color")).toBe(true);
+    expect(check.modifier("contrast")).toBe(true);
+    expect(check.modifier("light")).toBe(false);
+    expect(check.modifier("ghost")).toBe(false);
   });
 
-  it("rejects other values", () => {
-    expect(guard.mode("Light")).toBe(false);
-    expect(guard.mode("")).toBe(false);
-    expect(guard.mode(0)).toBe(false);
-  });
-});
-
-describe("guard.value", () => {
-  it("accepts common CSS values", () => {
-    expect(guard.value("#0090ff")).toBe(true);
-    expect(guard.value("rgb(0 144 255)")).toBe(true);
-    expect(guard.value("calc(100% - 2px)")).toBe(true);
-    expect(guard.value("Roboto, sans-serif")).toBe(true);
-    expect(guard.value("'Helvetica Neue', sans-serif")).toBe(true);
-    expect(guard.value("0 1px 2px rgb(0 0 0 / 8%)")).toBe(true);
-  });
-
-  it("rejects non-strings and blank strings", () => {
-    expect(guard.value(16)).toBe(false);
-    expect(guard.value("")).toBe(false);
-    expect(guard.value("   ")).toBe(false);
-  });
-
-  it("rejects declaration breakouts", () => {
-    expect(guard.value("red;} body{background:red}")).toBe(false);
-    expect(guard.value("</style><script>")).toBe(false);
-    expect(guard.value("/* comment */ red")).toBe(false);
-    expect(guard.value("\\27 red")).toBe(false);
-  });
-
-  it("rejects unbalanced parens and unclosed quotes", () => {
-    expect(guard.value("rgb(0")).toBe(false);
-    expect(guard.value("red)")).toBe(false);
-    expect(guard.value("'unclosed")).toBe(false);
-  });
-
-  it("rejects url() in any casing without flagging mere substrings", () => {
-    expect(guard.value("url(/img.png)")).toBe(false);
-    expect(guard.value("URL(x)")).toBe(false);
-    expect(guard.value("Url(x)")).toBe(false);
-    expect(guard.value("curl(x)")).toBe(true);
+  it("token accepts bare names; reference accepts curly form", () => {
+    expect(check.token("surface")).toBe(true);
+    expect(check.token("{surface}")).toBe(false);
+    expect(check.reference("{surface}")).toBe(true);
+    expect(check.reference("surface")).toBe(false);
+    expect(check.reference("{ghost}")).toBe(false);
   });
 });
 
-describe("guard token names", () => {
-  it("reference accepts reference names, rejects other tiers", () => {
-    expect(guard.reference("accent-9")).toBe(true);
-    expect(guard.reference("surface")).toBe(false);
-    expect(guard.reference("brand")).toBe(false);
-    expect(guard.reference(9)).toBe(false);
+describe("check.value / check.binding", () => {
+  it("value accepts CSS, rejects breakouts and braces", () => {
+    expect(check.value("calc(100% - 2px)")).toBe(true);
+    expect(check.value("red;}")).toBe(false);
+    expect(check.value("{bg-base}")).toBe(false);
   });
 
-  it("system accepts system names, rejects other tiers", () => {
-    expect(guard.system("surface")).toBe(true);
-    expect(guard.system("accent-9")).toBe(false);
-    expect(guard.system("brand")).toBe(false);
-  });
-
-  it("role accepts role names, rejects other tiers", () => {
-    expect(guard.role("brand")).toBe(true);
-    expect(guard.role("accent-9")).toBe(false);
-    expect(guard.role("surface")).toBe(false);
-  });
-
-  it("alias accepts reference and system names, rejects roles", () => {
-    expect(guard.alias("accent-9")).toBe(true);
-    expect(guard.alias("surface")).toBe(true);
-    expect(guard.alias("brand")).toBe(false);
-    expect(guard.alias("ghost")).toBe(false);
-  });
-
-  it("token accepts any tier, rejects unknown names", () => {
-    expect(guard.token("accent-9")).toBe(true);
-    expect(guard.token("surface")).toBe(true);
-    expect(guard.token("brand")).toBe(true);
-    expect(guard.token("ghost")).toBe(false);
+  it("binding accepts a reference or a literal value", () => {
+    expect(check.binding("{accent-9}")).toBe(true);
+    expect(check.binding("#fff")).toBe(true);
+    expect(check.binding("accent-9")).toBe(true);
+    expect(check.binding("{ghost}")).toBe(false);
+    expect(check.binding("red;}")).toBe(false);
   });
 });
 
-describe("guard.tokens", () => {
-  it("validates each value by the tier its key belongs to", () => {
-    // reference key holds a value, system key holds a reference, role key an alias
+describe("check.overrides", () => {
+  it("accepts a partial token map", () => {
+    expect(check.overrides({})).toBe(true);
+    expect(check.overrides({ surface: "{bg-base}", text: "#fff" })).toBe(true);
+  });
+
+  it("rejects unknown keys and bad bindings", () => {
+    expect(check.overrides({ ghost: "{bg-base}" })).toBe(false);
+    expect(check.overrides({ surface: "red;}" })).toBe(false);
+  });
+});
+
+describe("check.tokens", () => {
+  it("accepts the complete base map, rejects incomplete or bad", () => {
+    expect(check.tokens(base.tokens)).toBe(true);
+    expect(check.tokens({ "bg-base": "#fff" })).toBe(false);
+    expect(check.tokens({ ...base.tokens, "bg-base": "red;}" })).toBe(false);
+  });
+});
+
+describe("check.modifiers", () => {
+  it("accepts the complete two-level map", () => {
+    expect(check.modifiers(base.modifiers)).toBe(true);
+  });
+
+  it("rejects a missing modifier or missing context", () => {
+    expect(check.modifiers({ color: base.modifiers.color })).toBe(false);
     expect(
-      guard.tokens({ bg: "#101010", surface: "bg", brand: "surface" }),
-    ).toBe(true);
-    expect(guard.tokens({})).toBe(true);
+      check.modifiers({
+        ...base.modifiers,
+        color: { light: base.modifiers.color.light },
+      }),
+    ).toBe(false);
   });
 
-  it("rejects a value that does not match its key's tier", () => {
-    expect(guard.tokens({ surface: "red;}" })).toBe(false); // not a reference name
-    expect(guard.tokens({ brand: "#0090ff" })).toBe(false); // not an alias name
-    expect(guard.tokens({ bg: 9 })).toBe(false); // not a string value
-  });
-
-  it("rejects unknown keys and non-objects", () => {
-    expect(guard.tokens({ ghost: "bg" })).toBe(false);
-    expect(guard.tokens("surface")).toBe(false);
-    expect(guard.tokens(null)).toBe(false);
-  });
-});
-
-describe("guard.patch", () => {
-  it("accepts an empty patch", () => {
-    expect(guard.patch({})).toBe(true);
-  });
-
-  it("accepts any subset of facets, including a single mode", () => {
-    expect(guard.patch({ reference: { bg: "#f7f7f7" } })).toBe(true);
-    expect(guard.patch({ system: { light: { surface: "bg" } } })).toBe(true);
-    expect(guard.patch({ roles: { brand: "surface" } })).toBe(true);
-  });
-
-  it("rejects unknown facet keys", () => {
-    expect(guard.patch({ ghost: {} })).toBe(false);
-  });
-
-  it("rejects unknown token keys", () => {
-    expect(guard.patch({ reference: { ghost: "#000" } })).toBe(false);
-    expect(guard.patch({ system: { light: { ghost: "bg" } } })).toBe(false);
-    expect(guard.patch({ roles: { ghost: "bg" } })).toBe(false);
-  });
-
-  it("rejects values that break tier rules", () => {
-    expect(guard.patch({ reference: { bg: "red;}" } })).toBe(false);
-    expect(guard.patch({ system: { light: { surface: "text" } } })).toBe(false);
-    expect(guard.patch({ roles: { brand: "danger" } })).toBe(false);
-  });
-
-  it("rejects non-objects", () => {
-    expect(guard.patch("bg")).toBe(false);
-    expect(guard.patch(null)).toBe(false);
-  });
-
-  it("rejects a non-object facet or mode", () => {
-    expect(guard.patch({ reference: "x" })).toBe(false);
-    expect(guard.patch({ system: "x" })).toBe(false);
-    expect(guard.patch({ system: { light: "x" } })).toBe(false);
-    expect(guard.patch({ roles: 9 })).toBe(false);
-  });
-});
-
-describe("guard.layer", () => {
-  it("accepts a token subset with both modes present", () => {
+  it("rejects unknown modifiers, unknown contexts, and bad bindings", () => {
+    expect(check.modifiers({ ...base.modifiers, ghost: {} })).toBe(false);
     expect(
-      guard.layer({
+      check.modifiers({
+        ...base.modifiers,
+        contrast: { ...base.modifiers.contrast, extra: {} },
+      }),
+    ).toBe(false);
+    expect(
+      check.modifiers({
+        ...base.modifiers,
+        contrast: { normal: { surface: "red;}" }, high: {} },
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("check.order", () => {
+  it("accepts an array of modifier names", () => {
+    expect(check.order(["color", "contrast"])).toBe(true);
+    expect(check.order([])).toBe(true);
+  });
+
+  it("rejects unknown modifiers and non-arrays", () => {
+    expect(check.order(["ghost"])).toBe(false);
+    expect(check.order("color")).toBe(false);
+  });
+});
+
+describe("check.input", () => {
+  it("accepts one valid context per modifier", () => {
+    expect(check.input({ color: "dark", contrast: "high" })).toBe(true);
+    expect(check.input({ color: "light", contrast: "normal" })).toBe(true);
+  });
+
+  it("rejects a missing modifier, a cross-modifier context, or an unknown context", () => {
+    expect(check.input({ color: "dark" })).toBe(false);
+    expect(check.input({ color: "high", contrast: "normal" })).toBe(false);
+    expect(check.input({ color: "dark", contrast: "purple" })).toBe(false);
+  });
+});
+
+describe("check.theme / check.layer / check.patch", () => {
+  it("accepts the complete base theme", () => {
+    expect(check.theme(base)).toBe(true);
+  });
+
+  it("requires tokens, modifiers, and order", () => {
+    const candidate = { ...base };
+    Reflect.deleteProperty(candidate, "order");
+    expect(check.theme(candidate)).toBe(false);
+  });
+
+  it("a layer is a partial overlay carrying identity", () => {
+    expect(
+      check.layer({
         id: "demo-layer",
         name: "Demo Layer",
-        reference: { bg: "#f7f7f7" },
-        system: { light: { surface: "bg" }, dark: {} },
-        roles: {},
+        tokens: { surface: "{bg-base}" },
+        modifiers: { color: { dark: { surface: "{accent-9}" } } },
       }),
     ).toBe(true);
+    expect(check.layer({ tokens: { surface: "{bg-base}" } })).toBe(false);
   });
 
-  it("accepts a complete theme", () => {
-    expect(guard.layer(base)).toBe(true);
-  });
-
-  it("rejects a missing identity field", () => {
-    const candidate = { ...base };
-    Reflect.deleteProperty(candidate, "id");
-    expect(guard.layer(candidate)).toBe(false);
-  });
-
-  it("rejects a missing mode", () => {
-    expect(guard.layer({ ...base, system: { light: base.system.light } })).toBe(
-      false,
-    );
-  });
-
-  it("rejects unknown token keys", () => {
+  it("a patch is anonymous; rejects unknown keys and bad bindings", () => {
+    expect(check.patch({})).toBe(true);
     expect(
-      guard.layer({ ...base, reference: { ...base.reference, ghost: "#000" } }),
-    ).toBe(false);
-  });
-
-  it("rejects a system token aliasing a non-reference", () => {
-    expect(
-      guard.layer({
-        ...base,
-        system: { ...base.system, light: { surface: "ghost" } },
-      }),
-    ).toBe(false);
-    expect(
-      guard.layer({
-        ...base,
-        system: { ...base.system, light: { surface: "text" } },
-      }),
-    ).toBe(false);
-  });
-
-  it("rejects a role token aliasing a non-alias", () => {
-    expect(guard.layer({ ...base, roles: { brand: "ghost" } })).toBe(false);
-    expect(guard.layer({ ...base, roles: { brand: "danger" } })).toBe(false);
-  });
-
-  it("rejects unsafe reference values", () => {
-    expect(
-      guard.layer({ ...base, reference: { bg: "url(https://evil.example)" } }),
-    ).toBe(false);
-  });
-
-  it("rejects a non-object facet or mode", () => {
-    expect(guard.layer({ ...base, reference: 5 })).toBe(false);
-    expect(guard.layer({ ...base, system: "x" })).toBe(false);
-    expect(guard.layer({ ...base, system: { light: "x", dark: {} } })).toBe(
-      false,
-    );
+      check.patch({ modifiers: { color: { dark: { surface: "#fff" } } } }),
+    ).toBe(true);
+    expect(check.patch({ ghost: {} })).toBe(false);
+    expect(check.patch({ tokens: { surface: "red;}" } })).toBe(false);
   });
 });
 
-describe("guard.theme", () => {
-  it("accepts a complete theme", () => {
-    expect(guard.theme(base)).toBe(true);
+describe("cycle detection", () => {
+  const ring = defineSchema({
+    id: "ring",
+    name: "Ring",
+    tokens: { a: "#fff", b: "{a}" },
+    modifiers: {},
+    order: [],
   });
 
-  it("requires every reference token", () => {
-    const reference = { ...base.reference };
-    Reflect.deleteProperty(reference, "bg");
-    expect(guard.theme({ ...base, reference })).toBe(false);
+  it("accepts an acyclic chain, rejects a cycle", () => {
+    expect(ring.check.tokens({ a: "#fff", b: "{a}" })).toBe(true);
+    expect(ring.check.tokens({ a: "{b}", b: "{a}" })).toBe(false);
   });
 
-  it("requires every system token in both modes", () => {
-    expect(
-      guard.theme({ ...base, system: { light: base.system.light, dark: {} } }),
-    ).toBe(false);
-    expect(
-      guard.theme({
-        ...base,
-        system: {
-          light: { surface: "bg" },
-          dark: { surface: "accent-9" },
-        },
-      }),
-    ).toBe(false);
-  });
-
-  it("requires light/dark parity", () => {
-    const dark = { ...base.system.dark };
-    Reflect.deleteProperty(dark, "text");
-    expect(
-      guard.theme({ ...base, system: { light: base.system.light, dark } }),
-    ).toBe(false);
-  });
-
-  it("requires every role token", () => {
-    expect(guard.theme({ ...base, roles: { brand: "accent-9" } })).toBe(false);
-  });
-
-  it("rejects candidates that are not valid layers at all", () => {
-    expect(guard.theme(null)).toBe(false);
-    expect(guard.theme({ ...base, roles: { brand: "ghost" } })).toBe(false);
-  });
-
-  it("rejects a valid layer that is not complete", () => {
-    const layer = {
-      id: "demo-layer",
-      name: "Demo Layer",
-      reference: { bg: "#f7f7f7" },
-      system: { light: { surface: "bg" }, dark: { surface: "bg" } },
-      roles: {},
-    };
-    expect(guard.layer(layer)).toBe(true);
-    expect(guard.theme(layer)).toBe(false);
-  });
-
-  it("rejects a non-object facet", () => {
-    expect(guard.theme({ ...base, reference: 5 })).toBe(false);
-    expect(guard.theme({ ...base, system: "x" })).toBe(false);
-  });
-});
-
-describe("assert", () => {
-  it("returns silently for a valid value", () => {
-    expect(() => assert.theme(base)).not.toThrow();
-  });
-
-  it("throws a SchemaError carrying structured issues", () => {
+  it("reports the cycle as a structured issue", () => {
     let error: unknown;
     try {
-      assert.value("red;}");
+      ring.assert.tokens({ a: "{b}", b: "{a}" });
     } catch (e) {
       error = e;
     }
     expect(error).toBeInstanceOf(SchemaError);
     if (error instanceof SchemaError) {
-      expect(error.issues.map((i) => i.code)).toContain("css_breakout");
+      expect(error.issues.map((i) => i.code)).toContain("cycle");
     }
   });
+});
 
-  it("collects every failing rule in one pass, not just the first", () => {
+describe("assert", () => {
+  it("returns silently for a valid theme", () => {
+    expect(() => assert.theme(base)).not.toThrow();
+  });
+
+  it("collects every failing rule in one pass", () => {
     let error: unknown;
     try {
-      assert.value("a;("); // breakout (';') and unbalanced ('(')
+      assert.value("a;(");
     } catch (e) {
       error = e;
     }
@@ -361,54 +244,56 @@ describe("assert", () => {
   });
 
   it("reports the path into nested structure", () => {
-    const dark = { ...base.system.dark };
-    Reflect.deleteProperty(dark, "text");
+    const tokens = { ...base.tokens };
+    Reflect.deleteProperty(tokens, "bg-base");
     let error: unknown;
     try {
-      assert.theme({ ...base, system: { light: base.system.light, dark } });
+      assert.theme({ ...base, tokens });
     } catch (e) {
       error = e;
     }
     expect(error).toBeInstanceOf(SchemaError);
     if (error instanceof SchemaError) {
       const issue = error.issues.find((i) => i.code === "missing_key");
-      expect(issue?.path).toEqual(["system", "dark", "text"]);
+      expect(issue?.path).toEqual(["tokens", "bg-base"]);
     }
   });
 
-  it("renders the path into the error message", () => {
+  it("reports a bad binding deep inside modifiers", () => {
     let error: unknown;
     try {
-      assert.patch({ reference: { bg: "red;}" } });
+      assert.modifiers({
+        ...base.modifiers,
+        color: { ...base.modifiers.color, dark: { surface: "red;}" } },
+      });
     } catch (e) {
       error = e;
     }
     expect(error).toBeInstanceOf(SchemaError);
     if (error instanceof SchemaError) {
-      expect(error.message).toContain("reference.bg:");
+      expect(error.issues[0]?.path).toEqual(["color", "dark", "surface"]);
     }
   });
 });
 
-describe("parse", () => {
-  it("returns the value narrowed for every tier when valid", () => {
-    expect(parse.mode("light")).toBe("light");
-    expect(parse.value("#0090ff")).toBe("#0090ff");
-    expect(parse.reference("accent-9")).toBe("accent-9");
-    expect(parse.system("surface")).toBe("surface");
-    expect(parse.role("brand")).toBe("brand");
-    expect(parse.alias("surface")).toBe("surface");
-    expect(parse.token("brand")).toBe("brand");
-    expect(parse.tokens({ surface: "bg" })).toEqual({ surface: "bg" });
-    expect(parse.patch({ reference: { bg: "#eee" } })).toEqual({
-      reference: { bg: "#eee" },
+describe("parse / inspect", () => {
+  it("parse returns narrowed values and throws on invalid", () => {
+    expect(parse.modifier("color")).toBe("color");
+    expect(parse.reference("{bg-base}")).toBe("{bg-base}");
+    expect(parse.input({ color: "dark", contrast: "high" })).toEqual({
+      color: "dark",
+      contrast: "high",
     });
-    expect(parse.layer(base)).toBe(base);
     expect(parse.theme(base)).toBe(base);
+    expect(() => parse.modifier("light")).toThrow(SchemaError);
   });
 
-  it("throws a SchemaError when invalid", () => {
-    expect(() => parse.mode("Light")).toThrow(SchemaError);
-    expect(() => parse.theme(null)).toThrow(SchemaError);
+  it("inspect captures the outcome without throwing", () => {
+    expect(inspect.theme(base)).toEqual({ success: true, data: base });
+    const result = inspect.input({ color: "dark" });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.issues.length).toBeGreaterThan(0);
+    }
   });
 });

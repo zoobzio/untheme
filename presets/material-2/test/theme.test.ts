@@ -26,29 +26,29 @@ const PALETTES = [
   "stone",
 ];
 
-const { theme: base } = preset.use("light");
+const { theme: base } = preset.use({ color: "light" });
 
 describe("M2 preset", () => {
   it("ships the base scheme as a usable config", () => {
-    const config = preset.use("light");
-    expect(config.mode).toBe("light");
+    const config = preset.use({ color: "light" });
+    expect(config.input).toEqual({ color: "light" });
     expect(config.theme.name).toBe("Material 2");
   });
 
-  it("builds a config for either mode", () => {
-    expect(preset.use("light").mode).toBe("light");
-    expect(preset.use("dark").mode).toBe("dark");
+  it("builds a config for either selection", () => {
+    expect(preset.use({ color: "light" }).input).toEqual({ color: "light" });
+    expect(preset.use({ color: "dark" }).input).toEqual({ color: "dark" });
   });
 
-  it("has the expected number of reference tokens", () => {
+  it("has the expected number of base tokens", () => {
     // 22 palettes × 14 shades = 308 color tokens
     // + 1 font + 52 typography + 3 shape + 25 elevation + 4 easing + 7 duration = 92
-    // Total: 400
-    expect(Object.keys(base.reference)).toHaveLength(400);
+    // + 12 semantic roles = 412
+    expect(Object.keys(base.tokens)).toHaveLength(412);
   });
 
   it("includes all 22 palettes with 14 shades each", () => {
-    const colorKeys = Object.keys(base.reference).filter(
+    const colorKeys = Object.keys(base.tokens).filter(
       (k) => /^[a-z]+-(\d+|A\d+)$/.test(k) && !k.startsWith("elevation-"),
     );
     const prefixes = new Set(
@@ -59,7 +59,7 @@ describe("M2 preset", () => {
   });
 
   it("includes the typeface reference", () => {
-    expect(base.reference["font-default"]).toBe("Roboto, sans-serif");
+    expect(base.tokens["font-default"]).toBe("Roboto, sans-serif");
   });
 
   it("includes all 13 typography scales", () => {
@@ -79,79 +79,80 @@ describe("M2 preset", () => {
       "overline",
     ];
     for (const scale of scales) {
-      expect(base.reference[`${scale}-size`]).toBeDefined();
-      expect(base.reference[`${scale}-line-height`]).toBeDefined();
-      expect(base.reference[`${scale}-weight`]).toBeDefined();
-      expect(base.reference[`${scale}-tracking`]).toBeDefined();
+      expect(base.tokens[`${scale}-size`]).toBeDefined();
+      expect(base.tokens[`${scale}-line-height`]).toBeDefined();
+      expect(base.tokens[`${scale}-weight`]).toBeDefined();
+      expect(base.tokens[`${scale}-tracking`]).toBeDefined();
     }
   });
 
   it("includes shape tokens", () => {
-    expect(base.reference["shape-small"]).toBe("4px");
-    expect(base.reference["shape-medium"]).toBe("4px");
-    expect(base.reference["shape-large"]).toBe("0px");
+    expect(base.tokens["shape-small"]).toBe("4px");
+    expect(base.tokens["shape-medium"]).toBe("4px");
+    expect(base.tokens["shape-large"]).toBe("0px");
   });
 
   it("includes all 25 elevation tokens", () => {
-    expect(base.reference["elevation-0"]).toBe("none");
-    expect(base.reference["elevation-1"]).toContain("rgb(");
-    expect(base.reference["elevation-24"]).toBeDefined();
+    expect(base.tokens["elevation-0"]).toBe("none");
+    expect(base.tokens["elevation-1"]).toContain("rgb(");
+    expect(base.tokens["elevation-24"]).toBeDefined();
   });
 
   it("includes easing tokens", () => {
-    expect(base.reference["easing-standard"]).toContain("cubic-bezier");
-    expect(base.reference["easing-decelerate"]).toContain("cubic-bezier");
-    expect(base.reference["easing-accelerate"]).toContain("cubic-bezier");
-    expect(base.reference["easing-sharp"]).toContain("cubic-bezier");
+    expect(base.tokens["easing-standard"]).toContain("cubic-bezier");
+    expect(base.tokens["easing-decelerate"]).toContain("cubic-bezier");
+    expect(base.tokens["easing-accelerate"]).toContain("cubic-bezier");
+    expect(base.tokens["easing-sharp"]).toContain("cubic-bezier");
   });
 
   it("includes duration tokens", () => {
-    expect(base.reference["duration-shortest"]).toBe("150ms");
-    expect(base.reference["duration-standard"]).toBe("300ms");
-    expect(base.reference["duration-leaving"]).toBe("195ms");
+    expect(base.tokens["duration-shortest"]).toBe("150ms");
+    expect(base.tokens["duration-standard"]).toBe("300ms");
+    expect(base.tokens["duration-leaving"]).toBe("195ms");
   });
 
-  it("maps light mode primary to violet", () => {
-    expect(base.system.light["primary"]).toBe("violet-500");
-    expect(base.system.light["on-primary"]).toBe("neutral-50");
+  it("leaves the light context empty — the base tokens are the light scheme", () => {
+    expect(base.order).toEqual(["color"]);
+    expect(base.modifiers.color.light).toEqual({});
   });
 
-  it("maps light mode secondary to teal", () => {
-    expect(base.system.light["secondary"]).toBe("teal-500");
-    expect(base.system.light["on-secondary"]).toBe("neutral-50");
+  it("binds light scheme primary to violet in the base", () => {
+    expect(base.tokens["primary"]).toBe("{violet-500}");
+    expect(base.tokens["on-primary"]).toBe("{neutral-50}");
   });
 
-  it("maps light mode error to red", () => {
-    expect(base.system.light["error"]).toBe("red-500");
+  it("binds light scheme secondary to teal in the base", () => {
+    expect(base.tokens["secondary"]).toBe("{teal-500}");
+    expect(base.tokens["on-secondary"]).toBe("{neutral-50}");
   });
 
-  it("maps light mode surface and background to neutral", () => {
-    expect(base.system.light["surface"]).toBe("neutral-50");
-    expect(base.system.light["background"]).toBe("neutral-50");
+  it("binds light scheme error to red in the base", () => {
+    expect(base.tokens["error"]).toBe("{red-500}");
   });
 
-  it("maps dark mode system tokens correctly", () => {
-    expect(base.system.dark["primary"]).toBe("violet-200");
-    expect(base.system.dark["secondary"]).toBe("teal-200");
-    expect(base.system.dark["error"]).toBe("red-200");
-    expect(base.system.dark["surface"]).toBe("neutral-900");
-    expect(base.system.dark["background"]).toBe("neutral-900");
+  it("binds light scheme surface and background to neutral in the base", () => {
+    expect(base.tokens["surface"]).toBe("{neutral-50}");
+    expect(base.tokens["background"]).toBe("{neutral-50}");
   });
 
-  it("has matching system token keys in light and dark modes", () => {
-    expect(Object.keys(base.system.light).sort()).toEqual(
-      Object.keys(base.system.dark).sort(),
-    );
+  it("remaps the semantic roles for the dark context", () => {
+    expect(base.modifiers.color.dark["primary"]).toBe("{violet-200}");
+    expect(base.modifiers.color.dark["secondary"]).toBe("{teal-200}");
+    expect(base.modifiers.color.dark["error"]).toBe("{red-200}");
+    expect(base.modifiers.color.dark["surface"]).toBe("{neutral-900}");
+    expect(base.modifiers.color.dark["background"]).toBe("{neutral-900}");
   });
 
-  it("aliases only real reference tokens from every system token", () => {
-    const refKeys = new Set(Object.keys(base.reference));
-    const aliases = [
-      ...Object.values(base.system.light),
-      ...Object.values(base.system.dark),
-    ];
-    for (const alias of aliases) {
-      expect(refKeys.has(alias)).toBe(true);
+  it("has a dark context role for every light scheme role", () => {
+    for (const key of Object.keys(base.modifiers.color.dark)) {
+      expect(base.tokens).toHaveProperty(key);
+    }
+  });
+
+  it("references only real palette tokens from every dark-context role", () => {
+    const tokenKeys = new Set(Object.keys(base.tokens));
+    for (const ref of Object.values(base.modifiers.color.dark)) {
+      expect(tokenKeys.has(ref.slice(1, -1))).toBe(true);
     }
   });
 
@@ -159,12 +160,10 @@ describe("M2 preset", () => {
     const variant = preset.define({
       id: "override",
       name: "Override",
-      reference: { "violet-500": "#ff0000" },
-      system: { light: {}, dark: {} },
-      roles: {},
+      tokens: { "violet-500": "#ff0000" },
     });
     expect(variant.id).toBe("override");
-    expect(variant.reference["violet-500"]).toBe("#ff0000");
-    expect(variant.reference["violet-200"]).toBe(base.reference["violet-200"]);
+    expect(variant.tokens["violet-500"]).toBe("#ff0000");
+    expect(variant.tokens["violet-200"]).toBe(base.tokens["violet-200"]);
   });
 });

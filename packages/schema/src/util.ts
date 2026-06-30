@@ -1,7 +1,7 @@
 import type { Issue, Rule } from "./types";
 
 /**
- * Type-agnostic rule builders. Each util accepts a name plus parameters and
+ * Type-agnostic rule builders. Each builder takes a name plus parameters and
  * returns a {@link Rule}; none of them know anything about a template or its
  * token unions. Predicate atoms each own a single failure code; combinators
  * compose other rules and attach `path` as they descend.
@@ -16,6 +16,14 @@ const nest = (key: string, issue: Issue): Issue => ({
   ...issue,
   path: [key, ...(issue.path ?? [])],
 });
+
+/** The token name inside a `{name}` reference, or `undefined` when not one. */
+const target = (v: unknown): string | undefined => {
+  if (typeof v === "string" && v.startsWith("{") && v.endsWith("}")) {
+    return v.slice(1, -1);
+  }
+  return undefined;
+};
 
 /* ── predicate atoms ─────────────────────────────────────────────────── */
 
@@ -95,12 +103,27 @@ export const balanced =
 
 /** The value is a member of the allowed set. */
 export const member =
-  (name: string, tokens: Set<string>): Rule =>
+  (name: string, set: Set<string>): Rule =>
   (v) => {
-    if (typeof v !== "string" || !tokens.has(v)) {
+    if (typeof v !== "string" || !set.has(v)) {
       return {
         code: "not_member",
         message: `${name} must be a member of the known set.`,
+        expected: [...set],
+        received: v,
+      };
+    }
+  };
+
+/** The value is a reference to a member of the set, in `{name}` form. */
+export const reference =
+  (name: string, tokens: Set<string>): Rule =>
+  (v) => {
+    const token = target(v);
+    if (token === undefined || !tokens.has(token)) {
+      return {
+        code: "not_reference",
+        message: `${name} must reference a known token as {name}.`,
         expected: [...tokens],
         received: v,
       };
@@ -122,22 +145,82 @@ export const container =
 
 /* ── combinator atoms ────────────────────────────────────────────────── */
 
+/**
+ * The value satisfies at least one branch — every rule in that branch passes.
+ * The form a binding takes: a known token name, or a literal value. A value that
+ * matches no branch is rejected.
+ */
+export const either =
+  (name: string, branches: Rule[][]): Rule =>
+  (v) => {
+    for (const branch of branches) {
+      if (branch.every((rule) => rule(v) === undefined)) {
+        return;
+      }
+    }
+    return {
+      code: "no_match",
+      message: `${name} must be a known token reference or a valid value.`,
+      received: v,
+    };
+  };
+
 /** Every key must belong to the allowed set; values are not inspected. */
 export const subset =
-  (name: string, tokens: Set<string>): Rule =>
+  (name: string, set: Set<string>): Rule =>
   (v) => {
     if (!record(v)) {
       return;
     }
     for (const key of Object.keys(v)) {
-      if (!tokens.has(key)) {
+      if (!set.has(key)) {
         return {
           code: "unknown_key",
           message: `${name} contains an unknown key '${key}'.`,
           path: [key],
-          expected: [...tokens],
+          expected: [...set],
           received: key,
         };
+      }
+    }
+  };
+
+/** Every key in the required set must be present. */
+export const superset =
+  (name: string, set: Set<string>): Rule =>
+  (v) => {
+    if (!record(v)) {
+      return;
+    }
+    for (const key of set) {
+      if (!(key in v)) {
+        return {
+          code: "missing_key",
+          message: `${name} is missing required key '${key}'.`,
+          path: [key],
+          expected: [...set],
+        };
+      }
+    }
+  };
+
+/** The value is an array whose every element satisfies the rules. */
+export const list =
+  (name: string, rules: Rule[]): Rule =>
+  (v) => {
+    if (!Array.isArray(v)) {
+      return {
+        code: "not_array",
+        message: `${name} must be an array.`,
+        received: v,
+      };
+    }
+    for (const [index, item] of v.entries()) {
+      for (const rule of rules) {
+        const issue = rule(item);
+        if (issue) {
+          return nest(String(index), issue);
+        }
       }
     }
   };
@@ -189,52 +272,46 @@ export const shape =
     }
   };
 
-/** Every key in the required set must be present. */
-export const superset =
+/**
+ * The reference graph is acyclic. A key whose value names another token in the
+ * set forms an edge; a chain that returns to a key already on the path is a
+ * cycle, which resolves to nothing in CSS. Each key is walked once.
+ */
+export const acyclic =
   (name: string, tokens: Set<string>): Rule =>
   (v) => {
     if (!record(v)) {
       return;
     }
-    for (const key of tokens) {
-      if (!(key in v)) {
-        return {
-          code: "missing_key",
-          message: `${name} is missing required key '${key}'.`,
-          path: [key],
-          expected: [...tokens],
-        };
+    const settled = new Set<string>();
+    for (const start of Object.keys(v)) {
+      if (settled.has(start)) {
+        continue;
       }
-    }
-  };
-
-/**
- * A map whose value-rule is chosen by which set the key belongs to. The
- * heterogeneous companion to {@link each}, used for the flat tokens map where
- * a reference key holds a value, a system key holds a reference, and a role
- * key holds an alias. A key matching no route is rejected.
- */
-export const dispatch =
-  (name: string, routes: { set: Set<string>; rules: Rule[] }[]): Rule =>
-  (v) => {
-    if (!record(v)) {
-      return;
-    }
-    for (const [key, value] of Object.entries(v)) {
-      const route = routes.find((r) => r.set.has(key));
-      if (!route) {
-        return {
-          code: "unknown_key",
-          message: `${name} contains an unknown key '${key}'.`,
-          path: [key],
-          received: key,
-        };
-      }
-      for (const rule of route.rules) {
-        const issue = rule(value);
-        if (issue) {
-          return nest(key, issue);
+      const path = new Set<string>();
+      const trail: string[] = [];
+      let cursor: string | undefined = start;
+      while (cursor !== undefined && !settled.has(cursor)) {
+        if (path.has(cursor)) {
+          const cycle = [...trail.slice(trail.indexOf(cursor)), cursor];
+          return {
+            code: "cycle",
+            message: `${name} contains a reference cycle: ${cycle.join(" → ")}.`,
+            path: [cursor],
+            received: cycle,
+          };
         }
+        path.add(cursor);
+        trail.push(cursor);
+        const token = target(v[cursor]);
+        if (token !== undefined && tokens.has(token)) {
+          cursor = token;
+        } else {
+          cursor = undefined;
+        }
+      }
+      for (const key of path) {
+        settled.add(key);
       }
     }
   };

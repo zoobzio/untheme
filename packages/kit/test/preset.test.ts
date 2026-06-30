@@ -4,16 +4,21 @@ import { defineUnthemePreset } from "../src/preset";
 const base = {
   id: "base",
   name: "Base",
-  reference: {
+  tokens: {
     white: "#ffffff",
     black: "#000000",
     blue: "#0000ff",
+    background: "{white}",
+    foreground: "{black}",
+    primary: "{foreground}",
   },
-  system: {
-    light: { background: "white", foreground: "black" },
-    dark: { background: "black", foreground: "white" },
+  modifiers: {
+    color: {
+      light: { background: "{white}", foreground: "{black}" },
+      dark: { background: "{black}", foreground: "{white}" },
+    },
   },
-  roles: { primary: "foreground" },
+  order: ["color"],
 };
 
 const preset = defineUnthemePreset(base);
@@ -24,19 +29,27 @@ describe("defineUnthemePreset", () => {
       const theme = preset.define({
         id: "brand",
         name: "Brand",
-        reference: { blue: "#1e40af" },
-        system: { light: {}, dark: { foreground: "blue" } },
-        roles: {},
+        tokens: { blue: "#1e40af" },
+        modifiers: { color: { dark: { foreground: "{blue}" } } },
       });
       expect(theme).toEqual({
         id: "brand",
         name: "Brand",
-        reference: { white: "#ffffff", black: "#000000", blue: "#1e40af" },
-        system: {
-          light: { background: "white", foreground: "black" },
-          dark: { background: "black", foreground: "blue" },
+        tokens: {
+          white: "#ffffff",
+          black: "#000000",
+          blue: "#1e40af",
+          background: "{white}",
+          foreground: "{black}",
+          primary: "{foreground}",
         },
-        roles: { primary: "foreground" },
+        modifiers: {
+          color: {
+            light: { background: "{white}", foreground: "{black}" },
+            dark: { background: "{black}", foreground: "{blue}" },
+          },
+        },
+        order: ["color"],
       });
     });
 
@@ -44,11 +57,9 @@ describe("defineUnthemePreset", () => {
       preset.define({
         id: "brand",
         name: "Brand",
-        reference: { blue: "#1e40af" },
-        system: { light: {}, dark: {} },
-        roles: {},
+        tokens: { blue: "#1e40af" },
       });
-      expect(base.reference.blue).toBe("#0000ff");
+      expect(base.tokens.blue).toBe("#0000ff");
     });
   });
 
@@ -56,56 +67,56 @@ describe("defineUnthemePreset", () => {
     const app = preset.configure({
       id: "app",
       name: "App",
-      reference: { blue: "#1e40af", red: "#ff0000" },
-      system: {
-        light: { danger: "red" },
-        dark: { danger: "red" },
+      tokens: { blue: "#1e40af", red: "#ff0000", danger: "{red}" },
+      modifiers: {
+        color: {
+          light: { danger: "{red}" },
+          dark: { danger: "{red}" },
+        },
       },
-      roles: { alert: "danger" },
+      order: ["color"],
     });
 
-    it("derives a preset widened by the theme, under its identity", () => {
-      const config = app.use("light");
+    it("derives a preset widened by the extension, under its identity", () => {
+      const config = app.use({ color: "light" });
       expect(config.theme.id).toBe("app");
       expect(config.theme.name).toBe("App");
       // new tokens join the contract, overrides win, base survives underneath
-      expect(config.theme.reference.red).toBe("#ff0000");
-      expect(config.theme.reference.blue).toBe("#1e40af");
-      expect(config.theme.reference.white).toBe("#ffffff");
-      expect(config.theme.system.light.danger).toBe("red");
-      expect(config.theme.system.light.background).toBe("white");
-      expect(config.theme.roles).toEqual({
-        primary: "foreground",
-        alert: "danger",
-      });
+      expect(config.theme.tokens.red).toBe("#ff0000");
+      expect(config.theme.tokens.blue).toBe("#1e40af");
+      expect(config.theme.tokens.white).toBe("#ffffff");
+      expect(config.theme.tokens.danger).toBe("{red}");
+      expect(config.theme.modifiers.color.light.danger).toBe("{red}");
+      expect(config.theme.modifiers.color.light.background).toBe("{white}");
     });
 
     it("resolves derived variants against the widened base", () => {
       const theme = app.define({
         id: "night",
         name: "Night",
-        reference: { red: "#aa0000" },
-        system: { light: {}, dark: {} },
-        roles: {},
+        tokens: { red: "#aa0000" },
       });
-      expect(theme.reference.red).toBe("#aa0000");
-      expect(theme.reference.blue).toBe("#1e40af");
+      expect(theme.tokens.red).toBe("#aa0000");
+      expect(theme.tokens.blue).toBe("#1e40af");
     });
 
     it("leaves the original preset untouched", () => {
-      expect(preset.use("light").theme.reference).not.toHaveProperty("red");
-      expect(base.reference.blue).toBe("#0000ff");
+      expect(preset.use({ color: "light" }).theme.tokens).not.toHaveProperty(
+        "red",
+      );
+      expect(base.tokens.blue).toBe("#0000ff");
     });
   });
 
   describe("use", () => {
     it("builds a config from a detached copy of the base", () => {
-      const config = preset.use("dark");
-      expect(config.mode).toBe("dark");
+      const config = preset.use({ color: "dark" });
+      expect(config.input).toEqual({ color: "dark" });
+      expect(config.override).toEqual({});
       expect(config.theme).toEqual(base);
       expect(config.theme).not.toBe(base);
-      config.theme.reference.white = "#111111";
-      expect(preset.use("dark").theme.reference.white).toBe("#ffffff");
+      config.theme.tokens.white = "#111111";
+      expect(preset.use({ color: "dark" }).theme.tokens.white).toBe("#ffffff");
     });
   });
 });

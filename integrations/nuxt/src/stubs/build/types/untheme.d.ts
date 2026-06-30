@@ -1,6 +1,16 @@
 // Typecheck-only stub for the generated `#build/types/untheme.d.ts` virtual module.
-export type ReferenceToken = "white" | "black" | "slate" | "blue" | "indigo";
+export type Token =
+  | "white"
+  | "black"
+  | "blue"
+  | "indigo"
+  | "surface"
+  | "on-surface"
+  | "primary";
 
-export type SystemToken = "primary" | "surface" | "on-surface" | "muted";
-
-export type RoleToken = "text-color" | "background-color" | "link-color";
+export type Mod = {
+  color: {
+    light: Partial<Record<Token, string>>;
+    dark: Partial<Record<Token, string>>;
+  };
+};

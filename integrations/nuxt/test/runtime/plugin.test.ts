@@ -1,11 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref, reactive, nextTick, type Ref } from "vue";
-import { clone } from "untheme";
 import type { AppConfig } from "../../src/runtime/types";
-import { theme, themes } from "../fixtures";
+import { theme, themes, input } from "../fixtures";
 
 interface HeadInput {
-  htmlAttrs: { class: { value: string } };
+  htmlAttrs: Record<string, { value: string }>;
   style: { value: Array<{ key: string; innerHTML: string }> };
 }
 
@@ -16,9 +15,10 @@ const callHook = vi.fn();
 
 vi.mock("#build/untheme.mjs", () => ({
   get theme() {
-    return clone(theme);
+    return structuredClone(theme);
   },
   themes,
+  input,
 }));
 
 vi.mock("#app", () => ({
@@ -38,7 +38,7 @@ vi.mock("#imports", () => ({
 }));
 
 vi.mock("untheme/css", () => ({
-  generateCSS: (tokens: Record<string, string>) =>
+  generateRootCSS: (tokens: Record<string, string>) =>
     `/* ${Object.keys(tokens).join(",")} */`,
 }));
 
@@ -73,9 +73,9 @@ describe("untheme plugin", () => {
     expect(provide.untheme).toBeDefined();
   });
 
-  it("injects the dark class and token CSS via useHead", () => {
+  it("mirrors the selection as data attributes and injects token CSS", () => {
     setup();
-    expect(headCalls[0].htmlAttrs.class.value).toContain("dark");
+    expect(headCalls[0].htmlAttrs["data-color"].value).toBe("light");
     expect(headCalls[0].style.value[0].key).toBe("untheme");
     expect(headCalls[0].style.value[0].innerHTML).toContain("white");
   });
@@ -86,12 +86,12 @@ describe("untheme plugin", () => {
   });
 
   describe("reactivity", () => {
-    it("toggles the dark class when the mode changes", async () => {
+    it("updates the data attribute when the context changes", async () => {
       setup();
-      expect(headCalls[0].htmlAttrs.class.value).toContain("dark");
-      config.value.mode = "light";
+      expect(headCalls[0].htmlAttrs["data-color"].value).toBe("light");
+      config.value.input.color = "dark";
       await nextTick();
-      expect(headCalls[0].htmlAttrs.class.value).not.toContain("dark");
+      expect(headCalls[0].htmlAttrs["data-color"].value).toBe("dark");
     });
   });
 });

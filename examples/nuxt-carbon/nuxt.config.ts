@@ -6,8 +6,9 @@ import untheme from "./untheme.config";
  * IBM Carbon example.
  *
  * Carbon themes are light/dark *pairings* (e.g. White / Gray 90), so this app
- * demos untheme's two axes at once: `apply(key)` swaps the pairing, while
- * `setMode` flips between the pairing's light and dark halves.
+ * demos untheme's two axes at once: `apply` swaps the pairing, while `swap` on
+ * the `color` modifier flips between the pairing's light and dark halves. The
+ * theme catalog and initial selection live in `untheme.config.ts`.
  */
 const src = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 

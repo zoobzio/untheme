@@ -5,19 +5,21 @@ faithful translation of a well-known color scheme into M3 design tokens.
 
 ## Approach
 
-Every theme overrides both **reference tokens** (custom tonal palettes generated
-from the scheme's canonical colors) and **system tokens** (semantic role mappings
-that reflect how the original scheme actually uses its colors). The goal is
-maximum fidelity to the source material — not pattern-matching across themes.
+Every theme overrides both **palette tokens** (custom tonal palettes generated
+from the scheme's canonical colors) and the **semantic roles** — the light scheme
+in `tokens`, the dark scheme in the `color.dark` context — that reflect how the
+original scheme actually uses its colors. The goal is maximum fidelity to the
+source material — not pattern-matching across themes.
 
-Each theme is a `preset.define` variant, importable by path; pack the ones you
-want with `preset.use(...)` to get fully resolved themes:
+Each theme is a `preset.define` variant, importable by path; register the ones
+you want with `defineUntheme` and select between them at runtime:
 
 ```ts
+import { defineUntheme } from "@untheme/core";
 import preset from "@untheme/material-3";
 import dracula from "@untheme/material-3/themes/dracula";
 
-const bundle = preset.use(dracula);
+const ut = defineUntheme(preset.use({ color: "light" }), { dracula });
 ```
 
 ## Themes

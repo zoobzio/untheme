@@ -5,53 +5,53 @@ import { merge } from "../src/merge";
 const base = {
   id: "test",
   name: "Test",
-  reference: {
+  tokens: {
     white: "#ffffff",
     black: "#000000",
     blue: "#0000ff",
+    background: "{white}",
+    foreground: "{black}",
   },
-  system: {
-    light: { background: "white", foreground: "black" },
-    dark: { background: "black", foreground: "white" },
+  modifiers: {
+    color: {
+      light: { background: "{white}", foreground: "{black}" },
+      dark: { background: "{black}", foreground: "{white}" },
+    },
   },
-  roles: { primary: "foreground" },
+  order: ["color"],
 };
 
 describe("diff", () => {
   it("is all-empty for identical themes", () => {
     expect(diff(base, structuredClone(base))).toEqual({
-      reference: {},
-      system: { light: {}, dark: {} },
-      roles: {},
+      tokens: {},
+      modifiers: { color: { light: {}, dark: {} } },
     });
   });
 
-  it("holds only the deviating bindings, facet by facet", () => {
+  it("holds only the deviating bindings, token and context wise", () => {
     const edited = merge(base, {
-      reference: { white: "#fafafa" },
-      system: { dark: { background: "blue" } },
-      roles: { primary: "background" },
+      tokens: { white: "#fafafa" },
+      modifiers: { color: { dark: { background: "{blue}" } } },
     });
     expect(diff(base, edited)).toEqual({
-      reference: { white: "#fafafa" },
-      system: { light: {}, dark: { background: "blue" } },
-      roles: { primary: "background" },
+      tokens: { white: "#fafafa" },
+      modifiers: { color: { light: {}, dark: { background: "{blue}" } } },
     });
   });
 
   it("does not compare identity", () => {
     const renamed = merge(base, { id: "other", name: "Other" });
     expect(diff(base, renamed)).toEqual({
-      reference: {},
-      system: { light: {}, dark: {} },
-      roles: {},
+      tokens: {},
+      modifiers: { color: { light: {}, dark: {} } },
     });
   });
 
   it("round-trips through merge", () => {
     const edited = merge(base, {
-      reference: { blue: "#0090ff" },
-      system: { light: { foreground: "blue" } },
+      tokens: { blue: "#0090ff" },
+      modifiers: { color: { light: { foreground: "{blue}" } } },
     });
     expect(merge(base, diff(base, edited))).toEqual(edited);
   });

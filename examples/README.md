@@ -13,27 +13,39 @@ light/dark toggle, and a showcase built in that design system's own idiom.
 
 ## How it works
 
-Each app's `nuxt.config.ts` imports complete themes from a preset and hands them
-to the module:
+Each app's `untheme.config.ts` imports complete themes from a preset and hands
+them to the module, and `nuxt.config.ts` passes that config through:
 
 ```ts
+// untheme.config.ts
+import { defineUnthemeConfig } from "@untheme/nuxt/config";
 import dracula from "@untheme/material-3/themes/dracula";
 import nord from "@untheme/material-3/themes/nord";
 
-export default defineNuxtConfig({
-  modules: ["@untheme/nuxt"],
-  untheme: {
-    base: dracula, // boots with this theme
-    themes: { dracula, nord }, // switchable catalog
-  },
+export default defineUnthemeConfig({
+  base: dracula, // boots with this theme
+  themes: { dracula, nord }, // switchable catalog
+  input: { color: "light" }, // initial selection — one context per modifier
 });
 ```
 
-The module flattens the active theme into `--token` CSS variables on every
-render and toggles the `dark` class on `<html>`. The `app.vue` consumes those
-variables directly (`var(--primary)`, `var(--surface)`, …) and drives the
+```ts
+// nuxt.config.ts
+import untheme from "./untheme.config";
+
+export default defineNuxtConfig({
+  modules: ["@untheme/nuxt"],
+  untheme,
+});
+```
+
+The module flattens the active selection's tokens into `--token` CSS variables
+on every render and mirrors each modifier's selected context onto `<html>` as a
+`data-<modifier>` attribute (e.g. `data-color="dark"`). The `app.vue` consumes
+those variables directly (`var(--primary)`, `var(--surface)`, …) and drives the
 selection through the auto-imported `useUntheme()` composable, whose `apply()`
-and `setMode()` persist to cookies so the choice survives SSR and reloads.
+swaps the theme and `swap()` selects a modifier context. Both persist to cookies
+so the choice survives SSR and reloads.
 
 ## Stub vs. full build
 

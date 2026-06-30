@@ -1,43 +1,35 @@
-import type { Template, Schema, Assert } from "./types";
+import type { Assert, Schema, Template } from "./types";
 
-import { defineLexicon } from "./lexicon";
-import { defineGuard } from "./guard";
 import { defineAssert } from "./assert";
+import { defineCheck } from "./check";
+import { defineInspect } from "./inspect";
 import { defineParse } from "./parse";
+import { defineRules } from "./rules";
 
 /**
- * Builds the runtime validation {@link Schema} for a template's token
- * contract.
+ * Builds the runtime validation {@link Schema} for a template's token contract.
  *
- * The factories layer over a shared rule set: `lexicon` derives the template's
- * token {@link Set}s and a list of {@link Rule}s per tier, composed from the
- * type-agnostic atoms in `util`. `guard` runs those rules as boolean type
- * predicates; `assert` runs them too, but collects every {@link Issue} and
- * throws a {@link SchemaError}; `parse` asserts and returns the value narrowed.
+ * `rules` derives the template's token, modifier, and context {@link Set}s and a
+ * list of rules per kind. `check` runs those rules as boolean type predicates; `assert` runs
+ * them too, collecting every {@link Issue} and throwing a {@link SchemaError};
+ * `parse` asserts and returns the value narrowed; `inspect` captures the
+ * outcome as a {@link Result} instead of throwing.
  *
- * The tiers range from scalars (`mode`, `value`, the token-name tiers) to the
- * composite shapes (`tokens`, `patch`, `layer`, `theme`), each validating
- * progressively more of the contract — membership, tier aliasing, value
- * containment, completeness, and light/dark parity.
+ * The base template is validated against the `theme` kind before the schema is
+ * returned, so a malformed contract fails fast at construction.
  *
  * @param base - The template whose keys define the token contract.
- * @returns A schema of token sets and guard/assert/parse bundles, all
- *   narrowed to the template's token unions.
+ * @returns A schema of derived sets and check/assert/parse/inspect bundles, all
+ *   narrowed to the template's token, modifier, and context vocabularies.
  */
 export const defineSchema = <const T extends Template>(base: T): Schema<T> => {
-  const lexicon = defineLexicon(base);
-  const guard = defineGuard(lexicon);
-  const assert: Assert<T> = defineAssert(lexicon);
+  const rules = defineRules(base);
+  const check = defineCheck(rules);
+  const assert: Assert<T> = defineAssert(rules);
   const parse = defineParse(assert);
+  const inspect = defineInspect(parse);
 
-  // baseline check - ensures base template follows structural rules
   assert.theme(base);
 
-  return {
-    base,
-    lexicon,
-    guard,
-    assert,
-    parse,
-  };
+  return { base, rules, check, assert, parse, inspect };
 };

@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import type { Mode } from "untheme";
-
 // `useUntheme` is auto-imported by @untheme/nuxt. `themes` is the build-time
-// catalog from nuxt.config; `apply`/`setMode` persist the selection to cookies
+// catalog from untheme.config; `apply`/`swap` persist the selection to cookies
 // and survive SSR, so reloads keep the chosen theme and mode.
-const { config, themes, apply } = useUntheme();
+const { config, themes, apply, swap } = useUntheme();
 
-const setMode = (m: Mode) => {
-  config.mode = m;
+// Light/dark is the `color` modifier; `swap` selects its context and persists.
+const toggleMode = () => {
+  swap("color", config.input.color === "dark" ? "light" : "dark");
 };
 
 const swatch = (key: string, label: string) => ({ key, label });
@@ -61,7 +60,7 @@ const roleGroups = [
         <span class="logo">M3</span>
         <div>
           <h1>Material You</h1>
-          <p>{{ config.theme.name }} &middot; {{ config.mode }}</p>
+          <p>{{ config.theme.name }} &middot; {{ config.input.color }}</p>
         </div>
       </div>
       <div class="bar-actions">
@@ -76,11 +75,8 @@ const roleGroups = [
             {{ t.name }}
           </button>
         </div>
-        <button
-          class="icon-btn"
-          @click="setMode(config.mode === 'dark' ? 'light' : 'dark')"
-        >
-          {{ config.mode === "dark" ? "☾" : "☀" }}
+        <button class="icon-btn" @click="toggleMode">
+          {{ config.input.color === "dark" ? "☾" : "☀" }}
         </button>
       </div>
     </header>

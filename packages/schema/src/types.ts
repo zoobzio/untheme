@@ -1,153 +1,139 @@
-import type { COLOR_MODES, SECTIONS } from "./constant";
-
 /**
- * A supported color mode.
+ * The runtime theme contract. A schema turns a theme config into runtime types:
+ * the `tokens` keys define the `Token` union the rest of the runtime is typed
+ * against.
+ *
+ * A token's value may be a literal CSS value or a reference to another token in
+ * the same contract. References serialize to `var()`-to-`var()` indirection, so
+ * switching a context swaps values without regenerating CSS. `modifiers` group
+ * token overrides into axes of mutually exclusive contexts (e.g. a `color`
+ * modifier with `light` and `dark` contexts), composed at runtime in
+ * `order`.
  */
-export type Mode = (typeof COLOR_MODES)[number];
+
+/** A literal CSS value string. */
+export type Value = string & {};
 
 /**
- * A key of a theme {@link Template}.
- */
-export type Section = (typeof SECTIONS)[number];
-
-/**
- * A theme template: the token contract that layers and themes are validated
- * against. Its keys define which reference, system, and role tokens exist;
- * its values are the baseline assignments.
+ * A theme template: the contract that types and runtime validate against.
+ * `tokens` is the complete base map. `modifiers` map an axis name to its
+ * contexts, each carrying token overrides. `order` fixes the
+ * precedence in which active contexts compose over the base.
  */
 export type Template = {
   id: string;
   name: string;
-  reference: Record<string, string>;
-  system: { [M in Mode]: Record<string, string> };
-  roles: Record<string, string>;
+  tokens: Record<string, string>;
+  modifiers: Record<string, Record<string, Partial<Record<string, string>>>>;
+  order: string[];
+};
+
+/** Any token name defined by a template. */
+export type Token<T extends Template> = keyof T["tokens"] & string;
+
+/** Any modifier (axis) name defined by a template. */
+export type Modifier<T extends Template> = keyof T["modifiers"] & string;
+
+/** Any context name defined by a template's modifier `M`. */
+export type Context<
+  T extends Template,
+  M extends Modifier<T>,
+> = keyof T["modifiers"][M] & string;
+
+/**
+ * A reference to another token in the contract, in curly-brace syntax
+ * (`{token-name}`) — the form that survives into CSS as `var(--token-name)`.
+ */
+export type Reference<T extends Template> = `{${Token<T>}}`;
+
+/**
+ * A token binding: a {@link Reference} to another token, or a literal value.
+ * The `string & {}` arm accepts any literal value while keeping the reference
+ * forms in editor autocomplete — a bare `string` would absorb and erase them.
+ */
+export type Binding<T extends Template> = Reference<T> | Value;
+
+/**
+ * A partial set of token overrides — what a context, layer, or patch carries.
+ */
+export type Overrides<T extends Template> = {
+  [K in Token<T>]?: Binding<T>;
+};
+
+/** Every context of every modifier, each carrying its token overrides. */
+export type Modifiers<T extends Template> = {
+  [M in Modifier<T>]: { [C in Context<T, M>]: Overrides<T> };
+};
+
+/** The active context selected for each modifier. */
+export type Input<T extends Template> = {
+  [M in Modifier<T>]: Context<T, M>;
 };
 
 /**
- * A raw CSS value held by a reference token.
- */
-export type Value = string;
-
-/**
- * Union of reference token names defined by a template.
- */
-export type Reference<T extends Template> = keyof T["reference"] & string;
-
-/**
- * Union of system token names defined by a template.
- */
-export type System<T extends Template> = keyof T["system"][Mode] & string;
-
-/**
- * Union of role token names defined by a template.
- */
-export type Role<T extends Template> = keyof T["roles"] & string;
-
-/**
- * A token name a role may point to: reference or system.
- */
-export type Alias<T extends Template> = Reference<T> | System<T>;
-
-/**
- * Any token name defined by a template.
- */
-export type Token<T extends Template> = Reference<T> | System<T> | Role<T>;
-
-/**
- * The flat token map for a template: reference tokens hold raw values,
- * system tokens hold reference aliases, role tokens hold reference or
- * system aliases.
- */
-export type Tokens<T extends Template> = {
-  [K in Reference<T>]: Value;
-} & {
-  [K in System<T>]: Reference<T>;
-} & { [K in Role<T>]: Alias<T> };
-
-/**
- * An anonymous set of token overrides: every facet and token is optional, but
- * anything present must stay within the contract. Unlike a {@link Layer}, a
- * patch carries no identity — applying one changes values, not which theme
- * you are.
- */
-export type Patch<T extends Template> = {
-  reference?: { [K in Reference<T>]?: Value };
-  system?: { [M in Mode]?: { [K in System<T>]?: Reference<T> } };
-  roles?: { [K in Role<T>]?: Alias<T> };
-};
-
-/**
- * A partial overlay of a template. Every token present must belong to the
- * contract and satisfy its tier's value rule, but tokens may be omitted.
- */
-export type Layer<T extends Template> = {
-  id: string;
-  name: string;
-  reference: { [K in Reference<T>]?: string };
-  system: { [M in Mode]: { [K in System<T>]?: Reference<T> } };
-  roles: { [K in Role<T>]?: Alias<T> };
-};
-
-/**
- * A complete instantiation of a template: every contract token is present,
- * and both modes carry an identical token structure.
+ * A complete instantiation of a template: every token carries a base binding,
+ * every modifier's contexts each rebind a subset of tokens, and
+ * `order` lists the modifiers in composition precedence.
  */
 export type Theme<T extends Template> = {
   id: string;
   name: string;
-  reference: { [K in Reference<T>]: string };
-  system: { [M in Mode]: { [K in System<T>]: NoInfer<Reference<T>> } };
-  roles: { [K in Role<T>]: NoInfer<Reference<T> | System<T>> };
+  tokens: { [K in Token<T>]: Binding<T> };
+  modifiers: Modifiers<T>;
+  order: Modifier<T>[];
 };
 
 /**
- * A {@link Template} parameterized by its token name unions, for call sites
- * that infer the contract from a literal theme. `NoInfer` keeps inference
- * anchored on the key positions: system and role values must alias names
- * declared elsewhere in the contract, never widen it.
+ * A partial overlay that carries identity: applying it changes which theme is
+ * active. Anything present must belong to the contract; everything is optional.
+ */
+export type Layer<T extends Template> = {
+  id: string;
+  name: string;
+  tokens?: Overrides<T>;
+  modifiers?: { [M in Modifier<T>]?: { [C in Context<T, M>]?: Overrides<T> } };
+  order?: Modifier<T>[];
+};
+
+/**
+ * A partial overlay without identity: applying it changes values, not which
+ * theme is active.
+ */
+export type Patch<T extends Template> = {
+  tokens?: Overrides<T>;
+  modifiers?: { [M in Modifier<T>]?: { [C in Context<T, M>]?: Overrides<T> } };
+};
+
+/**
+ * A template parameterized by its token union (`Tok`) and modifier structure
+ * (`Mod`), for call sites that infer or widen a contract from a literal — the
+ * form `extend` returns. `NoInfer` anchors inference on the key positions so
+ * reference values name existing tokens rather than widening the contract.
  */
 export type Contract<
-  Ref extends string,
-  Sys extends string,
-  Rol extends string,
+  Tok extends string,
+  Mod extends Record<
+    string,
+    Record<string, Partial<Record<NoInfer<Tok>, `{${NoInfer<Tok>}}` | Value>>>
+  >,
 > = {
   id: string;
   name: string;
-  reference: { [K in Ref]: Value };
-  system: { [M in Mode]: { [K in Sys]: NoInfer<Ref> } };
-  roles: { [K in Rol]: NoInfer<Ref | Sys> };
+  tokens: { [K in Tok]: `{${NoInfer<Tok>}}` | Value };
+  modifiers: {
+    [M in keyof Mod & (string & {})]: {
+      [V in keyof Mod[M] & (string & {})]: {
+        [K in NoInfer<Tok>]?: `{${NoInfer<Tok>}}` | Value;
+      };
+    };
+  };
+  order: (keyof Mod & (string & {}))[];
 };
 
 /**
- * The full validation vocabulary for a template: every tier mapped to the type
- * a value of that tier narrows to. The scalar tiers (`mode`, `value`, the
- * token-name tiers) sit alongside the composite shapes (`tokens`, `patch`,
- * `layer`, `theme`).
- */
-export type Domain<T extends Template> = {
-  mode: Mode;
-  value: Value;
-  reference: Reference<T>;
-  system: System<T>;
-  role: Role<T>;
-  alias: Alias<T>;
-  token: Token<T>;
-  tokens: Tokens<T>;
-  patch: Patch<T>;
-  layer: Layer<T>;
-  theme: Theme<T>;
-};
-
-/**
- * The name of a tier — a key of {@link Domain}. Used to index the rule, guard,
- * assert, and parse bundles uniformly.
- */
-export type Tier = keyof Domain<Template>;
-
-/**
- * The closed set of failure kinds the rule atoms can emit. Predicate atoms own
- * one code each; combinators emit the structural codes (`unknown_key`,
- * `missing_key`).
+ * The closed set of failure kinds a rule can emit. Predicate atoms own one
+ * code each; combinators emit the structural kinds (`unknown_key`,
+ * `missing_key`) and the alternation kind (`no_match`).
  */
 export type Code =
   | "not_string"
@@ -155,15 +141,18 @@ export type Code =
   | "css_breakout"
   | "unbalanced"
   | "not_member"
+  | "not_reference"
   | "not_object"
+  | "not_array"
   | "unknown_key"
-  | "missing_key";
+  | "missing_key"
+  | "no_match"
+  | "cycle";
 
 /**
- * A detailed validation failure. `code` is a stable discriminant callers can
- * branch on, `message` is human-readable text, and `path` is filled in by
- * combinator rules as they descend into nested structure. `expected` and
- * `received` carry the contract value and the offending value when useful.
+ * A validation failure. `code` is a stable discriminant callers branch on,
+ * `message` is human-readable, `path` is filled in by combinators as they
+ * descend, and `expected`/`received` carry the contract and offending values.
  */
 export type Issue = {
   code: Code;
@@ -180,71 +169,121 @@ export type Issue = {
 export type Rule = (v: unknown) => Issue | undefined;
 
 /**
- * The runtime vocabulary derived from a template: the token-name {@link Set}s
- * used for membership and completeness checks, plus a list of {@link Rule}s per
- * tier. A tier's rules are a conjunction — a value satisfies the tier when
- * every rule returns no {@link Issue}.
+ * The validation vocabulary for a template: every kind mapped to the type a
+ * value of that kind narrows to. Scalar kinds (`modifier`, `value`, `token`,
+ * `reference`, `binding`) sit alongside the composite kinds (`overrides`,
+ * `tokens`, `modifiers`, `order`, `input`, `theme`, `layer`,
+ * `patch`).
  */
-export type Lexicon<T extends Template> = {
-  tokens: {
-    reference: Set<Reference<T>>;
-    system: Set<System<T>>;
-    role: Set<Role<T>>;
-    alias: Set<Alias<T>>;
-    all: Set<Token<T>>;
+export type Domain<T extends Template> = {
+  modifier: Modifier<T>;
+  value: Value;
+  token: Token<T>;
+  reference: Reference<T>;
+  binding: Binding<T>;
+  overrides: Overrides<T>;
+  tokens: Theme<T>["tokens"];
+  modifiers: Modifiers<T>;
+  order: Theme<T>["order"];
+  input: Input<T>;
+  theme: Theme<T>;
+  layer: Layer<T>;
+  patch: Patch<T>;
+};
+
+/** The name of a kind — a key of {@link Domain}. */
+export type Kind = keyof Domain<Template>;
+
+/**
+ * The runtime vocabulary derived from a template: the token, modifier, and
+ * per-modifier context {@link Set}s used for membership and completeness
+ * checks, plus a list of {@link Rule}s per kind. A kind's rules are a
+ * conjunction — a value satisfies the kind when every rule returns no {@link
+ * Issue}.
+ */
+export type Rules<T extends Template> = {
+  sets: {
+    tokens: Set<Token<T>>;
+    modifiers: Set<Modifier<T>>;
+    contexts: Record<string, Set<string>>;
   };
-  rules: {
-    [K in Tier]: Rule[];
-  };
+  rules: { [K in Kind]: Rule[] };
 };
 
 /**
- * Boolean type predicates per tier: `true` narrows the value to its tier type,
+ * Boolean type predicates per kind: `true` narrows the value to its kind type,
  * `false` says nothing more. Use when a yes/no answer is enough; reach for
  * {@link Assert} or {@link Parse} when you need the reasons.
  */
-export type Guard<T extends Template> = {
-  [K in Tier]: (v: unknown) => v is Domain<T>[K];
+export type Check<T extends Template> = {
+  [K in Kind]: (v: unknown) => v is Domain<T>[K];
 };
 
 /**
- * Assertion functions per tier: return when the value satisfies the tier, or
+ * Assertion functions per kind: return when the value satisfies the kind, or
  * throw a {@link SchemaError} carrying every {@link Issue} found. Spelled out
- * per tier (rather than mapped) because `asserts` predicates cannot be produced
- * by a mapped type.
+ * per kind rather than mapped, since `asserts` predicates cannot be produced by
+ * a mapped type.
  */
 export type Assert<T extends Template> = {
-  mode: (v: unknown) => asserts v is Mode;
+  modifier: (v: unknown) => asserts v is Modifier<T>;
   value: (v: unknown) => asserts v is Value;
-  reference: (v: unknown) => asserts v is Reference<T>;
-  system: (v: unknown) => asserts v is System<T>;
-  role: (v: unknown) => asserts v is Role<T>;
-  alias: (v: unknown) => asserts v is Alias<T>;
   token: (v: unknown) => asserts v is Token<T>;
-  tokens: (v: unknown) => asserts v is Tokens<T>;
-  patch: (v: unknown) => asserts v is Patch<T>;
-  layer: (v: unknown) => asserts v is Layer<T>;
+  reference: (v: unknown) => asserts v is Reference<T>;
+  binding: (v: unknown) => asserts v is Binding<T>;
+  overrides: (v: unknown) => asserts v is Overrides<T>;
+  tokens: (v: unknown) => asserts v is Theme<T>["tokens"];
+  modifiers: (v: unknown) => asserts v is Modifiers<T>;
+  order: (v: unknown) => asserts v is Theme<T>["order"];
+  input: (v: unknown) => asserts v is Input<T>;
   theme: (v: unknown) => asserts v is Theme<T>;
+  layer: (v: unknown) => asserts v is Layer<T>;
+  patch: (v: unknown) => asserts v is Patch<T>;
 };
 
 /**
- * Parse functions per tier: return the value narrowed to its tier type, or
- * throw a {@link SchemaError}. The throwing analog of {@link Guard}, handy at
- * trust boundaries (`const theme = parse.theme(await res.json())`).
+ * Parse functions per kind: return the value narrowed to its kind type, or let
+ * the {@link SchemaError} from {@link Assert} propagate. The throwing analog of
+ * {@link Check}, handy at trust boundaries
+ * (`const theme = parse.theme(await res.json())`).
  */
 export type Parse<T extends Template> = {
-  [K in Tier]: (v: unknown) => Domain<T>[K];
+  [K in Kind]: (v: unknown) => Domain<T>[K];
 };
 
 /**
- * The bundle {@link defineSchema} returns for a template: the source
- * template, the derived {@link Lexicon}, and the {@link Guard}/{@link Assert}/
- * {@link Parse} families built from it.
+ * The outcome of an {@link Inspect}: either the value narrowed to its kind
+ * type, or the {@link Issue}s explaining why it failed.
+ */
+export type Result<V> =
+  | {
+      success: true;
+      data: V;
+    }
+  | {
+      success: false;
+      issues: Issue[];
+    };
+
+/**
+ * Inspect functions per kind: return a {@link Result} — success with the
+ * narrowed value, or failure with the issues — rather than throwing. The
+ * non-throwing analog of {@link Parse}.
+ */
+export type Inspect<T extends Template> = {
+  [K in Kind]: (v: unknown) => Result<Domain<T>[K]>;
+};
+
+/**
+ * The bundle {@link defineSchema} returns for a template: the source template,
+ * the derived {@link Rules}, and the {@link Check} / {@link Assert} /
+ * {@link Parse} / {@link Inspect} families built from it.
  */
 export type Schema<T extends Template> = {
   base: T;
-  lexicon: Lexicon<T>;
-  guard: Guard<T>;
+  rules: Rules<T>;
+  check: Check<T>;
   assert: Assert<T>;
   parse: Parse<T>;
+  inspect: Inspect<T>;
 };

@@ -2,7 +2,7 @@
 
 Material Design 3 token preset for untheme.
 
-Provides a complete M3 baseline with 670 reference tokens and 49 system tokens as an untheme preset, plus 19 ready-made theme variants importable by path.
+Provides a complete M3 baseline — 670 palette/scale tokens plus 49 semantic roles, with a `color` modifier carrying the light and dark schemes — as an untheme preset, plus 19 ready-made theme variants importable by path.
 
 ## Usage
 
@@ -11,21 +11,20 @@ import { defineUntheme } from "@untheme/core";
 import preset from "@untheme/material-3";
 import dracula from "@untheme/material-3/themes/dracula";
 
-// Boot a service from the preset (preset.use(mode) yields its Config),
+// Boot a service from the preset (preset.use(input) yields its Config),
 // registering the variants you want to switch to at runtime.
-const ut = defineUntheme(preset.use("dark"), { dracula });
+const ut = defineUntheme(preset.use({ color: "dark" }), { dracula });
 ut.select("dracula"); // switch to a registered variant
 
 // Or author your own variant against the preset's contract
 const brand = preset.define({
   id: "brand",
   name: "Brand",
-  reference: { "violet-40": "#1e40af" },
-  system: { light: {}, dark: {} },
+  tokens: { "violet-40": "#1e40af" },
 });
 ```
 
-## Reference Tokens (670)
+## Base Tokens (670)
 
 ### Color (572)
 
@@ -59,9 +58,9 @@ Each palette is generated via `createM3ColorTokens(name, hex)` using the HCT col
 
 `duration-short-1` (50ms) through `duration-short-4` (200ms), `duration-medium-1` (250ms) through `duration-medium-4` (400ms), `duration-long-1` (450ms) through `duration-long-4` (600ms), `duration-extra-long-1` (700ms) through `duration-extra-long-4` (1000ms)
 
-## System Tokens (49)
+## Semantic Roles (49)
 
-Color system tokens mapped per light/dark mode following the M3 color system specification:
+Color roles bound to the light scheme in the base `tokens`, with the `color` modifier's `dark` context remapping them following the M3 color system specification:
 
 | Group     | Tokens                                                                                                                                                                                                                 |
 | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

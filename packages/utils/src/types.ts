@@ -1,84 +1,64 @@
 import type {
-  Alias,
-  Mode,
-  Reference,
-  Role,
-  System,
+  Context,
+  Modifier,
+  Overrides,
   Template,
   Value,
 } from "@untheme/schema";
 
 /**
- * A contract extension for `extend`: it may override base tokens or introduce
- * new ones, and its new system and role tokens may alias the extension's own
- * tokens as well as the base's. Identity is optional — when present it wins
- * over the base's.
+ * A contract extension for {@link extend}: new tokens (`XTok`) and new modifiers
+ * (`XMod`), plus optional overrides of the base's tokens and of its existing
+ * modifier contexts. New bindings may reference base or extension tokens.
  */
 export type Extension<
-  Ref extends string,
-  Sys extends string,
-  Rol extends string,
-  XRef extends string,
-  XSys extends string,
-  XRol extends string,
+  Tok extends string,
+  Mod extends Record<string, Record<string, Partial<Record<string, string>>>>,
+  XTok extends string,
+  XMod extends Record<string, Record<string, Partial<Record<string, string>>>>,
 > = {
-  id?: string;
-  name?: string;
-  reference: {
-    [K in XRef]: Value;
+  id: string;
+  name: string;
+  tokens: {
+    [K in Tok]?: `{${NoInfer<Tok | XTok>}` | Value;
   } & {
-    [K in Ref]?: Value;
+    [K in XTok]: `{${NoInfer<XTok>}` | Value;
   };
-  system: {
-    [M in Mode]: {
-      [K in XSys]: NoInfer<Ref> | NoInfer<XRef>;
-    } & {
-      [K in Sys]?: NoInfer<Ref> | NoInfer<XRef>;
+  modifiers: {
+    [M in keyof Mod]?: {
+      [C in keyof Mod[M]]?: {
+        [K in NoInfer<Tok | XTok>]?: `{${NoInfer<Tok | XTok>}}` | Value;
+      };
+    };
+  } & {
+    [M in keyof XMod]: {
+      [C in keyof XMod[M]]: {
+        [K in NoInfer<Tok | XTok>]?: `{${NoInfer<Tok | XTok>}}` | Value;
+      };
     };
   };
-  roles: {
-    [K in XRol]: NoInfer<Ref> | NoInfer<Sys> | NoInfer<XRef> | NoInfer<XSys>;
-  } & {
-    [K in Rol]?: NoInfer<Ref> | NoInfer<Sys> | NoInfer<XRef> | NoInfer<XSys>;
-  };
+  order: ((keyof Mod | keyof XMod) & (string & {}))[];
 };
 
 /**
- * The deviation between two themes, as produced by `diff`: a `Patch` whose
- * facets are always present (empty when nothing deviates), so consumers can
- * inspect them without guards.
+ * The deviation between two themes, as produced by {@link diff}: a token
+ * override map and per-modifier, per-context override maps, all present (empty
+ * when nothing deviates) so consumers can inspect them without guards.
  */
 export type Diff<T extends Template> = {
-  reference: {
-    [K in Reference<T>]?: Value;
-  };
-  system: {
-    [M in Mode]: {
-      [K in System<T>]?: Reference<T>;
-    };
-  };
-  roles: {
-    [K in Role<T>]?: Alias<T>;
-  };
+  tokens: Overrides<T>;
+  modifiers: { [M in Modifier<T>]: { [C in Context<T, M>]: Overrides<T> } };
 };
 
 /**
- * A partial overlay of a theme: any subset of identity and bindings. Both a
- * `Layer` (identity plus partial facets) and a `Patch` (anonymous overrides)
- * fit this shape, so one merge serves them all.
+ * A partial overlay of a theme: any subset of identity, tokens, modifiers, and
+ * order. Both a `Layer` (identity plus partial overrides) and a `Patch`
+ * (anonymous overrides) fit this shape, so one merge serves them all.
  */
 export type Overlay<T extends Template> = {
   id?: string;
   name?: string;
-  reference?: {
-    [K in Reference<T>]?: Value;
-  };
-  system?: {
-    [M in Mode]?: {
-      [K in System<T>]?: Reference<T>;
-    };
-  };
-  roles?: {
-    [K in Role<T>]?: Alias<T>;
-  };
+  tokens?: Overrides<T>;
+  modifiers?: { [M in Modifier<T>]?: { [C in Context<T, M>]?: Overrides<T> } };
+  order?: NoInfer<Modifier<T>>[];
 };

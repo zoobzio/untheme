@@ -1,64 +1,64 @@
 import type {
-  Template,
   Assert,
-  Rule,
+  Binding,
+  Input,
   Issue,
-  Lexicon,
-  Mode,
-  Value,
-  Reference,
-  System,
-  Role,
-  Alias,
-  Token,
-  Tokens,
-  Patch,
   Layer,
+  Modifier,
+  Modifiers,
+  Overrides,
+  Patch,
+  Reference,
+  Rule,
+  Rules,
+  Template,
   Theme,
+  Token,
+  Value,
 } from "./types";
 
 import { SchemaError } from "./error";
 
 /**
- * Builds the {@link Assert} bundle: each tier runs every rule, collects all the
+ * Builds the {@link Assert} bundle: each kind runs every rule, collects all the
  * {@link Issue}s, and throws a {@link SchemaError} if any were found. Unlike a
- * guard, it reports every failure in one pass rather than stopping at the first.
+ * {@link Check}, it reports every failure in one pass rather than stopping at
+ * the first.
  */
-export const defineAssert = <T extends Template>(
-  lexicon: Lexicon<T>,
-): Assert<T> => {
-  const assert = (v: unknown, rules: Rule[]) => {
-    const issues = rules.reduce<Issue[]>((iss, rule) => {
+export const defineAssert = <T extends Template>({
+  rules,
+}: Rules<T>): Assert<T> => {
+  const assert = (v: unknown, list: Rule[]) => {
+    const issues = list.reduce<Issue[]>((acc, rule) => {
       const issue = rule(v);
       if (issue) {
-        iss.push(issue);
+        acc.push(issue);
       }
-      return iss;
+      return acc;
     }, []);
     if (issues.length > 0) {
       throw new SchemaError(issues);
     }
-    return;
   };
   return {
-    mode: (v: unknown): asserts v is Mode => assert(v, lexicon.rules.mode),
-    value: (v: unknown): asserts v is Value => assert(v, lexicon.rules.value),
+    modifier: (v: unknown): asserts v is Modifier<T> =>
+      assert(v, rules.modifier),
+    value: (v: unknown): asserts v is Value => assert(v, rules.value),
+    token: (v: unknown): asserts v is Token<T> => assert(v, rules.token),
     reference: (v: unknown): asserts v is Reference<T> =>
-      assert(v, lexicon.rules.reference),
-    system: (v: unknown): asserts v is System<T> =>
-      assert(v, lexicon.rules.system),
-    role: (v: unknown): asserts v is Role<T> => assert(v, lexicon.rules.role),
-    alias: (v: unknown): asserts v is Alias<T> =>
-      assert(v, lexicon.rules.alias),
-    token: (v: unknown): asserts v is Token<T> =>
-      assert(v, lexicon.rules.token),
-    tokens: (v: unknown): asserts v is Tokens<T> =>
-      assert(v, lexicon.rules.tokens),
-    patch: (v: unknown): asserts v is Patch<T> =>
-      assert(v, lexicon.rules.patch),
-    layer: (v: unknown): asserts v is Layer<T> =>
-      assert(v, lexicon.rules.layer),
-    theme: (v: unknown): asserts v is Theme<T> =>
-      assert(v, lexicon.rules.theme),
+      assert(v, rules.reference),
+    binding: (v: unknown): asserts v is Binding<T> => assert(v, rules.binding),
+    overrides: (v: unknown): asserts v is Overrides<T> =>
+      assert(v, rules.overrides),
+    tokens: (v: unknown): asserts v is Theme<T>["tokens"] =>
+      assert(v, rules.tokens),
+    modifiers: (v: unknown): asserts v is Modifiers<T> =>
+      assert(v, rules.modifiers),
+    order: (v: unknown): asserts v is Theme<T>["order"] =>
+      assert(v, rules.order),
+    input: (v: unknown): asserts v is Input<T> => assert(v, rules.input),
+    theme: (v: unknown): asserts v is Theme<T> => assert(v, rules.theme),
+    layer: (v: unknown): asserts v is Layer<T> => assert(v, rules.layer),
+    patch: (v: unknown): asserts v is Patch<T> => assert(v, rules.patch),
   };
 };

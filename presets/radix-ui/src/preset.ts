@@ -68,19 +68,19 @@ import { createRadixColorTokens } from "./colors";
 /**
  * The Radix UI preset.
  *
- * Reference tokens provide the full Radix Colors set — 31 scales (25
- * chromatic
- * + 6 neutral), each as a light (`{scale}-{step}`) and dark
- * (`{scale}-dark-{step}`)
- * 12-step palette — alongside Radix Themes radius, spacing, typography, and
- * shadow tokens. System tokens map those references onto Radix's 12-step
- * semantic roles per light/dark mode: accent and gray scales plus error,
- * success, warning, and info status colors.
+ * The base `tokens` map provides the full Radix Colors set — 31 scales (25
+ * chromatic + 6 neutral), each as a light (`{scale}-{step}`) and dark
+ * (`{scale}-dark-{step}`) 12-step palette — alongside Radix Themes radius,
+ * spacing, typography, and shadow tokens, plus Radix's 12-step semantic roles
+ * (accent and gray scales plus error, success, warning, and info status
+ * colors) bound onto those palette tokens. The base defaults to the light
+ * scheme; the `color` modifier's `dark` context remaps the roles onto the dark
+ * scales.
  */
 export const preset = defineUnthemePreset({
   id: "radix-ui",
   name: "Radix UI",
-  reference: {
+  tokens: {
     // Chromatic scales
     ...createRadixColorTokens("tomato", tomato, tomatoDark),
     ...createRadixColorTokens("red", red, redDark),
@@ -186,126 +186,130 @@ export const preset = defineUnthemePreset({
       "0 12px 32px -8px rgb(0 0 0 / 16%), 0 4px 8px -4px rgb(0 0 0 / 8%)",
     "shadow-6":
       "0 24px 48px -12px rgb(0 0 0 / 24%), 0 8px 16px -8px rgb(0 0 0 / 12%)",
+    // Semantic roles — default to the light scheme
+    // Accent — indigo
+    "accent-app-bg": "{indigo-1}",
+    "accent-subtle-bg": "{indigo-2}",
+    "accent-element": "{indigo-3}",
+    "accent-element-hover": "{indigo-4}",
+    "accent-element-active": "{indigo-5}",
+    "accent-border-subtle": "{indigo-6}",
+    "accent-border": "{indigo-7}",
+    "accent-border-strong": "{indigo-8}",
+    "accent-solid": "{indigo-9}",
+    "accent-solid-hover": "{indigo-10}",
+    "accent-text-subtle": "{indigo-11}",
+    "accent-text": "{indigo-12}",
+    "accent-contrast": "{white}",
+    // Gray — slate
+    "gray-app-bg": "{slate-1}",
+    "gray-subtle-bg": "{slate-2}",
+    "gray-element": "{slate-3}",
+    "gray-element-hover": "{slate-4}",
+    "gray-element-active": "{slate-5}",
+    "gray-border-subtle": "{slate-6}",
+    "gray-border": "{slate-7}",
+    "gray-border-strong": "{slate-8}",
+    "gray-solid": "{slate-9}",
+    "gray-solid-hover": "{slate-10}",
+    "gray-text-subtle": "{slate-11}",
+    "gray-text": "{slate-12}",
+    "gray-contrast": "{white}",
+    // Status — error (red)
+    "error-bg": "{red-3}",
+    "error-border": "{red-7}",
+    "error-solid": "{red-9}",
+    "error-solid-hover": "{red-10}",
+    "error-text": "{red-11}",
+    // Status — success (green)
+    "success-bg": "{green-3}",
+    "success-border": "{green-7}",
+    "success-solid": "{green-9}",
+    "success-solid-hover": "{green-10}",
+    "success-text": "{green-11}",
+    // Status — warning (amber)
+    "warning-bg": "{amber-3}",
+    "warning-border": "{amber-7}",
+    "warning-solid": "{amber-9}",
+    "warning-solid-hover": "{amber-10}",
+    "warning-text": "{amber-11}",
+    // Status — info (blue)
+    "info-bg": "{blue-3}",
+    "info-border": "{blue-7}",
+    "info-solid": "{blue-9}",
+    "info-solid-hover": "{blue-10}",
+    "info-text": "{blue-11}",
+    // Globals
+    background: "{slate-1}",
+    panel: "{slate-2}",
+    overlay: "{black}",
   },
-  system: {
-    light: {
-      // Accent — indigo
-      "accent-app-bg": "indigo-1",
-      "accent-subtle-bg": "indigo-2",
-      "accent-element": "indigo-3",
-      "accent-element-hover": "indigo-4",
-      "accent-element-active": "indigo-5",
-      "accent-border-subtle": "indigo-6",
-      "accent-border": "indigo-7",
-      "accent-border-strong": "indigo-8",
-      "accent-solid": "indigo-9",
-      "accent-solid-hover": "indigo-10",
-      "accent-text-subtle": "indigo-11",
-      "accent-text": "indigo-12",
-      "accent-contrast": "white",
-      // Gray — slate
-      "gray-app-bg": "slate-1",
-      "gray-subtle-bg": "slate-2",
-      "gray-element": "slate-3",
-      "gray-element-hover": "slate-4",
-      "gray-element-active": "slate-5",
-      "gray-border-subtle": "slate-6",
-      "gray-border": "slate-7",
-      "gray-border-strong": "slate-8",
-      "gray-solid": "slate-9",
-      "gray-solid-hover": "slate-10",
-      "gray-text-subtle": "slate-11",
-      "gray-text": "slate-12",
-      "gray-contrast": "white",
-      // Status — error (red)
-      "error-bg": "red-3",
-      "error-border": "red-7",
-      "error-solid": "red-9",
-      "error-solid-hover": "red-10",
-      "error-text": "red-11",
-      // Status — success (green)
-      "success-bg": "green-3",
-      "success-border": "green-7",
-      "success-solid": "green-9",
-      "success-solid-hover": "green-10",
-      "success-text": "green-11",
-      // Status — warning (amber)
-      "warning-bg": "amber-3",
-      "warning-border": "amber-7",
-      "warning-solid": "amber-9",
-      "warning-solid-hover": "amber-10",
-      "warning-text": "amber-11",
-      // Status — info (blue)
-      "info-bg": "blue-3",
-      "info-border": "blue-7",
-      "info-solid": "blue-9",
-      "info-solid-hover": "blue-10",
-      "info-text": "blue-11",
-      // Globals
-      background: "slate-1",
-      panel: "slate-2",
-      overlay: "black",
-    },
-    dark: {
-      // Accent — indigo
-      "accent-app-bg": "indigo-dark-1",
-      "accent-subtle-bg": "indigo-dark-2",
-      "accent-element": "indigo-dark-3",
-      "accent-element-hover": "indigo-dark-4",
-      "accent-element-active": "indigo-dark-5",
-      "accent-border-subtle": "indigo-dark-6",
-      "accent-border": "indigo-dark-7",
-      "accent-border-strong": "indigo-dark-8",
-      "accent-solid": "indigo-dark-9",
-      "accent-solid-hover": "indigo-dark-10",
-      "accent-text-subtle": "indigo-dark-11",
-      "accent-text": "indigo-dark-12",
-      "accent-contrast": "white",
-      // Gray — slate
-      "gray-app-bg": "slate-dark-1",
-      "gray-subtle-bg": "slate-dark-2",
-      "gray-element": "slate-dark-3",
-      "gray-element-hover": "slate-dark-4",
-      "gray-element-active": "slate-dark-5",
-      "gray-border-subtle": "slate-dark-6",
-      "gray-border": "slate-dark-7",
-      "gray-border-strong": "slate-dark-8",
-      "gray-solid": "slate-dark-9",
-      "gray-solid-hover": "slate-dark-10",
-      "gray-text-subtle": "slate-dark-11",
-      "gray-text": "slate-dark-12",
-      "gray-contrast": "white",
-      // Status — error (red)
-      "error-bg": "red-dark-3",
-      "error-border": "red-dark-7",
-      "error-solid": "red-dark-9",
-      "error-solid-hover": "red-dark-10",
-      "error-text": "red-dark-11",
-      // Status — success (green)
-      "success-bg": "green-dark-3",
-      "success-border": "green-dark-7",
-      "success-solid": "green-dark-9",
-      "success-solid-hover": "green-dark-10",
-      "success-text": "green-dark-11",
-      // Status — warning (amber)
-      "warning-bg": "amber-dark-3",
-      "warning-border": "amber-dark-7",
-      "warning-solid": "amber-dark-9",
-      "warning-solid-hover": "amber-dark-10",
-      "warning-text": "amber-dark-11",
-      // Status — info (blue)
-      "info-bg": "blue-dark-3",
-      "info-border": "blue-dark-7",
-      "info-solid": "blue-dark-9",
-      "info-solid-hover": "blue-dark-10",
-      "info-text": "blue-dark-11",
-      // Globals
-      background: "slate-dark-1",
-      panel: "slate-dark-2",
-      overlay: "black",
+  modifiers: {
+    // Color scheme — the base tokens carry the light scheme, so `light` is
+    // empty; `dark` remaps the semantic roles onto the dark scales.
+    color: {
+      light: {},
+      dark: {
+        // Accent — indigo
+        "accent-app-bg": "{indigo-dark-1}",
+        "accent-subtle-bg": "{indigo-dark-2}",
+        "accent-element": "{indigo-dark-3}",
+        "accent-element-hover": "{indigo-dark-4}",
+        "accent-element-active": "{indigo-dark-5}",
+        "accent-border-subtle": "{indigo-dark-6}",
+        "accent-border": "{indigo-dark-7}",
+        "accent-border-strong": "{indigo-dark-8}",
+        "accent-solid": "{indigo-dark-9}",
+        "accent-solid-hover": "{indigo-dark-10}",
+        "accent-text-subtle": "{indigo-dark-11}",
+        "accent-text": "{indigo-dark-12}",
+        "accent-contrast": "{white}",
+        // Gray — slate
+        "gray-app-bg": "{slate-dark-1}",
+        "gray-subtle-bg": "{slate-dark-2}",
+        "gray-element": "{slate-dark-3}",
+        "gray-element-hover": "{slate-dark-4}",
+        "gray-element-active": "{slate-dark-5}",
+        "gray-border-subtle": "{slate-dark-6}",
+        "gray-border": "{slate-dark-7}",
+        "gray-border-strong": "{slate-dark-8}",
+        "gray-solid": "{slate-dark-9}",
+        "gray-solid-hover": "{slate-dark-10}",
+        "gray-text-subtle": "{slate-dark-11}",
+        "gray-text": "{slate-dark-12}",
+        "gray-contrast": "{white}",
+        // Status — error (red)
+        "error-bg": "{red-dark-3}",
+        "error-border": "{red-dark-7}",
+        "error-solid": "{red-dark-9}",
+        "error-solid-hover": "{red-dark-10}",
+        "error-text": "{red-dark-11}",
+        // Status — success (green)
+        "success-bg": "{green-dark-3}",
+        "success-border": "{green-dark-7}",
+        "success-solid": "{green-dark-9}",
+        "success-solid-hover": "{green-dark-10}",
+        "success-text": "{green-dark-11}",
+        // Status — warning (amber)
+        "warning-bg": "{amber-dark-3}",
+        "warning-border": "{amber-dark-7}",
+        "warning-solid": "{amber-dark-9}",
+        "warning-solid-hover": "{amber-dark-10}",
+        "warning-text": "{amber-dark-11}",
+        // Status — info (blue)
+        "info-bg": "{blue-dark-3}",
+        "info-border": "{blue-dark-7}",
+        "info-solid": "{blue-dark-9}",
+        "info-solid-hover": "{blue-dark-10}",
+        "info-text": "{blue-dark-11}",
+        // Globals
+        background: "{slate-dark-1}",
+        panel: "{slate-dark-2}",
+        overlay: "{black}",
+      },
     },
   },
-  roles: {},
+  order: ["color"],
 });
 
 export default preset;

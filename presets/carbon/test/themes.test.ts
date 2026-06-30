@@ -13,7 +13,7 @@ const themes = {
 };
 
 // The base scheme is its own contract; variants may not step outside it.
-const schema = defineSchema(preset.use("light").theme);
+const schema = defineSchema(preset.use({ color: "light" }).theme);
 
 describe("Carbon theme variants", () => {
   it("resolves every variant to a distinct id", () => {
@@ -31,7 +31,7 @@ describe("Carbon theme variants", () => {
       });
 
       it("resolves to a complete, contract-bound theme", () => {
-        expect(schema.guard.theme(variant)).toBe(true);
+        expect(schema.check.theme(variant)).toBe(true);
       });
     });
   }

@@ -1,14 +1,10 @@
-import type {
-  ReferenceToken,
-  RoleToken,
-  SystemToken,
-} from "#build/types/untheme.d.ts";
-import type { Config, Contract, Layer, Mode, Theme, Untheme } from "untheme";
+import type { Token, Mod } from "#build/types/untheme.d.ts";
+import type { Config, Contract, Input, Layer, Theme, Untheme } from "untheme";
 
 /**
  * The active token contract, derived from the build-time template.
  */
-export type AppContract = Contract<ReferenceToken, SystemToken, RoleToken>;
+export type AppContract = Contract<Token, Mod>;
 
 /**
  * A resolved theme instance with typed token keys.
@@ -16,7 +12,7 @@ export type AppContract = Contract<ReferenceToken, SystemToken, RoleToken>;
 export type AppTheme = Theme<AppContract>;
 
 /**
- * A theme without its roles — the portion swapped at runtime.
+ * A partial overlay carrying identity — what `apply` swaps in at runtime.
  */
 export type AppThemeLayer = Layer<AppContract>;
 
@@ -24,6 +20,11 @@ export type AppThemeLayer = Layer<AppContract>;
  * The build-time catalog of switchable layers, keyed by its known theme keys.
  */
 export type AppThemes = Record<string, AppThemeLayer>;
+
+/**
+ * The active selection — one context per modifier.
+ */
+export type AppInput = Input<AppContract>;
 
 /**
  * The caller-owned state container the service operates on.
@@ -41,7 +42,7 @@ export type AppUntheme = Untheme<AppContract>;
  */
 export interface UnthemeHooks {
   "untheme:ready": (service: AppUntheme) => void;
-  "untheme:mode": (mode: Mode) => void;
+  "untheme:input": (input: AppInput) => void;
   "untheme:theme": (theme: AppTheme) => void;
 }
 

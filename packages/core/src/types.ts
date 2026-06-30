@@ -1,162 +1,163 @@
 import type {
-  Template,
-  Mode,
-  Tokens,
-  Token,
-  Theme,
-  Schema,
+  Binding,
+  Context,
+  Input,
   Layer,
+  Modifier,
+  Overrides,
   Patch,
+  Schema,
+  Template,
+  Theme,
+  Token,
 } from "@untheme/schema";
 
 /**
- * The mutable state container an {@link Untheme} service operates on. The
- * caller owns it: pass a plain object for inert state, or a reactive proxy to
- * have every service read and write tracked.
+ * The caller-owned live state an {@link Untheme} service reads and writes: the
+ * active theme definition, the active selection (one context per modifier), and
+ * the user override layer that `set` populates. Pass a plain object for inert
+ * state, or a reactive proxy to have reads and writes tracked.
  */
 export type Config<T extends Template> = {
-  mode: Mode;
   theme: T;
+  input: Input<T>;
+  override: Overrides<T>;
 };
 
 /**
- * Construction options for an {@link Untheme} service.
- *
- * `get` and `set` register read/write middleware over the state container:
- * each slot intercepts the corresponding `config`/`themes` access to transform
- * the value as it passes through, leaving the container the source of truth.
+ * Read/write middleware over the state container. Each slot intercepts the
+ * matching `config` field or catalog entry and transforms the value as it
+ * passes through — the integration's hook for instrumenting state without the
+ * service knowing about it. Omit a slot to pass the value through untouched.
  */
 export type Options<T extends Template> = {
-  /**
-   * Read middleware: intercept each read and transform the value on its way
-   * out. Each receives what the container holds and returns what the service
-   * exposes; the container stays the source of truth. Omit a slot to read it
-   * through untouched.
-   */
   get?: {
     config?: {
-      /** Transforms the active mode on read. */
-      mode?: (mode: Mode) => Mode;
-      /** Transforms the active theme on read. */
-      theme?: (theme: Theme<T>) => Theme<T>;
+      theme?: (theme: T) => T;
+      input?: (input: Input<T>) => Input<T>;
+      override?: (override: Overrides<T>) => Overrides<T>;
     };
-    themes?: {
-      /** Transforms the registry layer filed under `key` on read. */
-      [key: string]: (layer: Layer<T>) => Layer<T>;
-    };
+    themes?: { [key: string]: (layer: Layer<T>) => Layer<T> };
   };
-  /**
-   * Write middleware: intercept each write and transform the value on its way
-   * in. Each receives the incoming value and returns what gets stored in the
-   * container. Omit a slot to store it untouched.
-   */
   set?: {
     config?: {
-      /** Transforms the active mode on write. */
-      mode?: (mode: Mode) => Mode;
-      /** Transforms the active theme on write. */
-      theme?: (theme: Theme<T>) => Theme<T>;
+      theme?: (theme: T) => T;
+      input?: (input: Input<T>) => Input<T>;
+      override?: (override: Overrides<T>) => Overrides<T>;
     };
-    themes?: {
-      /** Transforms the registry layer filed under `key` on write. */
-      [key: string]: (layer: Layer<T>) => Layer<T>;
-    };
+    themes?: { [key: string]: (layer: Layer<T>) => Layer<T> };
   };
 };
 
 /**
- * A runtime theme service: token access and alias resolution, tier-aware
- * mutation, and a mutable catalog of switchable themes.
+ * A runtime theme service over a contract. Reads resolve the active selection
+ * with the user override on top; `set` writes the override; switching a context
+ * or applying a definition change updates the active state in `config`.
  */
 export interface Untheme<T extends Template> {
   /**
-   * The caller-owned state container — the single place state is read or
-   * written raw.
+   * The caller-owned live state — the single place state is read or written raw.
    */
   config: Config<T>;
 
   /**
-   * The mutable catalog of theme layers applicable to the active theme:
-   * `select` switches to an entry by key, `create` files new themes in, and
-   * `remove` deletes them.
+   * The catalog of switchable themes `select` / `create` / `remove` operate on.
    */
   themes: Record<string, Layer<T>>;
 
   /**
-   * Guard vocabulary for the active theme's token contract.
+   * The validation bundle for the contract.
    */
-  schema: Schema<Theme<T>>;
+  schema: Schema<T>;
 
   /**
-   * Builds the flat token map for a mode (default: the active one), without
-   * touching `config.mode`.
+   * The modifiers (axes) the contract declares, in composition order.
    */
-  tokens: (mode?: Mode) => Tokens<T>;
+  modifiers: () => Modifier<T>[];
 
   /**
-   * Reads a token's current binding without resolving alias chains.
+   * The context names a modifier offers.
    */
-  get: <K extends Token<T>>(token: K) => Tokens<T>[K];
+  contexts: (modifier: Modifier<T>) => string[];
 
   /**
-   * Sets a single token, enforcing tier rules; invalid writes are no-ops.
+   * The flat token map for a selection (default: the active one), with the user
+   * override applied on top. Does not change the active state.
    */
-  set: <K extends Token<T>>(token: K, value: Tokens<T>[K]) => void;
+  tokens: (input?: Input<T>) => { [K in Token<T>]: Binding<T> };
 
   /**
-   * Recursively resolves a token through its alias chain to a raw value;
-   * throws `CircularAliasError` on a looping chain.
+   * A token's effective binding: the override if set, else the composed value.
+   */
+  get: <K extends Token<T>>(token: K) => Binding<T>;
+
+  /**
+   * Follows a token's reference chain to a literal value; throws
+   * `CircularAliasError` on a loop.
    */
   resolve: <K extends Token<T>>(token: K) => string;
 
   /**
-   * Merges a patch of token overrides; theme identity is unchanged. Throws
-   * `InvalidPatchError` when the patch steps outside the contract.
+   * Selects a context for a modifier — the cheap runtime swap.
    */
-  update: (patch: Patch<T>) => void;
+  swap: <M extends Modifier<T>, C extends Context<T, M>>(
+    modifier: M,
+    context: C,
+  ) => void;
 
   /**
-   * Applies a layer: becomes that theme — the layer resolved against the
-   * baseline — and caches the result as the id's pristine state. Throws
-   * `InvalidLayerError` when the layer steps outside the contract.
+   * Writes a token into the user override layer.
    */
-  apply: (layer: Layer<T>) => void;
+  set: <K extends Token<T>>(token: K, value: Binding<T>) => void;
 
   /**
-   * Switches to the registry layer filed under `key` — `apply` addressed by
-   * name. Throws `UnknownThemeError` when no theme is registered under `key`.
+   * The effective drift from the baseline as a re-appliable patch: the active
+   * theme with the user override baked in, diffed against the theme the service
+   * was built on. Token and context bindings that match the baseline drop out;
+   * what remains is everything `set` / `update` / `apply` changed. Identity is
+   * not compared. Feeding the result back through `update` reproduces the drift.
    */
-  select: (key: string) => void;
+  delta: () => Patch<T>;
 
   /**
-   * Resolves a layer against the baseline into a complete theme and files it in
-   * the registry under its id, where `select` can switch to it; the active
-   * theme is untouched. Throws `InvalidLayerError` when the layer steps outside
-   * the contract.
-   */
-  create: (layer: Layer<T>) => Theme<T>;
-
-  /**
-   * Snapshots the active theme — including unsaved edits — as a detached
-   * theme under a new identity. The snapshot is returned, not registered.
-   */
-  extract: (id: string, name: string) => Theme<T>;
-
-  /**
-   * Drops a theme from the registry by id; a no-op when absent. The active
-   * theme is unaffected.
-   */
-  remove: (id: string) => void;
-
-  /**
-   * Whether any active binding deviates from the active theme's cached
-   * pristine state.
+   * Whether the user override holds any edits.
    */
   dirty: () => boolean;
 
   /**
-   * Restores the active theme to its cached pristine state, discarding edits
-   * made since it was applied.
+   * Clears the user override.
    */
   reset: () => void;
+
+  /**
+   * Merges a patch into the active theme; identity and the override are
+   * unchanged.
+   */
+  update: (patch: Patch<T>) => void;
+
+  /**
+   * Becomes the layer resolved against the baseline, and clears the override.
+   */
+  apply: (layer: Layer<T>) => void;
+
+  /**
+   * Switches to the catalog theme filed under `key`, and clears the override.
+   */
+  select: (key: string) => void;
+
+  /**
+   * Resolves a layer against the baseline into the catalog under its id.
+   */
+  create: (layer: Layer<T>) => Theme<T>;
+
+  /**
+   * Snapshots the active theme and override as a detached theme; not
+   * registered.
+   */
+  extract: (id: string, name: string) => Theme<T>;
+
+  /**
+   * Drops a theme from the catalog by id; the active theme is unaffected.
+   */
+  remove: (id: string) => void;
 }

@@ -2,7 +2,7 @@
 
 Radix UI token preset for untheme.
 
-Provides a complete [Radix Colors](https://www.radix-ui.com/colors) baseline with 801 reference tokens and 49 system tokens as an untheme preset, plus 6 ready-made accent variants importable by path.
+Provides a complete [Radix Colors](https://www.radix-ui.com/colors) baseline — 801 palette tokens plus 49 semantic roles, with a `color` modifier carrying the light and dark schemes — as an untheme preset, plus 6 ready-made accent variants importable by path.
 
 ## Usage
 
@@ -11,25 +11,24 @@ import { defineUntheme } from "@untheme/core";
 import preset from "@untheme/radix-ui";
 import blue from "@untheme/radix-ui/themes/blue";
 
-// Boot a service from the preset (preset.use(mode) yields its Config),
+// Boot a service from the preset (preset.use(input) yields its Config),
 // registering the variants you want to switch to at runtime.
-const ut = defineUntheme(preset.use("dark"), { blue });
+const ut = defineUntheme(preset.use({ color: "dark" }), { blue });
 ut.select("blue"); // switch to a registered variant
 
 // Or author your own variant against the preset's contract
 const brand = preset.define({
   id: "brand",
   name: "Brand",
-  reference: { "indigo-9": "#1e40af" },
-  system: { light: {}, dark: {} },
+  tokens: { "indigo-9": "#1e40af" },
 });
 ```
 
-## Reference Tokens (801)
+## Palette Tokens (801)
 
 ### Color (744)
 
-31 Radix scales, each provided as a **light** (`{scale}-{step}`) and **dark** (`{scale}-dark-{step}`) 12-step palette. Radix tunes the light and dark variants of each scale independently — the same step number carries the same _meaning_ in both modes but a different raw value — so both are surfaced as references and the per-mode system tokens select between them.
+31 Radix scales, each provided as a **light** (`{scale}-{step}`) and **dark** (`{scale}-dark-{step}`) 12-step palette. Radix tunes the light and dark variants of each scale independently — the same step number carries the same _meaning_ in both modes but a different raw value — so both are surfaced as palette tokens and the semantic roles select between them per `color` context.
 
 **Chromatic (25):** tomato, red, ruby, crimson, pink, plum, purple, violet, iris, indigo, blue, cyan, teal, jade, green, grass, brown, orange, sky, mint, lime, yellow, amber, gold, bronze
 
@@ -61,9 +60,9 @@ Values come directly from `@radix-ui/colors` via `createRadixColorTokens(name, l
 
 `shadow-1` (inset hairline) through `shadow-6` (high overlay), as CSS `box-shadow` values.
 
-## System Tokens (49 per mode)
+## Semantic Roles (49)
 
-System tokens follow Radix's [12-step semantic scale](https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale): each step has a consistent role, and the same role maps to a light reference in light mode and a dark reference in dark mode.
+The semantic roles follow Radix's [12-step semantic scale](https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale): each step has a consistent role. The roles are bound to the light scheme in the base `tokens`; the `color` modifier's `dark` context remaps each one onto its dark palette token.
 
 | Role suffix      | Step | Usage                        |
 | ---------------- | ---- | ---------------------------- |

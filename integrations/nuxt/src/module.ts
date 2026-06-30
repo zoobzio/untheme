@@ -13,13 +13,11 @@ import {
 /**
  * Nuxt module for untheme.
  *
- * At build time it resolves the configured `preset` and `theme`, deep-merges
- * the
- * `extend` overrides (reference, modes, roles), writes the resolved theme set
- * to
- * `public/themes/*.json`, and registers the `untheme.mjs` build template, the
- * `types/untheme.d.ts` token-type template, the runtime plugin, and the
- * `useTheme` auto-import.
+ * At build time it validates the configured base theme, writes the base theme,
+ * the switchable catalog, and the initial selection to the `untheme.mjs` build
+ * template, derives the `Token` union and `Mod` axis structure into the
+ * `types/untheme.d.ts` type template, and registers the runtime plugin and the
+ * `useUntheme` auto-import.
  */
 export default defineNuxtModule<NuxtUnthemeConfig>({
   meta: {
@@ -30,19 +28,27 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
     const resolver = createResolver(import.meta.url);
 
     const schema = defineSchema(options.base);
-    const ref = Array.from(schema.lexicon.tokens.reference);
-    const sys = Array.from(schema.lexicon.tokens.system);
-    const role = Array.from(schema.lexicon.tokens.role);
+    const tokens = Array.from(schema.rules.sets.tokens);
+    const modifiers = Array.from(schema.rules.sets.modifiers);
+    const contexts = schema.rules.sets.contexts;
 
     addTypeTemplate({
       filename: "types/untheme.d.ts",
       write: true,
-      getContents: () =>
-        [
-          `export type ReferenceToken = "${ref.join('" | "')}";`,
-          `export type SystemToken = "${sys.join('" | "')}";`,
-          `export type RoleToken = "${role.join('" | "')}";`,
-        ].join("\n"),
+      getContents: () => {
+        const mod = modifiers
+          .map((modifier) => {
+            const ctx = Array.from(contexts[modifier])
+              .map((context) => `"${context}": Partial<Record<Token, string>>`)
+              .join("; ");
+            return `"${modifier}": { ${ctx} }`;
+          })
+          .join("; ");
+        return [
+          `export type Token = "${tokens.join('" | "')}";`,
+          `export type Mod = { ${mod} };`,
+        ].join("\n");
+      },
     });
 
     addTemplate({
@@ -52,6 +58,7 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
         return [
           `export const theme = ${JSON.stringify(options.base)};`,
           `export const themes = ${JSON.stringify(options.themes)};`,
+          `export const input = ${JSON.stringify(options.input)};`,
         ].join("\n");
       },
     });
@@ -66,11 +73,12 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
       write: true,
       getContents: () =>
         [
-          `import type { Theme, Layer, Contract } from "untheme";`,
-          `import type { ReferenceToken, SystemToken, RoleToken } from "./types/untheme";`,
-          `type AppContract = Contract<ReferenceToken, SystemToken, RoleToken>;`,
+          `import type { Theme, Layer, Input, Contract } from "untheme";`,
+          `import type { Token, Mod } from "./types/untheme";`,
+          `type AppContract = Contract<Token, Mod>;`,
           `export const theme: Theme<AppContract>;`,
           `export const themes: Record<string, Layer<AppContract>>;`,
+          `export const input: Input<AppContract>;`,
         ].join("\n"),
     });
 
@@ -92,6 +100,7 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
         "AppTheme",
         "AppThemeLayer",
         "AppThemes",
+        "AppInput",
         "AppConfig",
         "AppUntheme",
       ].map((name) => ({
