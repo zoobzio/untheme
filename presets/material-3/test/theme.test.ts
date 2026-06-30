@@ -40,8 +40,8 @@ describe("M3 preset", () => {
     expect(preset.use({ color: "dark" }).theme.id).toBe("material-3");
   });
 
-  it("has 719 base tokens (670 palette/scale + 49 semantic roles)", () => {
-    expect(Object.keys(base.tokens)).toHaveLength(719);
+  it("has 750 base tokens (701 palette/scale + 49 semantic roles)", () => {
+    expect(Object.keys(base.tokens)).toHaveLength(750);
   });
 
   it("includes all 22 tonal palettes", () => {
@@ -55,9 +55,12 @@ describe("M3 preset", () => {
   it("includes typography typeface references", () => {
     expect(base.tokens["font-brand"]).toBe("Roboto, sans-serif");
     expect(base.tokens["font-plain"]).toBe("Roboto, sans-serif");
+    expect(base.tokens["weight-regular"]).toBe("400");
+    expect(base.tokens["weight-medium"]).toBe("500");
+    expect(base.tokens["weight-bold"]).toBe("700");
   });
 
-  it("includes all 15 typography scales with 4 properties each", () => {
+  it("includes all 15 typography scales with 5 properties each", () => {
     const scales = [
       "display-large",
       "display-medium",
@@ -76,6 +79,7 @@ describe("M3 preset", () => {
       "label-small",
     ];
     for (const scale of scales) {
+      expect(base.tokens[`${scale}-font`]).toBeDefined();
       expect(base.tokens[`${scale}-size`]).toBeDefined();
       expect(base.tokens[`${scale}-line-height`]).toBeDefined();
       expect(base.tokens[`${scale}-weight`]).toBeDefined();
@@ -83,9 +87,18 @@ describe("M3 preset", () => {
     }
   });
 
+  it("gives the three label scales a prominent weight", () => {
+    expect(base.tokens["label-large-weight-prominent"]).toBe("{weight-bold}");
+    expect(base.tokens["label-medium-weight-prominent"]).toBe("{weight-bold}");
+    expect(base.tokens["label-small-weight-prominent"]).toBe("{weight-bold}");
+  });
+
   it("includes shape tokens", () => {
     expect(base.tokens["shape-none"]).toBe("0px");
     expect(base.tokens["shape-small"]).toBe("8px");
+    expect(base.tokens["shape-large-increased"]).toBe("20px");
+    expect(base.tokens["shape-extra-large-increased"]).toBe("32px");
+    expect(base.tokens["shape-extra-extra-large"]).toBe("48px");
     expect(base.tokens["shape-full"]).toBe("9999px");
   });
 
@@ -99,6 +112,16 @@ describe("M3 preset", () => {
     expect(base.tokens["easing-standard"]).toContain("cubic-bezier");
     expect(base.tokens["easing-emphasized"]).toContain("cubic-bezier");
     expect(base.tokens["easing-linear"]).toContain("cubic-bezier");
+    expect(base.tokens["easing-legacy"]).toContain("cubic-bezier");
+    expect(base.tokens["easing-legacy-decelerate"]).toContain("cubic-bezier");
+    expect(base.tokens["easing-legacy-accelerate"]).toContain("cubic-bezier");
+  });
+
+  it("includes state-layer opacity tokens", () => {
+    expect(base.tokens["state-hover"]).toBe("0.08");
+    expect(base.tokens["state-focus"]).toBe("0.12");
+    expect(base.tokens["state-pressed"]).toBe("0.12");
+    expect(base.tokens["state-dragged"]).toBe("0.16");
   });
 
   it("includes duration tokens", () => {
@@ -111,6 +134,37 @@ describe("M3 preset", () => {
   it("leaves the light context empty — the base tokens are the light scheme", () => {
     expect(base.order).toEqual(["color"]);
     expect(base.modifiers.color.light).toEqual({});
+  });
+
+  it("offers light/dark at standard, medium, and high contrast", () => {
+    expect(Object.keys(base.modifiers.color).sort()).toEqual([
+      "dark",
+      "dark-high-contrast",
+      "dark-medium-contrast",
+      "light",
+      "light-high-contrast",
+      "light-medium-contrast",
+    ]);
+  });
+
+  it("pushes on-surface toward the extreme as light contrast rises", () => {
+    expect(base.tokens["on-surface"]).toBe("{neutral-10}");
+    expect(base.modifiers.color["light-medium-contrast"]["on-surface"]).toBe(
+      "{neutral-6}",
+    );
+    expect(base.modifiers.color["light-high-contrast"]["on-surface"]).toBe(
+      "{neutral-0}",
+    );
+  });
+
+  it("holds fixed colors constant across the dark contrast contexts", () => {
+    expect(base.modifiers.color["dark"]["primary-fixed"]).toBe("{violet-90}");
+    expect(base.modifiers.color["dark-medium-contrast"]["primary-fixed"]).toBe(
+      "{violet-90}",
+    );
+    expect(base.modifiers.color["dark-high-contrast"]["primary-fixed"]).toBe(
+      "{violet-90}",
+    );
   });
 
   it("binds the light scheme color roles to the M3 palette in the base", () => {

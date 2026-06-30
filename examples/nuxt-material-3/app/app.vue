@@ -1,13 +1,22 @@
 <script setup lang="ts">
 // `useUntheme` is auto-imported by @untheme/nuxt. `themes` is the build-time
 // catalog from untheme.config; `apply`/`swap` persist the selection to cookies
-// and survive SSR, so reloads keep the chosen theme and mode.
-const { config, themes, apply, swap } = useUntheme();
+// and survive SSR, so reloads keep the chosen theme and selection.
+const { config, themes, apply, swap, contexts } = useUntheme();
 
-// Light/dark is the `color` modifier; `swap` selects its context and persists.
-const toggleMode = () => {
-  swap("color", config.input.color === "dark" ? "light" : "dark");
-};
+// Every context the `color` modifier offers, straight from the contract:
+// light/dark at each contrast level.
+const colorContexts = contexts("color");
+
+// A writable computed over the active color context — reads the selection,
+// writes through `swap` (which persists). `value` keeps the context union type,
+// so no casts and no manual mapping.
+const colorContext = computed({
+  get: () => config.input.color,
+  set: (value) => swap("color", value),
+});
+
+const contextLabel = (context: string) => context.replace(/-/g, " ");
 
 const swatch = (key: string, label: string) => ({ key, label });
 
@@ -60,7 +69,10 @@ const roleGroups = [
         <span class="logo">M3</span>
         <div>
           <h1>Material You</h1>
-          <p>{{ config.theme.name }} &middot; {{ config.input.color }}</p>
+          <p>
+            {{ config.theme.name }} &middot;
+            {{ contextLabel(config.input.color) }}
+          </p>
         </div>
       </div>
       <div class="bar-actions">
@@ -75,9 +87,11 @@ const roleGroups = [
             {{ t.name }}
           </button>
         </div>
-        <button class="icon-btn" @click="toggleMode">
-          {{ config.input.color === "dark" ? "☾" : "☀" }}
-        </button>
+        <select v-model="colorContext" class="select" aria-label="Color context">
+          <option v-for="c in colorContexts" :key="c" :value="c">
+            {{ contextLabel(c) }}
+          </option>
+        </select>
       </div>
     </header>
 
@@ -263,6 +277,18 @@ body {
   color: var(--on-surface);
   font-size: 1.1rem;
   cursor: pointer;
+}
+
+.select {
+  border-radius: 999px;
+  border: 1px solid var(--outline-variant);
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+  text-transform: capitalize;
 }
 
 /* Layout */

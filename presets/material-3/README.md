@@ -2,7 +2,7 @@
 
 Material Design 3 token preset for untheme.
 
-Provides a complete M3 baseline — 670 palette/scale tokens plus 49 semantic roles, with a `color` modifier carrying the light and dark schemes — as an untheme preset, plus 19 ready-made theme variants importable by path.
+Provides a complete M3 baseline — 701 palette/scale tokens plus 49 semantic roles, with a `color` modifier carrying the light/dark schemes at standard, medium, and high contrast — as an untheme preset, plus 19 ready-made theme variants importable by path.
 
 ## Usage
 
@@ -24,7 +24,7 @@ const brand = preset.define({
 });
 ```
 
-## Base Tokens (670)
+## Base Tokens (701)
 
 ### Color (572)
 
@@ -36,27 +36,32 @@ const brand = preset.define({
 
 Each palette is generated via `createM3ColorTokens(name, hex)` using the HCT color space from `@material/material-color-utilities`.
 
-### Typography (62)
+### Typography (83)
 
-- 2 typeface references: `font-brand`, `font-plain` (default: `Roboto, sans-serif`)
-- 15 type scales × 4 properties: `{scale}-size`, `{scale}-line-height`, `{scale}-weight`, `{scale}-tracking`
+- 5 typeface references: `font-brand`, `font-plain` (default: `Roboto, sans-serif`), `weight-regular` (400), `weight-medium` (500), `weight-bold` (700)
+- 15 type scales × 5 properties: `{scale}-font`, `{scale}-size`, `{scale}-line-height`, `{scale}-weight`, `{scale}-tracking` — `font` and `weight` reference the typeface tokens above
+- 3 prominent label weights: `label-large/medium/small-weight-prominent` (→ `weight-bold`)
 - Scales: display-large/medium/small, headline-large/medium/small, title-large/medium/small, body-large/medium/small, label-large/medium/small
 
-### Shape (7)
+### Shape (10)
 
-`shape-none` (0px), `shape-extra-small` (4px), `shape-small` (8px), `shape-medium` (12px), `shape-large` (16px), `shape-extra-large` (28px), `shape-full` (9999px)
+`shape-none` (0px), `shape-extra-small` (4px), `shape-small` (8px), `shape-medium` (12px), `shape-large` (16px), `shape-large-increased` (20px), `shape-extra-large` (28px), `shape-extra-large-increased` (32px), `shape-extra-extra-large` (48px), `shape-full` (9999px)
 
 ### Elevation (6)
 
 `elevation-0` (none) through `elevation-5` (CSS box-shadow values per the M3 spec)
 
-### Motion — Easing (7)
+### Motion — Easing (10)
 
-`easing-standard`, `easing-standard-decelerate`, `easing-standard-accelerate`, `easing-emphasized`, `easing-emphasized-decelerate`, `easing-emphasized-accelerate`, `easing-linear`
+`easing-standard`, `easing-standard-decelerate`, `easing-standard-accelerate`, `easing-emphasized`, `easing-emphasized-decelerate`, `easing-emphasized-accelerate`, `easing-linear`, `easing-legacy`, `easing-legacy-decelerate`, `easing-legacy-accelerate`
 
 ### Motion — Duration (16)
 
 `duration-short-1` (50ms) through `duration-short-4` (200ms), `duration-medium-1` (250ms) through `duration-medium-4` (400ms), `duration-long-1` (450ms) through `duration-long-4` (600ms), `duration-extra-long-1` (700ms) through `duration-extra-long-4` (1000ms)
+
+### State (4)
+
+State-layer opacities: `state-hover` (0.08), `state-focus` (0.12), `state-pressed` (0.12), `state-dragged` (0.16)
 
 ## Semantic Roles (49)
 
