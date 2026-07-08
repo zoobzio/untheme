@@ -1,6 +1,6 @@
 # @untheme/utils
 
-Common structural helpers for untheme's theme shape. Types come from [`@untheme/schema`](../schema); there is no other dependency.
+Common structural helpers for untheme's theme shape. Types come from [`@untheme/schema`](../schema); guards and generic helpers come from [`@untheme/common`](../common).
 
 ## Exports
 
@@ -39,7 +39,7 @@ Unlike `merge`, which stays within one contract, `extend` is the widening primit
 
 ### `diff(from, to)`
 
-Computes the patch that turns `from` into `to`: every binding `to` holds that deviates from `from`, token by token and context by context. Identity and order are not compared. Empty maps mean the themes bind identically; applying the result to `from` via `merge` restores `to`.
+Computes the patch that turns `from` into `to`: every binding `to` holds that deviates from `from`, token by token and context by context. At the token level only the bound `$value` is compared and emitted — a token's metadata cannot drift through the patch pipeline. Identity and order are not compared. Empty maps mean the themes bind identically; applying the result to `from` via `merge` restores `to` value-wise: only `$value` bindings are compared and carried, so identity, order, and slot metadata are not part of the restoration.
 
 ```ts
 import { diff, merge } from "@untheme/utils";
@@ -48,10 +48,36 @@ const deviation = diff(pristine, edited);
 merge(pristine, deviation); // ≅ edited
 ```
 
+## Primitives
+
+Supporting helpers that `merge`, `extend`, and `diff` are built on.
+
+### `clone(theme)`
+
+Deep copy of a theme, facet by facet: identity, tokens, modifiers, and order are each rebuilt through `copy`, so no definition object, nested `$value` structure, or override map is shared with the source. Because `copy` reaches every value through plain property access, cloning a reactive proxy yields an inert, plain snapshot. `clone` throws a `TypeError` if the rebuilt theme isn't structurally equal to the source.
+
+```ts
+import { clone } from "@untheme/utils";
+
+const snapshot = clone(theme); // detached from any reactive proxy
+```
+
+### `copy(value)`
+
+Deep copy of plain data: records and arrays are rebuilt from fresh containers, so mutating the copy never reaches the source. Non-plain values — functions and class instances, such as those a token's `$extensions` may carry — pass through by reference rather than being duplicated. `structuredClone` is never used: it throws on functions and detaches proxies through a mechanism `copy` deliberately avoids.
+
+### `delta(from, to)`
+
+The entries of `to` that deviate from `from`: every key `to` holds whose value is not structurally equal to the one `from` holds. Emitted values are copies, so the result shares no structure with `to`. Keys with structurally equal values drop out; two objects that bind identically yield an empty result.
+
+### `traverse(modifiers, fn)`
+
+Rebuilds a modifiers structure leaf by leaf: every context of every modifier is mapped through the callback, each modifier keeping its own context keys. The callback's `at` accessor indexes another (possibly sparse) modifiers structure at the same modifier/context coordinates, so a leaf can be combined with its counterpart elsewhere. This is the primitive `diff`, `merge`, and `extend` are all built on.
+
 ## Types
 
 - `Overlay<T>` — the shape `merge` accepts: any subset of identity, tokens, modifiers, and order. Both a `Layer` and a `Patch` from [`@untheme/schema`](../schema) fit it.
-- `Extension<T, XTok, XMod>` — the shape `extend` accepts: new tokens (`XTok`) and new modifiers (`XMod`), plus optional overrides of base tokens and of existing modifier contexts.
+- `Extension<Tok, Mod, XTok, XMod>` — the shape `extend` accepts: new tokens (`XTok`) and new modifiers (`XMod`) over a base contract's tokens (`Tok`) and modifiers (`Mod`). An existing base token accepts an optional bare binding that rebinds its `$value` only; a new token requires a full slot definition. New modifier axes carry their complete context maps; existing axes take optional overrides.
 - `Diff<T>` — the shape `diff` returns: token and per-context override maps, always present (empty when nothing deviates).
 
 ## Related

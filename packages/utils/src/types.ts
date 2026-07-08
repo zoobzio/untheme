@@ -2,38 +2,60 @@ import type {
   Context,
   Modifier,
   Overrides,
+  SharedBinding,
+  Slot,
   Template,
-  Value,
 } from "@untheme/schema";
 
 /**
  * A contract extension for {@link extend}: new tokens (`XTok`) and new modifiers
  * (`XMod`), plus optional overrides of the base's tokens and of its existing
- * modifier contexts. New bindings may reference base or extension tokens.
+ * modifier contexts.
+ *
+ * An existing base token accepts an optional bare binding — a value or a
+ * `{reference}` that rebinds its `$value` only, never its `$type`. A new token
+ * requires a full {@link Slot} definition. Every value position draws its
+ * reference suggestions from the union of the base tokens and the extension's
+ * own new tokens, so a binding may reference either set.
+ *
+ * `Tok` is inferred from the base contract and `XTok` from the new-token keys
+ * alone; the reference arm of every {@link SharedBinding} carries `NoInfer`, so
+ * a reference sitting in a value position never drives inference and never
+ * collapses the token union.
+ *
+ * `XTok` infers as every key present in `tokens`, base overrides included, since
+ * a mapped type cannot subtract the known `Tok` keys during inference. The
+ * `K extends Tok` guard routes those leaked base keys back to a bare binding, so
+ * only genuinely new keys demand a full definition. The arm stays optional: a
+ * required arm stops `XTok` from inferring when `tokens` is empty, and the
+ * fallback to `string` disables every token-name check.
+ *
+ * `modifiers` admits overrides of an existing axis's contexts and new axes
+ * carrying their complete context maps.
  */
 export type Extension<
   Tok extends string,
-  Mod extends Record<string, Record<string, Partial<Record<string, string>>>>,
+  Mod extends Record<string, Record<string, object>>,
   XTok extends string,
-  XMod extends Record<string, Record<string, Partial<Record<string, string>>>>,
+  XMod extends Record<string, Record<string, object>>,
 > = {
   id: string;
   name: string;
   tokens: {
-    [K in Tok]?: `{${NoInfer<Tok | XTok>}` | Value;
+    [K in NoInfer<Tok>]?: SharedBinding<Tok | XTok>;
   } & {
-    [K in XTok]: `{${NoInfer<XTok>}` | Value;
+    [K in XTok]?: K extends Tok ? SharedBinding<Tok | XTok> : Slot<Tok | XTok>;
   };
   modifiers: {
     [M in keyof Mod]?: {
       [C in keyof Mod[M]]?: {
-        [K in NoInfer<Tok | XTok>]?: `{${NoInfer<Tok | XTok>}}` | Value;
+        [K in NoInfer<Tok | XTok>]?: SharedBinding<Tok | XTok>;
       };
     };
   } & {
     [M in keyof XMod]: {
       [C in keyof XMod[M]]: {
-        [K in NoInfer<Tok | XTok>]?: `{${NoInfer<Tok | XTok>}}` | Value;
+        [K in NoInfer<Tok | XTok>]?: SharedBinding<Tok | XTok>;
       };
     };
   };

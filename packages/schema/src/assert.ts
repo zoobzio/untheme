@@ -4,17 +4,20 @@ import type {
   Input,
   Issue,
   Layer,
+  Meta,
   Modifier,
   Modifiers,
+  Open,
   Overrides,
   Patch,
   Reference,
   Rule,
-  Rules,
+  Slot,
   Template,
   Theme,
   Token,
-  Value,
+  Type,
+  Values,
 } from "./types";
 
 import { SchemaError } from "./error";
@@ -27,7 +30,7 @@ import { SchemaError } from "./error";
  */
 export const defineAssert = <T extends Template>({
   rules,
-}: Rules<T>): Assert<T> => {
+}: Meta<T>): Assert<T> => {
   const assert = (v: unknown, list: Rule[]) => {
     const issues = list.reduce<Issue[]>((acc, rule) => {
       const issue = rule(v);
@@ -43,11 +46,14 @@ export const defineAssert = <T extends Template>({
   return {
     modifier: (v: unknown): asserts v is Modifier<T> =>
       assert(v, rules.modifier),
-    value: (v: unknown): asserts v is Value => assert(v, rules.value),
+    value: (v: unknown): asserts v is Values<Open>[Type] =>
+      assert(v, rules.value),
     token: (v: unknown): asserts v is Token<T> => assert(v, rules.token),
     reference: (v: unknown): asserts v is Reference<T> =>
       assert(v, rules.reference),
     binding: (v: unknown): asserts v is Binding<T> => assert(v, rules.binding),
+    definition: (v: unknown): asserts v is Slot<Token<T>> =>
+      assert(v, rules.definition),
     overrides: (v: unknown): asserts v is Overrides<T> =>
       assert(v, rules.overrides),
     tokens: (v: unknown): asserts v is Theme<T>["tokens"] =>

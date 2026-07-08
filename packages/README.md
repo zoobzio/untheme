@@ -1,13 +1,13 @@
 # Packages
 
-| Package                                      | Directory                    | Description                                        |
-| -------------------------------------------- | ---------------------------- | -------------------------------------------------- |
-| [`untheme`](./untheme)                       | `packages/untheme`           | Umbrella package — core API, CSS gen, kit subpaths |
-| [`@untheme/core`](./core)                    | `packages/core`              | Token contract types and the runtime instance      |
-| [`@untheme/kit`](./kit)                      | `packages/kit`               | Toolkit for authoring reusable presets             |
-| [`@untheme/schema`](./schema)                | `packages/schema`            | Runtime zod schemas for the token contract         |
-| [`@untheme/material-2`](./preset/material-2) | `packages/preset/material-2` | Material Design 2 token preset + themes            |
-| [`@untheme/material-3`](./preset/material-3) | `packages/preset/material-3` | Material Design 3 token preset + themes            |
-| [`@untheme/radix-ui`](./preset/radix-ui)     | `packages/preset/radix-ui`   | Radix UI / Radix Colors token preset + themes      |
+| Package                       | Directory          | Description                                                       |
+| ----------------------------- | ------------------ | ----------------------------------------------------------------- |
+| [`untheme`](./untheme)        | `packages/untheme` | Umbrella package — core API at the root, `css` and `kit` subpaths |
+| [`@untheme/common`](./common) | `packages/common`  | Dependency-free type guards and typed object helpers              |
+| [`@untheme/core`](./core)     | `packages/core`    | The runtime theme service (`defineUntheme`)                       |
+| [`@untheme/css`](./css)       | `packages/css`     | CSS custom-property renderer (`defineRenderer`)                   |
+| [`@untheme/kit`](./kit)       | `packages/kit`     | Preset-authoring toolkit (`defineUnthemePreset`)                  |
+| [`@untheme/schema`](./schema) | `packages/schema`  | Token contract types and runtime validation (`defineSchema`)      |
+| [`@untheme/utils`](./utils)   | `packages/utils`   | Structural theme operations (`clone`/`merge`/`extend`/`diff`)     |
 
 Framework integrations (e.g. the Nuxt module) live in [`../integrations`](../integrations).

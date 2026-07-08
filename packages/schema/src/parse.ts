@@ -29,6 +29,10 @@ export const defineParse = <T extends Template>(
       assert.binding(v);
       return v;
     },
+    definition: (v: unknown) => {
+      assert.definition(v);
+      return v;
+    },
     overrides: (v: unknown) => {
       assert.overrides(v);
       return v;

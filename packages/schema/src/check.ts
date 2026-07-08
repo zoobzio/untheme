@@ -1,4 +1,4 @@
-import type { Check, Domain, Kind, Rule, Rules, Template } from "./types";
+import type { Check, Domain, Kind, Meta, Rule, Template } from "./types";
 
 /**
  * Builds the {@link Check} bundle: one boolean type predicate per kind. A kind
@@ -6,7 +6,7 @@ import type { Check, Domain, Kind, Rule, Rules, Template } from "./types";
  */
 export const defineCheck = <T extends Template>({
   rules,
-}: Rules<T>): Check<T> => {
+}: Meta<T>): Check<T> => {
   const check =
     <K extends Kind>(list: Rule[]) =>
     (v: unknown): v is Domain<T>[K] =>
@@ -17,6 +17,7 @@ export const defineCheck = <T extends Template>({
     token: check<"token">(rules.token),
     reference: check<"reference">(rules.reference),
     binding: check<"binding">(rules.binding),
+    definition: check<"definition">(rules.definition),
     overrides: check<"overrides">(rules.overrides),
     tokens: check<"tokens">(rules.tokens),
     modifiers: check<"modifiers">(rules.modifiers),

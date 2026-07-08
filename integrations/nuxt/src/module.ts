@@ -28,9 +28,9 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
     const resolver = createResolver(import.meta.url);
 
     const schema = defineSchema(options.base);
-    const tokens = Array.from(schema.rules.sets.tokens);
-    const modifiers = Array.from(schema.rules.sets.modifiers);
-    const contexts = schema.rules.sets.contexts;
+    const tokens = Array.from(schema.meta.enums.tokens);
+    const modifiers = Array.from(schema.meta.enums.modifiers);
+    const contexts = schema.meta.enums.contexts;
 
     addTypeTemplate({
       filename: "types/untheme.d.ts",
@@ -39,13 +39,15 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
         const mod = modifiers
           .map((modifier) => {
             const ctx = Array.from(contexts[modifier])
-              .map((context) => `"${context}": Partial<Record<Token, string>>`)
+              .map((context) => `"${context}": Overrides`)
               .join("; ");
             return `"${modifier}": { ${ctx} }`;
           })
           .join("; ");
         return [
+          `import type { SharedBinding } from "untheme";`,
           `export type Token = "${tokens.join('" | "')}";`,
+          `export type Overrides = Partial<Record<Token, SharedBinding<Token>>>;`,
           `export type Mod = { ${mod} };`,
         ].join("\n");
       },

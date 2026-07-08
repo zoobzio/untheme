@@ -1,6 +1,6 @@
 # @untheme/schema
 
-Types and runtime validation for untheme's token contract. Dependency-free.
+Types and runtime validation for untheme's token contract. Validation is built on the guards in `@untheme/common`.
 
 A **template** declares the contract: which **tokens** exist, which **modifiers** (axes like `color`) exist and what **contexts** (options like `light`/`dark`) each carries, and the **order** modifiers compose in. `defineSchema` derives a validation bundle from a template, narrowed to its vocabulary. Use it to validate untrusted theme objects at runtime (e.g. JSON loaded from disk) — anything that passes is contract-bound and safe to render.
 
@@ -37,10 +37,11 @@ const result = schema.inspect.theme(candidate);
 
 The bundle validates one **kind** at a time. Scalars:
 
-- `value` — a containment-safe literal CSS value.
+- `value` — a literal value matching one of the declared token type shapes.
 - `token` — a token name.
 - `reference` — a `{token}` reference to a known token.
 - `binding` — a reference or a value.
+- `definition` — a full token definition: `$type` and `$value` required, `$description` / `$deprecated` / `$extensions` optional, `$value` checked against the shape the declared `$type` requires.
 - `modifier` — a modifier (axis) name.
 
 Composites:
@@ -54,22 +55,18 @@ Composites:
 - `layer` — a partial overlay carrying identity (`id`, `name`); anything present must belong to the contract.
 - `patch` — a partial, anonymous overlay (no identity).
 
-## Value containment
+## Value validation
 
-`value` validates **containment, not vocabulary**. Browsers ignore invalid declarations, so a value doesn't need to be meaningful CSS — it only needs to be unable to escape the declaration it's interpolated into. Rejected:
+`value` validates **shape, not vocabulary**: a literal passes if it matches at least one of the 13 DTCG type shapes (`color`, `dimension`, `duration`, `fontFamily`, `fontWeight`, `number`, `cubicBezier`, `strokeStyle`, `border`, `transition`, `shadow`, `gradient`, `typography`) — a color object, a dimension, a stroke style, and so on.
 
-- breakout sequences: `;`, `{`, `}`, backslash escapes, `/*`, `</`, and `url(` in any casing
-- unbalanced parens and unclosed quotes
-- non-strings and blank strings
-
-Because `{` and `}` are rejected, a `{token}` reference is never a valid literal value — the two are unambiguous.
+Token names and font-family strings get extra scrutiny on top of their shape: both reject breakout sequences — `;`, `{`, `}`, backslash escapes, `/*`, `</`, and `url(` in any casing — so a name or family string can't escape whatever it's interpolated into. Because `{` and `}` are rejected there, a `{token}` reference is never mistaken for a token name or a font-family string.
 
 ## The bundle
 
 `defineSchema(template)` returns a `Schema<T>`:
 
 - `base` — the source template.
-- `rules` — the derived `sets` (token / modifier / per-modifier context `Set`s) and the list of rules per kind.
+- `meta` — the derived validation core: `enums` (the contract and specification sets), `shape` (the literal and value rule for each token type), and `rules` (the rule list for each kind).
 - `check` — boolean type predicates per kind; `true` narrows the value.
 - `assert` — throwing assertions per kind; on failure throws a `SchemaError` carrying every `Issue` found (not just the first).
 - `parse` — asserts and returns the value narrowed to its kind type.
@@ -81,12 +78,12 @@ The base template is validated against the `theme` kind at construction, so a ma
 
 - `Template` — the contract; its keys define tokens, modifiers, and contexts.
 - `Token<T>` / `Modifier<T>` / `Context<T, M>` — names derived from a template.
-- `Binding<T>` / `Reference<T>` / `Value` — a token's value; a `{token}` reference; a literal CSS value.
+- `Binding<T>` / `Reference<T>` / `Values<R>` — a token's value; a `{token}` reference; the value shape for every DTCG type, parameterized by reference availability (`Open` admits a `{token}` string per type, `Literal` admits none).
 - `Overrides<T>` / `Modifiers<T>` / `Input<T>` — a partial token map; the full modifier structure; a per-modifier context selection.
 - `Theme<T>` / `Layer<T>` / `Patch<T>` — the candidate shapes the kinds narrow to.
-- `Contract<Tok, Mod>` — a template parameterized by its token union and modifier structure, for inference and `extend`.
+- `Contract<Tok, Mod>` — a template parameterized by its token union and modifier structure, for inference; consumed by `extend` in [`@untheme/utils`](../utils).
 - `Domain<T>` — every kind mapped to the type it narrows to; `Kind` is its key.
-- `Schema<T>` — the bundle `defineSchema` returns; `Check<T>` / `Assert<T>` / `Parse<T>` / `Inspect<T>` / `Rules<T>` are its families.
+- `Schema<T>` — the bundle `defineSchema` returns; `Check<T>` / `Assert<T>` / `Parse<T>` / `Inspect<T>` are its per-kind families, and `Rules` is the unparameterized rule-list shape behind them.
 - `Result<V>` — an `inspect` outcome.
 - `Issue` / `Code` / `Rule` — a validation failure, its stable discriminant, and a type-agnostic rule.
 - `SchemaError` — the error `assert` and `parse` throw, carrying the concrete `Issue`s.

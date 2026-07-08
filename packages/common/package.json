@@ -1,0 +1,23 @@
+{
+  "name": "@untheme/common",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./.dist/index.mjs",
+  "types": "./.dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./.dist/index.mjs",
+      "types": "./.dist/index.d.ts"
+    }
+  },
+  "files": [
+    ".dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "stub": "unbuild --stub",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  }
+}

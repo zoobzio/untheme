@@ -1,3 +1,6 @@
+import type { Contract, Input, Overrides } from "@untheme/schema";
+import type { Mod, Tok } from "./fixture";
+
 import { describe, it, expect } from "vitest";
 
 import { defineUntheme } from "../src/service";
@@ -8,34 +11,17 @@ import {
   InvalidThemeError,
   UnknownThemeError,
 } from "../src/error";
+import { black, blue, theme, white } from "./fixture";
 
-const theme = {
-  id: "demo",
-  name: "Demo",
-  tokens: {
-    white: "#ffffff",
-    black: "#000000",
-    accent: "#0090ff",
-    bg: "{white}",
-    fg: "{black}",
-    ring: "{accent}",
-  },
-  modifiers: {
-    color: {
-      light: { bg: "{white}", fg: "{black}" },
-      dark: { bg: "{black}", fg: "{white}" },
-    },
-    contrast: {
-      normal: {},
-      high: { fg: "{black}" },
-    },
-  },
-  order: ["color", "contrast"],
-};
+type T = Contract<Tok, Mod>;
 
-const makeConfig = () => ({
+const makeConfig = (): {
+  theme: T;
+  input: Input<T>;
+  override: Overrides<T>;
+} => ({
   theme: structuredClone(theme),
-  input: { color: "light", contrast: "normal" },
+  input: { mode: "light", contrast: "normal" },
   override: {},
 });
 
@@ -44,82 +30,96 @@ describe("construction", () => {
     expect(() => defineUntheme(makeConfig())).not.toThrow();
   });
 
+  it("rejects a theme whose value violates its declared type", () => {
+    const config = makeConfig();
+    // A dimension object bound to a color token; Reflect skirts the compile-time
+    // contract so the runtime check is what rejects it.
+    Reflect.set(config.theme.tokens["color.white"], "$value", {
+      value: 4,
+      unit: "px",
+    });
+    expect(() => defineUntheme(config)).toThrow(InvalidThemeError);
+  });
+
   it("rejects an incomplete selection", () => {
-    expect(() =>
-      defineUntheme({ ...makeConfig(), input: { color: "light" } }),
-    ).toThrow(InvalidThemeError);
+    const config = makeConfig();
+    Reflect.deleteProperty(config.input, "contrast");
+    expect(() => defineUntheme(config)).toThrow(InvalidThemeError);
   });
 
   it("rejects a cross-axis or unknown context", () => {
-    expect(() =>
-      defineUntheme({
-        ...makeConfig(),
-        input: { color: "high", contrast: "normal" },
-      }),
-    ).toThrow(InvalidThemeError);
+    const config = makeConfig();
+    Reflect.set(config.input, "mode", "high");
+    expect(() => defineUntheme(config)).toThrow(InvalidThemeError);
   });
 
   it("rejects a malformed seed layer", () => {
-    expect(() =>
-      defineUntheme(makeConfig(), {
-        bad: { id: "bad", name: "Bad", tokens: { ghost: "#000" } },
-      }),
-    ).toThrow(InvalidLayerError);
+    const tokens = { "color.bg": "{color.black}", ghost: black };
+    const bad = { id: "bad", name: "Bad", tokens };
+    expect(() => defineUntheme(makeConfig(), { bad })).toThrow(
+      InvalidLayerError,
+    );
   });
 });
 
 describe("modifiers / contexts", () => {
   it("lists the axes in composition order", () => {
     expect(defineUntheme(makeConfig()).modifiers()).toEqual([
-      "color",
+      "mode",
       "contrast",
     ]);
   });
 
   it("lists the contexts of an axis", () => {
     const u = defineUntheme(makeConfig());
-    expect(u.contexts("color")).toEqual(["light", "dark"]);
+    expect(u.contexts("mode")).toEqual(["light", "dark"]);
     expect(u.contexts("contrast")).toEqual(["normal", "high"]);
   });
 });
 
 describe("tokens / get", () => {
+  it("flattens each token to its bound $value", () => {
+    const u = defineUntheme(makeConfig());
+    expect(u.tokens()["space.sm"]).toEqual({ value: 4, unit: "px" });
+    expect(u.tokens()["color.accent"]).toEqual(blue);
+  });
+
   it("composes base, then the selected context of each modifier", () => {
     const u = defineUntheme(makeConfig());
-    expect(u.get("bg")).toBe("{white}");
-    expect(u.get("fg")).toBe("{black}");
-    expect(u.get("ring")).toBe("{accent}");
+    expect(u.get("color.bg")).toBe("{color.white}");
+    expect(u.get("color.fg")).toBe("{color.black}");
   });
 
   it("applies later modifiers in order over earlier ones", () => {
     const u = defineUntheme({
       ...makeConfig(),
-      input: { color: "dark", contrast: "high" },
+      input: { mode: "dark", contrast: "high" },
     });
-    // color.dark sets fg "{white}"; contrast.high (later) overrides it "{black}"
-    expect(u.get("bg")).toBe("{black}");
-    expect(u.get("fg")).toBe("{black}");
+    // mode.dark sets fg "{color.white}"; contrast.high (later) overrides it
+    expect(u.get("color.bg")).toBe("{color.black}");
+    expect(u.get("color.fg")).toBe("{color.black}");
   });
 
   it("peeks at another selection without changing the active one", () => {
     const u = defineUntheme(makeConfig());
-    expect(u.tokens({ color: "dark", contrast: "normal" }).bg).toBe("{black}");
-    expect(u.config.input.color).toBe("light");
-    expect(u.get("bg")).toBe("{white}");
+    const peek = u.tokens({ mode: "dark", contrast: "normal" });
+    expect(peek["color.bg"]).toBe("{color.black}");
+    expect(u.config.input.mode).toBe("light");
+    expect(u.get("color.bg")).toBe("{color.white}");
   });
 });
 
 describe("swap", () => {
   it("selects a context and re-resolves", () => {
     const u = defineUntheme(makeConfig());
-    u.swap("color", "dark");
-    expect(u.config.input.color).toBe("dark");
-    expect(u.get("bg")).toBe("{black}");
+    u.swap("mode", "dark");
+    expect(u.config.input.mode).toBe("dark");
+    expect(u.get("color.bg")).toBe("{color.black}");
   });
 
   it("touches only the named axis", () => {
     const u = defineUntheme(makeConfig());
-    u.swap("color", "dark");
+    u.swap("mode", "dark");
     expect(u.config.input.contrast).toBe("normal");
   });
 });
@@ -127,76 +127,107 @@ describe("swap", () => {
 describe("set / dirty / reset (the override)", () => {
   it("set wins over the composed value", () => {
     const u = defineUntheme(makeConfig());
-    u.set("bg", "#123456");
-    expect(u.get("bg")).toBe("#123456");
+    u.set("color.bg", blue);
+    expect(u.get("color.bg")).toEqual(blue);
   });
 
   it("the override is selection-independent", () => {
     const u = defineUntheme(makeConfig());
-    u.set("bg", "#123456");
-    u.swap("color", "dark");
-    expect(u.get("bg")).toBe("#123456");
+    u.set("color.bg", blue);
+    u.swap("mode", "dark");
+    expect(u.get("color.bg")).toEqual(blue);
   });
 
-  it("is a no-op on an unknown token or invalid value", () => {
+  it("is a no-op on an unknown token", () => {
     const u = defineUntheme(makeConfig());
-    u.set("ghost", "#000");
-    u.set("bg", "red;}");
-    u.set("bg", "{ghost}");
+    Reflect.apply(u.set, undefined, ["ghost", black]);
+    expect(u.dirty()).toBe(false);
+  });
+
+  it("is a no-op on a value invalid for the token's declared type", () => {
+    const u = defineUntheme(makeConfig());
+    u.set("color.bg", { value: 4, unit: "px" });
+    u.set("color.bg", "{ghost}");
+    u.set("space.sm", blue);
     expect(u.dirty()).toBe(false);
   });
 
   it("dirty tracks the override; reset clears it", () => {
     const u = defineUntheme(makeConfig());
     expect(u.dirty()).toBe(false);
-    u.set("bg", "#123456");
+    u.set("color.bg", blue);
     expect(u.dirty()).toBe(true);
     u.reset();
     expect(u.dirty()).toBe(false);
-    expect(u.get("bg")).toBe("{white}");
+    expect(u.get("color.bg")).toBe("{color.white}");
   });
 });
 
 describe("resolve", () => {
   it("follows a reference chain to a literal", () => {
     const u = defineUntheme(makeConfig());
-    expect(u.resolve("bg")).toBe("#ffffff"); // bg -> {white} -> #ffffff
-    expect(u.resolve("ring")).toBe("#0090ff"); // ring -> {accent} -> #0090ff
+    expect(u.resolve("color.bg")).toEqual(white);
+    expect(u.resolve("color.fg")).toEqual(black);
   });
 
   it("returns a literal binding as-is", () => {
-    expect(defineUntheme(makeConfig()).resolve("white")).toBe("#ffffff");
+    const u = defineUntheme(makeConfig());
+    expect(u.resolve("color.accent")).toEqual(blue);
+    expect(u.resolve("space.sm")).toEqual({ value: 4, unit: "px" });
   });
 
-  it("resolves through the override", () => {
+  it("dereferences references nested inside composite values", () => {
     const u = defineUntheme(makeConfig());
-    u.set("bg", "{accent}");
-    expect(u.resolve("bg")).toBe("#0090ff");
+    expect(u.resolve("border.thin")).toEqual({
+      color: blue,
+      width: { value: 4, unit: "px" },
+      style: "solid",
+    });
+  });
+
+  it("resolves sibling references to the same token without a false cycle", () => {
+    const u = defineUntheme(makeConfig());
+    expect(u.resolve("gradient.fade")).toEqual([
+      { color: black, position: 0 },
+      { color: black, position: 1 },
+    ]);
+  });
+
+  it("resolves through the active selection and the override", () => {
+    const u = defineUntheme(makeConfig());
+    u.swap("mode", "dark");
+    expect(u.resolve("color.bg")).toEqual(black);
+    u.set("color.bg", "{color.accent}");
+    expect(u.resolve("color.bg")).toEqual(blue);
   });
 
   it("throws on a reference cycle", () => {
     const u = defineUntheme(makeConfig());
-    u.set("bg", "{fg}");
-    u.set("fg", "{bg}");
-    expect(() => u.resolve("bg")).toThrow(CircularAliasError);
+    u.set("color.bg", "{color.fg}");
+    u.set("color.fg", "{color.bg}");
+    expect(() => u.resolve("color.bg")).toThrow(CircularAliasError);
   });
 });
 
 describe("update", () => {
-  it("merges a patch into the definition and keeps the override", () => {
+  it("rebinds $value and keeps $type, identity, and the override", () => {
     const u = defineUntheme(makeConfig());
-    u.set("ring", "#111111");
-    u.update({ tokens: { bg: "{accent}" } });
-    expect(u.config.theme.tokens.bg).toBe("{accent}");
+    u.set("color.accent", "{color.white}");
+    u.update({ tokens: { "color.bg": "{color.black}" } });
+    expect(u.config.theme.tokens["color.bg"].$value).toBe("{color.black}");
+    expect(u.config.theme.tokens["color.bg"].$type).toBe("color");
+    expect(u.config.theme.id).toBe("demo");
     expect(u.dirty()).toBe(true);
-    expect(u.get("ring")).toBe("#111111");
+    expect(u.get("color.accent")).toBe("{color.white}");
   });
 
   it("rejects a patch outside the contract", () => {
     const u = defineUntheme(makeConfig());
-    expect(() => u.update({ tokens: { ghost: "#000" } })).toThrow(
-      InvalidPatchError,
-    );
+    const unknown = { tokens: { "color.bg": "{color.black}", ghost: black } };
+    expect(() => u.update(unknown)).toThrow(InvalidPatchError);
+    expect(() =>
+      u.update({ tokens: { "color.bg": { value: 4, unit: "px" } } }),
+    ).toThrow(InvalidPatchError);
   });
 });
 
@@ -206,7 +237,7 @@ describe("delta", () => {
     expect(u.delta()).toEqual({
       tokens: {},
       modifiers: {
-        color: { light: {}, dark: {} },
+        mode: { light: {}, dark: {} },
         contrast: { normal: {}, high: {} },
       },
     });
@@ -214,76 +245,119 @@ describe("delta", () => {
 
   it("captures both the override and the definition drift", () => {
     const u = defineUntheme(makeConfig());
-    u.set("ring", "#111111");
+    u.set("color.accent", "{color.white}");
     u.update({
-      tokens: { bg: "{accent}" },
-      modifiers: { color: { dark: { bg: "{accent}" } } },
+      tokens: { "color.bg": "{color.black}" },
+      modifiers: { mode: { dark: { "color.bg": "{color.accent}" } } },
     });
     const d = u.delta();
-    expect(d.tokens).toEqual({ ring: "#111111", bg: "{accent}" });
-    expect(d.modifiers.color.dark).toEqual({ bg: "{accent}" });
+    expect(d.tokens).toEqual({
+      "color.accent": "{color.white}",
+      "color.bg": "{color.black}",
+    });
+    expect(d.modifiers.mode.dark).toEqual({ "color.bg": "{color.accent}" });
   });
 
   it("round-trips: updating a fresh baseline with the delta reproduces the drift", () => {
     const u = defineUntheme(makeConfig());
-    u.set("ring", "#111111");
-    u.update({ tokens: { bg: "{accent}" } });
+    u.set("color.accent", "{color.white}");
+    u.update({ tokens: { "color.bg": "{color.black}" } });
 
     const fresh = defineUntheme(makeConfig());
     fresh.update(u.delta());
-    expect(fresh.config.theme.tokens.bg).toBe("{accent}");
-    expect(fresh.config.theme.tokens.ring).toBe("#111111");
+    expect(fresh.config.theme.tokens["color.bg"].$value).toBe("{color.black}");
+    expect(fresh.config.theme.tokens["color.accent"].$value).toBe(
+      "{color.white}",
+    );
   });
 });
 
 describe("apply / select", () => {
   it("becomes the layer over the baseline and clears the override", () => {
     const u = defineUntheme(makeConfig());
-    u.set("bg", "#123456");
-    u.apply({ id: "alt", name: "Alt", tokens: { ring: "{white}" } });
+    u.set("color.bg", blue);
+    u.apply({
+      id: "alt",
+      name: "Alt",
+      tokens: { "color.accent": "{color.white}" },
+    });
     expect(u.config.theme.id).toBe("alt");
     expect(u.dirty()).toBe(false);
-    expect(u.get("ring")).toBe("{white}");
+    expect(u.get("color.accent")).toBe("{color.white}");
+    expect(u.config.theme.tokens["color.accent"].$type).toBe("color");
   });
 
   it("resolves each apply against the baseline, not the prior theme", () => {
     const u = defineUntheme(makeConfig());
-    u.apply({ id: "l1", name: "L1", tokens: { ring: "{white}" } });
-    u.apply({ id: "l2", name: "L2", tokens: { bg: "{accent}" } });
-    // l1's ring change is gone — l2 resolved against the baseline
-    expect(u.get("ring")).toBe("{accent}");
+    u.apply({
+      id: "l1",
+      name: "L1",
+      tokens: { "color.accent": "{color.white}" },
+    });
+    u.apply({ id: "l2", name: "L2", tokens: { "color.bg": "{color.accent}" } });
+    // l1's accent change is gone — l2 resolved against the baseline
+    expect(u.get("color.accent")).toEqual(blue);
   });
 
   it("select applies a catalog layer; an unknown key throws", () => {
     const u = defineUntheme(makeConfig(), {
-      alt: { id: "alt", name: "Alt", tokens: { ring: "{white}" } },
+      alt: {
+        id: "alt",
+        name: "Alt",
+        tokens: { "color.accent": "{color.white}" },
+      },
     });
     u.select("alt");
     expect(u.config.theme.id).toBe("alt");
-    expect(u.get("ring")).toBe("{white}");
+    expect(u.get("color.accent")).toBe("{color.white}");
     expect(() => u.select("missing")).toThrow(UnknownThemeError);
   });
 });
 
 describe("create / extract / remove", () => {
-  it("create files a resolved theme without touching the active one", () => {
+  it("create files the layer and returns it resolved against the baseline", () => {
     const u = defineUntheme(makeConfig());
-    const made = u.create({
+    const layer = {
       id: "made",
       name: "Made",
-      tokens: { bg: "{accent}" },
-    });
-    expect(made.tokens.bg).toBe("{accent}");
-    expect(u.themes.made).toBeDefined();
+      tokens: { "color.bg": "{color.accent}" } as const,
+    };
+    const made = u.create(layer);
+    expect(u.themes.made).toEqual(layer);
+    expect(u.themes.made).not.toBe(layer);
+    expect(made.id).toBe("made");
+    expect(made.tokens["color.bg"].$value).toBe("{color.accent}");
+    expect(made.tokens["color.bg"].$type).toBe("color");
     expect(u.config.theme.id).toBe("demo");
+  });
+
+  it("created layers are reachable by select", () => {
+    const u = defineUntheme(makeConfig());
+    u.create({
+      id: "made",
+      name: "Made",
+      tokens: { "color.accent": "{color.white}" },
+    });
+    u.select("made");
+    expect(u.config.theme.id).toBe("made");
+    expect(u.get("color.accent")).toBe("{color.white}");
+  });
+
+  it("create rejects a layer outside the contract", () => {
+    const u = defineUntheme(makeConfig());
+    const tokens = { "color.bg": "{color.black}", ghost: black };
+    const bad = { id: "bad", name: "Bad", tokens };
+    expect(() => u.create(bad)).toThrow(InvalidLayerError);
+    expect(u.themes.bad).toBeUndefined();
   });
 
   it("extract bakes the override into a detached snapshot", () => {
     const u = defineUntheme(makeConfig());
-    u.set("bg", "#123456");
+    u.set("color.bg", blue);
     const snap = u.extract("snap", "Snap");
     expect(snap.id).toBe("snap");
-    expect(snap.tokens.bg).toBe("#123456");
+    expect(snap.tokens["color.bg"].$value).toEqual(blue);
+    expect(snap.tokens["color.bg"].$type).toBe("color");
     expect(u.themes.snap).toBeUndefined();
     expect(u.config.theme.id).toBe("demo");
   });
@@ -305,12 +379,12 @@ describe("Options middleware", () => {
       {},
       {
         get: {
-          config: { input: () => ({ color: "dark", contrast: "normal" }) },
+          config: { input: () => ({ mode: "dark", contrast: "normal" }) },
         },
       },
     );
     // reads see dark regardless of the stored selection
-    expect(u.get("bg")).toBe("{black}");
+    expect(u.get("color.bg")).toBe("{color.black}");
   });
 
   it("intercepts writes of the override", () => {
@@ -321,16 +395,37 @@ describe("Options middleware", () => {
       {
         set: {
           config: {
-            override: (o) => {
-              writes.push(o);
-              return o;
+            override: (override) => {
+              writes.push(override);
+              return override;
             },
           },
         },
       },
     );
-    u.set("bg", "#123456");
+    u.set("color.bg", blue);
     expect(writes).toHaveLength(1);
-    expect(writes[0]).toEqual({ bg: "#123456" });
+    expect(writes[0]).toEqual({ "color.bg": blue });
+  });
+
+  it("intercepts writes of the theme", () => {
+    const writes: unknown[] = [];
+    const u = defineUntheme(
+      makeConfig(),
+      {},
+      {
+        set: {
+          config: {
+            theme: (value) => {
+              writes.push(value.id);
+              return value;
+            },
+          },
+        },
+      },
+    );
+    u.apply({ id: "alt", name: "Alt", tokens: {} });
+    expect(writes).toEqual(["alt"]);
+    expect(u.config.theme.id).toBe("alt");
   });
 });

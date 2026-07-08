@@ -5,7 +5,7 @@ import type { Theme, Template, Layer, Input } from "untheme";
  */
 export interface NuxtUnthemeConfig {
   base: Theme<Template>;
-  themes: Record<string, Theme<Template>>;
+  themes: Record<string, Layer<Template>>;
   input: Input<Template>;
 }
 

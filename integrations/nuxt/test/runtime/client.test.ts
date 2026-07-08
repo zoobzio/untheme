@@ -1,3 +1,5 @@
+import type { Color } from "untheme";
+
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref, reactive, nextTick, type Ref } from "vue";
 import { theme, themes, input } from "../fixtures";
@@ -90,6 +92,15 @@ describe("makeUntheme", () => {
         expect.objectContaining({ id: "bravo" }),
       );
     });
+
+    it("resolves a layer-carried modifier override on top of the baseline", () => {
+      const u = make();
+      u.swap("color", "dark");
+      expect(u.tokens().primary).toBe("{indigo}");
+      u.apply(themes.bravo);
+      expect(u.tokens().primary).toBe("{blue}");
+      expect(u.tokens().surface).toBe("{black}");
+    });
   });
 
   describe("set / update", () => {
@@ -101,10 +112,15 @@ describe("makeUntheme", () => {
       expect(cookies["untheme-key"]?.value ?? null).toBeNull();
     });
 
-    it("update merges a patch and emits untheme:theme", () => {
+    it("update rebinds a token and emits untheme:theme", () => {
       const u = make();
-      u.update({ tokens: { white: "#eeeeee" } });
-      expect(u.config.theme.tokens.white).toBe("#eeeeee");
+      const smoke: Color = {
+        colorSpace: "srgb",
+        components: [0.93, 0.93, 0.93],
+      };
+      u.update({ tokens: { white: smoke } });
+      expect(u.config.theme.tokens.white.$value).toEqual(smoke);
+      expect(u.config.theme.tokens.white.$type).toBe("color");
       expect(nuxtApp.callHook).toHaveBeenCalledWith(
         "untheme:theme",
         expect.objectContaining({ id: "alpha" }),

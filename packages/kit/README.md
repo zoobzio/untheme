@@ -14,11 +14,20 @@ export const preset = defineUnthemePreset({
   id: "my",
   name: "My Preset",
   tokens: {
-    blue: "#3b82f6",
-    white: "#ffffff",
-    black: "#000000",
-    surface: "{white}",
-    primary: "{blue}",
+    blue: {
+      $type: "color",
+      $value: { colorSpace: "srgb", components: [0.231, 0.51, 0.965] },
+    },
+    white: {
+      $type: "color",
+      $value: { colorSpace: "srgb", components: [1, 1, 1] },
+    },
+    black: {
+      $type: "color",
+      $value: { colorSpace: "srgb", components: [0, 0, 0] },
+    },
+    surface: { $type: "color", $value: "{white}" },
+    primary: { $type: "color", $value: "{blue}" },
   },
   modifiers: {
     color: {
@@ -31,14 +40,12 @@ export const preset = defineUnthemePreset({
 ```
 
 ```ts
-// themes/brand.ts — a variant resolved against the base
-import { preset } from "../preset";
-
-export default preset.define({
+// themes/brand.ts — a variant layer, filed in the service's registry
+export default {
   id: "brand",
   name: "Brand",
-  tokens: { blue: "#1e40af" },
-});
+  tokens: { blue: { colorSpace: "srgb", components: [0.118, 0.251, 0.686] } },
+};
 ```
 
 ```ts
@@ -48,6 +55,7 @@ import { preset } from "my-preset";
 import brand from "my-preset/themes/brand";
 
 const ut = defineUntheme(preset.use({ color: "dark" }), { brand });
+// ut.select("brand") switches to the layer above, resolved against the base
 ```
 
 ```ts
@@ -55,7 +63,14 @@ const ut = defineUntheme(preset.use({ color: "dark" }), { brand });
 const app = preset.configure({
   id: "app",
   name: "App",
-  tokens: { red: "#ff0000", danger: "{red}" }, // join the contract
+  tokens: {
+    // new tokens join the contract, so each needs a full definition
+    red: {
+      $type: "color",
+      $value: { colorSpace: "srgb", components: [1, 0, 0] },
+    },
+    danger: { $type: "color", $value: "{red}" },
+  },
   modifiers: {
     color: { light: { danger: "{red}" }, dark: { danger: "{red}" } },
   },

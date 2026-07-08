@@ -18,7 +18,7 @@
     "stub": "unbuild --stub",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --root ../.."
+    "test": "vitest run"
   },
   "dependencies": {
     "@untheme/core": "workspace:*",

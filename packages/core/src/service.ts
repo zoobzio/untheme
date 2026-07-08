@@ -1,20 +1,24 @@
 import type {
+  Binding,
+  Context,
   Contract,
+  Input,
   Layer,
+  Modifier,
+  Open,
   Patch,
   Schema,
   Theme,
   Token,
-  Value,
-  Binding,
-  Modifier,
-  Context,
-  Input,
+  Type,
+  Values,
 } from "@untheme/schema";
+import type { Diff } from "@untheme/utils";
 import type { Config, Options, Untheme } from "./types";
 
+import { isRecord, map, values } from "@untheme/common";
 import { defineSchema } from "@untheme/schema";
-import { clone, diff, merge } from "@untheme/utils";
+import { clone, copy, diff, merge } from "@untheme/utils";
 import {
   CircularAliasError,
   InvalidLayerError,
@@ -49,10 +53,7 @@ import {
  */
 export const defineUntheme = <
   Tok extends string,
-  Mod extends Record<
-    string,
-    Record<string, Partial<Record<NoInfer<Tok>, `{${Tok}}` | Value>>>
-  >,
+  Mod extends Record<string, Record<string, object>>,
 >(
   state: Config<Contract<Tok, Mod>>,
   registry: Record<string, Layer<Contract<Tok, Mod>>> = {},
@@ -163,69 +164,92 @@ export const defineUntheme = <
   // `apply` (and so `select`) still re-validates every layer at the call
   // site, since the registry can be mutated after construction.
   reframe(InvalidLayerError, () => {
-    for (const layer of Object.values(themes)) {
+    for (const layer of values(themes)) {
       schema.assert.layer(layer);
     }
   });
 
   /**
-   * The flat token map for a selection (default: active): base tokens, then the
-   * selected context of each modifier in `order`, then the user override last.
+   * The flat token map for a selection (default: active): every token bound to
+   * its `$value`, overlaid with the selected context of each modifier in
+   * `order`, then the user override last.
    */
   const tokens = (
     input: Input<T> = config.input,
   ): { [K in Token<T>]: Binding<T> } => {
-    const map = { ...config.theme.tokens };
-    const modifiers = config.theme.modifiers;
-    const selection = input;
+    const flat = map(config.theme.tokens, (slot) => slot.$value);
     for (const modifier of config.theme.order) {
-      Object.assign(map, modifiers[modifier]?.[selection[modifier]]);
+      Object.assign(flat, config.theme.modifiers[modifier]?.[input[modifier]]);
     }
-    Object.assign(map, config.override);
-    return map;
+    Object.assign(flat, config.override);
+    return flat;
   };
 
   /**
    * A token's effective binding for the active selection, override included.
    */
-  const get = <K extends Token<T>>(token: K): Binding<T> => {
+  const get = (token: Token<T>): Binding<T> => {
     return tokens()[token];
   };
 
   /**
    * Writes a token into the user override layer — the topmost resolution layer,
-   * applied over the active selection. A write outside the contract is a silent
-   * no-op. Tracked by `dirty`, cleared by `reset`.
+   * applied over the active selection. The single-entry map is validated as an
+   * override, so an unknown token or a value invalid for that token's declared
+   * type is a silent no-op. Tracked by `dirty`, cleared by `reset`.
    */
-  const set = <K extends Token<T>>(token: K, value: Binding<T>) => {
-    if (!schema.check.token(token) || !schema.check.binding(value)) {
+  const set = (token: Token<T>, value: Binding<T>) => {
+    if (!schema.check.overrides({ [token]: value })) {
       return;
     }
     config.override = { ...config.override, [token]: value };
   };
 
   /**
-   * Follows a token's reference chain to a literal value. A binding in `{name}`
-   * form is a reference; its target is followed until a literal is reached.
-   * Visited tokens accumulate in `chain`, so a chain that loops back on itself
-   * throws {@link CircularAliasError} instead of recursing until the call stack
-   * overflows.
+   * Replaces every reference inside a value with its target's dereferenced
+   * value: a whole-value reference is followed to its token, and arrays and
+   * records are rebuilt member by member so references nested in composite
+   * values resolve in place. `chain` carries the tokens already being resolved
+   * on this branch.
    */
-  const resolve = <K extends Token<T>>(
-    token: K,
-    chain: Set<Token<T>> = new Set(),
-  ): string => {
+  const substitute = (value: unknown, chain: Set<Token<T>>): unknown => {
+    if (schema.check.reference(value)) {
+      const inner = value.slice(1, -1);
+      if (schema.check.token(inner)) {
+        return follow(inner, chain);
+      }
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return value.map((entry) => substitute(entry, chain));
+    }
+    if (isRecord(value)) {
+      return map(value, (entry) => substitute(entry, chain));
+    }
+    return value;
+  };
+
+  /**
+   * Dereferences a token's effective binding. Each hop extends a branch-local
+   * copy of `chain`, so sibling references to a shared token never collide,
+   * while a chain that loops back on itself throws {@link CircularAliasError}
+   * instead of recursing until the call stack overflows.
+   */
+  const follow = (token: Token<T>, chain: Set<Token<T>>): unknown => {
     if (chain.has(token)) {
       throw new CircularAliasError([...chain, token]);
     }
-    const binding = get(token);
-    if (schema.check.reference(binding)) {
-      const inner = binding.slice(1, -1);
-      if (schema.check.token(inner)) {
-        return resolve(inner, chain.add(token));
-      }
-    }
-    return binding;
+    return substitute(get(token), new Set(chain).add(token));
+  };
+
+  /**
+   * A token's fully dereferenced value for the active selection: no references
+   * remain at any depth. The result is narrowed through `parse.value`, so
+   * resolving a token outside the contract throws the schema's error rather
+   * than returning undefined.
+   */
+  const resolve = (token: Token<T>): Values<Open>[Type] => {
+    return schema.parse.value(follow(token, new Set()));
   };
 
   /**
@@ -258,7 +282,7 @@ export const defineUntheme = <
    */
   const update = (patch: Patch<T>) => {
     reframe(InvalidPatchError, () => schema.assert.patch(patch));
-    config.theme = merge(config.theme, patch);
+    config.theme = merge<T>(config.theme, patch);
   };
 
   /**
@@ -268,7 +292,7 @@ export const defineUntheme = <
    */
   const apply = (layer: Layer<T>) => {
     reframe(InvalidLayerError, () => schema.assert.layer(layer));
-    config.theme = merge(base, layer);
+    config.theme = merge<T>(base, layer);
     config.override = {};
   };
 
@@ -287,17 +311,17 @@ export const defineUntheme = <
   };
 
   /**
-   * Resolves a layer against the baseline into a complete theme — the layer's
-   * identity and bindings, gaps backfilled from the baseline — and files it in
-   * the registry under its id, where {@link select} can switch to it. The
-   * active theme is not touched. Throws {@link InvalidLayerError} when the
-   * layer steps outside the contract.
+   * Files a layer in the registry under its id, where {@link select} can switch
+   * to it, and returns the layer resolved against the baseline — its identity
+   * and bindings, gaps backfilled from the baseline — as a complete theme. The
+   * registry holds a detached copy of the layer; the active theme is not
+   * touched. Throws {@link InvalidLayerError} when the layer steps outside the
+   * contract.
    */
   const create = (layer: Layer<T>): Theme<T> => {
     reframe(InvalidLayerError, () => schema.assert.layer(layer));
-    const theme = merge(base, layer);
-    themes[theme.id] = theme;
-    return theme;
+    themes[layer.id] = copy(layer);
+    return merge<T>(base, layer);
   };
 
   /**
@@ -306,11 +330,11 @@ export const defineUntheme = <
    * not registered.
    */
   const extract = (id: string, name: string): Theme<T> => {
-    return merge(config.theme, { id, name, tokens: config.override });
+    return merge<T>(config.theme, { id, name, tokens: config.override });
   };
 
   /**
-   * Drops a theme from the registry by id; a no-op when nothing is filed
+   * Drops a layer from the registry by id; a no-op when nothing is filed
    * under it. The active theme is independent of the registry, so removing
    * the live theme's entry leaves it standing — it just can no longer be
    * reached by {@link select}.
@@ -325,8 +349,8 @@ export const defineUntheme = <
    * still match the baseline drop out, leaving a patch of everything `set` /
    * `update` / `apply` changed. Identity is not compared.
    */
-  const delta = (): Patch<T> => {
-    return diff(base, merge(config.theme, { tokens: config.override }));
+  const delta = (): Diff<T> => {
+    return diff<T>(base, merge<T>(config.theme, { tokens: config.override }));
   };
 
   /**

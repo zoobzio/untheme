@@ -5,11 +5,7 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "declaration": true,
-    "declarationMap": true,
-    "outDir": "../kit/.dist",
-    "rootDir": "../kit/src"
+    "skipLibCheck": true
   },
-  "include": ["../kit/src"]
+  "include": ["src", "test"]
 }

@@ -4,22 +4,32 @@ import type {
   Input,
   Layer,
   Modifier,
+  Open,
   Overrides,
   Patch,
   Schema,
   Template,
   Theme,
   Token,
+  Type,
+  Values,
 } from "@untheme/schema";
+import type { Diff } from "@untheme/utils";
 
 /**
  * The caller-owned live state an {@link Untheme} service reads and writes: the
  * active theme definition, the active selection (one context per modifier), and
  * the user override layer that `set` populates. Pass a plain object for inert
  * state, or a reactive proxy to have reads and writes tracked.
+ *
+ * `theme` reads as the caller's own contract type but writes accept any
+ * complete {@link Theme} of that contract: `update` and `apply` store merged
+ * themes, which satisfy the contract without being the caller's exact type. A
+ * plain `{ theme, input, override }` object satisfies both sides.
  */
 export type Config<T extends Template> = {
-  theme: T;
+  get theme(): T;
+  set theme(value: Theme<T>);
   input: Input<T>;
   override: Overrides<T>;
 };
@@ -41,7 +51,7 @@ export type Options<T extends Template> = {
   };
   set?: {
     config?: {
-      theme?: (theme: T) => T;
+      theme?: (theme: Theme<T>) => Theme<T>;
       input?: (input: Input<T>) => Input<T>;
       override?: (override: Overrides<T>) => Overrides<T>;
     };
@@ -61,7 +71,7 @@ export interface Untheme<T extends Template> {
   config: Config<T>;
 
   /**
-   * The catalog of switchable themes `select` / `create` / `remove` operate on.
+   * The catalog of switchable layers `select` / `create` / `remove` operate on.
    */
   themes: Record<string, Layer<T>>;
 
@@ -81,21 +91,24 @@ export interface Untheme<T extends Template> {
   contexts: (modifier: Modifier<T>) => string[];
 
   /**
-   * The flat token map for a selection (default: the active one), with the user
-   * override applied on top. Does not change the active state.
+   * The flat token map for a selection (default: the active one), each token
+   * bound to its `$value`, with the user override applied on top. Does not
+   * change the active state.
    */
   tokens: (input?: Input<T>) => { [K in Token<T>]: Binding<T> };
 
   /**
    * A token's effective binding: the override if set, else the composed value.
    */
-  get: <K extends Token<T>>(token: K) => Binding<T>;
+  get: (token: Token<T>) => Binding<T>;
 
   /**
-   * Follows a token's reference chain to a literal value; throws
-   * `CircularAliasError` on a loop.
+   * A token's fully dereferenced value: whole-value references are followed to
+   * their target and references nested inside composite values resolve in
+   * place, so the result carries no references at any depth. Throws
+   * `CircularAliasError` on a reference loop.
    */
-  resolve: <K extends Token<T>>(token: K) => string;
+  resolve: (token: Token<T>) => Values<Open>[Type];
 
   /**
    * Selects a context for a modifier — the cheap runtime swap.
@@ -106,9 +119,11 @@ export interface Untheme<T extends Template> {
   ) => void;
 
   /**
-   * Writes a token into the user override layer.
+   * Writes a token into the user override layer. A write outside the contract —
+   * an unknown token, or a value invalid for that token's declared type — is a
+   * silent no-op.
    */
-  set: <K extends Token<T>>(token: K, value: Binding<T>) => void;
+  set: (token: Token<T>, value: Binding<T>) => void;
 
   /**
    * The effective drift from the baseline as a re-appliable patch: the active
@@ -117,7 +132,7 @@ export interface Untheme<T extends Template> {
    * what remains is everything `set` / `update` / `apply` changed. Identity is
    * not compared. Feeding the result back through `update` reproduces the drift.
    */
-  delta: () => Patch<T>;
+  delta: () => Diff<T>;
 
   /**
    * Whether the user override holds any edits.
@@ -141,12 +156,13 @@ export interface Untheme<T extends Template> {
   apply: (layer: Layer<T>) => void;
 
   /**
-   * Switches to the catalog theme filed under `key`, and clears the override.
+   * Switches to the catalog layer filed under `key`, and clears the override.
    */
   select: (key: string) => void;
 
   /**
-   * Resolves a layer against the baseline into the catalog under its id.
+   * Files a layer in the catalog under its id and returns it resolved against
+   * the baseline as a complete theme. The active theme is not touched.
    */
   create: (layer: Layer<T>) => Theme<T>;
 
@@ -157,7 +173,7 @@ export interface Untheme<T extends Template> {
   extract: (id: string, name: string) => Theme<T>;
 
   /**
-   * Drops a theme from the catalog by id; the active theme is unaffected.
+   * Drops a layer from the catalog by id; the active theme is unaffected.
    */
   remove: (id: string) => void;
 }

@@ -5,3 +5,4 @@ dist
 .output
 .coverage
 *.log
+.idea

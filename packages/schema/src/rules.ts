@@ -1,73 +1,162 @@
-import type { Rule, Rules, Template } from "./types";
+import type { Enum, Rule, Rules, Shape, Template } from "./types";
 
-import { CSS_BREAKOUT } from "./constant";
+import { isDefinition, isObject } from "@untheme/common";
+
+import { CSS_BREAKOUT, TYPES } from "./constant";
 import {
   acyclic,
-  balanced,
   breakout,
+  collectRefs,
   container,
   each,
   either,
   filled,
+  keyed,
+  keys,
+  known,
   list,
   member,
+  nest,
+  fields,
   reference,
-  shape,
+  struct,
   subset,
   superset,
   text,
+  valued,
 } from "./util";
 
 /**
- * Derives a template's runtime {@link Rules}: the token, modifier, and
- * per-modifier context {@link Set}s, plus a list of rules per kind composed from
- * the atoms in `util`. The scalar rule lists double as building blocks the
- * composite kinds reuse — every token value is a binding, a context carries a
- * partial override map, and a modifier carries a map of contexts.
+ * Composes a template's runtime {@link Rules}: a list of rules per kind built
+ * from the atoms in `util`. Membership, completeness, and reference checks read
+ * the template's sets off {@link Enum}; every token slot resolves to the
+ * value rule for its declared type in {@link Shape} — a reference to a token
+ * of that type, or a structured value in place — and the composite kinds reuse
+ * those rules.
  *
- * @param base - The template whose keys define the token contract.
+ * @param enums - The template's token, modifier, context, and type sets.
+ * @param shape - The literal and value rule for each token type.
  */
-export const defineRules = <T extends Template>(base: T): Rules<T> => {
-  const tokens = new Set(Object.keys(base.tokens));
-  const modifiers = new Set(Object.keys(base.modifiers));
-  const contexts: Record<string, Set<string>> = {};
-  for (const modifier of Object.keys(base.modifiers)) {
-    contexts[modifier] = new Set(Object.keys(base.modifiers[modifier]));
-  }
+export const defineRules = <T extends Template>(
+  enums: Enum<T>,
+  shape: Shape,
+): Rules => {
+  /* $deprecated is inert: a boolean flag or an explanatory string. */
+  const deprecated: Rule = (v) => {
+    if (typeof v === "boolean" || typeof v === "string") {
+      return;
+    }
+    return {
+      code: "not_boolean",
+      message: "$deprecated must be a boolean or a string.",
+      received: v,
+    };
+  };
 
-  const value = [
-    text("Token value"),
-    filled("Token value"),
-    breakout("Token value", CSS_BREAKOUT),
-    balanced("Token value"),
+  /* A single token definition: a known type, a value valid for that type, and
+     inert metadata. The $type/$value correlation is resolved here — the value
+     is checked against the rule for its own declared type. */
+  const definition: Rule = (v) => {
+    const notObject = container("Definition")(v);
+    if (notObject) {
+      return notObject;
+    }
+    if (!isObject(v)) {
+      return;
+    }
+    const stray = subset("Definition", enums.definitionKeys)(v);
+    if (stray) {
+      return stray;
+    }
+    const missing = superset("Definition", enums.requiredDefinitionKeys)(v);
+    if (missing) {
+      return missing;
+    }
+    const badType = known("Type", enums.tokenTypes)(v.$type);
+    if (badType) {
+      return nest("$type", badType);
+    }
+    const declared = TYPES.find((type) => type === v.$type);
+    if (declared) {
+      const badValue = shape[declared].value(v.$value);
+      if (badValue) {
+        return nest("$value", badValue);
+      }
+    }
+    if ("$description" in v) {
+      const badDescription = text("$description")(v.$description);
+      if (badDescription) {
+        return nest("$description", badDescription);
+      }
+    }
+    if ("$deprecated" in v) {
+      const badDeprecated = deprecated(v.$deprecated);
+      if (badDeprecated) {
+        return nest("$deprecated", badDeprecated);
+      }
+    }
+    if ("$extensions" in v) {
+      const badExtensions = container("$extensions")(v.$extensions);
+      if (badExtensions) {
+        return nest("$extensions", badExtensions);
+      }
+    }
+  };
+
+  /* A partial override map: a subset of tokens, each rebinding its value
+     against that token's declared type. */
+  const overridePicker = (key: string): Rule[] => {
+    if (!(key in enums.types)) {
+      return [];
+    }
+    return [shape[enums.types[key]].value];
+  };
+  const overrides = [
+    container("Overrides"),
+    subset("Overrides", enums.tokens),
+    keyed(overridePicker),
   ];
-  const references = [reference("Reference", tokens)];
-  const binding = [either("Binding", [references, value])];
+
+  /* Edges of the reference graph: the tokens a definition's value names. */
+  const definitionEdges = (entry: unknown): string[] => {
+    if (isDefinition(entry)) {
+      return collectRefs(entry.$value);
+    }
+    return [];
+  };
+
+  /* A complete token map: every token present under a well-formed key, each a
+     valid definition, no reference cycles. */
+  const tokensRule = [
+    container("Tokens"),
+    keys("Tokens", [
+      filled("Token name"),
+      breakout("Token name", CSS_BREAKOUT),
+    ]),
+    subset("Tokens", enums.tokens),
+    superset("Tokens", enums.tokens),
+    each([definition]),
+    acyclic("Tokens", enums.tokens, definitionEdges),
+  ];
+
+  /* A single reference or a literal value of some known type. */
+  const value = [
+    either(
+      "Value",
+      TYPES.map((type) => [shape[type].literal]),
+    ),
+  ];
+  const binding = [valued(reference("Binding", enums.tokens), value[0])];
   const id = [text("Identifier"), filled("Identifier")];
   const name = [text("Name"), filled("Name")];
 
-  // A partial override map: a subset of tokens, each value a binding.
-  const overrides = [
-    container("Overrides"),
-    subset("Overrides", tokens),
-    each(binding),
-  ];
-  // A complete token map: every token present, each value a binding, no cycles.
-  const tokensRule = [
-    container("Tokens"),
-    subset("Tokens", tokens),
-    each(binding),
-    superset("Tokens", tokens),
-    acyclic("Tokens", tokens),
-  ];
-
-  // Per-modifier context maps: each modifier's contexts validated against its
-  // own context set. Complete requires every context; partial does not.
+  /* Per-modifier context maps. Complete requires every context; partial does
+     not. Each context carries a partial override map. */
   const completeFields: Record<string, Rule[]> = {};
   const partialFields: Record<string, Rule[]> = {};
   const inputFields: Record<string, Rule[]> = {};
-  for (const modifier of Object.keys(base.modifiers)) {
-    const ctx = contexts[modifier];
+  for (const modifier of enums.modifiers) {
+    const ctx = enums.contexts[modifier];
     completeFields[modifier] = [
       container("Contexts"),
       subset("Contexts", ctx),
@@ -84,61 +173,57 @@ export const defineRules = <T extends Template>(base: T): Rules<T> => {
 
   const completeModifiers = [
     container("Modifiers"),
-    shape("Modifiers", completeFields),
-    superset("Modifiers", modifiers),
+    struct("Modifiers", completeFields, enums.modifiers),
   ];
   const partialModifiers = [
     container("Modifiers"),
-    shape("Modifiers", partialFields),
+    fields("Modifiers", partialFields),
   ];
-  const order = [list("Order", [member("Modifier", modifiers)])];
+  const order = [list("Order", [member("Modifier", enums.modifiers)])];
 
   return {
-    sets: { tokens, modifiers, contexts },
-    rules: {
-      modifier: [text("Modifier"), member("Modifier", modifiers)],
-      value,
-      token: [text("Token"), member("Token", tokens)],
-      reference: references,
-      binding,
-      overrides,
-      tokens: tokensRule,
-      modifiers: completeModifiers,
-      order,
-      input: [
-        container("Input"),
-        shape("Input", inputFields),
-        superset("Input", modifiers),
-      ],
-      theme: [
-        container("Theme"),
-        shape("Theme", {
+    modifier: [text("Modifier"), member("Modifier", enums.modifiers)],
+    value,
+    token: [text("Token"), member("Token", enums.tokens)],
+    reference: [reference("Reference", enums.tokens)],
+    binding,
+    definition: [definition],
+    overrides,
+    tokens: tokensRule,
+    modifiers: completeModifiers,
+    order,
+    input: [container("Input"), struct("Input", inputFields, enums.modifiers)],
+    theme: [
+      container("Theme"),
+      struct(
+        "Theme",
+        {
           id,
           name,
           tokens: tokensRule,
           modifiers: completeModifiers,
           order,
-        }),
-        superset(
-          "Theme",
-          new Set(["id", "name", "tokens", "modifiers", "order"]),
-        ),
-      ],
-      layer: [
-        container("Layer"),
-        shape("Layer", {
+        },
+        enums.themeKeys,
+      ),
+    ],
+    layer: [
+      container("Layer"),
+      struct(
+        "Layer",
+        {
           id,
           name,
           tokens: overrides,
           modifiers: partialModifiers,
           order,
-        }),
-        superset("Layer", new Set(["id", "name"])),
-      ],
-      patch: [
-        container("Patch"),
-        shape("Patch", { tokens: overrides, modifiers: partialModifiers }),
-      ],
-    },
+        },
+        new Set(["id", "name"]),
+      ),
+    ],
+    patch: [
+      container("Patch"),
+      fields("Patch", { tokens: overrides, modifiers: partialModifiers }),
+    ],
   };
 };

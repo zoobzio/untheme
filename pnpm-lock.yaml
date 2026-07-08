@@ -143,8 +143,13 @@ importers:
         specifier: ^4.4.6
         version: 4.4.6(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7))(@parcel/watcher@2.5.6)(@types/node@25.9.1)(@vue/compiler-sfc@3.5.35)(cac@6.7.14)(db0@0.3.4)(eslint@10.4.1(jiti@2.7.0))(ioredis@5.11.0)(lightningcss@1.32.0)(magicast@0.5.3)(optionator@0.9.4)(rolldown@1.0.3)(rollup-plugin-visualizer@7.0.1(rolldown@1.0.3)(rollup@4.61.0))(rollup@4.61.0)(srvx@0.11.16)(terser@5.48.0)(typescript@6.0.3)(vite@8.0.16(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.5(typescript@6.0.3))(yaml@2.9.0)
 
+  packages/common: {}
+
   packages/core:
     dependencies:
+      '@untheme/common':
+        specifier: workspace:*
+        version: link:../common
       '@untheme/schema':
         specifier: workspace:*
         version: link:../schema
@@ -152,7 +157,14 @@ importers:
         specifier: workspace:*
         version: link:../utils
 
-  packages/css: {}
+  packages/css:
+    dependencies:
+      '@untheme/common':
+        specifier: workspace:*
+        version: link:../common
+      '@untheme/schema':
+        specifier: workspace:*
+        version: link:../schema
 
   packages/kit:
     dependencies:
@@ -166,9 +178,11 @@ importers:
         specifier: workspace:*
         version: link:../utils
 
-  packages/schema: {}
-
-  packages/spec: {}
+  packages/schema:
+    dependencies:
+      '@untheme/common':
+        specifier: workspace:*
+        version: link:../common
 
   packages/untheme:
     dependencies:
@@ -190,6 +204,9 @@ importers:
 
   packages/utils:
     dependencies:
+      '@untheme/common':
+        specifier: workspace:*
+        version: link:../common
       '@untheme/schema':
         specifier: workspace:*
         version: link:../schema

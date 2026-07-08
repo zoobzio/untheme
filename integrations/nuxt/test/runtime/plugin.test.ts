@@ -17,8 +17,10 @@ vi.mock("#build/untheme.mjs", () => ({
   get theme() {
     return structuredClone(theme);
   },
+  get input() {
+    return structuredClone(input);
+  },
   themes,
-  input,
 }));
 
 vi.mock("#app", () => ({
@@ -35,11 +37,6 @@ vi.mock("#imports", () => ({
   useHead: (input: HeadInput) => {
     headCalls.push(input);
   },
-}));
-
-vi.mock("untheme/css", () => ({
-  generateRootCSS: (tokens: Record<string, string>) =>
-    `/* ${Object.keys(tokens).join(",")} */`,
 }));
 
 import plugin from "../../src/runtime/plugin";
@@ -77,7 +74,10 @@ describe("untheme plugin", () => {
     setup();
     expect(headCalls[0].htmlAttrs["data-color"].value).toBe("light");
     expect(headCalls[0].style.value[0].key).toBe("untheme");
-    expect(headCalls[0].style.value[0].innerHTML).toContain("white");
+    const css = headCalls[0].style.value[0].innerHTML;
+    expect(css).toContain(":root {");
+    expect(css).toContain("--white: #ffffff;");
+    expect(css).toContain("--primary: var(--blue);");
   });
 
   it("emits untheme:ready with the service", () => {
@@ -92,6 +92,18 @@ describe("untheme plugin", () => {
       config.value.input.color = "dark";
       await nextTick();
       expect(headCalls[0].htmlAttrs["data-color"].value).toBe("dark");
+    });
+
+    it("re-renders the token CSS when the context changes", async () => {
+      setup();
+      expect(headCalls[0].style.value[0].innerHTML).toContain(
+        "--primary: var(--blue);",
+      );
+      config.value.input.color = "dark";
+      await nextTick();
+      expect(headCalls[0].style.value[0].innerHTML).toContain(
+        "--primary: var(--indigo);",
+      );
     });
   });
 });

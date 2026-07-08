@@ -11,7 +11,7 @@
     },
     "./css": {
       "import": "./.dist/css.mjs",
-      "types": "./.dist/index.d.ts"
+      "types": "./.dist/css.d.ts"
     },
     "./kit": {
       "import": "./.dist/kit.mjs",
@@ -25,8 +25,7 @@
     "build": "unbuild",
     "stub": "unbuild --stub",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run --root ../.."
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@untheme/core": "workspace:*",

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NuxtUnthemeConfig } from "../../src/types";
-import { theme } from "../fixtures";
+import { theme, themes } from "../fixtures";
 
 const kit = vi.hoisted(() => ({
   addTemplate: vi.fn(),
@@ -25,7 +25,7 @@ const mod = module as unknown as ModuleDef;
 
 const options: NuxtUnthemeConfig = {
   base: theme,
-  themes: { alpha: theme, bravo: theme },
+  themes,
   input: { color: "light" },
 };
 

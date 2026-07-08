@@ -29,6 +29,7 @@ export const defineInspect = <T extends Template>(
     token: inspect(parse.token),
     reference: inspect(parse.reference),
     binding: inspect(parse.binding),
+    definition: inspect(parse.definition),
     overrides: inspect(parse.overrides),
     tokens: inspect(parse.tokens),
     modifiers: inspect(parse.modifiers),
