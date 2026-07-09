@@ -1,4 +1,4 @@
-import type { Contract, SharedBinding } from "@untheme/schema";
+import type { Contract, Binding } from "@untheme/schema";
 import type { Preset } from "./types";
 
 import { makePreset } from "./factory";
@@ -21,7 +21,7 @@ export const defineUnthemePreset = <
   Tok extends string,
   Mod extends Record<
     string,
-    Record<string, Partial<Record<NoInfer<Tok>, SharedBinding<NoInfer<Tok>>>>>
+    Record<string, Partial<Record<NoInfer<Tok>, Binding>>>
   >,
 >(
   base: Contract<Tok, Mod>,

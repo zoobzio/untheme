@@ -51,8 +51,8 @@ export const defineAssert = <T extends Template>({
     token: (v: unknown): asserts v is Token<T> => assert(v, rules.token),
     reference: (v: unknown): asserts v is Reference<T> =>
       assert(v, rules.reference),
-    binding: (v: unknown): asserts v is Binding<T> => assert(v, rules.binding),
-    definition: (v: unknown): asserts v is Authored<Token<T>> =>
+    binding: (v: unknown): asserts v is Binding => assert(v, rules.binding),
+    definition: (v: unknown): asserts v is Authored =>
       assert(v, rules.definition),
     overrides: (v: unknown): asserts v is Overrides<T> =>
       assert(v, rules.overrides),

@@ -1,4 +1,4 @@
-import type { Input, Layer, SharedBinding, Theme } from "@untheme/schema";
+import type { Input, Layer, Binding, Theme } from "@untheme/schema";
 import type { Config } from "@untheme/core";
 import type { Extension } from "@untheme/utils";
 
@@ -11,7 +11,7 @@ import type { extend } from "@untheme/utils";
  * the token union is concrete and the conditional evaluates.
  */
 export type CheckedContext<Tok extends string, C> = {
-  [K in keyof C]: K extends Tok ? SharedBinding<Tok> : never;
+  [K in keyof C]: K extends Tok ? Binding : never;
 };
 
 /**

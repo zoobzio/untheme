@@ -1,8 +1,8 @@
 import type {
   Contract,
   Overrides,
-  SharedBinding,
-  Slot,
+  Binding,
+  Definition,
   Theme,
 } from "@untheme/schema";
 import type { Extension } from "./types";
@@ -40,13 +40,12 @@ export const extend = <
     if (slot === undefined || !isDefinition(slot)) {
       throw new TypeError(`token "${token}" is not a definition`);
     }
-    const definition: Slot<Tok | XTok> = slot;
-    const incoming: SharedBinding<Tok | XTok> | Slot<Tok | XTok> | undefined =
-      extension.tokens[token];
+    const definition: Definition = slot;
+    const incoming: Binding | Definition | undefined = extension.tokens[token];
     if (incoming === undefined || isDefinition(incoming)) {
       return copy(definition);
     }
-    const rebound: Slot<Tok | XTok> = {
+    const rebound: Definition = {
       ...copy(definition),
       $value: copy(incoming),
     };

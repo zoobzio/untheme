@@ -162,50 +162,15 @@ export type Values<R extends Refs> = {
 
 /**
  * Every value shape collapsed to a single union. `fontFamily`'s bare `string`
- * arm is the reason {@link SharedBinding} strips `string` before adding its
- * reference union — an unstripped `string` would absorb the reference forms.
+ * arm is the reason {@link Bindable} strips `string` before adding its
+ * reference form — an unstripped `string` would absorb it.
  */
 type AllValues = Values<Open>[Type];
 
 /**
- * The value type shared by every slot. It admits any structured value, a
- * suggested reference to a token in the contract, and — through the
- * absorption-exempt `string & {}` arm — any bare string the runtime then
- * validates. Slots do not vary by their token's `$type`; the `$type`/`$value`
- * correlation and reference validity are runtime-schema checks.
- *
- * `NoInfer` on the reference arm keeps `Tok` inferred from the token keys
- * alone: without it, a whole-value reference in a `$value` position drives
- * inference through `` `{${Tok}}` `` and collapses `Tok` to the referenced
- * names. The arm still expands to the full suggestion union once `Tok` is
- * fixed, so reference autocomplete is unaffected.
- */
-export type SharedBinding<Tok extends string> =
-  | Exclude<AllValues, string>
-  | `{${NoInfer<Tok>}}`
-  | (string & {});
-
-/**
- * One machine-side token slot: a declared type, a bound value, and the inert
- * metadata members. Every slot shares one {@link SharedBinding} regardless of
- * its declared type — a machine-built slot (a merged theme, a rebound
- * extension) carries a binding whose correlation with `$type` only the runtime
- * schema can rule on. The authoring counterpart, where the correlation is
- * statically knowable, is {@link Authored}.
- */
-export type Slot<Tok extends string> = {
-  $type: Type;
-  $value: SharedBinding<Tok>;
-  $description?: string;
-  $deprecated?: boolean | string;
-  $extensions?: Record<string, unknown>;
-};
-
-/**
  * A value union with its bare `string` arm removed: literal keyword arms
- * survive, only the absorbing wide `string` goes. `fontFamily` is the one type
- * carrying a bare string arm, and an unstripped `string` would absorb the
- * reference forms of any union it joins.
+ * survive as suggestions, only the absorbing wide `string` goes. `fontFamily`
+ * is the one type carrying a bare string arm.
  */
 type WithoutBareString<V> = V extends string
   ? string extends V
@@ -214,22 +179,42 @@ type WithoutBareString<V> = V extends string
   : V;
 
 /**
+ * The binding union over a value set: the set's own shapes with the bare
+ * `string` arm stripped, a `{reference}` string, and — only where the set
+ * itself admits bare strings (`fontFamily`) — the absorption-exempt escape
+ * that lets plain family names through.
+ */
+type Bindable<V> =
+  | WithoutBareString<V>
+  | `{${string}}`
+  | (string extends V ? string & {} : never);
+
+/**
+ * A token binding — the value type shared by every slot: any structured
+ * value, a `{reference}` string, or — for `fontFamily`'s sake, whose values
+ * are bare family names — any other string. Build time knows only that a
+ * reference is a braced string; whether it names a real token of the right
+ * type is a runtime-schema check. Deliberately token-independent: a
+ * per-contract reference union at every value position was measured at ~6x
+ * the whole contract's check time at preset scale, so the token union appears
+ * only at override key positions, where it is bounded and cheap.
+ */
+export type Binding = Bindable<AllValues>;
+
+/**
  * One authored token slot: a discriminated union with an arm per token type,
  * the declared `$type` narrowing `$value` to that type's own shape or a
- * reference into the contract. Where the type itself admits bare strings
- * (`fontFamily`), the absorption-exempt `string & {}` escape stands in for the
- * stripped arm. Because no wider string form remains, a structured value of
- * the wrong family or a reference that names no token is a static error at
- * the authoring site — every arm that survives is one the runtime schema
- * would accept for that `$type`.
+ * `{reference}` string. The reference arm is the anonymous `` `{${string}}` ``
+ * — build time knows a token is being referenced, not whether it exists;
+ * membership and type-matching are runtime-schema checks. Where the type
+ * itself admits bare strings (`fontFamily`), the absorption-exempt
+ * `string & {}` escape stands in for the stripped arm. A structured value of
+ * the wrong family remains a static error at the authoring site.
  */
-export type Authored<Tok extends string> = {
+export type Authored = {
   [Y in Type]: {
     $type: Y;
-    $value:
-      | WithoutBareString<Values<Open>[Y]>
-      | `{${NoInfer<Tok>}}`
-      | (string extends Values<Open>[Y] ? string & {} : never);
+    $value: Bindable<Values<Open>[Y]>;
     $description?: string;
     $deprecated?: boolean | string;
     $extensions?: Record<string, unknown>;
@@ -239,11 +224,12 @@ export type Authored<Tok extends string> = {
 /**
  * A contract parameterized by its token union (`Tok`) and modifier structure
  * (`Mod`), for call sites that infer or widen a contract from a literal. `Tok`
- * is inferred from the `tokens` keys alone; every slot's `$value` and every
- * modifier override then draws its reference suggestions from that same union.
+ * is inferred from the `tokens` keys alone and surfaces at override key
+ * positions — the one place the token union is worth its checking cost.
  * Token slots are {@link Authored}, so a slot's declared `$type` narrows its
  * `$value` statically; every arm remains assignable to the machine-side
- * {@link Slot}, so a contract flows into any `Theme` position unchanged.
+ * {@link Definition}, so a contract flows into any `Theme` position
+ * unchanged.
  */
 export type Contract<
   Tok extends string,
@@ -251,11 +237,11 @@ export type Contract<
 > = {
   id: string;
   name: string;
-  tokens: { [K in Tok]: Authored<Tok> };
+  tokens: { [K in Tok]: Authored };
   modifiers: Mod & {
     [M in keyof Mod]: {
       [C in keyof Mod[M]]: {
-        [K in keyof Mod[M][C]]: K extends Tok ? SharedBinding<Tok> : never;
+        [K in keyof Mod[M][C]]: K extends Tok ? Binding : never;
       };
     };
   };
@@ -263,14 +249,16 @@ export type Contract<
 };
 
 /**
- * The loose token shape a {@link Template} carries: a declared type, a value or
- * reference, and the inert metadata members. Unlike a {@link Slot}, a
- * definition's `$value` is the open value union rather than a suggestion
- * binding — the runtime enforces the `$type`/`$value` correlation.
+ * One token definition: a declared type, a bound value, and the inert
+ * metadata members. Every definition shares one {@link Binding} regardless of
+ * its declared type — a machine-built definition (a merged theme, a rebound
+ * extension) carries a binding whose correlation with `$type` only the
+ * runtime schema can rule on. The authoring counterpart, where the
+ * correlation is statically knowable, is {@link Authored}.
  */
 export type Definition = {
   $type: Type;
-  $value: Values<Open>[Type] | `{${string}}`;
+  $value: Binding;
   $description?: string;
   $deprecated?: boolean | string;
   $extensions?: Record<string, unknown>;
@@ -314,17 +302,11 @@ export type Context<
 export type Reference<T extends Template> = `{${Token<T>}}`;
 
 /**
- * A token binding: the value shared by every slot, narrowed so its reference
- * suggestions name tokens of this template.
- */
-export type Binding<T extends Template> = SharedBinding<Token<T>>;
-
-/**
  * A partial set of token overrides — what a context, layer, or patch carries.
  * Each override rebinds a token's value; it never restates the token's type.
  */
 export type Overrides<T extends Template> = {
-  [K in Token<T>]?: Binding<T>;
+  [K in Token<T>]?: Binding;
 };
 
 /** Every context of every modifier, each carrying its token overrides. */
@@ -345,7 +327,7 @@ export type Input<T extends Template> = {
 export type Theme<T extends Template> = {
   id: string;
   name: string;
-  tokens: { [K in Token<T>]: Slot<Token<T>> };
+  tokens: { [K in Token<T>]: Definition };
   modifiers: Modifiers<T>;
   order: Modifier<T>[];
 };
@@ -426,8 +408,8 @@ export type Domain<T extends Template> = {
   value: Values<Open>[Type];
   token: Token<T>;
   reference: Reference<T>;
-  binding: Binding<T>;
-  definition: Authored<Token<T>>;
+  binding: Binding;
+  definition: Authored;
   overrides: Overrides<T>;
   tokens: Theme<T>["tokens"];
   modifiers: Modifiers<T>;
@@ -539,8 +521,8 @@ export type Assert<T extends Template> = {
   value: (v: unknown) => asserts v is Values<Open>[Type];
   token: (v: unknown) => asserts v is Token<T>;
   reference: (v: unknown) => asserts v is Reference<T>;
-  binding: (v: unknown) => asserts v is Binding<T>;
-  definition: (v: unknown) => asserts v is Authored<Token<T>>;
+  binding: (v: unknown) => asserts v is Binding;
+  definition: (v: unknown) => asserts v is Authored;
   overrides: (v: unknown) => asserts v is Overrides<T>;
   tokens: (v: unknown) => asserts v is Theme<T>["tokens"];
   modifiers: (v: unknown) => asserts v is Modifiers<T>;

@@ -53,7 +53,7 @@ export type Source<T extends Template> = {
   config: { readonly theme: T };
 
   /* The active flat bindings, references intact. */
-  tokens: () => { [K in Token<T>]: Binding<T> };
+  tokens: () => { [K in Token<T>]: Binding };
 };
 
 /**

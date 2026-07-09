@@ -172,7 +172,7 @@ export const makeUntheme = <T extends Theme<T>>(
    */
   const tokens = (
     input: Input<T> = proxy.input,
-  ): { [K in Token<T>]: Binding<T> } => {
+  ): { [K in Token<T>]: Binding } => {
     const flat = map(proxy.theme.tokens, (slot) => slot.$value);
     for (const modifier of proxy.theme.order) {
       Object.assign(flat, proxy.theme.modifiers[modifier]?.[input[modifier]]);
@@ -184,7 +184,7 @@ export const makeUntheme = <T extends Theme<T>>(
   /**
    * A token's effective binding for the active selection, override included.
    */
-  const get = (token: Token<T>): Binding<T> => {
+  const get = (token: Token<T>): Binding => {
     return tokens()[token];
   };
 
@@ -194,7 +194,7 @@ export const makeUntheme = <T extends Theme<T>>(
    * override, so an unknown token or a value invalid for that token's declared
    * type is a silent no-op. Tracked by `dirty`, cleared by `reset`.
    */
-  const set = (token: Token<T>, value: Binding<T>) => {
+  const set = (token: Token<T>, value: Binding) => {
     if (!schema.check.overrides({ [token]: value })) {
       return;
     }

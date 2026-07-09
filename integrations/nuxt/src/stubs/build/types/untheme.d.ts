@@ -1,5 +1,5 @@
 // Typecheck-only stub for the generated `#build/types/untheme.d.ts` virtual module.
-import type { SharedBinding } from "untheme";
+import type { Binding } from "untheme";
 
 export type Token =
   | "white"
@@ -10,7 +10,7 @@ export type Token =
   | "on-surface"
   | "primary";
 
-export type Overrides = Partial<Record<Token, SharedBinding<Token>>>;
+export type Overrides = Partial<Record<Token, Binding>>;
 
 export type Mod = {
   color: {

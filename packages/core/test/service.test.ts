@@ -54,8 +54,8 @@ describe("construction", () => {
   });
 
   it("rejects a malformed seed layer", () => {
-    const tokens = { "color.bg": "{color.black}", ghost: black };
-    const bad = { id: "bad", name: "Bad", tokens };
+    const bad = { id: "bad", name: "Bad", tokens: {} };
+    Reflect.set(bad, "tokens", { "color.bg": "{color.black}", ghost: black });
     expect(() => defineUntheme(makeConfig(), { bad })).toThrow(
       InvalidLayerError,
     );

@@ -2,7 +2,7 @@ import type {
   Context,
   Modifier,
   Overrides,
-  SharedBinding,
+  Binding,
   Authored,
   Template,
 } from "@untheme/schema";
@@ -19,7 +19,7 @@ import type {
  * own new tokens, so a binding may reference either set.
  *
  * `Tok` is inferred from the base contract and `XTok` from the new-token keys
- * alone; the reference arm of every {@link SharedBinding} carries `NoInfer`, so
+ * alone; the reference arm of every {@link Binding} carries `NoInfer`, so
  * a reference sitting in a value position never drives inference and never
  * collapses the token union.
  *
@@ -42,22 +42,20 @@ export type Extension<
   id: string;
   name: string;
   tokens: {
-    [K in NoInfer<Tok>]?: SharedBinding<Tok | XTok>;
+    [K in NoInfer<Tok>]?: Binding;
   } & {
-    [K in XTok]?: K extends Tok
-      ? SharedBinding<Tok | XTok>
-      : Authored<Tok | XTok>;
+    [K in XTok]?: K extends Tok ? Binding : Authored;
   };
   modifiers: {
     [M in keyof Mod]?: {
       [C in keyof Mod[M]]?: {
-        [K in NoInfer<Tok | XTok>]?: SharedBinding<Tok | XTok>;
+        [K in NoInfer<Tok | XTok>]?: Binding;
       };
     };
   } & {
     [M in keyof XMod]: {
       [C in keyof XMod[M]]: {
-        [K in NoInfer<Tok | XTok>]?: SharedBinding<Tok | XTok>;
+        [K in NoInfer<Tok | XTok>]?: Binding;
       };
     };
   };

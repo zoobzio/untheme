@@ -95,12 +95,12 @@ export interface Untheme<T extends Template> {
    * bound to its `$value`, with the user override applied on top. Does not
    * change the active state.
    */
-  tokens: (input?: Input<T>) => { [K in Token<T>]: Binding<T> };
+  tokens: (input?: Input<T>) => { [K in Token<T>]: Binding };
 
   /**
    * A token's effective binding: the override if set, else the composed value.
    */
-  get: (token: Token<T>) => Binding<T>;
+  get: (token: Token<T>) => Binding;
 
   /**
    * A token's fully dereferenced value: whole-value references are followed to
@@ -123,7 +123,7 @@ export interface Untheme<T extends Template> {
    * an unknown token, or a value invalid for that token's declared type — is a
    * silent no-op.
    */
-  set: (token: Token<T>, value: Binding<T>) => void;
+  set: (token: Token<T>, value: Binding) => void;
 
   /**
    * The effective drift from the baseline as a re-appliable patch: the active

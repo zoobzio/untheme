@@ -45,9 +45,9 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
           })
           .join("; ");
         return [
-          `import type { SharedBinding } from "untheme";`,
+          `import type { Binding } from "untheme";`,
           `export type Token = "${tokens.join('" | "')}";`,
-          `export type Overrides = Partial<Record<Token, SharedBinding<Token>>>;`,
+          `export type Overrides = Partial<Record<Token, Binding>>;`,
           `export type Mod = { ${mod} };`,
         ].join("\n");
       },
