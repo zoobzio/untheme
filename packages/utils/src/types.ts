@@ -3,7 +3,7 @@ import type {
   Modifier,
   Overrides,
   SharedBinding,
-  Slot,
+  Authored,
   Template,
 } from "@untheme/schema";
 
@@ -14,7 +14,7 @@ import type {
  *
  * An existing base token accepts an optional bare binding — a value or a
  * `{reference}` that rebinds its `$value` only, never its `$type`. A new token
- * requires a full {@link Slot} definition. Every value position draws its
+ * requires a full {@link Authored} definition. Every value position draws its
  * reference suggestions from the union of the base tokens and the extension's
  * own new tokens, so a binding may reference either set.
  *
@@ -44,7 +44,9 @@ export type Extension<
   tokens: {
     [K in NoInfer<Tok>]?: SharedBinding<Tok | XTok>;
   } & {
-    [K in XTok]?: K extends Tok ? SharedBinding<Tok | XTok> : Slot<Tok | XTok>;
+    [K in XTok]?: K extends Tok
+      ? SharedBinding<Tok | XTok>
+      : Authored<Tok | XTok>;
   };
   modifiers: {
     [M in keyof Mod]?: {

@@ -75,10 +75,10 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
       write: true,
       getContents: () =>
         [
-          `import type { Theme, Layer, Input, Contract } from "untheme";`,
+          `import type { Layer, Input, Contract } from "untheme";`,
           `import type { Token, Mod } from "./types/untheme";`,
           `type AppContract = Contract<Token, Mod>;`,
-          `export const theme: Theme<AppContract>;`,
+          `export const theme: AppContract;`,
           `export const themes: Record<string, Layer<AppContract>>;`,
           `export const input: Input<AppContract>;`,
         ].join("\n"),

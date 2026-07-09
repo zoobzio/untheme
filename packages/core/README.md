@@ -30,7 +30,7 @@ ut.create(draftLayer); // resolve + file a new theme into the catalog
 ut.remove("midnight"); // drop a theme from the catalog
 ```
 
-Presets built with [`@untheme/kit`](../kit) produce the config for you: `defineUntheme(preset.use({ color: "dark" }))`.
+Presets built with [`@untheme/kit`](../kit) produce the config for you: `defineUntheme(preset.use({ color: "dark" }))`. A `configure`-widened preset's theme is machine-built rather than authored, so it boots through the factory instead: `makeUntheme(app.use({ color: "dark" }))` — the same service, accepting any complete theme of a contract.
 
 ## The state container
 

@@ -12,7 +12,7 @@ import type {
   Patch,
   Reference,
   Rule,
-  Slot,
+  Authored,
   Template,
   Theme,
   Token,
@@ -52,7 +52,7 @@ export const defineAssert = <T extends Template>({
     reference: (v: unknown): asserts v is Reference<T> =>
       assert(v, rules.reference),
     binding: (v: unknown): asserts v is Binding<T> => assert(v, rules.binding),
-    definition: (v: unknown): asserts v is Slot<Token<T>> =>
+    definition: (v: unknown): asserts v is Authored<Token<T>> =>
       assert(v, rules.definition),
     overrides: (v: unknown): asserts v is Overrides<T> =>
       assert(v, rules.overrides),

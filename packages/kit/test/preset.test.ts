@@ -2,7 +2,7 @@ import type { Color, Contract } from "@untheme/schema";
 
 import { describe, it, expect } from "vitest";
 
-import { defineUntheme } from "@untheme/core";
+import { defineUntheme, makeUntheme } from "@untheme/core";
 
 import { defineUnthemePreset } from "../src/preset";
 
@@ -131,7 +131,7 @@ describe("defineUnthemePreset", () => {
     });
 
     it("produces a schema-valid theme a service accepts end to end", () => {
-      const service = defineUntheme(
+      const service = makeUntheme(
         app.use({ color: "dark", density: "compact" }),
       );
       // density.compact rebinds danger to {blue}; blue was rebound to navy
@@ -162,7 +162,7 @@ describe("defineUnthemePreset", () => {
       });
       expect(config.theme.order).toEqual(["color", "density"]);
 
-      const service = defineUntheme(config);
+      const service = makeUntheme(config);
       expect(service.resolve("accent")).toEqual(red);
     });
   });

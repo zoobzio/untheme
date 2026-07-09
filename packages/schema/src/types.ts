@@ -186,9 +186,12 @@ export type SharedBinding<Tok extends string> =
   | (string & {});
 
 /**
- * One token slot in a contract: a declared type, a bound value, and the inert
+ * One machine-side token slot: a declared type, a bound value, and the inert
  * metadata members. Every slot shares one {@link SharedBinding} regardless of
- * its declared type.
+ * its declared type — a machine-built slot (a merged theme, a rebound
+ * extension) carries a binding whose correlation with `$type` only the runtime
+ * schema can rule on. The authoring counterpart, where the correlation is
+ * statically knowable, is {@link Authored}.
  */
 export type Slot<Tok extends string> = {
   $type: Type;
@@ -199,10 +202,48 @@ export type Slot<Tok extends string> = {
 };
 
 /**
+ * A value union with its bare `string` arm removed: literal keyword arms
+ * survive, only the absorbing wide `string` goes. `fontFamily` is the one type
+ * carrying a bare string arm, and an unstripped `string` would absorb the
+ * reference forms of any union it joins.
+ */
+type WithoutBareString<V> = V extends string
+  ? string extends V
+    ? never
+    : V
+  : V;
+
+/**
+ * One authored token slot: a discriminated union with an arm per token type,
+ * the declared `$type` narrowing `$value` to that type's own shape or a
+ * reference into the contract. Where the type itself admits bare strings
+ * (`fontFamily`), the absorption-exempt `string & {}` escape stands in for the
+ * stripped arm. Because no wider string form remains, a structured value of
+ * the wrong family or a reference that names no token is a static error at
+ * the authoring site — every arm that survives is one the runtime schema
+ * would accept for that `$type`.
+ */
+export type Authored<Tok extends string> = {
+  [Y in Type]: {
+    $type: Y;
+    $value:
+      | WithoutBareString<Values<Open>[Y]>
+      | `{${NoInfer<Tok>}}`
+      | (string extends Values<Open>[Y] ? string & {} : never);
+    $description?: string;
+    $deprecated?: boolean | string;
+    $extensions?: Record<string, unknown>;
+  };
+}[Type];
+
+/**
  * A contract parameterized by its token union (`Tok`) and modifier structure
  * (`Mod`), for call sites that infer or widen a contract from a literal. `Tok`
  * is inferred from the `tokens` keys alone; every slot's `$value` and every
  * modifier override then draws its reference suggestions from that same union.
+ * Token slots are {@link Authored}, so a slot's declared `$type` narrows its
+ * `$value` statically; every arm remains assignable to the machine-side
+ * {@link Slot}, so a contract flows into any `Theme` position unchanged.
  */
 export type Contract<
   Tok extends string,
@@ -210,7 +251,7 @@ export type Contract<
 > = {
   id: string;
   name: string;
-  tokens: { [K in Tok]: Slot<Tok> };
+  tokens: { [K in Tok]: Authored<Tok> };
   modifiers: Mod & {
     [M in keyof Mod]: {
       [C in keyof Mod[M]]: {
@@ -386,7 +427,7 @@ export type Domain<T extends Template> = {
   token: Token<T>;
   reference: Reference<T>;
   binding: Binding<T>;
-  definition: Slot<Token<T>>;
+  definition: Authored<Token<T>>;
   overrides: Overrides<T>;
   tokens: Theme<T>["tokens"];
   modifiers: Modifiers<T>;
@@ -499,7 +540,7 @@ export type Assert<T extends Template> = {
   token: (v: unknown) => asserts v is Token<T>;
   reference: (v: unknown) => asserts v is Reference<T>;
   binding: (v: unknown) => asserts v is Binding<T>;
-  definition: (v: unknown) => asserts v is Slot<Token<T>>;
+  definition: (v: unknown) => asserts v is Authored<Token<T>>;
   overrides: (v: unknown) => asserts v is Overrides<T>;
   tokens: (v: unknown) => asserts v is Theme<T>["tokens"];
   modifiers: (v: unknown) => asserts v is Modifiers<T>;

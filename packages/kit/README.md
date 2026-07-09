@@ -77,7 +77,8 @@ const app = preset.configure({
   order: ["color"],
 });
 
-const ut = defineUntheme(app.use({ color: "dark" }));
+// a configured preset's theme is machine-built, so it boots through the factory
+const ut = makeUntheme(app.use({ color: "dark" }));
 ```
 
 ## The authoring handle
