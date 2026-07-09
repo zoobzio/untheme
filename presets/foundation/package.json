@@ -1,0 +1,36 @@
+{
+  "name": "@untheme/foundation",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./.dist/index.mjs",
+  "types": "./.dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./.dist/index.d.ts",
+      "import": "./.dist/index.mjs"
+    },
+    "./themes/*": {
+      "types": "./.dist/themes/*.d.ts",
+      "import": "./.dist/themes/*.mjs"
+    }
+  },
+  "files": [
+    ".dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "stub": "unbuild --stub",
+    "generate": "node scripts/generate.mjs",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@untheme/kit": "workspace:*"
+  },
+  "devDependencies": {
+    "@material/material-color-utilities": "^0.4.0",
+    "@untheme/core": "workspace:*",
+    "@untheme/schema": "workspace:*"
+  }
+}
