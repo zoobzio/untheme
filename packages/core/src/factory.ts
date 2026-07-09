@@ -23,6 +23,7 @@ import {
   InvalidLayerError,
   InvalidPatchError,
   InvalidThemeError,
+  UnknownModifierError,
   UnknownThemeError,
   reframe,
 } from "./error";
@@ -192,13 +193,14 @@ export const makeUntheme = <T extends Theme<T>>(
    * Writes a token into the user override layer — the topmost resolution layer,
    * applied over the active selection. The single-entry map is validated as an
    * override, so an unknown token or a value invalid for that token's declared
-   * type is a silent no-op. Tracked by `dirty`, cleared by `reset`.
+   * type is a silent no-op. The override holds a detached copy of the value.
+   * Tracked by `dirty`, cleared by `reset`.
    */
   const set = (token: Token<T>, value: Binding) => {
     if (!schema.check.overrides({ [token]: value })) {
       return;
     }
-    proxy.override = { ...proxy.override, [token]: value };
+    proxy.override = { ...proxy.override, [token]: copy(value) };
   };
 
   /**
@@ -211,10 +213,10 @@ export const makeUntheme = <T extends Theme<T>>(
   const substitute = (value: unknown, chain: Set<Token<T>>): unknown => {
     if (schema.check.reference(value)) {
       const inner = value.slice(1, -1);
+      // Re-proves what `check.reference` guaranteed, narrowing the slice.
       if (schema.check.token(inner)) {
         return follow(inner, chain);
       }
-      return value;
     }
     if (Array.isArray(value)) {
       return value.map((entry) => substitute(entry, chain));
@@ -254,21 +256,29 @@ export const makeUntheme = <T extends Theme<T>>(
   const modifiers = () => proxy.theme.order;
 
   /**
-   * The context names a modifier offers.
+   * The context names a modifier offers. Throws {@link UnknownModifierError}
+   * when the contract declares no modifier under the name.
    */
   const contexts = (modifier: Modifier<T>): string[] => {
-    return Object.keys(proxy.theme.modifiers[modifier]);
+    const axis = proxy.theme.modifiers[modifier];
+    if (!axis) {
+      throw new UnknownModifierError(modifier);
+    }
+    return Object.keys(axis);
   };
 
   /**
    * Selects a context for a modifier, replacing the selection so reactive reads
-   * re-resolve.
+   * re-resolve. Throws {@link InvalidThemeError} when the context is not one
+   * the modifier declares.
    */
   const swap = <M extends Modifier<T>, C extends Context<T, M>>(
     modifier: M,
     context: C,
   ) => {
-    proxy.input = { ...proxy.input, [modifier]: context };
+    const input: Input<T> = { ...proxy.input, [modifier]: context };
+    reframe(InvalidThemeError, () => schema.assert.input(input));
+    proxy.input = input;
   };
 
   /**
@@ -322,11 +332,18 @@ export const makeUntheme = <T extends Theme<T>>(
 
   /**
    * Snapshots the active theme with the user override baked into its base
-   * tokens, as a detached theme under a new identity. The snapshot is returned,
-   * not registered.
+   * tokens, as a detached theme under a new identity. The snapshot is
+   * returned, not registered. Throws {@link InvalidThemeError} when the
+   * identity leaves it invalid.
    */
   const extract = (id: string, name: string): Theme<T> => {
-    return merge<T>(proxy.theme, { id, name, tokens: proxy.override });
+    const snapshot = merge<T>(proxy.theme, {
+      id,
+      name,
+      tokens: proxy.override,
+    });
+    reframe(InvalidThemeError, () => schema.assert.theme(snapshot));
+    return snapshot;
   };
 
   /**

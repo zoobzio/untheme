@@ -21,7 +21,7 @@ import { makeUntheme } from "./client";
  */
 export default defineNuxtPlugin({
   name: "untheme",
-  setup: (nuxtApp) => {
+  setup: async (nuxtApp) => {
     const untheme = makeUntheme(nuxtApp);
     const renderer = defineRenderer(untheme);
 
@@ -42,7 +42,7 @@ export default defineNuxtPlugin({
       ]),
     });
 
-    nuxtApp.callHook("untheme:ready", untheme);
+    await nuxtApp.callHook("untheme:ready", untheme);
 
     return {
       provide: {

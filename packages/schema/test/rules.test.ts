@@ -239,6 +239,18 @@ describe("overrides", () => {
       "type_mismatch",
     );
   });
+
+  it("rejects a cycle among the map's own entries", () => {
+    expect(first(rules.overrides, { "color.bg": "{color.bg}" })?.code).toBe(
+      "cycle",
+    );
+    expect(
+      first(rules.overrides, {
+        "color.bg": "{color.fg}",
+        "color.fg": "{color.bg}",
+      })?.code,
+    ).toBe("cycle");
+  });
 });
 
 describe("modifiers (complete)", () => {
@@ -284,13 +296,25 @@ describe("modifiers (complete)", () => {
 });
 
 describe("order", () => {
-  it("accepts modifier names", () => {
+  it("accepts a permutation of the axes", () => {
     expect(first(rules.order, ["mode", "contrast"])).toBeUndefined();
+    expect(first(rules.order, ["contrast", "mode"])).toBeUndefined();
   });
 
   it("rejects unknown names and non-arrays", () => {
     expect(first(rules.order, ["ghost"])?.code).toBe("not_member");
     expect(first(rules.order, "mode")?.code).toBe("not_array");
+  });
+
+  it("rejects a repeated axis", () => {
+    expect(first(rules.order, ["mode", "mode", "contrast"])?.code).toBe(
+      "duplicate",
+    );
+  });
+
+  it("rejects a missing axis", () => {
+    expect(first(rules.order, ["mode"])?.code).toBe("not_exhaustive");
+    expect(first(rules.order, [])?.code).toBe("not_exhaustive");
   });
 });
 

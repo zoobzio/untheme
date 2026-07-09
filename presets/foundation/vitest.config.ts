@@ -7,7 +7,7 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html"],
       reportsDirectory: ".coverage",
-      include: ["src/**/*.{ts,vue}"],
+      include: ["src/**/*.ts"],
     },
   },
 });

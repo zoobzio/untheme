@@ -45,6 +45,11 @@ describe("axis composition", () => {
     expect(modifiers.motion.default).toEqual({});
   });
 
+  it("radius.round leaves shape-full at its pill radius", () => {
+    expect(modifiers.radius.sharp).toHaveProperty(["shape-full"]);
+    expect(modifiers.radius.round).not.toHaveProperty(["shape-full"]);
+  });
+
   it("keeps the axes orthogonal outside the color/contrast collision", () => {
     for (const a of order) {
       for (const b of order) {

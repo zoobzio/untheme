@@ -38,6 +38,35 @@ describe("untheme module", () => {
     expect(mod.meta).toEqual({ name: "untheme", configKey: "untheme" });
   });
 
+  it("fails plainly when no base theme is configured", () => {
+    const missing = { ...options };
+    Reflect.deleteProperty(missing, "base");
+    expect(() => mod.setup(missing)).toThrow(/no base theme/);
+  });
+
+  it("rejects a catalog layer outside the contract", () => {
+    const bad = {
+      ...options,
+      themes: { bad: { id: "bad", name: "Bad", tokens: { ghost: "{white}" } } },
+    };
+    expect(() => mod.setup(bad)).toThrow();
+  });
+
+  it("rejects an initial selection outside the contract", () => {
+    expect(() =>
+      mod.setup({ ...options, input: { color: "banana" } }),
+    ).toThrow();
+  });
+
+  it("escapes quotes in generated context names", () => {
+    const odd = structuredClone(theme);
+    Reflect.set(odd.modifiers.color, 'dar"k', odd.modifiers.color.dark);
+    Reflect.deleteProperty(odd.modifiers.color, "dark");
+    mod.setup({ base: odd, themes: {}, input: { color: "light" } });
+    const template = kit.addTypeTemplate.mock.calls[0][0];
+    expect(template.getContents()).toContain('"dar\\"k": Overrides');
+  });
+
   it("registers a build template exporting theme, themes, and input", () => {
     mod.setup(options);
     expect(kit.addTemplate).toHaveBeenCalledTimes(2);

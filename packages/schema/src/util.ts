@@ -84,6 +84,22 @@ export const breakout =
     }
   };
 
+/** A string value is a hex color: `#` plus 3, 4, 6, or 8 hex digits. */
+export const hexColor =
+  (name: string): Rule =>
+  (v) => {
+    if (
+      typeof v === "string" &&
+      !/^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(v)
+    ) {
+      return {
+        code: "not_hex",
+        message: `${name} must be '#' followed by 3, 4, 6, or 8 hex digits.`,
+        received: v,
+      };
+    }
+  };
+
 /** The value is a member of the allowed set. */
 export const member =
   (name: string, set: Set<string>): Rule =>
@@ -284,6 +300,46 @@ export const superset =
           message: `${name} is missing required key '${key}'.`,
           path: [key],
           expected: [...set],
+        };
+      }
+    }
+  };
+
+/** An array's elements are distinct — no element appears twice. */
+export const unique =
+  (name: string): Rule =>
+  (v) => {
+    if (!Array.isArray(v)) {
+      return;
+    }
+    const seen = new Set<unknown>();
+    for (const [index, item] of v.entries()) {
+      if (seen.has(item)) {
+        return {
+          code: "duplicate",
+          message: `${name} lists '${String(item)}' more than once.`,
+          path: [String(index)],
+          received: item,
+        };
+      }
+      seen.add(item);
+    }
+  };
+
+/** An array lists every member of the required set. */
+export const exhaustive =
+  (name: string, set: Set<string>): Rule =>
+  (v) => {
+    if (!Array.isArray(v)) {
+      return;
+    }
+    for (const key of set) {
+      if (!v.includes(key)) {
+        return {
+          code: "not_exhaustive",
+          message: `${name} is missing '${key}'.`,
+          expected: [...set],
+          received: v,
         };
       }
     }

@@ -4,7 +4,7 @@ import { defineSchema } from "@untheme/schema";
 
 import { preset } from "../src/preset";
 
-import { RAMP_TOKENS } from "./fixture";
+import { RAMP_TOKENS, agrees } from "./fixture";
 
 const config = preset.use({
   color: "light",
@@ -23,6 +23,16 @@ describe("base theme", () => {
   it("carries every generated ramp token", () => {
     for (const token of RAMP_TOKENS) {
       expect(config.theme.tokens).toHaveProperty([token]);
+    }
+  });
+
+  it("pairs every ramp literal with an agreeing hex fallback", () => {
+    const ramps = new Set(RAMP_TOKENS);
+    for (const [token, definition] of Object.entries(config.theme.tokens)) {
+      if (!ramps.has(token)) {
+        continue;
+      }
+      expect.soft(agrees(definition.$value), token).toBe(true);
     }
   });
 

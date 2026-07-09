@@ -1,3 +1,4 @@
+import type { Schema, Template, Theme } from "untheme";
 import type { NuxtUnthemeConfig } from "./types";
 import { defineSchema } from "untheme";
 
@@ -13,11 +14,11 @@ import {
 /**
  * Nuxt module for untheme.
  *
- * At build time it validates the configured base theme, writes the base theme,
- * the switchable catalog, and the initial selection to the `untheme.mjs` build
- * template, derives the `Token` union and `Mod` axis structure into the
- * `types/untheme.d.ts` type template, and registers the runtime plugin and the
- * `useUntheme` auto-import.
+ * At build time it validates the configured base theme, catalog, and initial
+ * selection, writes them to the `untheme.mjs` build template, derives the
+ * `Token` union and `Mod` axis structure into the `types/untheme.d.ts` type
+ * template, and registers the runtime plugin and the `useUntheme`
+ * auto-import.
  */
 export default defineNuxtModule<NuxtUnthemeConfig>({
   meta: {
@@ -27,7 +28,17 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
   setup: (options) => {
     const resolver = createResolver(import.meta.url);
 
-    const schema = defineSchema(options.base);
+    if (!options.base) {
+      throw new Error(
+        "untheme: no base theme configured — set `untheme.base` in nuxt.config.",
+      );
+    }
+
+    const schema: Schema<Theme<Template>> = defineSchema(options.base);
+    schema.assert.input(options.input);
+    for (const layer of Object.values(options.themes ?? {})) {
+      schema.assert.layer(layer);
+    }
     const tokens = Array.from(schema.meta.enums.tokens);
     const modifiers = Array.from(schema.meta.enums.modifiers);
     const contexts = schema.meta.enums.contexts;
@@ -39,14 +50,15 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
         const mod = modifiers
           .map((modifier) => {
             const ctx = Array.from(contexts[modifier])
-              .map((context) => `"${context}": Overrides`)
+              .map((context) => `${JSON.stringify(context)}: Overrides`)
               .join("; ");
-            return `"${modifier}": { ${ctx} }`;
+            return `${JSON.stringify(modifier)}: { ${ctx} }`;
           })
           .join("; ");
+        const union = tokens.map((token) => JSON.stringify(token)).join(" | ");
         return [
           `import type { Binding } from "untheme";`,
-          `export type Token = "${tokens.join('" | "')}";`,
+          `export type Token = ${union || "never"};`,
           `export type Overrides = Partial<Record<Token, Binding>>;`,
           `export type Mod = { ${mod} };`,
         ].join("\n");
@@ -65,11 +77,6 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
       },
     });
 
-    // Declaration co-located with the `untheme.mjs` data template above: a
-    // sibling `.d.mts` overrides TypeScript's inference from the `.mjs`, which
-    // would otherwise type the resolved theme as a loose all-`string` object
-    // that fails the strict token contract. Written with `addTemplate` because
-    // `addTypeTemplate` only accepts `.d.ts`.
     addTemplate({
       filename: "untheme.d.mts",
       write: true,

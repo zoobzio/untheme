@@ -50,16 +50,16 @@ export const isDefinition = (value: unknown): value is { $value: unknown } => {
 
 /**
  * Deep structural equality over plain data: records are compared key by key,
- * arrays element by element, and primitives by `===`. Two values are equal when
- * they have the same shape and every leaf matches, which narrows `b` to `a`'s
- * type.
+ * arrays element by element, and primitives by SameValueZero — `===` except
+ * that `NaN` equals itself, so a structure containing `NaN` still equals its
+ * own rebuild. Two values are equal when they have the same shape and every
+ * leaf matches, which narrows `b` to `a`'s type.
  *
- * Non-plain values — functions and class instances — compare by identity, the
- * same reference-based test `===` applies. `NaN` follows `===` and is never
- * equal to itself; `null` and `undefined` are distinct.
+ * Non-plain values — functions and class instances — compare by identity;
+ * `null` and `undefined` are distinct.
  */
 export const isEqual = <T>(a: T, b: unknown): b is T => {
-  if (a === b) {
+  if (a === b || (Number.isNaN(a) && Number.isNaN(b))) {
     return true;
   }
 

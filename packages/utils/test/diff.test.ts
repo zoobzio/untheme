@@ -82,4 +82,16 @@ describe("diff", () => {
     expect(restored.tokens).toEqual(edited.tokens);
     expect(restored.modifiers).toEqual(edited.modifiers);
   });
+
+  it("cannot express a dropped override, so the round-trip keeps it", () => {
+    /* `to` empties the dark context; the patch has no way to say "remove",
+       so restoring over `from` leaves the original dark overrides standing. */
+    const stripped = clone(theme);
+    stripped.modifiers.mode.dark = {};
+    const result = diff(theme, stripped);
+
+    expect(result.modifiers.mode.dark).toEqual({});
+    const restored = merge(theme, { modifiers: result.modifiers });
+    expect(restored.modifiers.mode.dark).toEqual(theme.modifiers.mode.dark);
+  });
 });

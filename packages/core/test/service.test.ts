@@ -9,6 +9,7 @@ import {
   InvalidLayerError,
   InvalidPatchError,
   InvalidThemeError,
+  UnknownModifierError,
   UnknownThemeError,
 } from "../src/error";
 import { black, blue, theme, white } from "./fixture";
@@ -75,6 +76,13 @@ describe("modifiers / contexts", () => {
     expect(u.contexts("mode")).toEqual(["light", "dark"]);
     expect(u.contexts("contrast")).toEqual(["normal", "high"]);
   });
+
+  it("contexts throws a semantic error on an unknown axis", () => {
+    const u = defineUntheme(makeConfig());
+    expect(() => Reflect.apply(u.contexts, undefined, ["ghost"])).toThrow(
+      UnknownModifierError,
+    );
+  });
 });
 
 describe("tokens / get", () => {
@@ -122,6 +130,14 @@ describe("swap", () => {
     u.swap("mode", "dark");
     expect(u.config.input.contrast).toBe("normal");
   });
+
+  it("rejects a context the modifier does not declare", () => {
+    const u = defineUntheme(makeConfig());
+    expect(() => Reflect.apply(u.swap, undefined, ["mode", "banana"])).toThrow(
+      InvalidThemeError,
+    );
+    expect(u.config.input.mode).toBe("light");
+  });
 });
 
 describe("set / dirty / reset (the override)", () => {
@@ -150,6 +166,14 @@ describe("set / dirty / reset (the override)", () => {
     u.set("color.bg", "{ghost}");
     u.set("space.sm", blue);
     expect(u.dirty()).toBe(false);
+  });
+
+  it("stores a detached copy, so mutating the caller's value afterwards changes nothing", () => {
+    const u = defineUntheme(makeConfig());
+    const value = structuredClone(blue);
+    u.set("color.bg", value);
+    Reflect.set(value, "components", "garbage");
+    expect(u.get("color.bg")).toEqual(blue);
   });
 
   it("dirty tracks the override; reset clears it", () => {
@@ -362,6 +386,11 @@ describe("create / extract / remove", () => {
     expect(u.config.theme.id).toBe("demo");
   });
 
+  it("extract rejects an empty identity", () => {
+    const u = defineUntheme(makeConfig());
+    expect(() => u.extract("", "")).toThrow(InvalidThemeError);
+  });
+
   it("remove drops a catalog entry", () => {
     const u = defineUntheme(makeConfig(), {
       alt: { id: "alt", name: "Alt", tokens: {} },
@@ -406,6 +435,60 @@ describe("Options middleware", () => {
     u.set("color.bg", blue);
     expect(writes).toHaveLength(1);
     expect(writes[0]).toEqual({ "color.bg": blue });
+  });
+
+  it("intercepts reads of the theme", () => {
+    const u = defineUntheme(
+      makeConfig(),
+      {},
+      {
+        get: {
+          config: { theme: (value) => ({ ...value, name: "Seen" }) },
+        },
+      },
+    );
+    expect(u.config.theme.name).toBe("Seen");
+  });
+
+  it("intercepts reads of the override", () => {
+    const u = defineUntheme(
+      makeConfig(),
+      {},
+      {
+        get: {
+          config: { override: () => ({ "color.bg": blue }) },
+        },
+      },
+    );
+    expect(u.get("color.bg")).toEqual(blue);
+    expect(u.dirty()).toBe(true);
+  });
+
+  it("intercepts registry reads and writes per key", () => {
+    const reads: string[] = [];
+    const u = defineUntheme(
+      makeConfig(),
+      { alt: { id: "alt", name: "Alt", tokens: {} } },
+      {
+        get: {
+          themes: {
+            alt: (layer) => {
+              reads.push(layer.id);
+              return layer;
+            },
+          },
+        },
+        set: {
+          themes: {
+            made: (layer) => ({ ...layer, name: "Renamed" }),
+          },
+        },
+      },
+    );
+    u.select("alt");
+    expect(reads).toContain("alt");
+    u.create({ id: "made", name: "Made", tokens: {} });
+    expect(u.themes.made.name).toBe("Renamed");
   });
 
   it("intercepts writes of the theme", () => {

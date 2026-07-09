@@ -86,7 +86,8 @@ export interface Untheme<T extends Template> {
   modifiers: () => Modifier<T>[];
 
   /**
-   * The context names a modifier offers.
+   * The context names a modifier offers. Throws `UnknownModifierError` when
+   * the contract declares no modifier under the name.
    */
   contexts: (modifier: Modifier<T>) => string[];
 
@@ -111,7 +112,9 @@ export interface Untheme<T extends Template> {
   resolve: (token: Token<T>) => Values<Open>[Type];
 
   /**
-   * Selects a context for a modifier — the cheap runtime swap.
+   * Selects a context for a modifier — the cheap runtime swap. Throws
+   * `InvalidThemeError` when the context names no declared context of the
+   * modifier.
    */
   swap: <M extends Modifier<T>, C extends Context<T, M>>(
     modifier: M,
@@ -121,7 +124,7 @@ export interface Untheme<T extends Template> {
   /**
    * Writes a token into the user override layer. A write outside the contract —
    * an unknown token, or a value invalid for that token's declared type — is a
-   * silent no-op.
+   * silent no-op. The override holds a detached copy of the value.
    */
   set: (token: Token<T>, value: Binding) => void;
 
@@ -168,7 +171,8 @@ export interface Untheme<T extends Template> {
 
   /**
    * Snapshots the active theme and override as a detached theme; not
-   * registered.
+   * registered. Throws `InvalidThemeError` when the identity leaves the
+   * snapshot invalid.
    */
   extract: (id: string, name: string) => Theme<T>;
 

@@ -82,6 +82,21 @@ describe("map", () => {
       active: "active",
     });
   });
+
+  it("skips absent optional keys, though the result type claims them", () => {
+    /* The documented exact-keys assumption: presence is asserted, not
+       proven. */
+    const source: { a?: number } = {};
+    const result = map(source, (value) => String(value));
+    expect(result).toEqual({});
+    expect("a" in result).toBe(false);
+  });
+
+  it("emits entries for excess keys the parameter type hides", () => {
+    const wide = { a: 1, b: 2 };
+    const narrow: { a: number } = wide;
+    expect(map(narrow, (value) => value + 1)).toEqual({ a: 2, b: 3 });
+  });
 });
 
 describe("remap", () => {

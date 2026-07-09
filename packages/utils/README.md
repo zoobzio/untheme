@@ -39,7 +39,7 @@ Unlike `merge`, which stays within one contract, `extend` is the widening primit
 
 ### `diff(from, to)`
 
-Computes the patch that turns `from` into `to`: every binding `to` holds that deviates from `from`, token by token and context by context. At the token level only the bound `$value` is compared and emitted — a token's metadata cannot drift through the patch pipeline. Identity and order are not compared. Empty maps mean the themes bind identically; applying the result to `from` via `merge` restores `to` value-wise: only `$value` bindings are compared and carried, so identity, order, and slot metadata are not part of the restoration.
+Computes the patch that turns `from` into `to`: every binding `to` holds that deviates from `from`, token by token and context by context. At the token level only the bound `$value` is compared and emitted — a token's metadata cannot drift through the patch pipeline. Identity and order are not compared. Empty maps mean the themes bind identically; applying the result to `from` via `merge` restores every binding `to` carries. A patch can add and override, never remove — a context override `from` holds that `to` dropped survives the restoration, and identity, order, and slot metadata are not part of it.
 
 ```ts
 import { diff, merge } from "@untheme/utils";

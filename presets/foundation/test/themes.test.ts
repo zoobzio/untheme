@@ -4,7 +4,7 @@ import { defineSchema } from "@untheme/schema";
 
 import { preset } from "../src/preset";
 
-import { RAMP_TOKENS } from "./fixture";
+import { RAMP_TOKENS, agrees } from "./fixture";
 
 import ayu from "../src/themes/ayu";
 import catppuccin from "../src/themes/catppuccin";
@@ -74,5 +74,11 @@ describe.each(Object.entries(themes))("theme %s", (id, theme) => {
 
   it("resolves against the base into a complete theme", () => {
     expect(schema.check.theme(preset.define(theme))).toBe(true);
+  });
+
+  it("pairs every ramp literal with an agreeing hex fallback", () => {
+    for (const [token, value] of Object.entries(theme.tokens)) {
+      expect.soft(agrees(value), token).toBe(true);
+    }
   });
 });

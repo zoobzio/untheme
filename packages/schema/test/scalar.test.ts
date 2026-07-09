@@ -107,6 +107,20 @@ describe("literalColor", () => {
     ).toBe("not_number");
   });
 
+  it("rejects a malformed hex fallback", () => {
+    expect(
+      literalColor({ colorSpace: "srgb", components: [0], hex: "abcdef" })
+        ?.code,
+    ).toBe("not_hex");
+    expect(
+      literalColor({
+        colorSpace: "srgb",
+        components: [0],
+        hex: ";} body { background: url(evil) }",
+      })?.code,
+    ).toBe("not_hex");
+  });
+
   it("rejects alpha outside the unit interval", () => {
     expect(
       literalColor({ colorSpace: "srgb", components: [0], alpha: 5 })?.code,

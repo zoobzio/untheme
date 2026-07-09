@@ -65,6 +65,16 @@ export const defineRenderer = <T extends Template>(
   };
 
   /**
+   * The attribute selector for a modifier context, both names escaped — the
+   * schema constrains neither.
+   */
+  const attribute = (modifier: string, context: string): string => {
+    const name = modifier.replace(/[^a-zA-Z0-9_-]/g, (found) => `\\${found}`);
+    const value = context.replace(/["\\]/g, (found) => `\\${found}`);
+    return `[data-${name}="${value}"]`;
+  };
+
+  /**
    * The custom property name for a token.
    */
   const prop = <K extends Token<T>>(token: K): Variable<K> => {
@@ -132,7 +142,7 @@ export const defineRenderer = <T extends Template>(
         if (Object.keys(decls).length === 0) {
           continue;
         }
-        blocks.push(block(`[data-${modifier}="${context}"]`, decls));
+        blocks.push(block(attribute(modifier, context), decls));
       }
     }
     return blocks.join("\n");

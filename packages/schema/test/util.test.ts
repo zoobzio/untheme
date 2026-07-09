@@ -9,8 +9,10 @@ import {
   container,
   each,
   either,
+  exhaustive,
   fields,
   filled,
+  hexColor,
   keyed,
   keys,
   known,
@@ -27,6 +29,7 @@ import {
   superset,
   target,
   text,
+  unique,
   valued,
 } from "../src/util";
 
@@ -139,6 +142,25 @@ describe("breakout", () => {
 
   it("passes non-strings untouched", () => {
     expect(rule(5)).toBeUndefined();
+  });
+});
+
+describe("hexColor", () => {
+  const rule = hexColor("N");
+
+  it("passes each hex digit count and non-strings", () => {
+    expect(rule("#abc")).toBeUndefined();
+    expect(rule("#abcd")).toBeUndefined();
+    expect(rule("#AbCdEf")).toBeUndefined();
+    expect(rule("#abcdef01")).toBeUndefined();
+    expect(rule(5)).toBeUndefined();
+  });
+
+  it("fails a missing '#', a bad length, and non-hex characters", () => {
+    expect(rule("abcdef")?.code).toBe("not_hex");
+    expect(rule("#abcde")?.code).toBe("not_hex");
+    expect(rule("#xyzxyz")?.code).toBe("not_hex");
+    expect(rule(";} body { background: url(evil) }")?.code).toBe("not_hex");
   });
 });
 
@@ -370,6 +392,38 @@ describe("superset", () => {
 
   it("passes non-records untouched", () => {
     expect(rule("x")).toBeUndefined();
+  });
+});
+
+describe("unique", () => {
+  const rule = unique("N");
+
+  it("passes distinct elements and non-arrays", () => {
+    expect(rule(["a", "b"])).toBeUndefined();
+    expect(rule([])).toBeUndefined();
+    expect(rule("a")).toBeUndefined();
+  });
+
+  it("fails a repeated element, under its index", () => {
+    const issue = rule(["a", "b", "a"]);
+    expect(issue?.code).toBe("duplicate");
+    expect(issue?.path).toEqual(["2"]);
+  });
+});
+
+describe("exhaustive", () => {
+  const rule = exhaustive("N", new Set(["a", "b"]));
+
+  it("passes an array carrying every member, and non-arrays", () => {
+    expect(rule(["b", "a"])).toBeUndefined();
+    expect(rule(["a", "b", "c"])).toBeUndefined();
+    expect(rule(5)).toBeUndefined();
+  });
+
+  it("fails when a member is missing", () => {
+    const issue = rule(["a"]);
+    expect(issue?.code).toBe("not_exhaustive");
+    expect(issue?.expected).toEqual(["a", "b"]);
   });
 });
 

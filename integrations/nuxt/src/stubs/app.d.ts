@@ -27,7 +27,10 @@ interface NuxtPluginDef {
   dependsOn?: string[];
   setup: (
     nuxtApp: NuxtApp,
-  ) => void | Promise<void> | { provide?: Record<string, unknown> };
+  ) =>
+    | void
+    | { provide?: Record<string, unknown> }
+    | Promise<void | { provide?: Record<string, unknown> }>;
 }
 
 export declare function defineNuxtPlugin(plugin: NuxtPluginDef): NuxtPluginDef;

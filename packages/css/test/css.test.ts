@@ -1,3 +1,5 @@
+import type { Contract } from "@untheme/schema";
+
 import { describe, expect, it } from "vitest";
 
 import { map } from "@untheme/common";
@@ -174,6 +176,44 @@ describe("defineRenderer", () => {
     it("holds only the overridden tokens in a context block", () => {
       const dark = css.slice(css.indexOf('[data-mode="dark"]'));
       expect(dark).not.toContain("--space-sm");
+    });
+  });
+
+  describe("escaping", () => {
+    /* Names the schema admits but CSS text must not take at face value: a
+       family carrying a quote, a family named by a reserved word, and a
+       modifier axis and context carrying quotes. */
+    type OddTok = "font.brand" | "font.reserved";
+    type OddMod = { 'mo"de': { plain: object; 'dar"k': object } };
+    const odd: Contract<OddTok, OddMod> = {
+      id: "odd",
+      name: "Odd",
+      tokens: {
+        "font.brand": { $type: "fontFamily", $value: ['My "Font"', "serif"] },
+        "font.reserved": { $type: "fontFamily", $value: "inherit" },
+      },
+      modifiers: {
+        'mo"de': { plain: {}, 'dar"k': { "font.reserved": "monospace" } },
+      },
+      order: ['mo"de'],
+    };
+    const renderer = defineRenderer({
+      config: { theme: odd },
+      tokens: () => map(odd.tokens, (slot) => slot.$value),
+    });
+
+    it("escapes quotes inside a quoted family name", () => {
+      expect(renderer.variables()["--font-brand"]).toBe(
+        '"My \\"Font\\"", serif',
+      );
+    });
+
+    it("quotes a family named by a reserved word", () => {
+      expect(renderer.variables()["--font-reserved"]).toBe('"inherit"');
+    });
+
+    it("escapes the modifier and context in the sheet's attribute selector", () => {
+      expect(renderer.sheet()).toContain('[data-mo\\"de="dar\\"k"] {');
     });
   });
 

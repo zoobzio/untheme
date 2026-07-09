@@ -41,8 +41,8 @@ vi.mock("#imports", () => ({
 
 import plugin from "../../src/runtime/plugin";
 
-const setup = () => {
-  const result = plugin.setup({ callHook } as never);
+const setup = async () => {
+  const result = await plugin.setup({ callHook } as never);
   if (
     !result ||
     typeof result !== "object" ||
@@ -65,13 +65,13 @@ describe("untheme plugin", () => {
     expect(plugin.name).toBe("untheme");
   });
 
-  it("provides the untheme service", () => {
-    const provide = setup();
+  it("provides the untheme service", async () => {
+    const provide = await setup();
     expect(provide.untheme).toBeDefined();
   });
 
-  it("mirrors the selection as data attributes and injects token CSS", () => {
-    setup();
+  it("mirrors the selection as data attributes and injects token CSS", async () => {
+    await setup();
     expect(headCalls[0].htmlAttrs["data-color"].value).toBe("light");
     expect(headCalls[0].style.value[0].key).toBe("untheme");
     const css = headCalls[0].style.value[0].innerHTML;
@@ -80,14 +80,14 @@ describe("untheme plugin", () => {
     expect(css).toContain("--primary: var(--blue);");
   });
 
-  it("emits untheme:ready with the service", () => {
-    const provide = setup();
+  it("emits untheme:ready with the service", async () => {
+    const provide = await setup();
     expect(callHook).toHaveBeenCalledWith("untheme:ready", provide.untheme);
   });
 
   describe("reactivity", () => {
     it("updates the data attribute when the context changes", async () => {
-      setup();
+      await setup();
       expect(headCalls[0].htmlAttrs["data-color"].value).toBe("light");
       config.value.input.color = "dark";
       await nextTick();
@@ -95,7 +95,7 @@ describe("untheme plugin", () => {
     });
 
     it("re-renders the token CSS when the context changes", async () => {
-      setup();
+      await setup();
       expect(headCalls[0].style.value[0].innerHTML).toContain(
         "--primary: var(--blue);",
       );

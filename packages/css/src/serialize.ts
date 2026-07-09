@@ -3,7 +3,7 @@ import type { Inputs } from "./types";
 
 import { isReference } from "@untheme/common";
 
-import { FONT_WEIGHT_NUMBERS } from "./constant";
+import { FONT_WEIGHT_NUMBERS, RESERVED_FAMILY_NAMES } from "./constant";
 import { indirection, property } from "./property";
 
 /**
@@ -70,14 +70,18 @@ const measure = (value: Inputs["dimension"] | Inputs["duration"]): string => {
 };
 
 /**
- * A family name: bare when it is a plain ident, quoted otherwise, so names
- * with spaces or other characters stay one name.
+ * A family name: bare when it is a plain ident and not a reserved word,
+ * quoted otherwise — with quotes and backslashes escaped — so any name stays
+ * one name.
  */
 const familyName = (value: string): string => {
-  if (/^[a-zA-Z-][a-zA-Z0-9-]*$/.test(value)) {
+  if (
+    /^[a-zA-Z-][a-zA-Z0-9-]*$/.test(value) &&
+    !RESERVED_FAMILY_NAMES.has(value.toLowerCase())
+  ) {
     return value;
   }
-  return `"${value}"`;
+  return `"${value.replace(/["\\]/g, (found) => `\\${found}`)}"`;
 };
 
 /**

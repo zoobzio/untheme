@@ -137,8 +137,12 @@ describe("isEqual", () => {
     expect(isEqual(null, undefined)).toBe(false);
   });
 
-  it("never reports NaN as equal to itself", () => {
-    expect(isEqual(NaN, NaN)).toBe(false);
+  it("reports NaN as equal to itself, and only to itself", () => {
+    expect(isEqual(NaN, NaN)).toBe(true);
+    expect(isEqual(NaN, 0)).toBe(false);
+    expect(isEqual(0, NaN)).toBe(false);
+    expect(isEqual({ a: NaN }, { a: NaN })).toBe(true);
+    expect(isEqual([NaN], [NaN])).toBe(true);
   });
 
   it("compares records key by key", () => {

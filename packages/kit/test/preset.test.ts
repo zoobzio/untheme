@@ -66,6 +66,15 @@ describe("defineUnthemePreset", () => {
       });
       expect(base.tokens.blue.$value).toBe(blue);
     });
+
+    it("silently drops a binding outside the contract", () => {
+      /* The type layer is the real gate; Reflect skirts it the way an untyped
+         caller would. Merge skips keys the base declares no slot for. */
+      const layer = { id: "brand", name: "Brand", tokens: { blue: navy } };
+      Reflect.set(layer.tokens, "ghost", red);
+      const theme = preset.define(layer);
+      expect("ghost" in theme.tokens).toBe(false);
+    });
   });
 
   describe("configure", () => {

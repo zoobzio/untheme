@@ -6,16 +6,16 @@
   "types": "./.dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./.dist/index.mjs",
-      "types": "./.dist/index.d.ts"
+      "types": "./.dist/index.d.ts",
+      "import": "./.dist/index.mjs"
     },
     "./css": {
-      "import": "./.dist/css.mjs",
-      "types": "./.dist/css.d.ts"
+      "types": "./.dist/css.d.ts",
+      "import": "./.dist/css.mjs"
     },
     "./kit": {
-      "import": "./.dist/kit.mjs",
-      "types": "./.dist/kit.d.ts"
+      "types": "./.dist/kit.d.ts",
+      "import": "./.dist/kit.mjs"
     }
   },
   "files": [
@@ -25,7 +25,8 @@
     "build": "unbuild",
     "stub": "unbuild --stub",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@untheme/core": "workspace:*",

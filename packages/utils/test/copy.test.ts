@@ -45,6 +45,16 @@ describe("copy", () => {
     expect(result.b).toBeUndefined();
   });
 
+  it("copies structures containing NaN without throwing", () => {
+    const source = { a: NaN, list: [NaN, 1], nested: { b: NaN } };
+    const result = copy(source);
+
+    expect(result).not.toBe(source);
+    expect(result.a).toBeNaN();
+    expect(result.list).toEqual([NaN, 1]);
+    expect(result.nested.b).toBeNaN();
+  });
+
   it("passes functions and class instances through by reference", () => {
     const fn = () => 1;
     class Box {

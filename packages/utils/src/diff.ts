@@ -11,7 +11,9 @@ import { traverse } from "./traverse";
  * level the bound `$value` is compared and emitted — a token's metadata cannot
  * drift through the patch pipeline, so only the binding is carried. Identity and
  * order are not compared. Empty maps mean the themes bind identically; applying
- * the result to `from` via `merge` restores `to` value-wise.
+ * the result to `from` via `merge` restores every binding `to` carries. A
+ * binding `from` holds that `to` dropped is not restored — a patch can add and
+ * override, never remove.
  */
 export const diff = <T extends Template>(
   from: Theme<T>,

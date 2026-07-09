@@ -36,18 +36,18 @@ automatically.
 
 Six modifier axes, composing in `order`:
 
-| Axis       | Contexts                        | Overrides                    |
-| ---------- | ------------------------------- | ---------------------------- |
-| `color`    | `light` / `dark`                | color roles + channels       |
-| `contrast` | `default` / `medium` / `high`   | color roles → channels       |
-| `text`     | `sm` / `md` / `lg`              | type-scale sizes and leading |
-| `density`  | `compact` / `default` / `spacious` | spacing and control metrics |
-| `radius`   | `sharp` / `default` / `round`   | shape radii                  |
-| `motion`   | `default` / `reduced`           | durations → `0ms`            |
+| Axis       | Contexts                           | Overrides                    |
+| ---------- | ---------------------------------- | ---------------------------- |
+| `color`    | `light` / `dark`                   | color roles + channels       |
+| `contrast` | `default` / `medium` / `high`      | color roles → channels       |
+| `text`     | `sm` / `md` / `lg`                 | type-scale sizes and leading |
+| `density`  | `compact` / `default` / `spacious` | spacing and control metrics  |
+| `radius`   | `sharp` / `default` / `round`      | shape radii                  |
+| `motion`   | `default` / `reduced`              | durations → `0ms`            |
 
 The base tokens are the default context of every axis, so each default
 context is empty. The axes override disjoint token sets — apart from `color`
-and `contrast`, whose collision is the point (below) — so all 216
+and `contrast`, whose collision is the point (below) — so all 324
 combinations stay coherent without being individually authored.
 
 ## The contrast channels
@@ -111,8 +111,9 @@ Each file carries exactly the eight re-seeded ramps and nothing else.
 
 ## Regenerating
 
-`src/ramps.ts` and `src/themes/*.ts` are generated literals — the committed
-files are what builds and ships; no color math runs at runtime. To change a
+The ramps in `src/preset.ts` and the files in `src/themes/*.ts` are generated
+literals — the committed files are what builds and ships; no color math runs
+at runtime. To change a
 palette, edit the seed hexes in `scripts/seeds.json` and run:
 
 ```sh

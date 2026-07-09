@@ -55,6 +55,22 @@ export class UnknownThemeError extends Error {
 }
 
 /**
+ * Raised when {@link Untheme.contexts} is handed a name the contract declares
+ * no modifier under. Like {@link UnknownThemeError} this is a lookup miss, not
+ * a contract violation, so it extends the plain {@link Error} while carrying
+ * the offending `modifier`.
+ */
+export class UnknownModifierError extends Error {
+  readonly modifier: string;
+
+  constructor(modifier: string) {
+    super(`no modifier declared under "${modifier}"`);
+    this.name = "UnknownModifierError";
+    this.modifier = modifier;
+  }
+}
+
+/**
  * Raised when {@link Untheme.resolve} follows an alias chain that loops back on
  * itself. Like {@link UnknownThemeError} it carries no {@link Issue}s — a cycle
  * is a resolution failure, not a contract violation — so it extends the plain

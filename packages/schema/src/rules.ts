@@ -10,6 +10,7 @@ import {
   container,
   each,
   either,
+  exhaustive,
   filled,
   keyed,
   keys,
@@ -23,6 +24,7 @@ import {
   subset,
   superset,
   text,
+  unique,
   valued,
 } from "./util";
 
@@ -53,26 +55,37 @@ export const defineRules = <T extends Template>(
     };
   };
 
+  /* The atoms a definition composes, built once and shared across calls. */
+  const definitionContainer = container("Definition");
+  const definitionSubset = subset("Definition", enums.definitionKeys);
+  const definitionSuperset = superset(
+    "Definition",
+    enums.requiredDefinitionKeys,
+  );
+  const definitionType = known("Type", enums.tokenTypes);
+  const descriptionText = text("$description");
+  const extensionsContainer = container("$extensions");
+
   /* A single token definition: a known type, a value valid for that type, and
      inert metadata. The $type/$value correlation is resolved here — the value
      is checked against the rule for its own declared type. */
   const definition: Rule = (v) => {
-    const notObject = container("Definition")(v);
+    const notObject = definitionContainer(v);
     if (notObject) {
       return notObject;
     }
     if (!isObject(v)) {
       return;
     }
-    const stray = subset("Definition", enums.definitionKeys)(v);
+    const stray = definitionSubset(v);
     if (stray) {
       return stray;
     }
-    const missing = superset("Definition", enums.requiredDefinitionKeys)(v);
+    const missing = definitionSuperset(v);
     if (missing) {
       return missing;
     }
-    const badType = known("Type", enums.tokenTypes)(v.$type);
+    const badType = definitionType(v.$type);
     if (badType) {
       return nest("$type", badType);
     }
@@ -84,7 +97,7 @@ export const defineRules = <T extends Template>(
       }
     }
     if ("$description" in v) {
-      const badDescription = text("$description")(v.$description);
+      const badDescription = descriptionText(v.$description);
       if (badDescription) {
         return nest("$description", badDescription);
       }
@@ -96,7 +109,7 @@ export const defineRules = <T extends Template>(
       }
     }
     if ("$extensions" in v) {
-      const badExtensions = container("$extensions")(v.$extensions);
+      const badExtensions = extensionsContainer(v.$extensions);
       if (badExtensions) {
         return nest("$extensions", badExtensions);
       }
@@ -104,17 +117,22 @@ export const defineRules = <T extends Template>(
   };
 
   /* A partial override map: a subset of tokens, each rebinding its value
-     against that token's declared type. */
+     against that token's declared type, with no reference cycle among the
+     map's own entries — those win composition together, so such a cycle can
+     never resolve. References that leave the map are a resolution-time
+     concern. */
+  const overrideRules: Record<string, Rule[]> = {};
+  for (const token of enums.tokens) {
+    overrideRules[token] = [shape[enums.types[token]].value];
+  }
   const overridePicker = (key: string): Rule[] => {
-    if (!(key in enums.types)) {
-      return [];
-    }
-    return [shape[enums.types[key]].value];
+    return overrideRules[key] ?? [];
   };
   const overrides = [
     container("Overrides"),
     subset("Overrides", enums.tokens),
     keyed(overridePicker),
+    acyclic("Overrides", enums.tokens, collectRefs),
   ];
 
   /* Edges of the reference graph: the tokens a definition's value names. */
@@ -179,7 +197,12 @@ export const defineRules = <T extends Template>(
     container("Modifiers"),
     fields("Modifiers", partialFields),
   ];
-  const order = [list("Order", [member("Modifier", enums.modifiers)])];
+  /* Composition precedence: an exact permutation of the axes. */
+  const order = [
+    list("Order", [member("Modifier", enums.modifiers)]),
+    unique("Order"),
+    exhaustive("Order", enums.modifiers),
+  ];
 
   return {
     modifier: [text("Modifier"), member("Modifier", enums.modifiers)],

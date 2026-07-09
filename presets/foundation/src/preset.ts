@@ -33,7 +33,7 @@ export const preset = defineUnthemePreset({
     // Tonal ramps — eight functional palettes at the 26 M3 tone stops
     "primary-0": {
       $type: "color",
-      $value: { colorSpace: "srgb", components: [0, 0, 0] },
+      $value: { colorSpace: "srgb", components: [0, 0, 0], hex: "#000000" },
     },
     "primary-4": {
       $type: "color",
@@ -2718,6 +2718,7 @@ export const preset = defineUnthemePreset({
         "shape-extra-extra-large": { value: 0, unit: "px" },
         "shape-full": { value: 0, unit: "px" },
       },
+      // shape-full stays at its pill radius — it cannot get rounder.
       round: {
         "shape-extra-small": { value: 8, unit: "px" },
         "shape-small": { value: 12, unit: "px" },
