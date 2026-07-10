@@ -18,4 +18,16 @@ export default tseslint.config(
       "@typescript-eslint/consistent-type-imports": "error",
     },
   },
+  {
+    /* Generator scripts run under node, whose runtime globals the browserless
+       default config does not declare. */
+    files: ["**/scripts/**/*.mjs"],
+    languageOptions: {
+      globals: {
+        URL: "readonly",
+        console: "readonly",
+        process: "readonly",
+      },
+    },
+  },
 );

@@ -1,0 +1,448 @@
+{
+  "base": {
+    "primary": "#0ea77e",
+    "secondary": "#7a5fd0",
+    "tertiary": "#c74f9e",
+    "error": "#dc4a5e",
+    "success": "#57a53c",
+    "warning": "#c08a1f",
+    "neutral": "#787f8a",
+    "neutral-variant": "#71809b"
+  },
+  "themes": {
+    "abyss": {
+      "name": "Abyss",
+      "description": "Bioluminescent cyan and deep-sea blues on abyssal grays",
+      "seeds": {
+        "primary": "#22b8cf",
+        "secondary": "#3f7bd9",
+        "tertiary": "#7a63d9",
+        "error": "#e35171",
+        "success": "#2fa87d",
+        "warning": "#cfa03a",
+        "neutral": "#6f7c8f",
+        "neutral-variant": "#66788f"
+      }
+    },
+    "aurora": {
+      "name": "Aurora",
+      "description": "Electric teal-green, violet, and magenta on cold blue-grays — the preset's own borealis palette",
+      "seeds": {
+        "primary": "#0ea77e",
+        "secondary": "#7a5fd0",
+        "tertiary": "#c74f9e",
+        "error": "#dc4a5e",
+        "success": "#57a53c",
+        "warning": "#c08a1f",
+        "neutral": "#787f8a",
+        "neutral-variant": "#71809b"
+      }
+    },
+    "ayu": {
+      "name": "Ayu",
+      "description": "Warm orange over deep blue-black, from the Ayu editor colorscheme",
+      "seeds": {
+        "primary": "#bc5c0a",
+        "secondary": "#007fb3",
+        "tertiary": "#8d65b8",
+        "error": "#c55059",
+        "success": "#5d8200",
+        "warning": "#9a700b",
+        "neutral": "#74777f",
+        "neutral-variant": "#6c7886"
+      }
+    },
+    "catppuccin": {
+      "name": "Catppuccin Mocha",
+      "description": "Soothing lavender and blue pastels, from Catppuccin Mocha",
+      "seeds": {
+        "primary": "#8a67b3",
+        "secondary": "#4b78ba",
+        "tertiary": "#8e7070",
+        "error": "#b65975",
+        "success": "#4c844b",
+        "warning": "#a46943",
+        "neutral": "#767589",
+        "neutral-variant": "#73768c"
+      }
+    },
+    "cyberdream": {
+      "name": "Cyberdream",
+      "description": "Neon blue and violet on graphite, from the Cyberdream colorscheme",
+      "seeds": {
+        "primary": "#2b77d2",
+        "secondary": "#a647e8",
+        "tertiary": "#00848d",
+        "error": "#ce4a3d",
+        "success": "#008a26",
+        "warning": "#a16c10",
+        "neutral": "#75777b",
+        "neutral-variant": "#6e7789"
+      }
+    },
+    "dracula": {
+      "name": "Dracula",
+      "description": "Vivid purple, pink, and cyan on cool darks, from Dracula",
+      "seeds": {
+        "primary": "#8b63c5",
+        "secondary": "#c34893",
+        "tertiary": "#058395",
+        "error": "#db3b3e",
+        "success": "#008a37",
+        "warning": "#a46a26",
+        "neutral": "#757684",
+        "neutral-variant": "#73768b"
+      }
+    },
+    "dune": {
+      "name": "Dune",
+      "description": "Terracotta, sand, and dusk mauve over sandstone grays",
+      "seeds": {
+        "primary": "#c4763a",
+        "secondary": "#b3924e",
+        "tertiary": "#9c6b93",
+        "error": "#cc4b3c",
+        "success": "#6f9c49",
+        "warning": "#d39a2b",
+        "neutral": "#8c8272",
+        "neutral-variant": "#968a75"
+      }
+    },
+    "ember": {
+      "name": "Ember",
+      "description": "Volcanic orange and copper over warm ash",
+      "seeds": {
+        "primary": "#e05d2a",
+        "secondary": "#b0623c",
+        "tertiary": "#8a4f6d",
+        "error": "#d43d3d",
+        "success": "#7a9b3e",
+        "warning": "#dd9426",
+        "neutral": "#84776f",
+        "neutral-variant": "#8c7a6d"
+      }
+    },
+    "everforest": {
+      "name": "Everforest",
+      "description": "Muted forest greens with warm accents, from Everforest",
+      "seeds": {
+        "primary": "#687f45",
+        "secondary": "#46817a",
+        "tertiary": "#9d6782",
+        "error": "#b95a5d",
+        "success": "#687f45",
+        "warning": "#8d743e",
+        "neutral": "#70787f",
+        "neutral-variant": "#6d7a72"
+      }
+    },
+    "flexoki": {
+      "name": "Flexoki",
+      "description": "Inky blue, cyan, and purple on warm paper grays, from Flexoki",
+      "seeds": {
+        "primary": "#4385be",
+        "secondary": "#3aa99f",
+        "tertiary": "#8b7ec8",
+        "error": "#d14d41",
+        "success": "#879a39",
+        "warning": "#da702c",
+        "neutral": "#878580",
+        "neutral-variant": "#6f6e69"
+      }
+    },
+    "github": {
+      "name": "GitHub",
+      "description": "GitHub's blue, purple, and green brand hues",
+      "seeds": {
+        "primary": "#2374e5",
+        "secondary": "#8b59e8",
+        "tertiary": "#3a8647",
+        "error": "#e13139",
+        "success": "#3a8647",
+        "warning": "#a16d08",
+        "neutral": "#73777f",
+        "neutral-variant": "#6f7882"
+      }
+    },
+    "glacier": {
+      "name": "Glacier",
+      "description": "Ice blues and periwinkle over frosted grays, light and cold",
+      "seeds": {
+        "primary": "#3d94cf",
+        "secondary": "#5f9ea8",
+        "tertiary": "#8895c9",
+        "error": "#d95461",
+        "success": "#4aa06c",
+        "warning": "#c2924a",
+        "neutral": "#8a929c",
+        "neutral-variant": "#8793a6"
+      }
+    },
+    "graphite": {
+      "name": "Graphite",
+      "description": "Grayscale identity with quietly hued semantics — the system with color removed",
+      "seeds": {
+        "primary": "#6b6b6b",
+        "secondary": "#878787",
+        "tertiary": "#4f4f4f",
+        "error": "#9e5a5a",
+        "success": "#5f7f63",
+        "warning": "#8f7a4d",
+        "neutral": "#7a7a7a",
+        "neutral-variant": "#707070"
+      }
+    },
+    "gruvbox": {
+      "name": "Gruvbox",
+      "description": "Retro teal and warm earth tones, from Gruvbox",
+      "seeds": {
+        "primary": "#418184",
+        "secondary": "#4f8352",
+        "tertiary": "#ac5e82",
+        "error": "#e03429",
+        "success": "#7c7b00",
+        "warning": "#9f6e00",
+        "neutral": "#837654",
+        "neutral-variant": "#837566"
+      }
+    },
+    "horizon": {
+      "name": "Horizon",
+      "description": "Coral pink and violet dusk tones, from Horizon",
+      "seeds": {
+        "primary": "#d24167",
+        "secondary": "#9b5cbe",
+        "tertiary": "#00848e",
+        "error": "#e02e4f",
+        "success": "#00885d",
+        "warning": "#9b6d4b",
+        "neutral": "#757680",
+        "neutral-variant": "#717499"
+      }
+    },
+    "kanagawa": {
+      "name": "Kanagawa",
+      "description": "Wave blue and ink violet, from Kanagawa",
+      "seeds": {
+        "primary": "#5977b0",
+        "secondary": "#826da5",
+        "tertiary": "#507f80",
+        "error": "#cf494b",
+        "success": "#627f57",
+        "warning": "#9d6e2f",
+        "neutral": "#777681",
+        "neutral-variant": "#78776f"
+      }
+    },
+    "manuscript": {
+      "name": "Manuscript",
+      "description": "Sepia ink and faded olive on paper-toned grays",
+      "seeds": {
+        "primary": "#8a6d4a",
+        "secondary": "#5f6d54",
+        "tertiary": "#7d5a6b",
+        "error": "#a84a3a",
+        "success": "#6d8a4f",
+        "warning": "#b08d3a",
+        "neutral": "#8a8175",
+        "neutral-variant": "#94886f"
+      }
+    },
+    "monokai": {
+      "name": "Monokai",
+      "description": "Hot magenta and cyan on olive darks, from Monokai",
+      "seeds": {
+        "primary": "#e81066",
+        "secondary": "#008395",
+        "tertiary": "#8a5ed9",
+        "error": "#e81066",
+        "success": "#5c8300",
+        "warning": "#81791b",
+        "neutral": "#777770",
+        "neutral-variant": "#7b7764"
+      }
+    },
+    "moss": {
+      "name": "Moss",
+      "description": "Moss green and lichen teal over earthy green-grays",
+      "seeds": {
+        "primary": "#5f8f3e",
+        "secondary": "#4f8f7b",
+        "tertiary": "#9a7b4f",
+        "error": "#c25040",
+        "success": "#3ba06e",
+        "warning": "#c79232",
+        "neutral": "#7d8578",
+        "neutral-variant": "#77836e"
+      }
+    },
+    "night_owl": {
+      "name": "Night Owl",
+      "description": "Periwinkle blue and mint for late-night work, from Night Owl",
+      "seeds": {
+        "primary": "#4c75c6",
+        "secondary": "#9462b6",
+        "tertiary": "#1e8577",
+        "error": "#d83b59",
+        "success": "#668020",
+        "warning": "#996f38",
+        "neutral": "#65798e",
+        "neutral-variant": "#617a90"
+      }
+    },
+    "nord": {
+      "name": "Nord",
+      "description": "Frosted polar blues, from Nord",
+      "seeds": {
+        "primary": "#477f8e",
+        "secondary": "#537f7e",
+        "tertiary": "#8f6c89",
+        "error": "#b75b64",
+        "success": "#657e52",
+        "warning": "#a86651",
+        "neutral": "#717785",
+        "neutral-variant": "#6e778b"
+      }
+    },
+    "one_dark": {
+      "name": "One Dark",
+      "description": "Balanced blue, purple, and teal, from Atom One Dark",
+      "seeds": {
+        "primary": "#217db9",
+        "secondary": "#a358bb",
+        "tertiary": "#0c838f",
+        "error": "#c1545d",
+        "success": "#5a823f",
+        "warning": "#917236",
+        "neutral": "#737780",
+        "neutral-variant": "#707785"
+      }
+    },
+    "oxocarbon": {
+      "name": "Oxocarbon",
+      "description": "IBM blue, teal, and purple on carbon grays, after oxocarbon",
+      "seeds": {
+        "primary": "#0f62fe",
+        "secondary": "#009d9a",
+        "tertiary": "#a56eff",
+        "error": "#da1e28",
+        "success": "#24a148",
+        "warning": "#b28600",
+        "neutral": "#6f6f6f",
+        "neutral-variant": "#697077"
+      }
+    },
+    "palenight": {
+      "name": "Material Palenight",
+      "description": "Soft violet and indigo pastels, from Material Palenight",
+      "seeds": {
+        "primary": "#9462b6",
+        "secondary": "#4c75c6",
+        "tertiary": "#1d81a0",
+        "error": "#da3757",
+        "success": "#618133",
+        "warning": "#997017",
+        "neutral": "#72768a",
+        "neutral-variant": "#6e759c"
+      }
+    },
+    "phosphor": {
+      "name": "Phosphor",
+      "description": "CRT phosphor greens on green-cast grays",
+      "seeds": {
+        "primary": "#27b648",
+        "secondary": "#2f9e6e",
+        "tertiary": "#74b83a",
+        "error": "#d94f43",
+        "success": "#2fae5c",
+        "warning": "#c2a029",
+        "neutral": "#6f7f74",
+        "neutral-variant": "#657a6c"
+      }
+    },
+    "rose_pine": {
+      "name": "Rosé Pine",
+      "description": "Iris, foam, and rose over deep pine, from Rosé Pine",
+      "seeds": {
+        "primary": "#866ba7",
+        "secondary": "#4d7f87",
+        "tertiary": "#956d6c",
+        "error": "#c34f72",
+        "success": "#4d7f87",
+        "warning": "#9a6f2d",
+        "neutral": "#797585",
+        "neutral-variant": "#78748e"
+      }
+    },
+    "sakura": {
+      "name": "Sakura",
+      "description": "Blossom pink, wisteria, and peach on soft rosy grays",
+      "seeds": {
+        "primary": "#e37a9f",
+        "secondary": "#b98ac9",
+        "tertiary": "#e8927c",
+        "error": "#d64d5f",
+        "success": "#5ca86a",
+        "warning": "#d9a036",
+        "neutral": "#8f8489",
+        "neutral-variant": "#9a8791"
+      }
+    },
+    "solarized": {
+      "name": "Solarized",
+      "description": "Precision-balanced blue and cyan, from Solarized",
+      "seeds": {
+        "primary": "#007cc2",
+        "secondary": "#00867d",
+        "tertiary": "#6a6fc2",
+        "error": "#df3431",
+        "success": "#6e7f00",
+        "warning": "#967100",
+        "neutral": "#597c89",
+        "neutral-variant": "#647b82"
+      }
+    },
+    "synthwave": {
+      "name": "Synthwave '84",
+      "description": "Retro neon pink and cyan, from Synthwave '84",
+      "seeds": {
+        "primary": "#bf48a2",
+        "secondary": "#008583",
+        "tertiary": "#8c7500",
+        "error": "#e22e3f",
+        "success": "#00885d",
+        "warning": "#8c7500",
+        "neutral": "#79748a",
+        "neutral-variant": "#6d74a4"
+      }
+    },
+    "tokyo_night": {
+      "name": "Tokyo Night",
+      "description": "City-light blue and purple, from Tokyo Night",
+      "seeds": {
+        "primary": "#4c75c7",
+        "secondary": "#8667bf",
+        "tertiary": "#1d7fab",
+        "error": "#c54f67",
+        "success": "#588328",
+        "warning": "#996f2f",
+        "neutral": "#767684",
+        "neutral-variant": "#6c75a0"
+      }
+    },
+    "vesper": {
+      "name": "Vesper",
+      "description": "Peach and mint on near-black, from Vesper",
+      "seeds": {
+        "primary": "#9b6d46",
+        "secondary": "#058771",
+        "tertiary": "#c35354",
+        "error": "#c35354",
+        "success": "#058771",
+        "warning": "#9b6d46",
+        "neutral": "#787776",
+        "neutral-variant": "#777777"
+      }
+    }
+  }
+}

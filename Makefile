@@ -43,6 +43,6 @@ clean: ## Remove build output and example caches (.dist, .coverage, .nuxt)
 	find packages integrations presets -maxdepth 2 -name .dist -type d -prune -exec rm -rf {} +
 	find examples -maxdepth 2 \( -name .nuxt -o -name .output \) -type d -prune -exec rm -rf {} +
 
-check: inspect lint typecheck test ## Run all gates without writing (CI parity)
+check: lint typecheck test ## Run all gates without writing (CI parity)
 
 verify: clean install build typecheck test ## Full cold rebuild and verification

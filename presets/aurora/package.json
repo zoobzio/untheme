@@ -1,5 +1,5 @@
 {
-  "name": "@untheme/Aurora",
+  "name": "@untheme/aurora",
   "version": "0.0.0",
   "type": "module",
   "main": "./.dist/index.mjs",
@@ -26,11 +26,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@untheme/kit": "workspace:*"
+    "@untheme/kit": "workspace:*",
+    "@untheme/schema": "workspace:*"
   },
   "devDependencies": {
-    "@material/material-color-utilities": "^0.4.0",
     "@untheme/core": "workspace:*",
-    "@untheme/schema": "workspace:*"
+    "theme-colors": "^0.1.0"
   }
 }
