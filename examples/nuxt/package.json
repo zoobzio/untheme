@@ -1,0 +1,22 @@
+{
+  "name": "@untheme/example-nuxt",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@untheme/aurora": "workspace:*",
+    "@untheme/nuxt": "workspace:*",
+    "nuxt": "^4.4.6",
+    "untheme": "workspace:*"
+  },
+  "devDependencies": {
+    "vue-tsc": "^3.3.5"
+  }
+}

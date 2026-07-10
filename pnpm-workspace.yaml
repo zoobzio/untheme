@@ -2,4 +2,4 @@ packages:
   - "packages/*"
   - "integrations/*"
   - "presets/*"
-  #- "examples/*"
+  - "examples/*"
