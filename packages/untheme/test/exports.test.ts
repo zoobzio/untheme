@@ -7,6 +7,7 @@ import * as schema from "@untheme/schema";
 import * as utils from "@untheme/utils";
 
 import * as root from "../src/index";
+import * as configSubpath from "../src/config";
 import * as cssSubpath from "../src/css";
 import * as kitSubpath from "../src/kit";
 
@@ -40,5 +41,9 @@ describe("star-export composition", () => {
     for (const name of Object.keys(kit)) {
       expect.soft(kitSubpath, name).toHaveProperty(name);
     }
+  });
+
+  it("exposes the canonical config helper under its subpath", () => {
+    expect(configSubpath).toHaveProperty("defineUnthemeConfig");
   });
 });

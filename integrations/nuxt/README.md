@@ -8,7 +8,7 @@ Give the module a base theme and a catalog of switchable variants, and it valida
 
 ```ts
 // nuxt.config.ts
-import { defineUnthemeConfig } from "@untheme/nuxt/config";
+import { defineUnthemeConfig } from "untheme/config";
 
 export default defineNuxtConfig({
   modules: ["@untheme/nuxt"],

@@ -9,6 +9,10 @@
       "types": "./.dist/index.d.ts",
       "import": "./.dist/index.mjs"
     },
+    "./config": {
+      "types": "./.dist/config.d.ts",
+      "import": "./.dist/config.mjs"
+    },
     "./css": {
       "types": "./.dist/css.d.ts",
       "import": "./.dist/css.mjs"

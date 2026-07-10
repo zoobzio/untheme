@@ -10,11 +10,12 @@ pnpm add untheme
 
 ## Entry points
 
-| Import        | Re-exports                                                                               | Provides                                                                                                                                                                        |
-| ------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `untheme`     | [`@untheme/core`](../core), [`@untheme/schema`](../schema), [`@untheme/utils`](../utils) | `defineUntheme`, `Untheme`, `Config`, `defineSchema`, `Schema`, `Theme`, `Layer`, `Patch`, `Input`, `SchemaError`, `clone`/`copy`/`merge`/`extend`/`diff`/`delta`/`traverse`, … |
-| `untheme/css` | [`@untheme/css`](../css)                                                                 | `defineRenderer`, `Renderer`, `serialize`, `emit`, `property`, `Variables`, …                                                                                                   |
-| `untheme/kit` | [`@untheme/kit`](../kit)                                                                 | `defineUnthemePreset`, `Preset`                                                                                                                                                 |
+| Import           | Re-exports                                                                               | Provides                                                                                                                                                                        |
+| ---------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `untheme`        | [`@untheme/core`](../core), [`@untheme/schema`](../schema), [`@untheme/utils`](../utils) | `defineUntheme`, `Untheme`, `Config`, `defineSchema`, `Schema`, `Theme`, `Layer`, `Patch`, `Input`, `SchemaError`, `clone`/`copy`/`merge`/`extend`/`diff`/`delta`/`traverse`, … |
+| `untheme/config` | —                                                                                        | `defineUnthemeConfig`, `UnthemeConfig` — the canonical application config (`base`/`themes`/`input`) every integration consumes                                                  |
+| `untheme/css`    | [`@untheme/css`](../css)                                                                 | `defineRenderer`, `Renderer`, `serialize`, `emit`, `property`, `Variables`, …                                                                                                   |
+| `untheme/kit`    | [`@untheme/kit`](../kit)                                                                 | `defineUnthemePreset`, `Preset`                                                                                                                                                 |
 
 ## Usage
 

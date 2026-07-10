@@ -1,5 +1,5 @@
 import type { Schema, Template, Theme } from "untheme";
-import type { NuxtUnthemeConfig } from "./types";
+import type { UnthemeConfig } from "untheme/config";
 import { defineSchema } from "untheme";
 
 import {
@@ -20,7 +20,7 @@ import {
  * template, and registers the runtime plugin and the `useUntheme`
  * auto-import.
  */
-export default defineNuxtModule<NuxtUnthemeConfig>({
+export default defineNuxtModule<UnthemeConfig>({
   meta: {
     name: "untheme",
     configKey: "untheme",

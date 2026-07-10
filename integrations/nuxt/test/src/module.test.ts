@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { NuxtUnthemeConfig } from "../../src/types";
+import type { UnthemeConfig } from "untheme/config";
 import { theme, themes } from "../fixtures";
 
 const kit = vi.hoisted(() => ({
@@ -19,11 +19,11 @@ import module from "../../src/module";
 
 interface ModuleDef {
   meta: { name: string; configKey: string };
-  setup: (options: NuxtUnthemeConfig) => void;
+  setup: (options: UnthemeConfig) => void;
 }
 const mod = module as unknown as ModuleDef;
 
-const options: NuxtUnthemeConfig = {
+const options: UnthemeConfig = {
   base: theme,
   themes,
   input: { color: "light" },
