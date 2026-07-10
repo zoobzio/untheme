@@ -245,6 +245,8 @@ export const preset = defineUnthemePreset({
     "space-6": { $type: "dimension", $value: { value: 2, unit: "rem" } },
     "space-7": { $type: "dimension", $value: { value: 3, unit: "rem" } },
     "space-8": { $type: "dimension", $value: { value: 4, unit: "rem" } },
+    "space-9": { $type: "dimension", $value: { value: 6, unit: "rem" } },
+    "space-10": { $type: "dimension", $value: { value: 8, unit: "rem" } },
 
     // Elevation shadows
     "elevation-none": {
@@ -396,6 +398,13 @@ export const preset = defineUnthemePreset({
         { color: "{tertiary-400}", position: 1 },
       ],
     },
+    "gradient-faint": {
+      $type: "gradient",
+      $value: [
+        { color: "{primary-100}", position: 0 },
+        { color: "{surface}", position: 1 },
+      ],
+    },
   },
   modifiers: {
     color: {
@@ -467,6 +476,13 @@ export const preset = defineUnthemePreset({
         "warning-high-contrast": "{warning-200}",
         "on-warning-container-medium-contrast": "{warning-100}",
         "on-warning-container-high-contrast": "{warning-50}",
+
+        // The faint wash starts from the dark end of the ramp; its surface
+        // endpoint follows the rebound role on its own.
+        "gradient-faint": [
+          { color: "{primary-900}", position: 0 },
+          { color: "{surface}", position: 1 },
+        ],
       },
     },
     contrast: {
@@ -533,6 +549,8 @@ export const preset = defineUnthemePreset({
         "space-6": { value: 1.75, unit: "rem" },
         "space-7": { value: 2.5, unit: "rem" },
         "space-8": { value: 3.5, unit: "rem" },
+        "space-9": { value: 5, unit: "rem" },
+        "space-10": { value: 6.5, unit: "rem" },
       },
       default: {},
       spacious: {
@@ -544,6 +562,8 @@ export const preset = defineUnthemePreset({
         "space-6": { value: 2.5, unit: "rem" },
         "space-7": { value: 3.75, unit: "rem" },
         "space-8": { value: 5, unit: "rem" },
+        "space-9": { value: 7.5, unit: "rem" },
+        "space-10": { value: 10, unit: "rem" },
       },
     },
     radius: {

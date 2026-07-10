@@ -1,145 +1,309 @@
 <script setup lang="ts">
 /**
- * The aurora showcase: a landing page whose every color, size, radius,
- * shadow, and motion value is an untheme token, with live controls for the
- * theme catalog and all six modifier axes. Nothing on this page is
- * hardcoded — the axes, their contexts, the theme list, and the ramp
- * swatches all derive from the untheme instance.
+ * Borealis — a fictional observability platform whose landing page is
+ * styled entirely by untheme tokens. The page itself is the demo: the demo
+ * bar swaps themes and modifier contexts, and every surface below rebrands
+ * without a rule of CSS changing.
  */
-const untheme = useUntheme();
+const tiers = [
+  {
+    name: "Starter",
+    price: "$0",
+    cadence: "forever",
+    featured: false,
+    action: "Start free",
+    features: [
+      "3 services, 7-day retention",
+      "Dashboards and alerting",
+      "Community support",
+    ],
+  },
+  {
+    name: "Team",
+    price: "$29",
+    cadence: "per seat / month",
+    featured: true,
+    action: "Start a trial",
+    features: [
+      "Unlimited services",
+      "13-month retention",
+      "SLO tracking and burn alerts",
+      "SSO and audit log",
+    ],
+  },
+  {
+    name: "Enterprise",
+    price: "Custom",
+    cadence: "annual",
+    featured: false,
+    action: "Talk to sales",
+    features: [
+      "Self-hosted or dedicated cloud",
+      "Custom retention and residency",
+      "24/7 support with an SLA",
+    ],
+  },
+];
 
-const axes = untheme.modifiers();
+const quotes = [
+  {
+    quote:
+      "We deleted four Grafana boards the first week. The on-call channel has never been this quiet.",
+    name: "Mara Chen",
+    role: "Platform lead, Nimbus",
+    initials: "MC",
+    accent: "primary",
+  },
+  {
+    quote:
+      "Borealis is the first tool where the dashboard my CTO sees is the one my SREs actually use.",
+    name: "Diego Álvarez",
+    role: "VP Engineering, Vertex",
+    initials: "DA",
+    accent: "secondary",
+  },
+  {
+    quote:
+      "The bill went down. The coverage went up. I keep waiting for the catch.",
+    name: "Priya Raman",
+    role: "SRE manager, Coldfront",
+    initials: "PR",
+    accent: "tertiary",
+  },
+];
 
-const themes = computed(() => Object.values(untheme.themes));
-
-const themeKey = computed({
-  get: () => untheme.config.theme.id,
-  set: (key) => untheme.select(key),
-});
-
-/* The primary ramp's stops, in ascending order, straight off the flat token
-   map. */
-const rampStops = computed(() => {
-  return Object.keys(untheme.tokens())
-    .filter((token) => /^primary-\d+$/.test(token))
-    .sort((a, b) => Number(a.slice(8)) - Number(b.slice(8)));
-});
+const faqs = [
+  {
+    question: "How long does migration take?",
+    answer:
+      "Most teams point their OpenTelemetry exporters at Borealis and see data inside an hour. Our importer replays your existing dashboards and alert rules, and the two systems can run side by side for as long as you like.",
+  },
+  {
+    question: "Can we self-host?",
+    answer:
+      "Yes — the Enterprise tier ships as a single container image with an embedded columnar store, or as a Helm chart if you would rather bring your own. Same UI, same API, your hardware.",
+  },
+  {
+    question: "What exactly is metered?",
+    answer:
+      "Ingested events, nothing else. Dashboards, alerts, seats on the Starter and Enterprise tiers, and queries are all unmetered — we think you should never be afraid to look at your own data.",
+  },
+  {
+    question: "Where does our data live?",
+    answer:
+      "Your choice of US, EU, or APAC regions at every tier, with per-dataset residency controls on Enterprise. Data never leaves the region you pick.",
+  },
+];
 </script>
 
 <template>
   <div class="page">
+    <DemoBar />
+
     <header class="masthead">
-      <p class="brand">aurora</p>
-      <p class="tagline">the untheme reference preset</p>
+      <p class="brand">borealis</p>
+      <nav class="site-nav" aria-label="Site">
+        <a href="#product">Product</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <button type="button" class="button button-primary">Start free</button>
     </header>
 
-    <aside class="controls" aria-label="Theme and modifier controls">
-      <div class="control-theme">
-        <label for="theme-picker">Theme</label>
-        <select id="theme-picker" v-model="themeKey">
-          <option v-for="theme in themes" :key="theme.id" :value="theme.id">
-            {{ theme.name }}
-          </option>
-        </select>
-      </div>
-      <AxisControl v-for="axis in axes" :key="axis" :axis="axis" />
-    </aside>
-
     <main>
-      <section class="hero">
-        <h1>Build once, theme forever.</h1>
-        <p>
-          Every value on this page is a design token resolved through untheme.
-          Pick a theme, flip an axis — the contract holds, the values swap, and
-          the CSS never changes.
-        </p>
-        <div class="actions">
-          <button type="button" class="button button-primary">
-            Get started
-          </button>
-          <button type="button" class="button button-outline">
-            Read the docs
-          </button>
+      <section id="product" class="hero">
+        <div class="hero-atmos" aria-hidden="true">
+          <span class="hero-orb hero-orb-a"></span>
+          <span class="hero-orb hero-orb-b"></span>
+          <span class="hero-grid"></span>
         </div>
+        <div class="hero-copy">
+          <p class="eyebrow">Observability, minus the noise</p>
+          <h1>
+            Every signal, in the <span class="hero-accent">right light</span>.
+          </h1>
+          <p class="lede">
+            Borealis turns raw telemetry into dashboards your whole team can
+            read — metrics, traces, and logs in one calm view, with alerts that
+            only fire when a human should look.
+          </p>
+          <div class="actions">
+            <button type="button" class="button button-primary">
+              Start free
+            </button>
+            <button type="button" class="button button-outline">
+              Book a demo
+            </button>
+          </div>
+          <p class="hero-foot">Free for three services · No credit card</p>
+        </div>
+        <ProductMock />
       </section>
 
-      <section class="features" aria-label="Feature cards">
-        <h2>Composable by construction</h2>
+      <section class="logos" aria-label="Customers">
+        <p>Trusted by teams at</p>
+        <ul>
+          <li>Nimbus</li>
+          <li>Vertex</li>
+          <li>Coldfront</li>
+          <li>Meridian</li>
+          <li>Substrate</li>
+        </ul>
+      </section>
+
+      <section class="features">
+        <h2>Built for the 3am page</h2>
         <div class="feature-grid">
           <article class="feature">
-            <h3>One contract</h3>
+            <span class="feature-mark" aria-hidden="true">01</span>
+            <h3>Dashboards that read like sentences</h3>
             <p>
-              Tokens declare their type and their relationships; themes only
-              rebind values. A layer that steps outside the contract fails
-              validation before it ever renders.
+              Golden signals per service, laid out the same way every time. New
+              teammates stop asking which graph matters — it is always the first
+              one.
             </p>
           </article>
           <article class="feature">
-            <h3>Six axes</h3>
+            <span class="feature-mark" aria-hidden="true">02</span>
+            <h3>Alerts with judgment</h3>
             <p>
-              Color, contrast, text, density, radius, and motion compose in a
-              declared order. Contexts override disjoint token sets, so every
-              combination stays coherent.
+              Burn-rate SLOs instead of static thresholds. Borealis pages you
+              for trajectories, not blips, and attaches the trace that explains
+              itself.
             </p>
           </article>
           <article class="feature">
-            <h3>References all the way down</h3>
+            <span class="feature-mark" aria-hidden="true">03</span>
+            <h3>Retention without the bill shock</h3>
             <p>
-              Roles point at ramp stops, composites point at scalars, and the
-              renderer keeps every reference as a var() indirection — one rebind
-              cascades everywhere.
+              Thirteen months of queryable history on a flat, per-event meter.
+              Look at last year's incident without filing a budget request
+              first.
             </p>
           </article>
         </div>
       </section>
 
-      <section class="specimen" aria-label="Type specimen">
-        <h2>Type specimen</h2>
-        <p class="type-display">Display</p>
-        <p class="type-headline">Headline</p>
-        <p class="type-title">Title</p>
-        <p class="type-body">
-          Body — the reading size. The text axis rebinds the size scalars and
-          the typography composites follow through sub-value references.
+      <section class="stats" aria-label="Numbers">
+        <dl>
+          <div class="stat">
+            <dt>Uptime SLA</dt>
+            <dd>99.99%</dd>
+          </div>
+          <div class="stat">
+            <dt>Events every day</dt>
+            <dd>4.2B</dd>
+          </div>
+          <div class="stat">
+            <dt>From event to insight</dt>
+            <dd>&lt;60s</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="quotes" aria-label="Testimonials">
+        <h2>Loved on both sides of the pager</h2>
+        <div class="quote-grid">
+          <figure v-for="entry in quotes" :key="entry.name" class="quote">
+            <blockquote>{{ entry.quote }}</blockquote>
+            <figcaption>
+              <span class="avatar" :class="`avatar-${entry.accent}`">
+                {{ entry.initials }}
+              </span>
+              <span>
+                <strong>{{ entry.name }}</strong>
+                <small>{{ entry.role }}</small>
+              </span>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="pricing" class="pricing">
+        <h2>Pricing that meters one thing</h2>
+        <p class="section-lede">
+          Seats. Not events, not hosts, not a spreadsheet of line items.
+          Retention scales with the plan.
         </p>
-        <p class="type-label">Label — for controls and captions</p>
-      </section>
-
-      <section class="callouts" aria-label="Semantic callouts">
-        <h2>Semantic roles</h2>
-        <aside class="callout callout-success">
-          <strong>Success</strong>
-          <p>The build is green. Every theme keeps this recognizably green.</p>
-        </aside>
-        <aside class="callout callout-warning">
-          <strong>Warning</strong>
-          <p>Contrast at default. Try the high context on the contrast axis.</p>
-        </aside>
-        <aside class="callout callout-error">
-          <strong>Error</strong>
-          <p>Reserved for actual problems — of which this page has none.</p>
-        </aside>
-      </section>
-
-      <section class="ramp" aria-label="Primary ramp">
-        <h2>The primary ramp</h2>
-        <ol class="stops">
-          <li
-            v-for="stop in rampStops"
-            :key="stop"
-            class="stop"
-            :style="{ background: `var(--${stop})` }"
+        <div class="tier-grid">
+          <article
+            v-for="tier in tiers"
+            :key="tier.name"
+            class="tier"
+            :class="{ 'tier-featured': tier.featured }"
           >
-            <code>{{ stop }}</code>
-          </li>
-        </ol>
+            <p v-if="tier.featured" class="tier-flag">Popular</p>
+            <h3>{{ tier.name }}</h3>
+            <p class="tier-price">
+              {{ tier.price }} <small>{{ tier.cadence }}</small>
+            </p>
+            <ul>
+              <li v-for="feature in tier.features" :key="feature">
+                {{ feature }}
+              </li>
+            </ul>
+            <button
+              type="button"
+              class="button"
+              :class="tier.featured ? 'button-primary' : 'button-outline'"
+            >
+              {{ tier.action }}
+            </button>
+          </article>
+        </div>
+      </section>
+
+      <section id="faq" class="faq">
+        <h2>Questions, answered</h2>
+        <div class="faq-list">
+          <details v-for="entry in faqs" :key="entry.question" class="faq-item">
+            <summary>{{ entry.question }}</summary>
+            <p>{{ entry.answer }}</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="banner" aria-label="Call to action">
+        <div class="banner-inner">
+          <h2>See your stack in a better light.</h2>
+          <p>Free for three services. No card, no meter anxiety.</p>
+          <button type="button" class="button button-inverse">
+            Start free
+          </button>
+        </div>
       </section>
     </main>
 
     <footer class="footer">
-      <p>
-        {{ untheme.config.theme.name }} — rendered from
-        {{ Object.keys(untheme.tokens()).length }} tokens.
+      <div class="footer-grid">
+        <nav aria-label="Product">
+          <h3>Product</h3>
+          <a href="#product">Dashboards</a>
+          <a href="#product">Alerts</a>
+          <a href="#pricing">Pricing</a>
+        </nav>
+        <nav aria-label="Company">
+          <h3>Company</h3>
+          <a href="#">About</a>
+          <a href="#">Careers</a>
+          <a href="#">Blog</a>
+        </nav>
+        <nav aria-label="Resources">
+          <h3>Resources</h3>
+          <a href="#">Docs</a>
+          <a href="#">Status</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+        <nav aria-label="Legal">
+          <h3>Legal</h3>
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+        </nav>
+      </div>
+      <p class="footer-note">
+        Borealis is a fictional product. This page is themed by
+        <strong>untheme</strong> — every color, size, radius, shadow, and motion
+        value on it is a design token.
       </p>
     </footer>
   </div>

@@ -29,10 +29,10 @@ Tokens come in three tiers:
 - **System scales** — a five-style type scale (`type-display` …
   `type-label`, typography composites whose sizes arrive through sub-value
   references), shape radii (`shape-sm` … `shape-full`), a spacing scale
-  (`space-1` … `space-8`), elevation shadows (`elevation-none` …
+  (`space-1` … `space-10`), elevation shadows (`elevation-none` …
   `elevation-high`), motion (`duration-*`, `easing-*`, and `transition-*`
-  composites), state-layer opacities, strokes, borders, and a brand
-  gradient.
+  composites), state-layer opacities, strokes, borders, and the brand
+  gradients.
 
 Because roles reference ramps rather than literals, a theme variant rebinds
 _only the 88 ramp values_ — every role and every modifier context follows

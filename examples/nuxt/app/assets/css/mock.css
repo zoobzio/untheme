@@ -1,0 +1,264 @@
+/* mock.css — the Borealis product window (a fake app screenshot, entirely CSS).
+   Precise mono type, hairline borders, one-ramp chart, staggered bar growth,
+   dark-mode glow. Tokens only; raw values limited to layout geometry/transforms. */
+
+.mock {
+  position: relative;
+  perspective: 1800px;
+}
+
+/* dark-only ambient glow behind the window */
+.mock-glow {
+  position: absolute;
+  inset: 8% 4%;
+  z-index: 0;
+  opacity: 0;
+  border-radius: var(--shape-lg);
+  background:
+    radial-gradient(
+      60% 60% at 30% 20%,
+      color-mix(in srgb, var(--primary) 55%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      60% 60% at 80% 90%,
+      color-mix(in srgb, var(--tertiary) 45%, transparent),
+      transparent 70%
+    );
+  filter: blur(48px);
+  transition: opacity var(--duration-slow) var(--easing-standard);
+}
+[data-color="dark"] .mock-glow {
+  opacity: 0.9;
+}
+
+.mock-window {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  background-color: var(--surface);
+  border: var(--border-thin);
+  border-radius: var(--shape-lg);
+  box-shadow: var(--elevation-high);
+  transform: rotateY(-9deg) rotateX(3deg) translateZ(0);
+  transform-origin: center right;
+  transition:
+    transform var(--duration-slow) var(--easing-standard),
+    box-shadow var(--duration-slow) var(--easing-standard);
+}
+.mock:hover .mock-window {
+  transform: rotateY(0deg) rotateX(0deg);
+}
+
+/* ---------- title bar ---------- */
+.mock-chrome {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--surface-container-high);
+  border-block-end: var(--border-thin);
+  border-color: var(--outline-muted);
+}
+.mock-dot {
+  inline-size: 10px;
+  block-size: 10px;
+  border-radius: var(--shape-full);
+  background-color: var(--outline);
+}
+.mock-title {
+  margin-inline-start: var(--space-3);
+  font: var(--type-label);
+  font-family: var(--font-mono);
+  letter-spacing: var(--type-label-letter-spacing);
+  color: var(--on-surface-muted);
+  white-space: nowrap;
+}
+
+/* ---------- body: nav + main ---------- */
+.mock-body {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.28fr) 1fr;
+  background-color: var(--surface);
+}
+.mock-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background-color: var(--surface-container);
+  border-inline-end: var(--border-thin);
+  border-color: var(--outline-muted);
+}
+.mock-item {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--shape-sm);
+  font: var(--type-label);
+  letter-spacing: var(--type-label-letter-spacing);
+  color: var(--on-surface-muted);
+}
+.mock-item-active {
+  background-color: var(--primary-container);
+  color: var(--on-primary-container);
+  font-weight: var(--weight-medium);
+}
+
+.mock-main {
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+/* ---------- stat cards ---------- */
+.mock-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+.mock-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background-color: var(--surface-container);
+  border: var(--border-thin);
+  border-color: var(--outline-muted);
+  border-radius: var(--shape-md);
+}
+.mock-stat-label {
+  font: var(--type-label);
+  font-family: var(--font-mono);
+  color: var(--on-surface-muted);
+}
+.mock-stat-value {
+  font: var(--type-title);
+  letter-spacing: var(--type-title-letter-spacing);
+  color: var(--on-surface);
+}
+.badge {
+  align-self: flex-start;
+  margin-block-start: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--shape-full);
+  font: var(--type-label);
+  font-family: var(--font-mono);
+  line-height: 1;
+}
+.badge-success {
+  background-color: var(--success-container);
+  color: var(--on-success-container);
+}
+.badge-error {
+  background-color: var(--error-container);
+  color: var(--on-error-container);
+}
+
+/* ---------- chart (single primary ramp so it reads in monochrome themes) ---------- */
+.mock-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  block-size: 9.5rem;
+  padding: var(--space-3);
+  background-color: var(--surface-container);
+  border: var(--border-thin);
+  border-color: var(--outline-muted);
+  border-radius: var(--shape-md);
+}
+.mock-bar {
+  flex: 1 1 0;
+  min-inline-size: 0;
+  border-radius: var(--shape-sm) var(--shape-sm) 0 0;
+  background: linear-gradient(to top, var(--primary-700), var(--primary-400));
+  transform-origin: bottom;
+  animation: bar-grow var(--duration-slow) var(--easing-enter) both;
+}
+[data-color="dark"] .mock-bar {
+  background: linear-gradient(to top, var(--primary-600), var(--primary-300));
+}
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+.mock-bar:nth-child(1) {
+  animation-delay: calc(var(--duration-fast) * 0.4);
+}
+.mock-bar:nth-child(2) {
+  animation-delay: calc(var(--duration-fast) * 0.8);
+}
+.mock-bar:nth-child(3) {
+  animation-delay: calc(var(--duration-fast) * 1.2);
+}
+.mock-bar:nth-child(4) {
+  animation-delay: calc(var(--duration-fast) * 1.6);
+}
+.mock-bar:nth-child(5) {
+  animation-delay: calc(var(--duration-fast) * 2);
+}
+.mock-bar:nth-child(6) {
+  animation-delay: calc(var(--duration-fast) * 2.4);
+}
+.mock-bar:nth-child(7) {
+  animation-delay: calc(var(--duration-fast) * 2.8);
+}
+.mock-bar:nth-child(8) {
+  animation-delay: calc(var(--duration-fast) * 3.2);
+}
+.mock-bar:nth-child(9) {
+  animation-delay: calc(var(--duration-fast) * 3.6);
+}
+.mock-bar:nth-child(10) {
+  animation-delay: calc(var(--duration-fast) * 4);
+}
+.mock-bar:nth-child(11) {
+  animation-delay: calc(var(--duration-fast) * 4.4);
+}
+.mock-bar:nth-child(12) {
+  animation-delay: calc(var(--duration-fast) * 4.8);
+}
+/* motion: reduced — no growth, bars simply present */
+[data-motion="reduced"] .mock-bar {
+  animation: none;
+}
+
+/* ---------- health feed ---------- */
+.mock-feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.mock-feed li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font: var(--type-label);
+  font-family: var(--font-mono);
+  color: var(--on-surface);
+}
+.pill {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--shape-full);
+  font: var(--type-label);
+  font-family: var(--font-mono);
+  line-height: 1;
+}
+.pill-success {
+  background-color: var(--success-container);
+  color: var(--on-success-container);
+}
+.pill-warning {
+  background-color: var(--warning-container);
+  color: var(--on-warning-container);
+}
+
+@media (max-width: 56rem) {
+  .mock-window {
+    transform: none;
+  }
+}
