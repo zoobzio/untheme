@@ -6,7 +6,7 @@
  * context lives in the base contract and reads the new values through its
  * ramp references.
  */
-import type { FoundationLayer } from "../types";
+import type { AuroraLayer } from "../types";
 
 export default {
   id: "kanagawa",
@@ -1025,4 +1025,4 @@ export default {
       hex: "#ffffff",
     },
   },
-} satisfies FoundationLayer;
+} satisfies AuroraLayer;

@@ -5,9 +5,9 @@ import { defineUntheme } from "@untheme/core";
 import { preset } from "../src/preset";
 import dracula from "../src/themes/dracula";
 
-import type { FoundationInput } from "../src/types";
+import type { AuroraInput } from "../src/types";
 
-const boot = (input: Partial<FoundationInput> = {}) => {
+const boot = (input: Partial<AuroraInput> = {}) => {
   return defineUntheme(
     preset.use({
       color: "light",

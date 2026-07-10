@@ -132,7 +132,7 @@ importers:
         specifier: workspace:*
         version: link:../schema
 
-  presets/foundation:
+  presets/Aurora:
     dependencies:
       '@untheme/kit':
         specifier: workspace:*

@@ -1,9 +1,9 @@
-# @untheme/foundation
+# @untheme/Aurora
 
 The reference untheme preset: Material 3 semantics, six modifier axes, and a
 catalog of nineteen theme variants.
 
-Foundation demonstrates the full token model — every DTCG value family the
+Aurora demonstrates the full token model — every DTCG value family the
 schema validates (colors, dimensions, durations, font families and weights,
 numbers, cubic Béziers, shadows), modifier axes that compose in a declared
 order, and theme layers that re-tint the entire system by rebinding eight
@@ -25,7 +25,7 @@ Tokens come in three tiers:
 - **System scales** — the M3 type scale (per-property: `body-medium-size`,
   `body-medium-line-height`, …), shape radii (`shape-*`), elevation shadows
   (`elevation-0` … `elevation-5`), motion easings and durations, state-layer
-  opacities, and a spacing scale (`space-*`, `control-*`) of foundation's own,
+  opacities, and a spacing scale (`space-*`, `control-*`) of Aurora's own,
   since M3 defines none.
 
 Because roles reference ramps rather than literals, a theme variant rebinds
@@ -75,9 +75,9 @@ late-bound references rather than a hand-authored context per combination.
 
 ```ts
 import { defineUntheme } from "@untheme/core";
-import { preset } from "@untheme/foundation";
-import dracula from "@untheme/foundation/themes/dracula";
-import nord from "@untheme/foundation/themes/nord";
+import { preset } from "@untheme/Aurora";
+import dracula from "@untheme/Aurora/themes/dracula";
+import nord from "@untheme/Aurora/themes/nord";
 
 const ut = defineUntheme(
   preset.use({
@@ -95,13 +95,13 @@ ut.swap("contrast", "high"); // high-contrast dark, by composition
 ut.select("nord"); // re-tint every role through the ramps
 ```
 
-The package also exports `FoundationTheme`, `FoundationLayer`, and
-`FoundationInput` — the contract types a consumer's own layers and
+The package also exports `AuroraTheme`, `AuroraLayer`, and
+`AuroraInput` — the contract types a consumer's own layers and
 selections check against.
 
 ## Themes
 
-Nineteen variants, one subpath export each (`@untheme/foundation/themes/<id>`):
+Nineteen variants, one subpath export each (`@untheme/Aurora/themes/<id>`):
 
 `ayu`, `catppuccin`, `cyberdream`, `dracula`, `everforest`, `github`,
 `gruvbox`, `horizon`, `kanagawa`, `monokai`, `night_owl`, `nord`, `one_dark`,

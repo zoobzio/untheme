@@ -1,7 +1,7 @@
 import { defineUnthemePreset } from "@untheme/kit";
 
 /**
- * The Foundation preset.
+ * The Aurora preset.
  *
  * The reference untheme preset: Material 3 semantics carried by eight
  * functional tonal ramps — primary, secondary, tertiary, error, success,
@@ -27,8 +27,8 @@ import { defineUnthemePreset } from "@untheme/kit";
  * collision.
  */
 export const preset = defineUnthemePreset({
-  id: "foundation",
-  name: "Foundation",
+  id: "Aurora",
+  name: "Aurora",
   tokens: {
     // Tonal ramps — eight functional palettes at the 26 M3 tone stops
     "primary-0": {
