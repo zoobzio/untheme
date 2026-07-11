@@ -75,10 +75,12 @@ const themes = {
 const schema = defineSchema(
   preset.use({
     color: "light",
+    vibrancy: "balanced",
     contrast: "default",
     text: "md",
     density: "default",
     radius: "default",
+    depth: "default",
     motion: "default",
   }).theme,
 );

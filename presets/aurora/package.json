@@ -30,7 +30,6 @@
     "@untheme/schema": "workspace:*"
   },
   "devDependencies": {
-    "@untheme/core": "workspace:*",
-    "theme-colors": "^0.1.0"
+    "@untheme/core": "workspace:*"
   }
 }

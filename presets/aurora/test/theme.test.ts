@@ -8,10 +8,12 @@ import { RAMP_TOKENS, agrees } from "./fixture";
 
 const config = preset.use({
   color: "light",
+  vibrancy: "balanced",
   contrast: "default",
   text: "md",
   density: "default",
   radius: "default",
+  depth: "default",
   motion: "default",
 });
 

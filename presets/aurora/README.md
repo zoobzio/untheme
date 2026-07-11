@@ -1,8 +1,8 @@
 # @untheme/aurora
 
 The reference untheme preset: a compact semantic vocabulary over eight
-generated tonal ramps, six modifier axes, and a catalog of thirty-one theme
-variants.
+generated tonal ramps, eight modifier axes, and a catalog of thirty-one
+theme variants.
 
 Aurora demonstrates the full token model — every value family the schema
 validates appears at least once (colors, dimensions, durations, font
@@ -16,7 +16,9 @@ Tokens come in three tiers:
 
 - **Ramps** — eight functional tonal palettes (`primary`, `secondary`,
   `tertiary`, `error`, `success`, `warning`, `neutral`, `neutral-variant`),
-  each at the eleven Tailwind-style stops (`primary-50` … `primary-950`).
+  each at the eleven Tailwind-style stops (`primary-50` … `primary-950`);
+  the six accent ramps also carry muted and vivid chroma columns
+  (`primary-muted-500`, `primary-vivid-500`, …) for the vibrancy axis.
   These are the only literal colors in the contract, generated from seed
   colors — see _Regenerating_ below.
 - **Roles** — a small semantic vocabulary: per accent family a fill, its
@@ -35,26 +37,30 @@ Tokens come in three tiers:
   gradients.
 
 Because roles reference ramps rather than literals, a theme variant rebinds
-_only the 88 ramp values_ — every role and every modifier context follows
+_only the 220 ramp values_ — every role and every modifier context follows
 automatically.
 
 ## The axes
 
-Six modifier axes, composing in `order`:
+Eight modifier axes, composing in `order`:
 
-| Axis       | Contexts                           | Overrides              |
-| ---------- | ---------------------------------- | ---------------------- |
-| `color`    | `light` / `dark`                   | color roles + channels |
-| `contrast` | `default` / `medium` / `high`      | color roles → channels |
-| `text`     | `sm` / `md` / `lg`                 | type-scale sizes       |
-| `density`  | `compact` / `default` / `spacious` | the spacing scale      |
-| `radius`   | `sharp` / `default` / `round`      | shape radii            |
-| `motion`   | `default` / `reduced`              | durations → `0ms`      |
+| Axis       | Contexts                             | Overrides                         |
+| ---------- | ------------------------------------ | --------------------------------- |
+| `color`    | `light` / `dark`                     | color roles + channels            |
+| `vibrancy` | `muted` / `balanced` / `vivid`       | accent roles → chroma channels    |
+| `contrast` | `default` / `medium` / `high`        | shifted roles → contrast channels |
+| `text`     | `sm` / `md` / `lg`                   | type-scale sizes                  |
+| `density`  | `compact` / `default` / `spacious`   | the spacing scale                 |
+| `radius`   | `sharp` / `default` / `round`        | shape radii                       |
+| `depth`    | `flat` / `default` / `deep`          | elevation shadows                 |
+| `motion`   | `default` / `reduced` / `expressive` | durations, delay, easing          |
 
 The base tokens are the default context of every axis, so each default
-context is empty. The axes override disjoint token sets — apart from `color`
-and `contrast`, whose collision is the point (below) — so all 324
-combinations stay coherent without being individually authored.
+context is empty. The axes override disjoint token sets — apart from
+`color`, `vibrancy`, and `contrast`, whose collisions are the point
+(below) — so all 2,916 combinations stay coherent without being
+individually authored. `contrast` follows `vibrancy` in `order`, so
+accessibility wins their collision.
 
 ## The contrast channels
 
@@ -77,6 +83,10 @@ its reference wins, and the reference resolves through whatever the color
 context set. One override, correct in either mode — axes cooperating through
 late-bound references rather than a hand-authored context per combination.
 
+The `vibrancy` axis reuses the same mechanism for chroma: accent roles
+re-point at `*-muted` / `*-vivid` channels, and the color contexts rebind
+each channel to its mode's stop in the matching chroma column.
+
 ## Usage
 
 ```ts
@@ -88,16 +98,19 @@ import nord from "@untheme/aurora/themes/nord";
 const ut = defineUntheme(
   preset.use({
     color: "dark",
+    vibrancy: "balanced",
     contrast: "default",
     text: "md",
     density: "default",
     radius: "default",
+    depth: "default",
     motion: "default",
   }),
   { dracula, nord },
 );
 
-ut.swap("contrast", "high"); // high-contrast dark, by composition
+ut.swap("vibrancy", "vivid"); // electric dark, by composition
+ut.swap("contrast", "high"); // and accessible, contrast wins the collision
 ut.select("nord"); // re-tint every role through the ramps
 ```
 
@@ -140,11 +153,13 @@ pnpm generate && pnpm format
 ```
 
 The generator (`scripts/generate.mjs`) expands each seed into a tonal ramp
-through [`theme-colors`](https://github.com/unjs/theme-colors), the seed
-itself landing at stop 500. The base ramps and every theme seed all eight
-ramps individually; semantic seeds (`error`, `success`, `warning`) stay
-recognizably red, green, and amber across themes, hue-shifted toward each
-theme's temperature.
+in OKLCH: the seed contributes hue and chroma, every ramp shares one
+perceptual lightness ladder across the eleven stops, and a chroma curve
+peaks at the middle and tapers toward both ends (out-of-gamut colors
+reduce chroma until sRGB holds them). The base ramps and every theme seed
+all eight ramps individually; semantic seeds (`error`, `success`,
+`warning`) stay recognizably red, green, and amber across themes,
+hue-shifted toward each theme's temperature.
 
 ## Related
 

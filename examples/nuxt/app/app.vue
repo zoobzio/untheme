@@ -72,6 +72,108 @@ const quotes = [
   },
 ];
 
+/* The aurora field: one blurred orb per entry, cycling the accent families
+   (p/t/s). Fixed literals within the design's thresholds — SSR and
+   hydration must agree, so nothing here is randomized per render. */
+const orbs = [
+  {
+    family: "p",
+    size: "34vw",
+    x: "-8vw",
+    y: "-12vw",
+    travel: "72vh",
+    drift: "5vw",
+  },
+  {
+    family: "t",
+    size: "22vw",
+    x: "68vw",
+    y: "-6vw",
+    travel: "54vh",
+    drift: "7vw",
+  },
+  {
+    family: "s",
+    size: "16vw",
+    x: "34vw",
+    y: "10vh",
+    travel: "88vh",
+    drift: "4vw",
+  },
+  {
+    family: "p",
+    size: "12vw",
+    x: "86vw",
+    y: "22vh",
+    travel: "40vh",
+    drift: "8vw",
+  },
+  {
+    family: "t",
+    size: "40vw",
+    x: "-12vw",
+    y: "38vh",
+    travel: "96vh",
+    drift: "3vw",
+  },
+  {
+    family: "s",
+    size: "26vw",
+    x: "56vw",
+    y: "30vh",
+    travel: "62vh",
+    drift: "6vw",
+  },
+  {
+    family: "p",
+    size: "18vw",
+    x: "12vw",
+    y: "50vh",
+    travel: "78vh",
+    drift: "7vw",
+  },
+  {
+    family: "t",
+    size: "14vw",
+    x: "78vw",
+    y: "44vh",
+    travel: "48vh",
+    drift: "5vw",
+  },
+  {
+    family: "s",
+    size: "44vw",
+    x: "24vw",
+    y: "-16vw",
+    travel: "98vh",
+    drift: "4vw",
+  },
+  {
+    family: "p",
+    size: "24vw",
+    x: "44vw",
+    y: "58vh",
+    travel: "66vh",
+    drift: "6vw",
+  },
+  {
+    family: "t",
+    size: "30vw",
+    x: "-6vw",
+    y: "16vh",
+    travel: "84vh",
+    drift: "8vw",
+  },
+  {
+    family: "s",
+    size: "13vw",
+    x: "90vw",
+    y: "36vh",
+    travel: "44vh",
+    drift: "3vw",
+  },
+];
+
 const faqs = [
   {
     question: "How long does migration take?",
@@ -98,6 +200,23 @@ const faqs = [
 
 <template>
   <div class="page">
+    <div class="page-atmos" aria-hidden="true">
+      <span
+        v-for="(orb, at) in orbs"
+        :key="at"
+        class="page-orb"
+        :class="`page-orb-${orb.family}`"
+        :style="{
+          '--orb-size': orb.size,
+          '--orb-x': orb.x,
+          '--orb-y': orb.y,
+          '--orb-travel': orb.travel,
+          '--orb-drift': orb.drift,
+        }"
+      ></span>
+      <span class="page-grid"></span>
+    </div>
+
     <DemoBar />
 
     <header class="masthead">
@@ -112,11 +231,6 @@ const faqs = [
 
     <main>
       <section id="product" class="hero">
-        <div class="hero-atmos" aria-hidden="true">
-          <span class="hero-orb hero-orb-a"></span>
-          <span class="hero-orb hero-orb-b"></span>
-          <span class="hero-grid"></span>
-        </div>
         <div class="hero-copy">
           <p class="eyebrow">Observability, minus the noise</p>
           <h1>

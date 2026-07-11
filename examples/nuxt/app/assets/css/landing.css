@@ -28,6 +28,140 @@ main h2 {
   margin-block-end: var(--space-7);
 }
 
+/* ---------- page-level ambient colour field (two-tone, parallax, motion-aware) ---------- */
+.page-atmos {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.page-orb {
+  position: absolute;
+  inline-size: var(--orb-size, 28vw);
+  block-size: var(--orb-size, 28vw);
+  inset-block-start: var(--orb-y, 0);
+  inset-inline-start: var(--orb-x, 0);
+  border-radius: var(--shape-full);
+  filter: blur(var(--blur-lg));
+  opacity: 0.22;
+  will-change: transform;
+}
+/* colour by accent family (loop assigns p / t / s round-robin) */
+.page-orb-p {
+  background-color: color-mix(in srgb, var(--primary) 60%, transparent);
+}
+.page-orb-t {
+  background-color: color-mix(in srgb, var(--tertiary) 58%, transparent);
+}
+.page-orb-s {
+  background-color: color-mix(in srgb, var(--secondary) 55%, transparent);
+}
+[data-color="dark"] .page-orb {
+  opacity: 0.3;
+}
+/* vibrancy governs the whole field's colour presence */
+[data-vibrancy="muted"] .page-orb {
+  opacity: 0.12;
+}
+[data-vibrancy="vivid"] .page-orb {
+  opacity: 0.34;
+}
+[data-color="dark"][data-vibrancy="vivid"] .page-orb {
+  opacity: 0.46;
+}
+
+/* private axis multipliers (novel names, not tokens): motion scales speed,
+   density scales the horizontal-wander threshold */
+:root {
+  --orb-motion: 1;
+  --orb-spread: 1;
+  --grid-travel: 8vh;
+}
+[data-motion="expressive"] {
+  --orb-motion: 1.9;
+  --grid-travel: 16vh;
+}
+[data-motion="reduced"] {
+  --orb-motion: 0.07;
+  --grid-travel: 0vh;
+}
+[data-density="compact"] {
+  --orb-spread: 0.6;
+}
+[data-density="spacious"] {
+  --orb-spread: 1.45;
+}
+
+/* full-page dot grid: a quiet texture over the aurora (fades out toward the footer) */
+.page-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--outline) 55%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 26px 26px;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 68%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to bottom, #000 0%, #000 68%, transparent 100%);
+  opacity: 0.55;
+}
+
+/* foreground rides above the ambient field */
+.masthead,
+main,
+.footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* every orb falls on the same scroll-aligned track shape, but each carries its own
+   randomized size / start / travel / drift (inline, loop-generated like the chart bars).
+   Down as you scroll down, back up as you scroll up, with a subtle L/R wander at midpoint.
+   Speed scales with motion (--orb-motion), wander with density (--orb-spread);
+   reduced ≈ still. No scroll timeline => orbs rest at their start pose. */
+@keyframes orb-fall {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(
+      calc(var(--orb-drift, 4vw) * var(--orb-spread)),
+      calc(var(--orb-travel, 40vh) * var(--orb-motion) * 0.55),
+      0
+    );
+  }
+  100% {
+    transform: translate3d(
+      calc(var(--orb-drift, 4vw) * var(--orb-spread) * -1),
+      calc(var(--orb-travel, 40vh) * var(--orb-motion)),
+      0
+    );
+  }
+}
+/* the dot grid tracks straight down/up with scroll (pattern slides, so no edge gap;
+   the viewport fade stays put and hides it near the footer) */
+@keyframes grid-scroll {
+  to {
+    background-position-y: calc(-1 * var(--grid-travel, 8vh));
+  }
+}
+@supports (animation-timeline: scroll()) {
+  .page-orb {
+    animation: orb-fall linear both;
+    animation-timeline: scroll(root);
+  }
+  .page-grid {
+    animation: grid-scroll linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
 /* ---------- masthead ---------- */
 .masthead {
   display: flex;
@@ -93,65 +227,6 @@ main h2 {
   padding-block: var(--space-8) var(--space-10);
   overflow: hidden;
 }
-.hero-atmos {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image: var(--gradient-faint);
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent,
-    #000 10%,
-    #000 90%,
-    transparent
-  );
-  mask-image: linear-gradient(
-    to right,
-    transparent,
-    #000 10%,
-    #000 90%,
-    transparent
-  );
-}
-.hero-orb {
-  position: absolute;
-  border-radius: var(--shape-full);
-  filter: blur(70px);
-  opacity: 0.5;
-}
-.hero-orb-a {
-  inline-size: 32vw;
-  block-size: 32vw;
-  inset-block-start: -8vw;
-  inset-inline-end: -4vw;
-  background-color: color-mix(in srgb, var(--primary) 60%, transparent);
-}
-.hero-orb-b {
-  inline-size: 26vw;
-  block-size: 26vw;
-  inset-block-end: -10vw;
-  inset-inline-start: 8vw;
-  background-color: color-mix(in srgb, var(--tertiary) 50%, transparent);
-}
-[data-color="dark"] .hero-orb {
-  opacity: 0.6;
-}
-.hero-grid {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(
-    color-mix(in srgb, var(--outline) 55%, transparent) 1px,
-    transparent 1px
-  );
-  background-size: 26px 26px;
-  -webkit-mask-image: radial-gradient(
-    70% 60% at 50% 30%,
-    #000,
-    transparent 75%
-  );
-  mask-image: radial-gradient(70% 60% at 50% 30%, #000, transparent 75%);
-  opacity: 0.5;
-}
 
 .eyebrow {
   display: inline-block;
@@ -173,6 +248,15 @@ main h2 {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+/* vivid makes the accent word and eyebrow read electric (effect the tokens can't carry alone) */
+[data-vibrancy="vivid"] .hero-accent {
+  filter: drop-shadow(
+    0 0 18px color-mix(in srgb, var(--primary) 30%, transparent)
+  );
+}
+[data-color="dark"][data-vibrancy="vivid"] .eyebrow {
+  text-shadow: 0 0 16px color-mix(in srgb, var(--primary) 45%, transparent);
 }
 .lede {
   font: var(--type-title);
@@ -585,6 +669,82 @@ main h2 {
 .footer-note strong {
   color: var(--on-surface);
   font-weight: var(--weight-medium);
+}
+
+/* ---------- depth axis: keep hierarchy legible when shadows flatten ---------- */
+/* under flat, elevation collapses to a hairline ring — firm card outlines so
+   separation is carried by structure, not shadow */
+[data-depth="flat"] .feature,
+[data-depth="flat"] .quote,
+[data-depth="flat"] .tier,
+[data-depth="flat"] .faq-item,
+[data-depth="flat"] .stats dl {
+  border-color: var(--outline);
+}
+
+/* ---------- entrance + expressive motion ---------- */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes reveal-mock {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* hero copy staggers in on load; expressive lengthens + overshoots, reduced stills it */
+.hero-copy > * {
+  animation: reveal-up var(--duration-slow) var(--easing-enter) both;
+}
+.hero-copy .eyebrow {
+  animation-delay: calc(var(--delay-step) * 0);
+}
+.hero-copy h1 {
+  animation-delay: calc(var(--delay-step) * 1);
+}
+.hero-copy .lede {
+  animation-delay: calc(var(--delay-step) * 2);
+}
+.hero-copy .actions {
+  animation-delay: calc(var(--delay-step) * 3);
+}
+.hero-copy .hero-foot {
+  animation-delay: calc(var(--delay-step) * 4);
+}
+.mock {
+  animation: reveal-mock var(--duration-slow) var(--easing-enter) both;
+  animation-delay: calc(var(--delay-step) * 2);
+}
+
+/* section content reveals as it scrolls into view (progressive enhancement:
+   where scroll timelines are unsupported it simply plays once on load) */
+@supports (animation-timeline: view()) {
+  .feature,
+  .quote,
+  .tier {
+    animation: reveal-up var(--duration-slow) var(--easing-enter) both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 22%;
+  }
+}
+[data-motion="reduced"] .hero-copy > *,
+[data-motion="reduced"] .mock,
+[data-motion="reduced"] .feature,
+[data-motion="reduced"] .quote,
+[data-motion="reduced"] .tier {
+  animation: none;
 }
 
 /* ---------- responsive: single breakpoint ---------- */

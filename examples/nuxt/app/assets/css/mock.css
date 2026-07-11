@@ -25,7 +25,7 @@
       color-mix(in srgb, var(--tertiary) 45%, transparent),
       transparent 70%
     );
-  filter: blur(48px);
+  filter: blur(var(--blur-md));
   transition: opacity var(--duration-slow) var(--easing-standard);
 }
 [data-color="dark"] .mock-glow {
@@ -48,6 +48,9 @@
 }
 .mock:hover .mock-window {
   transform: rotateY(0deg) rotateX(0deg);
+}
+[data-depth="flat"] .mock-window {
+  border-color: var(--outline);
 }
 
 /* ---------- title bar ---------- */
@@ -178,6 +181,35 @@
 [data-color="dark"] .mock-bar {
   background: linear-gradient(to top, var(--primary-600), var(--primary-300));
 }
+/* vibrancy is a chart moment: saturate/desaturate on the same ramp (spectral use of the columns) */
+[data-vibrancy="vivid"] .mock-bar {
+  background: linear-gradient(
+    to top,
+    var(--primary-vivid-700),
+    var(--primary-vivid-400)
+  );
+}
+[data-vibrancy="muted"] .mock-bar {
+  background: linear-gradient(
+    to top,
+    var(--primary-muted-700),
+    var(--primary-muted-400)
+  );
+}
+[data-color="dark"][data-vibrancy="vivid"] .mock-bar {
+  background: linear-gradient(
+    to top,
+    var(--primary-vivid-600),
+    var(--primary-vivid-300)
+  );
+}
+[data-color="dark"][data-vibrancy="muted"] .mock-bar {
+  background: linear-gradient(
+    to top,
+    var(--primary-muted-600),
+    var(--primary-muted-300)
+  );
+}
 @keyframes bar-grow {
   from {
     transform: scaleY(0);
@@ -187,42 +219,42 @@
   }
 }
 .mock-bar:nth-child(1) {
-  animation-delay: calc(var(--duration-fast) * 0.4);
+  animation-delay: calc(var(--delay-step) * 1);
 }
 .mock-bar:nth-child(2) {
-  animation-delay: calc(var(--duration-fast) * 0.8);
+  animation-delay: calc(var(--delay-step) * 2);
 }
 .mock-bar:nth-child(3) {
-  animation-delay: calc(var(--duration-fast) * 1.2);
+  animation-delay: calc(var(--delay-step) * 3);
 }
 .mock-bar:nth-child(4) {
-  animation-delay: calc(var(--duration-fast) * 1.6);
+  animation-delay: calc(var(--delay-step) * 4);
 }
 .mock-bar:nth-child(5) {
-  animation-delay: calc(var(--duration-fast) * 2);
+  animation-delay: calc(var(--delay-step) * 5);
 }
 .mock-bar:nth-child(6) {
-  animation-delay: calc(var(--duration-fast) * 2.4);
+  animation-delay: calc(var(--delay-step) * 6);
 }
 .mock-bar:nth-child(7) {
-  animation-delay: calc(var(--duration-fast) * 2.8);
+  animation-delay: calc(var(--delay-step) * 7);
 }
 .mock-bar:nth-child(8) {
-  animation-delay: calc(var(--duration-fast) * 3.2);
+  animation-delay: calc(var(--delay-step) * 8);
 }
 .mock-bar:nth-child(9) {
-  animation-delay: calc(var(--duration-fast) * 3.6);
+  animation-delay: calc(var(--delay-step) * 9);
 }
 .mock-bar:nth-child(10) {
-  animation-delay: calc(var(--duration-fast) * 4);
+  animation-delay: calc(var(--delay-step) * 10);
 }
 .mock-bar:nth-child(11) {
-  animation-delay: calc(var(--duration-fast) * 4.4);
+  animation-delay: calc(var(--delay-step) * 11);
 }
 .mock-bar:nth-child(12) {
-  animation-delay: calc(var(--duration-fast) * 4.8);
+  animation-delay: calc(var(--delay-step) * 12);
 }
-/* motion: reduced — no growth, bars simply present */
+/* motion: reduced — no growth, bars simply present (delay-step is 0 too) */
 [data-motion="reduced"] .mock-bar {
   animation: none;
 }

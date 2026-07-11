@@ -1,69 +1,89 @@
-/* demo.css — the untheme demo bar and axis pill controls.
-   Demo chrome, deliberately distinct from the Borealis product fiction:
-   mono labels, a compact segmented control feel. Tokens only. */
+/* demo.css — the untheme demo bar, axis pill controls, action buttons,
+   and the (concept) live token inspector. Demo chrome, distinct from the
+   product fiction: mono labels, segmented pills. Tokens only. */
 
 .demo-bar {
   position: sticky;
   top: 0;
   z-index: 100;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-4) var(--space-6);
+  flex-direction: column;
+  gap: var(--space-3);
   padding: var(--space-3) var(--space-5);
   background-color: color-mix(
     in srgb,
     var(--surface-container-high) 88%,
     transparent
   );
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(var(--blur-sm));
+  backdrop-filter: blur(var(--blur-sm));
   border-block-end: var(--border-thin);
 }
 
+/* row 1: note · theme select · action buttons */
+.demo-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+}
 .demo-note {
   font: var(--type-label);
   letter-spacing: var(--type-label-letter-spacing);
   color: var(--on-surface-muted);
-  text-transform: none;
-  max-inline-size: 22ch;
+  max-inline-size: 44ch;
 }
 .demo-note strong {
   color: var(--on-surface);
   font-weight: var(--weight-bold);
 }
 
-.demo-controls {
+.demo-actions {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
-  gap: var(--space-3) var(--space-5);
+  align-items: center;
+  gap: var(--space-2);
   margin-inline-start: auto;
 }
 
-/* ---------- theme select ---------- */
+/* row 2: theme control + axis fieldsets share one tidy grid */
+.demo-axes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  align-items: start;
+  gap: var(--space-4) var(--space-5);
+  padding-block-start: var(--space-3);
+  border-block-start: var(--border-thin);
+  border-color: var(--outline-muted);
+}
+
+/* ---------- theme select (a grid cell, matched to the axis controls) ---------- */
 .demo-theme {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  min-inline-size: 0;
 }
-.demo-theme > span,
-.axis legend {
+.demo-cell-label,
+.axis-label {
   font: var(--type-label);
   font-family: var(--font-mono);
   letter-spacing: var(--type-label-letter-spacing);
   text-transform: lowercase;
   color: var(--on-surface-muted);
 }
-.demo-theme select {
+.demo-axes select {
   appearance: none;
-  padding: var(--space-2) var(--space-6) var(--space-2) var(--space-3);
+  inline-size: 100%;
+  block-size: 2.25rem;
+  padding-inline: var(--space-3) var(--space-6);
   background-color: var(--surface);
   color: var(--on-surface);
   border: var(--border-thin);
   border-radius: var(--shape-sm);
   font: var(--type-label);
   font-family: var(--font-mono);
+  text-overflow: ellipsis;
   cursor: pointer;
   background-image:
     linear-gradient(45deg, transparent 50%, currentcolor 50%),
@@ -77,65 +97,155 @@
   background-repeat: no-repeat;
   transition: var(--transition-fast);
 }
-.demo-theme select:hover {
+.demo-axes select:hover {
   background-color: var(--surface-container);
 }
-
-/* ---------- axis segmented pills ---------- */
-.axis {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1);
-}
-.axis legend {
-  flex-basis: 100%;
-  margin-block-end: var(--space-1);
-  padding: 0;
+.demo-axes select:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
 }
 
-.axis-option {
-  position: relative;
+/* ---------- action buttons (shuffle · copy-as-CSS) — a matched pair ---------- */
+.demo-button {
   display: inline-flex;
-}
-.axis-option input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  margin: 0;
-  cursor: pointer;
-}
-.axis-option span {
-  display: block;
-  padding: var(--space-2) var(--space-3);
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  block-size: 2.25rem;
+  padding-inline: var(--space-4);
+  min-inline-size: 7rem;
   background-color: var(--surface);
-  color: var(--on-surface-muted);
+  color: var(--on-surface);
   border: var(--border-thin);
   border-radius: var(--shape-sm);
   font: var(--type-label);
   font-family: var(--font-mono);
   line-height: 1;
-  user-select: none;
+  white-space: nowrap;
   transition: var(--transition-fast);
 }
-.axis-option:hover span {
+.demo-button:hover {
   background-color: var(--surface-container);
+  border-color: var(--outline);
+}
+.demo-button:active {
+  transform: translateY(1px);
+}
+.demo-button .demo-button-icon {
+  font-size: 1.1em;
+  line-height: 0;
+}
+/* transient confirmation state (JS toggles [data-copied]) */
+.demo-button[data-copied="true"] {
+  background-color: var(--success-container);
+  color: var(--on-success-container);
+  border-color: transparent;
+}
+
+/* ---------- axis controls (labelled selects, matched to the theme control) ---------- */
+.axis {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-inline-size: 0;
+}
+
+/* ---------- token inspector (CONCEPT — static mock, no wiring this round) ---------- */
+.token-inspector {
+  position: fixed;
+  inset-block-end: var(--space-5);
+  inset-inline-end: var(--space-5);
+  z-index: 90;
+  inline-size: min(20rem, calc(100vw - 2rem));
+  padding: var(--space-4);
+  background-color: var(--surface-container-high);
+  color: var(--on-surface);
+  border: var(--border-thin);
+  border-radius: var(--shape-md);
+  box-shadow: var(--elevation-high);
+}
+.ti-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-block-end: var(--space-3);
+}
+.ti-target {
+  font: var(--type-label);
+  font-family: var(--font-mono);
+  color: var(--on-surface-muted);
+}
+.ti-target strong {
   color: var(--on-surface);
 }
-.axis-option input:checked + span {
-  background-color: var(--primary-container);
-  color: var(--on-primary-container);
+.ti-tag {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--shape-full);
+  background-color: var(--tertiary-container);
+  color: var(--on-tertiary-container);
+  font: var(--type-label);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  line-height: 1;
+}
+.ti-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.ti-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--type-label);
+  font-family: var(--font-mono);
+}
+.ti-swatch {
+  inline-size: 1rem;
+  block-size: 1rem;
+  border-radius: var(--shape-sm);
+  border: var(--border-thin);
+  border-color: var(--outline-muted);
+}
+.ti-chain {
+  color: var(--on-surface-muted);
+}
+.ti-chain b {
+  color: var(--on-surface);
+  font-weight: var(--weight-medium);
+}
+.ti-chain .ti-arrow {
+  color: var(--primary);
+  padding-inline: var(--space-1);
+}
+.ti-swatch-primary {
+  background-color: var(--primary);
   border-color: transparent;
+}
+.ti-swatch-onprimary {
+  background-color: var(--on-primary);
+}
+.ti-swatch-radius {
+  background-color: var(--surface);
+  border-radius: var(--shape-md);
+}
+.ti-swatch-elev {
+  background-color: var(--surface);
   box-shadow: var(--elevation-low);
 }
 
-/* stack the bar on narrow screens */
+/* ---------- responsive ---------- */
 @media (max-width: 56rem) {
-  .demo-controls {
+  .demo-actions {
     margin-inline-start: 0;
     inline-size: 100%;
   }
   .demo-note {
     max-inline-size: none;
+  }
+  .token-inspector {
+    display: none;
   }
 }

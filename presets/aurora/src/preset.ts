@@ -7,27 +7,31 @@ import { ramps } from "./ramps";
  *
  * The reference untheme preset: eight functional tonal ramps — primary,
  * secondary, tertiary, error, success, warning, neutral, and
- * neutral-variant — at the eleven Tailwind-style stops (50–950), carrying a
- * deliberately small semantic vocabulary: color roles, a five-style type
- * scale, shape radii, a spacing scale, elevation shadows, motion, and
- * state-layer opacities. Every color role binds a ramp stop by reference,
- * so a theme variant rebinds only the ramp values and every role and
- * context follows. Every token type the schema validates appears at least
- * once.
+ * neutral-variant — at the eleven Tailwind-style stops (50–950), the six
+ * accent ramps additionally carried in muted and vivid chroma columns. The
+ * ramps feed a deliberately small semantic vocabulary: color roles, a
+ * five-style type scale, shape radii, a spacing scale, elevation shadows,
+ * motion, and state-layer opacities. Every color role binds a ramp stop by
+ * reference, so a theme variant rebinds only the ramp values and every
+ * role and context follows. Every token type the schema validates appears
+ * at least once.
  *
- * Six modifier axes compose in `order`: `color` (light/dark) rebinds the
- * color roles; `contrast` (default/medium/high) re-points shifted roles at
- * the `*-medium-contrast` / `*-high-contrast` channel tokens; `text`
- * (sm/md/lg) rebinds the type-scale sizes; `density`
+ * Eight modifier axes compose in `order`: `color` (light/dark) rebinds the
+ * color roles; `vibrancy` (muted/balanced/vivid) re-points accent roles at
+ * their chroma-column channels; `contrast` (default/medium/high) re-points
+ * shifted roles at the `*-medium-contrast` / `*-high-contrast` channels;
+ * `text` (sm/md/lg) rebinds the type-scale sizes; `density`
  * (compact/default/spacious) rebinds the spacing scale; `radius`
- * (sharp/default/round) rebinds the shape radii; `motion`
- * (default/reduced) zeroes the durations. The axes override disjoint token
- * sets — except `color` and `contrast`, which deliberately collide on the
- * shifted roles: what "higher contrast" means depends on the mode, so each
- * color context also sets the channel tokens for its mode, and the
- * contrast contexts override roles with mode-independent references whose
- * targets the color axis already resolved. `contrast` follows `color` in
- * `order`, so its override wins the collision.
+ * (sharp/default/round) rebinds the shape radii; `depth`
+ * (flat/default/deep) rebinds the elevation shadows; `motion`
+ * (default/reduced/expressive) rebinds the durations, stagger delay, and
+ * standard easing. The axes override disjoint token sets — except `color`,
+ * `vibrancy`, and `contrast`, which deliberately collide on the accent
+ * roles: what a stop or column means depends on the mode, so the color
+ * contexts also set every channel token for their mode, and the vibrancy
+ * and contrast contexts override roles with mode-independent references
+ * whose targets the color axis already resolved. `contrast` follows
+ * `vibrancy` in `order`, so accessibility wins their collision.
  */
 export const preset = defineUnthemePreset({
   id: "aurora",
@@ -151,6 +155,130 @@ export const preset = defineUnthemePreset({
     "on-warning-container-high-contrast": {
       $type: "color",
       $value: "{warning-950}",
+    },
+
+    // Vibrancy channels — every accent role at each chroma column, holding
+    // the light scheme's stops; the dark context rebinds each channel to
+    // its own stops in the same column
+    "primary-muted": { $type: "color", $value: "{primary-muted-600}" },
+    "primary-vivid": { $type: "color", $value: "{primary-vivid-600}" },
+    "on-primary-muted": { $type: "color", $value: "{primary-muted-50}" },
+    "on-primary-vivid": { $type: "color", $value: "{primary-vivid-50}" },
+    "primary-container-muted": {
+      $type: "color",
+      $value: "{primary-muted-100}",
+    },
+    "primary-container-vivid": {
+      $type: "color",
+      $value: "{primary-vivid-100}",
+    },
+    "on-primary-container-muted": {
+      $type: "color",
+      $value: "{primary-muted-800}",
+    },
+    "on-primary-container-vivid": {
+      $type: "color",
+      $value: "{primary-vivid-800}",
+    },
+    "secondary-muted": { $type: "color", $value: "{secondary-muted-600}" },
+    "secondary-vivid": { $type: "color", $value: "{secondary-vivid-600}" },
+    "on-secondary-muted": { $type: "color", $value: "{secondary-muted-50}" },
+    "on-secondary-vivid": { $type: "color", $value: "{secondary-vivid-50}" },
+    "secondary-container-muted": {
+      $type: "color",
+      $value: "{secondary-muted-100}",
+    },
+    "secondary-container-vivid": {
+      $type: "color",
+      $value: "{secondary-vivid-100}",
+    },
+    "on-secondary-container-muted": {
+      $type: "color",
+      $value: "{secondary-muted-800}",
+    },
+    "on-secondary-container-vivid": {
+      $type: "color",
+      $value: "{secondary-vivid-800}",
+    },
+    "tertiary-muted": { $type: "color", $value: "{tertiary-muted-600}" },
+    "tertiary-vivid": { $type: "color", $value: "{tertiary-vivid-600}" },
+    "on-tertiary-muted": { $type: "color", $value: "{tertiary-muted-50}" },
+    "on-tertiary-vivid": { $type: "color", $value: "{tertiary-vivid-50}" },
+    "tertiary-container-muted": {
+      $type: "color",
+      $value: "{tertiary-muted-100}",
+    },
+    "tertiary-container-vivid": {
+      $type: "color",
+      $value: "{tertiary-vivid-100}",
+    },
+    "on-tertiary-container-muted": {
+      $type: "color",
+      $value: "{tertiary-muted-800}",
+    },
+    "on-tertiary-container-vivid": {
+      $type: "color",
+      $value: "{tertiary-vivid-800}",
+    },
+    "error-muted": { $type: "color", $value: "{error-muted-600}" },
+    "error-vivid": { $type: "color", $value: "{error-vivid-600}" },
+    "on-error-muted": { $type: "color", $value: "{error-muted-50}" },
+    "on-error-vivid": { $type: "color", $value: "{error-vivid-50}" },
+    "error-container-muted": {
+      $type: "color",
+      $value: "{error-muted-100}",
+    },
+    "error-container-vivid": {
+      $type: "color",
+      $value: "{error-vivid-100}",
+    },
+    "on-error-container-muted": {
+      $type: "color",
+      $value: "{error-muted-800}",
+    },
+    "on-error-container-vivid": {
+      $type: "color",
+      $value: "{error-vivid-800}",
+    },
+    "success-muted": { $type: "color", $value: "{success-muted-600}" },
+    "success-vivid": { $type: "color", $value: "{success-vivid-600}" },
+    "on-success-muted": { $type: "color", $value: "{success-muted-50}" },
+    "on-success-vivid": { $type: "color", $value: "{success-vivid-50}" },
+    "success-container-muted": {
+      $type: "color",
+      $value: "{success-muted-100}",
+    },
+    "success-container-vivid": {
+      $type: "color",
+      $value: "{success-vivid-100}",
+    },
+    "on-success-container-muted": {
+      $type: "color",
+      $value: "{success-muted-800}",
+    },
+    "on-success-container-vivid": {
+      $type: "color",
+      $value: "{success-vivid-800}",
+    },
+    "warning-muted": { $type: "color", $value: "{warning-muted-600}" },
+    "warning-vivid": { $type: "color", $value: "{warning-vivid-600}" },
+    "on-warning-muted": { $type: "color", $value: "{warning-muted-50}" },
+    "on-warning-vivid": { $type: "color", $value: "{warning-vivid-50}" },
+    "warning-container-muted": {
+      $type: "color",
+      $value: "{warning-muted-100}",
+    },
+    "warning-container-vivid": {
+      $type: "color",
+      $value: "{warning-vivid-100}",
+    },
+    "on-warning-container-muted": {
+      $type: "color",
+      $value: "{warning-muted-800}",
+    },
+    "on-warning-container-vivid": {
+      $type: "color",
+      $value: "{warning-vivid-800}",
     },
 
     // Typography — families, weights, and per-style size and leading
@@ -336,6 +464,8 @@ export const preset = defineUnthemePreset({
     "easing-standard": { $type: "cubicBezier", $value: [0.2, 0, 0, 1] },
     "easing-enter": { $type: "cubicBezier", $value: [0.05, 0.7, 0.1, 1] },
     "easing-exit": { $type: "cubicBezier", $value: [0.3, 0, 0.8, 0.15] },
+    "easing-overshoot": { $type: "cubicBezier", $value: [0.34, 1.56, 0.64, 1] },
+    "delay-step": { $type: "duration", $value: { value: 60, unit: "ms" } },
     "transition-fast": {
       $type: "transition",
       $value: {
@@ -389,6 +519,19 @@ export const preset = defineUnthemePreset({
         style: "{stroke-solid}",
       },
     },
+    "border-focus": {
+      $type: "border",
+      $value: {
+        color: "{primary}",
+        width: { value: 2, unit: "px" },
+        style: "{stroke-solid}",
+      },
+    },
+
+    // Blur radii
+    "blur-sm": { $type: "dimension", $value: { value: 12, unit: "px" } },
+    "blur-md": { $type: "dimension", $value: { value: 48, unit: "px" } },
+    "blur-lg": { $type: "dimension", $value: { value: 70, unit: "px" } },
 
     // Gradients
     "gradient-brand": {
@@ -477,12 +620,117 @@ export const preset = defineUnthemePreset({
         "on-warning-container-medium-contrast": "{warning-100}",
         "on-warning-container-high-contrast": "{warning-50}",
 
+        // Vibrancy channels — the dark scheme's stops in each chroma column
+        "primary-muted": "{primary-muted-400}",
+        "primary-vivid": "{primary-vivid-400}",
+        "on-primary-muted": "{primary-muted-950}",
+        "on-primary-vivid": "{primary-vivid-950}",
+        "primary-container-muted": "{primary-muted-800}",
+        "primary-container-vivid": "{primary-vivid-800}",
+        "on-primary-container-muted": "{primary-muted-200}",
+        "on-primary-container-vivid": "{primary-vivid-200}",
+        "secondary-muted": "{secondary-muted-400}",
+        "secondary-vivid": "{secondary-vivid-400}",
+        "on-secondary-muted": "{secondary-muted-950}",
+        "on-secondary-vivid": "{secondary-vivid-950}",
+        "secondary-container-muted": "{secondary-muted-800}",
+        "secondary-container-vivid": "{secondary-vivid-800}",
+        "on-secondary-container-muted": "{secondary-muted-200}",
+        "on-secondary-container-vivid": "{secondary-vivid-200}",
+        "tertiary-muted": "{tertiary-muted-400}",
+        "tertiary-vivid": "{tertiary-vivid-400}",
+        "on-tertiary-muted": "{tertiary-muted-950}",
+        "on-tertiary-vivid": "{tertiary-vivid-950}",
+        "tertiary-container-muted": "{tertiary-muted-800}",
+        "tertiary-container-vivid": "{tertiary-vivid-800}",
+        "on-tertiary-container-muted": "{tertiary-muted-200}",
+        "on-tertiary-container-vivid": "{tertiary-vivid-200}",
+        "error-muted": "{error-muted-400}",
+        "error-vivid": "{error-vivid-400}",
+        "on-error-muted": "{error-muted-950}",
+        "on-error-vivid": "{error-vivid-950}",
+        "error-container-muted": "{error-muted-800}",
+        "error-container-vivid": "{error-vivid-800}",
+        "on-error-container-muted": "{error-muted-200}",
+        "on-error-container-vivid": "{error-vivid-200}",
+        "success-muted": "{success-muted-400}",
+        "success-vivid": "{success-vivid-400}",
+        "on-success-muted": "{success-muted-950}",
+        "on-success-vivid": "{success-vivid-950}",
+        "success-container-muted": "{success-muted-800}",
+        "success-container-vivid": "{success-vivid-800}",
+        "on-success-container-muted": "{success-muted-200}",
+        "on-success-container-vivid": "{success-vivid-200}",
+        "warning-muted": "{warning-muted-400}",
+        "warning-vivid": "{warning-vivid-400}",
+        "on-warning-muted": "{warning-muted-950}",
+        "on-warning-vivid": "{warning-vivid-950}",
+        "warning-container-muted": "{warning-muted-800}",
+        "warning-container-vivid": "{warning-vivid-800}",
+        "on-warning-container-muted": "{warning-muted-200}",
+        "on-warning-container-vivid": "{warning-vivid-200}",
+
         // The faint wash starts from the dark end of the ramp; its surface
         // endpoint follows the rebound role on its own.
         "gradient-faint": [
           { color: "{primary-900}", position: 0 },
           { color: "{surface}", position: 1 },
         ],
+      },
+    },
+    vibrancy: {
+      balanced: {},
+      muted: {
+        primary: "{primary-muted}",
+        "on-primary": "{on-primary-muted}",
+        "primary-container": "{primary-container-muted}",
+        "on-primary-container": "{on-primary-container-muted}",
+        secondary: "{secondary-muted}",
+        "on-secondary": "{on-secondary-muted}",
+        "secondary-container": "{secondary-container-muted}",
+        "on-secondary-container": "{on-secondary-container-muted}",
+        tertiary: "{tertiary-muted}",
+        "on-tertiary": "{on-tertiary-muted}",
+        "tertiary-container": "{tertiary-container-muted}",
+        "on-tertiary-container": "{on-tertiary-container-muted}",
+        error: "{error-muted}",
+        "on-error": "{on-error-muted}",
+        "error-container": "{error-container-muted}",
+        "on-error-container": "{on-error-container-muted}",
+        success: "{success-muted}",
+        "on-success": "{on-success-muted}",
+        "success-container": "{success-container-muted}",
+        "on-success-container": "{on-success-container-muted}",
+        warning: "{warning-muted}",
+        "on-warning": "{on-warning-muted}",
+        "warning-container": "{warning-container-muted}",
+        "on-warning-container": "{on-warning-container-muted}",
+      },
+      vivid: {
+        primary: "{primary-vivid}",
+        "on-primary": "{on-primary-vivid}",
+        "primary-container": "{primary-container-vivid}",
+        "on-primary-container": "{on-primary-container-vivid}",
+        secondary: "{secondary-vivid}",
+        "on-secondary": "{on-secondary-vivid}",
+        "secondary-container": "{secondary-container-vivid}",
+        "on-secondary-container": "{on-secondary-container-vivid}",
+        tertiary: "{tertiary-vivid}",
+        "on-tertiary": "{on-tertiary-vivid}",
+        "tertiary-container": "{tertiary-container-vivid}",
+        "on-tertiary-container": "{on-tertiary-container-vivid}",
+        error: "{error-vivid}",
+        "on-error": "{on-error-vivid}",
+        "error-container": "{error-container-vivid}",
+        "on-error-container": "{on-error-container-vivid}",
+        success: "{success-vivid}",
+        "on-success": "{on-success-vivid}",
+        "success-container": "{success-container-vivid}",
+        "on-success-container": "{on-success-container-vivid}",
+        warning: "{warning-vivid}",
+        "on-warning": "{on-warning-vivid}",
+        "warning-container": "{warning-container-vivid}",
+        "on-warning-container": "{on-warning-container-vivid}",
       },
     },
     contrast: {
@@ -587,8 +835,91 @@ export const preset = defineUnthemePreset({
         "duration-fast": { value: 0, unit: "ms" },
         "duration-base": { value: 0, unit: "ms" },
         "duration-slow": { value: 0, unit: "ms" },
+        "delay-step": { value: 0, unit: "ms" },
+      },
+      expressive: {
+        "duration-fast": { value: 250, unit: "ms" },
+        "duration-base": { value: 450, unit: "ms" },
+        "duration-slow": { value: 700, unit: "ms" },
+        "delay-step": { value: 90, unit: "ms" },
+        "easing-standard": "{easing-overshoot}",
+      },
+    },
+    depth: {
+      default: {},
+      // Borders carry separation when the shadows collapse.
+      flat: {
+        "elevation-low": "{elevation-none}",
+        "elevation-mid": "{elevation-none}",
+        "elevation-high": "{elevation-none}",
+      },
+      deep: {
+        "elevation-low": [
+          {
+            color: { colorSpace: "srgb", components: [0, 0, 0], alpha: 0.18 },
+            offsetX: { value: 0, unit: "px" },
+            offsetY: { value: 2, unit: "px" },
+            blur: { value: 6, unit: "px" },
+            spread: { value: 0, unit: "px" },
+          },
+          {
+            color: { colorSpace: "srgb", components: [0, 0, 0], alpha: 0.12 },
+            offsetX: { value: 0, unit: "px" },
+            offsetY: { value: 6, unit: "px" },
+            blur: { value: 12, unit: "px" },
+            spread: { value: -3, unit: "px" },
+          },
+        ],
+        "elevation-mid": [
+          {
+            color: { colorSpace: "srgb", components: [0, 0, 0], alpha: 0.18 },
+            offsetX: { value: 0, unit: "px" },
+            offsetY: { value: 6, unit: "px" },
+            blur: { value: 12, unit: "px" },
+            spread: { value: 0, unit: "px" },
+          },
+          {
+            color: { colorSpace: "srgb", components: [0, 0, 0], alpha: 0.12 },
+            offsetX: { value: 0, unit: "px" },
+            offsetY: { value: 12, unit: "px" },
+            blur: { value: 24, unit: "px" },
+            spread: { value: -6, unit: "px" },
+          },
+        ],
+        "elevation-high": [
+          {
+            color: { colorSpace: "srgb", components: [0, 0, 0], alpha: 0.2 },
+            offsetX: { value: 0, unit: "px" },
+            offsetY: { value: 12, unit: "px" },
+            blur: { value: 24, unit: "px" },
+            spread: { value: 0, unit: "px" },
+          },
+          {
+            color: { colorSpace: "srgb", components: [0, 0, 0], alpha: 0.14 },
+            offsetX: { value: 0, unit: "px" },
+            offsetY: { value: 24, unit: "px" },
+            blur: { value: 48, unit: "px" },
+            spread: { value: -12, unit: "px" },
+          },
+          {
+            color: { colorSpace: "srgb", components: [0, 0, 0], alpha: 0.08 },
+            offsetX: { value: 0, unit: "px" },
+            offsetY: { value: 48, unit: "px" },
+            blur: { value: 96, unit: "px" },
+            spread: { value: -24, unit: "px" },
+          },
+        ],
       },
     },
   },
-  order: ["color", "contrast", "text", "density", "radius", "motion"],
+  order: [
+    "color",
+    "vibrancy",
+    "contrast",
+    "text",
+    "density",
+    "radius",
+    "depth",
+    "motion",
+  ],
 });

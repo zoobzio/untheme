@@ -74,6 +74,12 @@ a:hover {
   color: var(--tertiary);
 }
 
+/* View Transitions on theme swap (JS opts in; skipped under motion: reduced) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--duration-slow);
+}
+
 /* theme + axis swaps glide instead of snapping (stilled by motion: reduced) */
 body,
 .masthead,
@@ -165,14 +171,14 @@ body,
 
 /* ---------- focus treatment (every interactive element) ---------- */
 :focus-visible {
-  outline: 2px solid var(--primary);
+  outline: var(--border-focus);
   outline-offset: 2px;
   border-radius: var(--shape-sm);
 }
 .button:focus-visible,
 .site-nav a:focus-visible,
-.axis-option:focus-within {
-  outline: 2px solid var(--primary);
+.demo-button:focus-visible {
+  outline: var(--border-focus);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px
     color-mix(
@@ -180,10 +186,6 @@ body,
       var(--primary) calc(var(--state-focus) * 100%),
       transparent
     );
-}
-/* radios sit under a styled pill; move the ring to the pill */
-.axis-option input:focus-visible {
-  outline: none;
 }
 
 .sr-only {
