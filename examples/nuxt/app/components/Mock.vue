@@ -1,13 +1,3 @@
-<script setup lang="ts">
-/**
- * The product shot: a fake Borealis dashboard window built entirely from
- * tokens — chrome, sidebar, stat cards, a bar chart on the primary ramp,
- * and a service feed carrying the semantic containers. Flip any control and
- * "your app" rebrands with the page.
- */
-const bars = [38, 52, 46, 64, 58, 74, 66, 82, 71, 90, 78, 60];
-</script>
-
 <template>
   <figure class="mock" aria-label="Borealis dashboard preview">
     <div class="mock-glow" aria-hidden="true" />
@@ -45,7 +35,7 @@ const bars = [38, 52, 46, 64, 58, 74, 66, 82, 71, 90, 78, 60];
           </div>
           <div class="mock-chart" aria-hidden="true">
             <span
-              v-for="(height, hour) in bars"
+              v-for="(height, hour) in BARS"
               :key="hour"
               class="mock-bar"
               :style="{ blockSize: `${height}%` }"

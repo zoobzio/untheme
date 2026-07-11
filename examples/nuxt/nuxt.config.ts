@@ -19,6 +19,9 @@ export default defineNuxtConfig({
   compatibilityDate: "2026-07-01",
   modules: ["@untheme/nuxt"],
   css: ["~/assets/css/main.css"],
+  imports: {
+    dirs: ["constants", "types"],
+  },
   // The runtime plugin pulls untheme into the app bundle, where Vite must
   // compile real ESM — not a `unbuild --stub` jiti shim. Aliasing the libs to
   // their TypeScript source lets Vite transpile them directly, so the example
