@@ -1,0 +1,43 @@
+/* features.css — Features.vue: the three-up feature grid. */
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+.feature {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  background-color: var(--surface-container);
+  border: var(--border-thin);
+  border-color: var(--outline-muted);
+  border-radius: var(--shape-lg);
+  transition: var(--transition-base);
+}
+.feature:hover {
+  transform: translateY(-4px);
+  border-color: var(--outline);
+  box-shadow: var(--elevation-mid);
+}
+.feature-mark {
+  font: var(--type-title);
+  font-family: var(--font-mono);
+  color: var(--primary);
+  opacity: 0.7;
+}
+.feature h3 {
+  font: var(--type-title);
+  letter-spacing: var(--type-title-letter-spacing);
+  color: var(--on-surface);
+}
+.feature p {
+  color: var(--on-surface-muted);
+}
+
+@media (max-width: 56rem) {
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+}

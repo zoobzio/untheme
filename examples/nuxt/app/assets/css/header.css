@@ -1,0 +1,64 @@
+/* header.css — Header.vue: the masthead (brand mark, site nav). */
+
+.masthead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  max-inline-size: 78rem;
+  margin-inline: auto;
+  padding: var(--space-4) var(--space-6);
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--type-title);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--type-title-letter-spacing);
+  color: var(--on-surface);
+}
+.brand::before {
+  content: "";
+  inline-size: 0.7em;
+  block-size: 0.7em;
+  border-radius: var(--shape-full);
+  background-image: var(--gradient-brand);
+}
+.site-nav {
+  display: flex;
+  gap: var(--space-5);
+  margin-inline-start: auto;
+}
+.site-nav a {
+  position: relative;
+  color: var(--on-surface-muted);
+  font: var(--type-label);
+  letter-spacing: var(--type-label-letter-spacing);
+}
+.site-nav a::after {
+  content: "";
+  position: absolute;
+  inset-block-end: -0.35em;
+  inset-inline: 0;
+  block-size: 2px;
+  background-color: var(--primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-base) var(--easing-standard);
+}
+.site-nav a:hover {
+  color: var(--on-surface);
+}
+.site-nav a:hover::after {
+  transform: scaleX(1);
+}
+
+@media (max-width: 56rem) {
+  .masthead {
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-5);
+  }
+  .site-nav {
+    margin-inline-start: 0;
+  }
+}

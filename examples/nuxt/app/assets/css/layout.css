@@ -1,0 +1,82 @@
+/* layout.css — cross-cutting page rules that no single component owns:
+   the shared section rhythm, the global heading, the depth axis, and the
+   shared entrance keyframes / motion resets. Component-specific styling
+   lives in that component's own file. */
+
+/* ---------- shared section rhythm ---------- */
+.hero,
+.logos,
+.features,
+.stats,
+.quotes,
+.pricing,
+.faq {
+  max-inline-size: 78rem;
+  margin-inline: auto;
+  padding-block: var(--space-9);
+  padding-inline: var(--space-6);
+}
+section[id] {
+  scroll-margin-block-start: var(--space-9);
+}
+
+main h2 {
+  font: var(--type-headline);
+  letter-spacing: var(--type-headline-letter-spacing);
+  color: var(--on-surface);
+  text-align: center;
+  text-wrap: balance;
+  margin-block-end: var(--space-7);
+}
+
+/* ---------- depth axis: keep hierarchy legible when shadows flatten ---------- */
+/* under flat, elevation collapses to a hairline ring — firm card outlines so
+   separation is carried by structure, not shadow */
+[data-depth="flat"] .feature,
+[data-depth="flat"] .quote,
+[data-depth="flat"] .tier,
+[data-depth="flat"] .faq-item,
+[data-depth="flat"] .stats dl {
+  border-color: var(--outline);
+}
+
+/* ---------- shared entrance keyframes + cross-component motion ---------- */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes reveal-mock {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* section content reveals as it scrolls into view (progressive enhancement:
+   where scroll timelines are unsupported it simply plays once on load) */
+@supports (animation-timeline: view()) {
+  .feature,
+  .quote,
+  .tier {
+    animation: reveal-up var(--duration-slow) var(--easing-enter) both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 22%;
+  }
+}
+[data-motion="reduced"] .hero-copy > *,
+[data-motion="reduced"] .mock,
+[data-motion="reduced"] .feature,
+[data-motion="reduced"] .quote,
+[data-motion="reduced"] .tier {
+  animation: none;
+}

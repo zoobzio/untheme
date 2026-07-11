@@ -57,14 +57,7 @@
   border-color: var(--outline-muted);
 }
 
-/* ---------- theme select (a grid cell, matched to the axis controls) ---------- */
-.demo-theme {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  min-inline-size: 0;
-}
-.demo-cell-label,
+/* ---------- control label (theme + axes share one cell shape) ---------- */
 .axis-label {
   font: var(--type-label);
   font-family: var(--font-mono);

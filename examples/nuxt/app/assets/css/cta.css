@@ -1,0 +1,30 @@
+/* cta.css — CTA.vue: the full-bleed brand-gradient banner. */
+
+.banner {
+  margin-block-start: var(--space-9);
+  padding: var(--space-10) var(--space-6);
+  background-image: var(--gradient-brand);
+  color: var(--on-primary);
+  text-align: center;
+}
+.banner-inner {
+  max-inline-size: 44rem;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+.banner h2 {
+  font: var(--type-headline);
+  letter-spacing: var(--type-headline-letter-spacing);
+  color: var(--on-primary);
+  text-wrap: balance;
+}
+.banner p {
+  color: var(--on-primary);
+  opacity: 0.88;
+}
+.banner .button {
+  margin-block-start: var(--space-2);
+}

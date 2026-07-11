@@ -21,14 +21,14 @@ const { key, themes, axes, shuffle } = useDemo();
       </div>
     </div>
     <div class="demo-axes">
-      <label class="demo-theme">
-        <span class="demo-cell-label">theme</span>
+      <fieldset class="axis">
+        <legend class="axis-label">theme</legend>
         <select v-model="key" aria-label="Theme">
           <option v-for="theme in themes" :key="theme.id" :value="theme.id">
             {{ theme.name }}
           </option>
         </select>
-      </label>
+      </fieldset>
       <Controls v-for="axis in axes" :key="axis" :axis="axis" />
     </div>
   </aside>

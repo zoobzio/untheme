@@ -1,0 +1,203 @@
+/* atmosphere.css — Atmosphere.vue: the page-level ambient colour field.
+   Blurred token-coloured orbs plus a dot grid. Every modifier axis drives
+   one facet of the field, so the atmosphere restyles itself with the theme.
+   Tokens only (raw values limited to layout geometry, opacity, transforms). */
+
+.page-atmos {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.page-orb {
+  position: absolute;
+  /* text scales the whole field; each orb keeps its own relative size */
+  inline-size: calc(var(--orb-size, 28vw) * var(--orb-scale));
+  block-size: calc(var(--orb-size, 28vw) * var(--orb-scale));
+  /* density clusters the field: scale each orb's offset from the viewport centre */
+  inset-block-start: calc(50vh + (var(--orb-y, 0px) - 50vh) * var(--orb-gap));
+  inset-inline-start: calc(50vw + (var(--orb-x, 0px) - 50vw) * var(--orb-gap));
+  /* radius shapes the silhouette (rect → rounded rect → circle) */
+  border-radius: var(--orb-round);
+  /* contrast sets edge crispness */
+  filter: blur(var(--orb-blur));
+  opacity: 0.22;
+  will-change: transform;
+}
+/* colour by accent family (loop assigns p / t / s round-robin) */
+.page-orb-p {
+  background-color: color-mix(in srgb, var(--primary) 60%, transparent);
+}
+.page-orb-t {
+  background-color: color-mix(in srgb, var(--tertiary) 58%, transparent);
+}
+.page-orb-s {
+  background-color: color-mix(in srgb, var(--secondary) 55%, transparent);
+}
+/* colour governs the field's overall brightness */
+[data-color="dark"] .page-orb {
+  opacity: 0.3;
+}
+/* vibrancy governs the field's colour presence */
+[data-vibrancy="muted"] .page-orb {
+  opacity: 0.12;
+}
+[data-vibrancy="vivid"] .page-orb {
+  opacity: 0.34;
+}
+[data-color="dark"][data-vibrancy="vivid"] .page-orb {
+  opacity: 0.46;
+}
+
+/* ---------- axis → orb mapping ----------
+   Each modifier drives one facet of the field. :root carries the default
+   context's value; non-default contexts override below. These are private
+   multipliers (novel names), not tokens. */
+:root {
+  --orb-scale: 1; /* text: overall size */
+  --orb-gap: 1; /* density: clustering */
+  --orb-depth: 1; /* depth: scroll-travel distance */
+  --orb-wander: 1; /* motion: sideways drift */
+  --orb-blur: var(--blur-lg); /* contrast: edge softness */
+  --orb-round: 14%; /* radius: silhouette (rounded rect) */
+  --grid-ink: 55%; /* contrast: grid presence */
+  --grid-travel: 8vh; /* motion: grid drift */
+  /* radius: grid cell shape — rounded square by default */
+  --grid-dot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Crect x='11.7' y='11.7' width='2.6' height='2.6' rx='0.8' fill='%23000'/%3E%3C/svg%3E");
+}
+
+/* text — orbs scale with the type ramp, keeping their relative spread */
+[data-text="sm"] {
+  --orb-scale: 0.82;
+}
+[data-text="lg"] {
+  --orb-scale: 1.25;
+}
+
+/* density — how tightly the field clusters toward centre */
+[data-density="compact"] {
+  --orb-gap: 0.68;
+}
+[data-density="spacious"] {
+  --orb-gap: 1.35;
+}
+
+/* depth — how far each orb rides the scroll (flat ≈ still, deep ≈ dramatic) */
+[data-depth="flat"] {
+  --orb-depth: 0.3;
+}
+[data-depth="deep"] {
+  --orb-depth: 1.7;
+}
+
+/* motion — sideways liveliness + grid drift (reduced stills it entirely below) */
+[data-motion="expressive"] {
+  --orb-wander: 1.6;
+  --grid-travel: 16vh;
+}
+[data-motion="reduced"] {
+  --orb-wander: 0;
+  --grid-travel: 0vh;
+}
+
+/* contrast — the field's definition: orb edges tighten, grid firms up */
+[data-contrast="medium"] {
+  --orb-blur: var(--blur-md);
+  --grid-ink: 66%;
+}
+[data-contrast="high"] {
+  --orb-blur: var(--blur-sm);
+  --grid-ink: 78%;
+}
+
+/* radius — silhouette echoes the UI's corner language (orbs + grid dots) */
+[data-radius="sharp"] {
+  --orb-round: 0%;
+  --grid-dot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Crect x='11.7' y='11.7' width='2.6' height='2.6' fill='%23000'/%3E%3C/svg%3E");
+}
+[data-radius="round"] {
+  --orb-round: 50%;
+  --grid-dot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Crect x='11.7' y='11.7' width='2.6' height='2.6' rx='1.3' fill='%23000'/%3E%3C/svg%3E");
+}
+
+/* full-page dot grid: a quiet texture over the aurora. The ink colour is a
+   token (masked into cells) so it tracks the theme; the mask carries both the
+   cell shape (radius) and the fade-out toward the footer. */
+.page-grid {
+  position: absolute;
+  inset: 0;
+  background-color: color-mix(in srgb, var(--outline) var(--grid-ink), transparent);
+  -webkit-mask-image: var(--grid-dot),
+    linear-gradient(to bottom, #000 0%, #000 68%, transparent 100%);
+  mask-image: var(--grid-dot),
+    linear-gradient(to bottom, #000 0%, #000 68%, transparent 100%);
+  -webkit-mask-size: 26px 26px, cover;
+  mask-size: 26px 26px, cover;
+  -webkit-mask-repeat: repeat, no-repeat;
+  mask-repeat: repeat, no-repeat;
+  -webkit-mask-position: 0 0, 0 0;
+  mask-position: 0 0, 0 0;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  opacity: 0.55;
+}
+
+/* foreground rides above the ambient field */
+.masthead,
+main,
+.footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* every orb rides the same scroll-aligned track, but each carries its own
+   size / start / travel / drift (inline, loop-generated like the chart bars).
+   Each orb only traverses the middle half of its travel, centred on mid-scroll:
+   a quarter above its authored position at the top (a little room at the bottom),
+   the authored position at the page middle (the fullest spread), a quarter below
+   at the bottom (a little room at the top).
+   Travel scales with depth (--orb-depth), the L/R wander with motion (--orb-wander).
+   No scroll timeline => orbs rest at their authored position. */
+@keyframes orb-fall {
+  0% {
+    transform: translate3d(
+      calc(var(--orb-drift, 4vw) * var(--orb-wander)),
+      calc(var(--orb-travel, 40vh) * var(--orb-depth) * -0.25),
+      0
+    );
+  }
+  50% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(
+      calc(var(--orb-drift, 4vw) * var(--orb-wander) * -1),
+      calc(var(--orb-travel, 40vh) * var(--orb-depth) * 0.25),
+      0
+    );
+  }
+}
+/* the dot grid tracks straight down/up with scroll (the dot layer of the mask
+   slides; the fade layer stays put and hides it near the footer) */
+@keyframes grid-scroll {
+  to {
+    -webkit-mask-position: 0 calc(-1 * var(--grid-travel, 8vh)), 0 0;
+    mask-position: 0 calc(-1 * var(--grid-travel, 8vh)), 0 0;
+  }
+}
+@supports (animation-timeline: scroll()) {
+  .page-orb {
+    animation: orb-fall linear both;
+    animation-timeline: scroll(root);
+  }
+  .page-grid {
+    animation: grid-scroll linear both;
+    animation-timeline: scroll(root);
+  }
+}
+/* motion: reduced — the field rests, regardless of depth */
+[data-motion="reduced"] .page-orb,
+[data-motion="reduced"] .page-grid {
+  animation: none;
+}

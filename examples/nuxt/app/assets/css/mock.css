@@ -2,9 +2,12 @@
    Precise mono type, hairline borders, one-ramp chart, staggered bar growth,
    dark-mode glow. Tokens only; raw values limited to layout geometry/transforms. */
 
+/* reveals on load (reveal-mock keyframe + reduced-motion reset live in layout.css) */
 .mock {
   position: relative;
   perspective: 1800px;
+  animation: reveal-mock var(--duration-slow) var(--easing-enter) both;
+  animation-delay: calc(var(--delay-step) * 2);
 }
 
 /* dark-only ambient glow behind the window */

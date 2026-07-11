@@ -1,0 +1,92 @@
+/* hero.css — Hero.vue: the masthead-below hero (eyebrow, headline, lede,
+   actions) and its staggered entrance. */
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+  gap: var(--space-8);
+  align-items: center;
+  padding-block: var(--space-8) var(--space-10);
+  overflow: hidden;
+}
+
+.eyebrow {
+  display: inline-block;
+  font: var(--type-label);
+  letter-spacing: var(--type-label-letter-spacing);
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-block-end: var(--space-3);
+}
+.hero-copy h1 {
+  font: var(--type-display);
+  letter-spacing: var(--type-display-letter-spacing);
+  color: var(--on-surface);
+  text-wrap: balance;
+  margin-block-end: var(--space-4);
+}
+.hero-accent {
+  background-image: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* vivid makes the accent word and eyebrow read electric (effect the tokens can't carry alone) */
+[data-vibrancy="vivid"] .hero-accent {
+  filter: drop-shadow(
+    0 0 18px color-mix(in srgb, var(--primary) 30%, transparent)
+  );
+}
+[data-color="dark"][data-vibrancy="vivid"] .eyebrow {
+  text-shadow: 0 0 16px color-mix(in srgb, var(--primary) 45%, transparent);
+}
+.lede {
+  font: var(--type-title);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--type-title-letter-spacing);
+  color: var(--on-surface-muted);
+  max-inline-size: 46ch;
+  margin-block-end: var(--space-6);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.hero-foot {
+  margin-block-start: var(--space-4);
+  font: var(--type-label);
+  font-family: var(--font-mono);
+  color: var(--on-surface-muted);
+}
+
+/* hero copy staggers in on load; expressive lengthens + overshoots, reduced stills it
+   (reveal-up keyframe + reduced-motion reset live in layout.css) */
+.hero-copy > * {
+  animation: reveal-up var(--duration-slow) var(--easing-enter) both;
+}
+.hero-copy .eyebrow {
+  animation-delay: calc(var(--delay-step) * 0);
+}
+.hero-copy h1 {
+  animation-delay: calc(var(--delay-step) * 1);
+}
+.hero-copy .lede {
+  animation-delay: calc(var(--delay-step) * 2);
+}
+.hero-copy .actions {
+  animation-delay: calc(var(--delay-step) * 3);
+}
+.hero-copy .hero-foot {
+  animation-delay: calc(var(--delay-step) * 4);
+}
+
+@media (max-width: 56rem) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: var(--space-7);
+    padding-block: var(--space-7) var(--space-8);
+  }
+}
