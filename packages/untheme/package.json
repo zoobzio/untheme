@@ -9,6 +9,10 @@
       "types": "./.dist/index.d.ts",
       "import": "./.dist/index.mjs"
     },
+    "./common": {
+      "types": "./.dist/common.d.ts",
+      "import": "./.dist/common.mjs"
+    },
     "./config": {
       "types": "./.dist/config.d.ts",
       "import": "./.dist/config.mjs"
@@ -33,6 +37,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@untheme/common": "workspace:*",
     "@untheme/core": "workspace:*",
     "@untheme/css": "workspace:*",
     "@untheme/kit": "workspace:*",

@@ -1,9 +1,10 @@
 import { defineBuildConfig } from "unbuild";
 
 export default defineBuildConfig({
-  entries: ["src/index", "src/common", "src/config", "src/css", "src/kit"],
+  entries: ["src/index"],
   outDir: ".dist",
   declaration: true,
+  externals: ["@terrazzo/parser", "@terrazzo/token-types"],
   rollup: {
     emitCJS: false,
   },

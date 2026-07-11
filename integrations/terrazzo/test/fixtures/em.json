@@ -1,0 +1,5 @@
+{
+  "space": {
+    "wide": { "$type": "dimension", "$value": { "value": 1, "unit": "em" } }
+  }
+}
