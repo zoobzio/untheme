@@ -7,7 +7,7 @@
 # Show this help by default.
 .DEFAULT_GOAL := help
 
-.PHONY: help install stub build typecheck test lint format inspect clean check verify
+.PHONY: help install stub build prepare typecheck test lint format inspect clean check verify ci
 
 help: ## List available targets
 	@grep -hE '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) \
@@ -22,6 +22,9 @@ stub: ## Link packages to source for dev (jiti stubs, preserves live types)
 
 build: ## Build every package to its .dist
 	pnpm build
+
+prepare: ## Run workspace prepare hooks (nuxt prepare); needs build first
+	pnpm -r prepare
 
 typecheck: ## Type-check every package and example
 	pnpm typecheck
@@ -43,6 +46,8 @@ clean: ## Remove build output and example caches (.dist, .coverage, .nuxt)
 	find packages integrations presets -maxdepth 2 -name .dist -type d -prune -exec rm -rf {} +
 	find examples -maxdepth 2 \( -name .nuxt -o -name .output \) -type d -prune -exec rm -rf {} +
 
-check: lint typecheck test ## Run all gates without writing (CI parity)
+check: lint typecheck test ## Run lint/typecheck/test against existing build output
 
 verify: clean install build typecheck test ## Full cold rebuild and verification
+
+ci: build prepare typecheck test lint inspect ## Cold CI gate: build first, then every check (examples included)

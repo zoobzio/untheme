@@ -42,12 +42,12 @@ entirely against those variables, so a selection change restyles everything.
 
 ## What to read first
 
-| File | What it shows |
-| --- | --- |
-| [`untheme.config.ts`](./untheme.config.ts) | The base theme, catalog, and default selection |
-| [`app/composables/demo.ts`](./app/composables/demo.ts) | `useDemo` — theme list, active-theme binding, and `shuffle` |
-| [`app/composables/controls.ts`](./app/composables/controls.ts) | `useControls` — two-way binding for one modifier axis |
-| [`app/components/Demo.vue`](./app/components/Demo.vue) | The demo bar that consumes both composables |
+| File                                                           | What it shows                                               |
+| -------------------------------------------------------------- | ----------------------------------------------------------- |
+| [`untheme.config.ts`](./untheme.config.ts)                     | The base theme, catalog, and default selection              |
+| [`app/composables/demo.ts`](./app/composables/demo.ts)         | `useDemo` — theme list, active-theme binding, and `shuffle` |
+| [`app/composables/controls.ts`](./app/composables/controls.ts) | `useControls` — two-way binding for one modifier axis       |
+| [`app/components/Demo.vue`](./app/components/Demo.vue)         | The demo bar that consumes both composables                 |
 
 Both composables call `useUntheme()` — the runtime service the module provides —
 and never touch CSS directly. `demo.ts` reads the theme catalog and drives

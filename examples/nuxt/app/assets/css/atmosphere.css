@@ -127,17 +127,31 @@
 .page-grid {
   position: absolute;
   inset: 0;
-  background-color: color-mix(in srgb, var(--outline) var(--grid-ink), transparent);
-  -webkit-mask-image: var(--grid-dot),
+  background-color: color-mix(
+    in srgb,
+    var(--outline) var(--grid-ink),
+    transparent
+  );
+  -webkit-mask-image:
+    var(--grid-dot),
     linear-gradient(to bottom, #000 0%, #000 68%, transparent 100%);
-  mask-image: var(--grid-dot),
+  mask-image:
+    var(--grid-dot),
     linear-gradient(to bottom, #000 0%, #000 68%, transparent 100%);
-  -webkit-mask-size: 26px 26px, cover;
-  mask-size: 26px 26px, cover;
+  -webkit-mask-size:
+    26px 26px,
+    cover;
+  mask-size:
+    26px 26px,
+    cover;
   -webkit-mask-repeat: repeat, no-repeat;
   mask-repeat: repeat, no-repeat;
-  -webkit-mask-position: 0 0, 0 0;
-  mask-position: 0 0, 0 0;
+  -webkit-mask-position:
+    0 0,
+    0 0;
+  mask-position:
+    0 0,
+    0 0;
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
   opacity: 0.55;
@@ -182,8 +196,12 @@ main,
    slides; the fade layer stays put and hides it near the footer) */
 @keyframes grid-scroll {
   to {
-    -webkit-mask-position: 0 calc(-1 * var(--grid-travel, 8vh)), 0 0;
-    mask-position: 0 calc(-1 * var(--grid-travel, 8vh)), 0 0;
+    -webkit-mask-position:
+      0 calc(-1 * var(--grid-travel, 8vh)),
+      0 0;
+    mask-position:
+      0 calc(-1 * var(--grid-travel, 8vh)),
+      0 0;
   }
 }
 @supports (animation-timeline: scroll()) {
