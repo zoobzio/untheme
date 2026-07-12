@@ -1,0 +1,98 @@
+{
+  "primary": {
+    "$type": "color",
+    "$value": "{primary-muted}"
+  },
+  "on-primary": {
+    "$type": "color",
+    "$value": "{on-primary-muted}"
+  },
+  "primary-container": {
+    "$type": "color",
+    "$value": "{primary-container-muted}"
+  },
+  "on-primary-container": {
+    "$type": "color",
+    "$value": "{on-primary-container-muted}"
+  },
+  "secondary": {
+    "$type": "color",
+    "$value": "{secondary-muted}"
+  },
+  "on-secondary": {
+    "$type": "color",
+    "$value": "{on-secondary-muted}"
+  },
+  "secondary-container": {
+    "$type": "color",
+    "$value": "{secondary-container-muted}"
+  },
+  "on-secondary-container": {
+    "$type": "color",
+    "$value": "{on-secondary-container-muted}"
+  },
+  "tertiary": {
+    "$type": "color",
+    "$value": "{tertiary-muted}"
+  },
+  "on-tertiary": {
+    "$type": "color",
+    "$value": "{on-tertiary-muted}"
+  },
+  "tertiary-container": {
+    "$type": "color",
+    "$value": "{tertiary-container-muted}"
+  },
+  "on-tertiary-container": {
+    "$type": "color",
+    "$value": "{on-tertiary-container-muted}"
+  },
+  "error": {
+    "$type": "color",
+    "$value": "{error-muted}"
+  },
+  "on-error": {
+    "$type": "color",
+    "$value": "{on-error-muted}"
+  },
+  "error-container": {
+    "$type": "color",
+    "$value": "{error-container-muted}"
+  },
+  "on-error-container": {
+    "$type": "color",
+    "$value": "{on-error-container-muted}"
+  },
+  "success": {
+    "$type": "color",
+    "$value": "{success-muted}"
+  },
+  "on-success": {
+    "$type": "color",
+    "$value": "{on-success-muted}"
+  },
+  "success-container": {
+    "$type": "color",
+    "$value": "{success-container-muted}"
+  },
+  "on-success-container": {
+    "$type": "color",
+    "$value": "{on-success-container-muted}"
+  },
+  "warning": {
+    "$type": "color",
+    "$value": "{warning-muted}"
+  },
+  "on-warning": {
+    "$type": "color",
+    "$value": "{on-warning-muted}"
+  },
+  "warning-container": {
+    "$type": "color",
+    "$value": "{warning-container-muted}"
+  },
+  "on-warning-container": {
+    "$type": "color",
+    "$value": "{on-warning-container-muted}"
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "name": "Aurora",
+  "version": "2025.10",
+  "sets": {
+    "base": {
+      "sources": [
+        {
+          "$ref": "./aurora.tokens.json"
+        }
+      ]
+    }
+  },
+  "modifiers": {
+    "color": {
+      "contexts": {
+        "light": [
+          {
+            "$ref": "./modifiers/color/light.json"
+          }
+        ],
+        "dark": [
+          {
+            "$ref": "./modifiers/color/dark.json"
+          }
+        ]
+      },
+      "default": "light"
+    },
+    "vibrancy": {
+      "contexts": {
+        "balanced": [
+          {
+            "$ref": "./modifiers/vibrancy/balanced.json"
+          }
+        ],
+        "muted": [
+          {
+            "$ref": "./modifiers/vibrancy/muted.json"
+          }
+        ],
+        "vivid": [
+          {
+            "$ref": "./modifiers/vibrancy/vivid.json"
+          }
+        ]
+      },
+      "default": "balanced"
+    },
+    "contrast": {
+      "contexts": {
+        "default": [
+          {
+            "$ref": "./modifiers/contrast/default.json"
+          }
+        ],
+        "medium": [
+          {
+            "$ref": "./modifiers/contrast/medium.json"
+          }
+        ],
+        "high": [
+          {
+            "$ref": "./modifiers/contrast/high.json"
+          }
+        ]
+      },
+      "default": "default"
+    },
+    "text": {
+      "contexts": {
+        "sm": [
+          {
+            "$ref": "./modifiers/text/sm.json"
+          }
+        ],
+        "md": [
+          {
+            "$ref": "./modifiers/text/md.json"
+          }
+        ],
+        "lg": [
+          {
+            "$ref": "./modifiers/text/lg.json"
+          }
+        ]
+      },
+      "default": "md"
+    },
+    "density": {
+      "contexts": {
+        "compact": [
+          {
+            "$ref": "./modifiers/density/compact.json"
+          }
+        ],
+        "default": [
+          {
+            "$ref": "./modifiers/density/default.json"
+          }
+        ],
+        "spacious": [
+          {
+            "$ref": "./modifiers/density/spacious.json"
+          }
+        ]
+      },
+      "default": "default"
+    },
+    "radius": {
+      "contexts": {
+        "default": [
+          {
+            "$ref": "./modifiers/radius/default.json"
+          }
+        ],
+        "sharp": [
+          {
+            "$ref": "./modifiers/radius/sharp.json"
+          }
+        ],
+        "round": [
+          {
+            "$ref": "./modifiers/radius/round.json"
+          }
+        ]
+      },
+      "default": "default"
+    },
+    "motion": {
+      "contexts": {
+        "default": [
+          {
+            "$ref": "./modifiers/motion/default.json"
+          }
+        ],
+        "reduced": [
+          {
+            "$ref": "./modifiers/motion/reduced.json"
+          }
+        ],
+        "expressive": [
+          {
+            "$ref": "./modifiers/motion/expressive.json"
+          }
+        ]
+      },
+      "default": "default"
+    },
+    "depth": {
+      "contexts": {
+        "default": [
+          {
+            "$ref": "./modifiers/depth/default.json"
+          }
+        ],
+        "flat": [
+          {
+            "$ref": "./modifiers/depth/flat.json"
+          }
+        ],
+        "deep": [
+          {
+            "$ref": "./modifiers/depth/deep.json"
+          }
+        ]
+      },
+      "default": "default"
+    }
+  },
+  "resolutionOrder": [
+    {
+      "$ref": "#/sets/base"
+    },
+    {
+      "$ref": "#/modifiers/color"
+    },
+    {
+      "$ref": "#/modifiers/vibrancy"
+    },
+    {
+      "$ref": "#/modifiers/contrast"
+    },
+    {
+      "$ref": "#/modifiers/text"
+    },
+    {
+      "$ref": "#/modifiers/density"
+    },
+    {
+      "$ref": "#/modifiers/radius"
+    },
+    {
+      "$ref": "#/modifiers/depth"
+    },
+    {
+      "$ref": "#/modifiers/motion"
+    }
+  ]
+}

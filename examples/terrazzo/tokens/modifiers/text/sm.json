@@ -1,0 +1,37 @@
+{
+  "display-size": {
+    "$type": "dimension",
+    "$value": {
+      "value": 2.5,
+      "unit": "rem"
+    }
+  },
+  "headline-size": {
+    "$type": "dimension",
+    "$value": {
+      "value": 1.75,
+      "unit": "rem"
+    }
+  },
+  "title-size": {
+    "$type": "dimension",
+    "$value": {
+      "value": 1.125,
+      "unit": "rem"
+    }
+  },
+  "body-size": {
+    "$type": "dimension",
+    "$value": {
+      "value": 0.875,
+      "unit": "rem"
+    }
+  },
+  "label-size": {
+    "$type": "dimension",
+    "$value": {
+      "value": 0.75,
+      "unit": "rem"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "duration-fast": {
+    "$type": "duration",
+    "$value": {
+      "value": 250,
+      "unit": "ms"
+    }
+  },
+  "duration-base": {
+    "$type": "duration",
+    "$value": {
+      "value": 450,
+      "unit": "ms"
+    }
+  },
+  "duration-slow": {
+    "$type": "duration",
+    "$value": {
+      "value": 700,
+      "unit": "ms"
+    }
+  },
+  "delay-step": {
+    "$type": "duration",
+    "$value": {
+      "value": 90,
+      "unit": "ms"
+    }
+  },
+  "easing-standard": {
+    "$type": "cubicBezier",
+    "$value": "{easing-overshoot}"
+  }
+}

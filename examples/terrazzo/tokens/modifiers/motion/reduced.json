@@ -1,0 +1,30 @@
+{
+  "duration-fast": {
+    "$type": "duration",
+    "$value": {
+      "value": 0,
+      "unit": "ms"
+    }
+  },
+  "duration-base": {
+    "$type": "duration",
+    "$value": {
+      "value": 0,
+      "unit": "ms"
+    }
+  },
+  "duration-slow": {
+    "$type": "duration",
+    "$value": {
+      "value": 0,
+      "unit": "ms"
+    }
+  },
+  "delay-step": {
+    "$type": "duration",
+    "$value": {
+      "value": 0,
+      "unit": "ms"
+    }
+  }
+}

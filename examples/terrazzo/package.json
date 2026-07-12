@@ -1,0 +1,19 @@
+{
+  "name": "@untheme/example-terrazzo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tz build",
+    "typecheck": "tz build && tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@terrazzo/cli": "^2.4.0",
+    "@untheme/terrazzo": "workspace:*",
+    "untheme": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

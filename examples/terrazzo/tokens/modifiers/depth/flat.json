@@ -1,0 +1,14 @@
+{
+  "elevation-low": {
+    "$type": "shadow",
+    "$value": "{elevation-none}"
+  },
+  "elevation-mid": {
+    "$type": "shadow",
+    "$value": "{elevation-none}"
+  },
+  "elevation-high": {
+    "$type": "shadow",
+    "$value": "{elevation-none}"
+  }
+}
