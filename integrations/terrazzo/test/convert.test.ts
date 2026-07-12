@@ -2,6 +2,7 @@ import type { Source } from "../src/types";
 
 import { describe, expect, it } from "vitest";
 
+import { REJECTED_TYPES } from "../src/constant";
 import { binding, collisions, definition, literal } from "../src/convert";
 
 const token = (over: Partial<Source>): Source => {
@@ -89,6 +90,13 @@ describe("binding", () => {
     expect(() => binding(source)).toThrow(
       /"boolean".*"feature\.enabled".*tokens\.json/,
     );
+  });
+
+  it("rejects every off-spec token type by name", () => {
+    for (const type of REJECTED_TYPES) {
+      const source = token({ $type: type, $value: null });
+      expect(() => binding(source)).toThrow(new RegExp(`"${type}"`));
+    }
   });
 });
 

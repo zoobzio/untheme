@@ -59,13 +59,18 @@ describe("defineAssert", () => {
   });
 
   it("collects every failing rule in one pass", () => {
-    /* An extra token fails both the subset check and completeness. */
+    /* Dropping a required token trips completeness while an extra token trips
+       the subset check; assert reports both rather than stopping at the
+       first — the behavior that sets it apart from a check. */
+    const tokens = { ...template.tokens };
+    Reflect.deleteProperty(tokens, "space.md");
     const codes = thrownCodes(() =>
       assert.tokens({
-        ...template.tokens,
+        ...tokens,
         "bg-extra": { $type: "number", $value: 1 },
       }),
     );
+    expect(codes).toContain("missing_key");
     expect(codes).toContain("unknown_key");
   });
 

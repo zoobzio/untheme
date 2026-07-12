@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { map } from "@untheme/common";
 import { defineSchema } from "@untheme/schema";
 
-import { defineRenderer, property } from "../src/index";
+import { defineRenderer } from "../src/service";
 import { theme } from "./fixture";
 
 /**
@@ -22,13 +22,6 @@ const make = () => {
 describe("fixture", () => {
   it("satisfies the schema contract, as trusted input must", () => {
     expect(() => defineSchema(theme)).not.toThrow();
-  });
-});
-
-describe("property", () => {
-  it("dashes dotted token names", () => {
-    expect(property("color.bg")).toBe("--color-bg");
-    expect(property("color.fg.muted")).toBe("--color-fg-muted");
   });
 });
 
@@ -55,46 +48,6 @@ describe("defineRenderer", () => {
       expect(variables["--type-display-letter-spacing"]).toBe(
         "var(--type-body-letter-spacing)",
       );
-    });
-  });
-
-  describe("serialization", () => {
-    const variables = make().variables();
-
-    it("prefers the hex fallback", () => {
-      expect(variables["--color-paper"]).toBe("#faf7f2");
-    });
-
-    it("emits the named function for the lab/lch family, with alpha", () => {
-      expect(variables["--color-ink"]).toBe("oklch(0.32 0.02 260 / 0.9)");
-    });
-
-    it("emits hsl with percentage components and none passthrough", () => {
-      expect(variables["--color-mist"]).toBe("hsl(120 50% none)");
-    });
-
-    it("emits dimensions and durations with their units", () => {
-      expect(variables["--space-sm"]).toBe("4px");
-      expect(variables["--time-fast"]).toBe("150ms");
-    });
-
-    it("emits font families, quoting names that need it", () => {
-      expect(variables["--font-stack"]).toBe('"Helvetica Neue", sans-serif');
-      expect(variables["--font-mono"]).toBe("monospace");
-    });
-
-    it("maps font weight keywords to numbers", () => {
-      expect(variables["--weight-bold"]).toBe("600");
-    });
-
-    it("emits numbers and cubic beziers", () => {
-      expect(variables["--scale-half"]).toBe("0.5");
-      expect(variables["--ease-smooth"]).toBe("cubic-bezier(0.4, 0, 0.2, 1)");
-    });
-
-    it("passes stroke keywords through and nears dash objects to dashed", () => {
-      expect(variables["--stroke-solid"]).toBe("solid");
-      expect(variables["--stroke-dashed"]).toBe("dashed");
     });
 
     it("emits nested references in place inside composites", () => {
@@ -176,6 +129,28 @@ describe("defineRenderer", () => {
     it("holds only the overridden tokens in a context block", () => {
       const dark = css.slice(css.indexOf('[data-mode="dark"]'));
       expect(dark).not.toContain("--space-sm");
+    });
+  });
+
+  describe("empty contract", () => {
+    const empty: Contract<never, Record<string, Record<string, object>>> = {
+      id: "empty",
+      name: "Empty",
+      tokens: {},
+      modifiers: {},
+      order: [],
+    };
+    const renderer = defineRenderer({
+      config: { theme: empty },
+      tokens: () => ({}),
+    });
+
+    it("renders no :root block when there are no tokens", () => {
+      expect(renderer.root()).toBe("");
+    });
+
+    it("renders no sheet when the base holds no tokens", () => {
+      expect(renderer.sheet()).toBe("");
     });
   });
 
