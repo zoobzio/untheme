@@ -1,77 +1,90 @@
 # untheme
 
-A type-safe design token system for building themeable applications.
+A type-safe design token system with runtime theming, built on the
+[DTCG](https://www.designtokens.org/) 2025.10 token format.
 
-untheme separates the **token contract** (what tokens exist and how they relate) from **theme variants** (the concrete values that fill the contract). Define a contract once, then create unlimited variants by swapping reference values.
+untheme separates the **contract** — which tokens exist, their types, and how
+they reference each other — from the **values that fill it**. Modifier axes
+rebind tokens per context (light/dark, density, contrast, motion, …), theme
+layers rebind them wholesale, and references stay live all the way into CSS:
+a role points at a ramp as a `var()` indirection, so swapping a context or
+theme cascades through the custom-property graph instead of recompiling
+styles. The contract is carried in the types — token names, axes, and
+contexts autocomplete and misuse fails to compile — and re-proved at runtime
+by a schema derived from the theme itself.
 
-## Packages
+## Anatomy
 
-| Package                                               | Description                                        |
-| ----------------------------------------------------- | -------------------------------------------------- |
-| [`untheme`](./packages/untheme)                       | Umbrella package — core API, CSS gen, kit subpaths |
-| [`@untheme/core`](./packages/core)                    | Token contract types and the runtime instance      |
-| [`@untheme/kit`](./packages/kit)                      | Toolkit for authoring reusable presets             |
-| [`@untheme/material-2`](./packages/preset/material-2) | Material Design 2 token preset + themes            |
-| [`@untheme/material-3`](./packages/preset/material-3) | Material Design 3 token preset + themes            |
-| [`@untheme/nuxt`](./integrations/nuxt)                | Nuxt module for runtime theming                    |
-
-## Token Architecture
-
-untheme uses a three-tier token system:
-
-- **Reference tokens** — raw values with no semantic meaning (colors, sizes, shadows).
-- **System tokens** — semantic names mapped to reference tokens per color mode (light/dark).
-- **Role tokens** — component-level aliases pointing at a reference or system token.
-
-```
-reference: { "violet-40": "#3c5ba9", "violet-80": "#b3c5ff", ... }
-     ↓
-modes:
-  light: { primary: "violet-40", ... }
-  dark:  { primary: "violet-80", ... }
-     ↓
-roles: { "button-bg": "primary", ... }
-```
-
-## Quick Start
-
-Use a preset and the runtime instance directly:
+A theme is a flat map of DTCG token definitions, modifier axes whose contexts
+rebind subsets of them, and an order fixing composition precedence. The
+runtime service resolves tokens through the active selection:
 
 ```ts
 import { defineUntheme } from "untheme";
-import { generateCSS } from "untheme/css";
-import { defineM3Theme } from "@untheme/material-3";
 
-const theme = defineM3Theme({ key: "app", label: "My App" });
+const untheme = defineUntheme({
+  theme: {
+    id: "app",
+    name: "App",
+    tokens: {
+      "blue-600": {
+        $type: "color",
+        $value: { colorSpace: "srgb", components: [0.15, 0.35, 0.9] },
+      },
+      "blue-200": {
+        $type: "color",
+        $value: { colorSpace: "srgb", components: [0.7, 0.8, 1] },
+      },
+      primary: { $type: "color", $value: "{blue-600}" },
+    },
+    modifiers: {
+      color: { light: {}, dark: { primary: "{blue-200}" } },
+    },
+    order: ["color"],
+  },
+  input: { color: "light" },
+  override: {},
+});
 
-const ut = defineUntheme({ ...theme, roles: {} }, "dark");
-const css = generateCSS(ut.tokens);
+untheme.resolve("primary"); // the blue-600 color object
+untheme.swap("color", "dark"); // primary now follows {blue-200}
 ```
 
-Or author your own preset with the kit:
+Rendering to CSS keeps the reference graph intact:
 
 ```ts
-import { defineUnthemePreset } from "untheme/kit";
+import { defineRenderer } from "untheme/css";
 
-const defineMyPreset = defineUnthemePreset({
-  preset: "my",
-  key: "my",
-  label: "My Preset",
-  reference: { blue: "#3b82f6", white: "#fff", black: "#000" },
-  modes: {
-    light: { primary: "blue", surface: "white" },
-    dark: { primary: "blue", surface: "black" },
-  },
-});
+const renderer = defineRenderer(untheme);
 
-const brand = defineMyPreset({
-  key: "brand",
-  label: "Brand",
-  reference: { blue: "#1e40af" },
-});
+renderer.var("primary"); // "var(--primary)"
+renderer.root(); // :root block over the active bindings
+renderer.sheet(); // static cascade: base + per-context attribute blocks
 ```
 
-For Nuxt apps, see [`@untheme/nuxt`](./integrations/nuxt).
+Reusable presets — a base contract plus a catalog of variant layers — are
+authored with the kit (`untheme/kit`); the [aurora](./presets/aurora) preset
+is the reference: eight modifier axes over eight tonal ramps, with a large
+catalog of themes that each rebind only the ramps.
+
+## Workspace
+
+| Directory                        | Contents                                                                                    |
+| -------------------------------- | ------------------------------------------------------------------------------------------- |
+| [`packages`](./packages)         | The library: the public [`untheme`](./packages/untheme) package and the internals behind it |
+| [`presets`](./presets)           | Reusable presets — [`@untheme/aurora`](./presets/aurora) is the reference                   |
+| [`integrations`](./integrations) | Framework bridges — the Nuxt module and the terrazzo DTCG codegen                           |
+| [`examples`](./examples)         | A themeable Nuxt app, and a terrazzo pipeline compiling DTCG JSON to an untheme config      |
+
+## From DTCG token JSON
+
+Teams that already maintain DTCG token documents (with a resolver document
+describing modifiers) can generate their untheme configuration instead of
+authoring it: the [`@untheme/terrazzo`](./integrations/terrazzo) plugin
+compiles token JSON to an `untheme.config.ts`, keeping aliases live and
+proving the translation against Terrazzo's own resolution. See
+[`examples/terrazzo`](./examples/terrazzo) for the aurora preset expressed
+entirely as token JSON.
 
 ## Development
 
