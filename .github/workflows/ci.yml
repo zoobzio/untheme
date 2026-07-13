@@ -94,3 +94,27 @@ jobs:
           name: dist
       - run: pnpm -r prepare
       - run: pnpm test
+
+  # A single aggregated coverage pass on the pinned Node version — the matrix
+  # already proves the suite passes everywhere, so there is no value in
+  # uploading identical coverage per version. Runs the federated root vitest
+  # config, which emits .coverage/lcov.info for the Codecov upload.
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Download build output
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+      - run: pnpm -r prepare
+      - run: pnpm coverage
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: .coverage/lcov.info
+          fail_ci_if_error: false
