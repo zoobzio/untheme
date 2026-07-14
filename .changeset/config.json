@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
+  "changelog": ["@changesets/changelog-github", { "repo": "zoobzio/untheme" }],
+  "commit": false,
+  "access": "public",
+  "baseBranch": "main",
+  "fixed": [
+    [
+      "untheme",
+      "@untheme/common",
+      "@untheme/core",
+      "@untheme/css",
+      "@untheme/kit",
+      "@untheme/schema",
+      "@untheme/utils",
+      "@untheme/nuxt",
+      "@untheme/terrazzo",
+      "@untheme/aurora"
+    ]
+  ],
+  "linked": [],
+  "updateInternalDependencies": "patch",
+  "ignore": ["@untheme/example-nuxt", "@untheme/example-terrazzo"]
+}
