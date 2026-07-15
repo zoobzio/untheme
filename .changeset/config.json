@@ -15,6 +15,7 @@
       "@untheme/utils",
       "@untheme/nuxt",
       "@untheme/shiki",
+      "@untheme/codemirror",
       "@untheme/terrazzo",
       "@untheme/aurora"
     ]
@@ -22,6 +23,7 @@
   "linked": [],
   "updateInternalDependencies": "patch",
   "ignore": [
+    "@untheme/example-codemirror",
     "@untheme/example-nuxt",
     "@untheme/example-shiki",
     "@untheme/example-terrazzo"
