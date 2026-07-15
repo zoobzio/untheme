@@ -5,4 +5,5 @@ Bridges between untheme and host frameworks. Each integration depends only on th
 | Integration                       | Directory               | Description                                   |
 | --------------------------------- | ----------------------- | --------------------------------------------- |
 | [`@untheme/nuxt`](./nuxt)         | `integrations/nuxt`     | Nuxt module for runtime theming               |
+| [`@untheme/shiki`](./shiki)       | `integrations/shiki`    | Shiki syntax-highlighting theme from a contract |
 | [`@untheme/terrazzo`](./terrazzo) | `integrations/terrazzo` | DTCG token JSON → `untheme.config.ts` codegen |

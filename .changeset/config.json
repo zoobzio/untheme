@@ -14,11 +14,16 @@
       "@untheme/schema",
       "@untheme/utils",
       "@untheme/nuxt",
+      "@untheme/shiki",
       "@untheme/terrazzo",
       "@untheme/aurora"
     ]
   ],
   "linked": [],
   "updateInternalDependencies": "patch",
-  "ignore": ["@untheme/example-nuxt", "@untheme/example-terrazzo"]
+  "ignore": [
+    "@untheme/example-nuxt",
+    "@untheme/example-shiki",
+    "@untheme/example-terrazzo"
+  ]
 }

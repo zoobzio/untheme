@@ -1,0 +1,33 @@
+{
+  "name": "@untheme/shiki",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./.dist/index.mjs",
+  "types": "./.dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./.dist/index.d.ts",
+      "import": "./.dist/index.mjs"
+    }
+  },
+  "files": [
+    ".dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "stub": "unbuild --stub",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "shiki": "^3.0.0"
+  },
+  "dependencies": {
+    "untheme": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "shiki": "^3.0.0"
+  }
+}

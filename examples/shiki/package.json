@@ -1,0 +1,22 @@
+{
+  "name": "@untheme/example-shiki",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "jiti src/generate.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@untheme/aurora": "workspace:*",
+    "@untheme/shiki": "workspace:*",
+    "shiki": "^3.0.0",
+    "untheme": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "jiti": "^2.7.0",
+    "typescript": "^6.0.3"
+  }
+}
