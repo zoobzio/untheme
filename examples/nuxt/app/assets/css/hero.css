@@ -9,7 +9,6 @@
   gap: var(--space-8);
   align-items: center;
   padding-block: var(--space-8) var(--space-10);
-  overflow: hidden;
 }
 
 .eyebrow {

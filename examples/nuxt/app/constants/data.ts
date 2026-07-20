@@ -178,6 +178,69 @@ export const ORBS = [
 ];
 
 /**
+ * The aurora curtains: light ribbons hung from the top of the page, each
+ * swaying on its own time loop, cycling the accent families (p/t/s). Fixed
+ * literals within the design's thresholds — SSR and hydration must agree,
+ * so nothing here is randomized per render.
+ */
+export const BANDS = [
+  {
+    family: "p",
+    x: "4vw",
+    w: "22vw",
+    skew: "-11deg",
+    delay: "0s",
+    dur: "15s",
+    h: "90vh",
+  },
+  {
+    family: "t",
+    x: "19vw",
+    w: "15vw",
+    skew: "-6deg",
+    delay: "-4s",
+    dur: "19s",
+    h: "74vh",
+  },
+  {
+    family: "s",
+    x: "32vw",
+    w: "26vw",
+    skew: "-14deg",
+    delay: "-8s",
+    dur: "13s",
+    h: "96vh",
+  },
+  {
+    family: "p",
+    x: "52vw",
+    w: "18vw",
+    skew: "-8deg",
+    delay: "-2s",
+    dur: "17s",
+    h: "82vh",
+  },
+  {
+    family: "t",
+    x: "65vw",
+    w: "23vw",
+    skew: "-12deg",
+    delay: "-6s",
+    dur: "21s",
+    h: "70vh",
+  },
+  {
+    family: "s",
+    x: "82vw",
+    w: "17vw",
+    skew: "-5deg",
+    delay: "-10s",
+    dur: "16s",
+    h: "92vh",
+  },
+];
+
+/**
  * Question-and-answer pairs rendered in the FAQ section.
  */
 export const FAQS = [
