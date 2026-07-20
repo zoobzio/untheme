@@ -1,6 +1,8 @@
 import type { Issue } from "./types";
 
-/** Renders issues into a multi-line message, each prefixed by its path. */
+/**
+ * Renders issues into a multi-line message, each prefixed by its path.
+ */
 const summarize = (issues: Issue[]): string =>
   issues
     .map((issue) =>

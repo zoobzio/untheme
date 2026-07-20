@@ -8,7 +8,7 @@ import type {
 } from "./types";
 
 import { defineConfig, parse } from "@terrazzo/parser";
-import { SchemaError, defineSchema, guard } from "untheme";
+import { SchemaError, defineSchema, isTemplate } from "untheme";
 import { map } from "untheme/common";
 
 import { FILENAME } from "./constant";
@@ -52,7 +52,7 @@ export const reframe = <T>(tokens: TokenNormalizedSet, run: () => T): T => {
 
 /**
  * Assembles and validates the base theme from parsed sources: skeleton off
- * the resolver, structural narrowing through `guard`, then untheme's schema
+ * the resolver, structural narrowing through `isTemplate`, then untheme's schema
  * adjudicates every binding, and the round-trip verifier proves the
  * translation against Terrazzo's own resolution.
  */
@@ -69,7 +69,7 @@ export const assemble = (
     modifiers: pieces.modifiers,
     order: pieces.order,
   };
-  if (!guard(base)) {
+  if (!isTemplate(base)) {
     throw new Error(
       "untheme terrazzo: the assembled base is not structurally a theme — this is a bug in @untheme/terrazzo",
     );

@@ -1,5 +1,3 @@
-export * from "./constant";
-export * from "./property";
-export * from "./serialize";
-export * from "./service";
+export { property } from "./property";
+export { defineRenderer } from "./service";
 export * from "./types";

@@ -141,9 +141,27 @@ export const makeUntheme = <T extends Theme<T>>(
 
   /**
    * A token's effective binding for the active selection, override included.
+   * Layers are probed from the top of the stack down — the user override,
+   * then each modifier's selected context in reverse `order`, then the base
+   * slot — and the first layer binding the token wins, mirroring the overlay
+   * precedence of {@link tokens} without assembling the full map.
    */
   const get = (token: Token<T>): Binding => {
-    return tokens()[token];
+    const override = proxy.override[token];
+    if (override !== undefined) {
+      return override;
+    }
+
+    const theme = proxy.theme;
+    const input = proxy.input;
+    for (const modifier of [...theme.order].reverse()) {
+      const bound = theme.modifiers[modifier]?.[input[modifier]]?.[token];
+      if (bound !== undefined) {
+        return bound;
+      }
+    }
+
+    return theme.tokens[token].$value;
   };
 
   /**

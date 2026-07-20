@@ -9,13 +9,17 @@ import { isObject, isReference } from "@untheme/common";
  * compose other rules and attach `path` as they descend.
  */
 
-/** Prefixes a nested issue's path with the key it was found under. */
+/**
+ * Prefixes a nested issue's path with the key it was found under.
+ */
 export const nest = (key: string, issue: Issue): Issue => ({
   ...issue,
   path: [key, ...(issue.path ?? [])],
 });
 
-/** The token name inside a `{name}` reference, or `undefined` when not one. */
+/**
+ * The token name inside a `{name}` reference, or `undefined` when not one.
+ */
 export const target = (v: unknown): string | undefined => {
   if (isReference(v)) {
     return v.slice(1, -1);
@@ -44,7 +48,9 @@ export const collectRefs = (v: unknown): string[] => {
 
 /* ── predicate atoms ─────────────────────────────────────────────────── */
 
-/** The value is a string. */
+/**
+ * The value is a string.
+ */
 export const text =
   (name: string): Rule =>
   (v) => {
@@ -57,7 +63,9 @@ export const text =
     }
   };
 
-/** A string value is not empty once trimmed. */
+/**
+ * A string value is not empty once trimmed.
+ */
 export const filled =
   (name: string): Rule =>
   (v) => {
@@ -70,7 +78,9 @@ export const filled =
     }
   };
 
-/** A string value contains no sequence that escapes its CSS declaration. */
+/**
+ * A string value contains no sequence that escapes its CSS declaration.
+ */
 export const breakout =
   (name: string, pattern: RegExp): Rule =>
   (v) => {
@@ -84,7 +94,9 @@ export const breakout =
     }
   };
 
-/** A string value is a hex color: `#` plus 3, 4, 6, or 8 hex digits. */
+/**
+ * A string value is a hex color: `#` plus 3, 4, 6, or 8 hex digits.
+ */
 export const hexColor =
   (name: string): Rule =>
   (v) => {
@@ -100,7 +112,9 @@ export const hexColor =
     }
   };
 
-/** The value is a member of the allowed set. */
+/**
+ * The value is a member of the allowed set.
+ */
 export const member =
   (name: string, set: Set<string>): Rule =>
   (v) => {
@@ -114,7 +128,9 @@ export const member =
     }
   };
 
-/** The value is a finite number. */
+/**
+ * The value is a finite number.
+ */
 export const numeric =
   (name: string): Rule =>
   (v) => {
@@ -127,7 +143,9 @@ export const numeric =
     }
   };
 
-/** A numeric value falls within the inclusive range. */
+/**
+ * A numeric value falls within the inclusive range.
+ */
 export const range =
   (name: string, min: number, max: number): Rule =>
   (v) => {
@@ -141,7 +159,9 @@ export const range =
     }
   };
 
-/** The value is one the caller's predicate accepts for its declared type. */
+/**
+ * The value is one the caller's predicate accepts for its declared type.
+ */
 export const mismatch =
   (name: string, ok: (v: unknown) => boolean): Rule =>
   (v) => {
@@ -154,7 +174,9 @@ export const mismatch =
     }
   };
 
-/** The value is a member of the known type set. */
+/**
+ * The value is a member of the known type set.
+ */
 export const known =
   (name: string, set: Set<string>): Rule =>
   (v) => {
@@ -168,7 +190,9 @@ export const known =
     }
   };
 
-/** The value is a reference to a member of the set, in `{name}` form. */
+/**
+ * The value is a reference to a member of the set, in `{name}` form.
+ */
 export const reference =
   (name: string, tokens: Set<string>): Rule =>
   (v) => {
@@ -206,7 +230,9 @@ export const referenceType =
     }
   };
 
-/** The value is a plain object. */
+/**
+ * The value is a plain object.
+ */
 export const container =
   (name: string): Rule =>
   (v) => {
@@ -221,7 +247,9 @@ export const container =
 
 /* ── combinator atoms ────────────────────────────────────────────────── */
 
-/** Runs the rules in order and returns the first issue any of them raises. */
+/**
+ * Runs the rules in order and returns the first issue any of them raises.
+ */
 export const all =
   (rules: Rule[]): Rule =>
   (v) => {
@@ -266,7 +294,9 @@ export const either =
     };
   };
 
-/** Every key must belong to the allowed set; values are not inspected. */
+/**
+ * Every key must belong to the allowed set; values are not inspected.
+ */
 export const subset =
   (name: string, set: Set<string>): Rule =>
   (v) => {
@@ -286,7 +316,9 @@ export const subset =
     }
   };
 
-/** Every key in the required set must be present. */
+/**
+ * Every key in the required set must be present.
+ */
 export const superset =
   (name: string, set: Set<string>): Rule =>
   (v) => {
@@ -305,7 +337,9 @@ export const superset =
     }
   };
 
-/** An array's elements are distinct — no element appears twice. */
+/**
+ * An array's elements are distinct — no element appears twice.
+ */
 export const unique =
   (name: string): Rule =>
   (v) => {
@@ -326,7 +360,9 @@ export const unique =
     }
   };
 
-/** An array lists every member of the required set. */
+/**
+ * An array lists every member of the required set.
+ */
 export const exhaustive =
   (name: string, set: Set<string>): Rule =>
   (v) => {
@@ -345,7 +381,9 @@ export const exhaustive =
     }
   };
 
-/** The value is an array whose every element satisfies the rules. */
+/**
+ * The value is an array whose every element satisfies the rules.
+ */
 export const list =
   (name: string, rules: Rule[]): Rule =>
   (v) => {
@@ -366,7 +404,9 @@ export const list =
     }
   };
 
-/** Applies a list of rules to every value; keys are not inspected. */
+/**
+ * Applies a list of rules to every value; keys are not inspected.
+ */
 export const each =
   (rules: Rule[]): Rule =>
   (v) => {
@@ -383,7 +423,9 @@ export const each =
     }
   };
 
-/** Applies a set of rules to every value, chosen per key by the picker. */
+/**
+ * Applies a set of rules to every value, chosen per key by the picker.
+ */
 export const keyed =
   (pick: (key: string) => Rule[]): Rule =>
   (v) => {
@@ -400,7 +442,9 @@ export const keyed =
     }
   };
 
-/** Applies a list of rules to every key; values are not inspected. */
+/**
+ * Applies a list of rules to every key; values are not inspected.
+ */
 export const keys =
   (name: string, rules: Rule[]): Rule =>
   (v) => {
@@ -417,7 +461,9 @@ export const keys =
     }
   };
 
-/** Each named field validated by its own rules; unknown fields are rejected. */
+/**
+ * Each named field validated by its own rules; unknown fields are rejected.
+ */
 export const fields =
   (name: string, members: Record<string, Rule[]>): Rule =>
   (v) => {

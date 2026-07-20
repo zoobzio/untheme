@@ -69,12 +69,12 @@ catalog of themes that each rebind only the ramps.
 
 ## Workspace
 
-| Directory                        | Contents                                                                                    |
-| -------------------------------- | ------------------------------------------------------------------------------------------- |
-| [`packages`](./packages)         | The library: the public [`untheme`](./packages/untheme) package and the internals behind it |
-| [`presets`](./presets)           | Reusable presets — [`@untheme/aurora`](./presets/aurora) is the reference                   |
-| [`integrations`](./integrations) | Framework bridges — the Nuxt module and the terrazzo DTCG codegen                           |
-| [`examples`](./examples)         | A themeable Nuxt app, and a terrazzo pipeline compiling DTCG JSON to an untheme config      |
+| Directory                        | Contents                                                                                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| [`packages`](./packages)         | The library: the public [`untheme`](./packages/untheme) package and the internals behind it                                     |
+| [`presets`](./presets)           | Reusable presets — [`@untheme/aurora`](./presets/aurora) is the reference                                                       |
+| [`integrations`](./integrations) | Framework bridges — the Nuxt module, Shiki and CodeMirror highlighting, and the terrazzo DTCG codegen                           |
+| [`examples`](./examples)         | A themeable Nuxt app, Shiki and CodeMirror highlighting demos, and a terrazzo pipeline compiling DTCG JSON to an untheme config |
 
 ## From DTCG token JSON
 

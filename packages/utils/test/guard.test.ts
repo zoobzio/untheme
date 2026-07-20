@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { guard } from "../src/guard";
+import { isTemplate } from "../src/guard";
 import { theme } from "./fixture";
 
 /* A minimal record that satisfies every branch of the template shape. */
@@ -12,71 +12,71 @@ const base = {
   order: [],
 };
 
-describe("guard", () => {
+describe("isTemplate", () => {
   it("accepts a complete theme", () => {
-    expect(guard(theme)).toBe(true);
+    expect(isTemplate(theme)).toBe(true);
   });
 
   it("accepts a minimal template with empty tokens, modifiers, and order", () => {
-    expect(guard(base)).toBe(true);
+    expect(isTemplate(base)).toBe(true);
   });
 
   it("narrows the value to a template", () => {
     const value: unknown = theme;
 
-    if (guard(value)) {
+    if (isTemplate(value)) {
       expect(value.order).toEqual(["mode", "contrast"]);
     } else {
-      throw new Error("expected the fixture theme to pass the guard");
+      throw new Error("expected the fixture theme to pass the template guard");
     }
   });
 
   it("rejects a non-object", () => {
-    expect(guard("theme")).toBe(false);
-    expect(guard(42)).toBe(false);
+    expect(isTemplate("theme")).toBe(false);
+    expect(isTemplate(42)).toBe(false);
   });
 
   it("rejects null", () => {
-    expect(guard(null)).toBe(false);
+    expect(isTemplate(null)).toBe(false);
   });
 
   it("rejects an array", () => {
-    expect(guard([])).toBe(false);
+    expect(isTemplate([])).toBe(false);
   });
 
   it("rejects a missing or non-string id", () => {
-    expect(guard({ name: "Demo", tokens: {}, modifiers: {}, order: [] })).toBe(
-      false,
-    );
-    expect(guard({ ...base, id: 1 })).toBe(false);
+    expect(
+      isTemplate({ name: "Demo", tokens: {}, modifiers: {}, order: [] }),
+    ).toBe(false);
+    expect(isTemplate({ ...base, id: 1 })).toBe(false);
   });
 
   it("rejects a missing or non-string name", () => {
-    expect(guard({ id: "demo", tokens: {}, modifiers: {}, order: [] })).toBe(
-      false,
-    );
-    expect(guard({ ...base, name: 1 })).toBe(false);
+    expect(
+      isTemplate({ id: "demo", tokens: {}, modifiers: {}, order: [] }),
+    ).toBe(false);
+    expect(isTemplate({ ...base, name: 1 })).toBe(false);
   });
 
   it("rejects missing tokens or tokens that are not an object", () => {
-    expect(guard({ id: "demo", name: "Demo", modifiers: {}, order: [] })).toBe(
-      false,
-    );
-    expect(guard({ ...base, tokens: [] })).toBe(false);
+    expect(
+      isTemplate({ id: "demo", name: "Demo", modifiers: {}, order: [] }),
+    ).toBe(false);
+    expect(isTemplate({ ...base, tokens: [] })).toBe(false);
   });
 
   it("rejects missing modifiers or modifiers that are not a plain record", () => {
-    expect(guard({ id: "demo", name: "Demo", tokens: {}, order: [] })).toBe(
-      false,
-    );
-    expect(guard({ ...base, modifiers: [] })).toBe(false);
-    expect(guard({ ...base, modifiers: new Date() })).toBe(false);
+    expect(
+      isTemplate({ id: "demo", name: "Demo", tokens: {}, order: [] }),
+    ).toBe(false);
+    expect(isTemplate({ ...base, modifiers: [] })).toBe(false);
+    expect(isTemplate({ ...base, modifiers: new Date() })).toBe(false);
   });
 
   it("rejects missing order or an order that is not an array", () => {
-    expect(guard({ id: "demo", name: "Demo", tokens: {}, modifiers: {} })).toBe(
-      false,
-    );
-    expect(guard({ ...base, order: {} })).toBe(false);
+    expect(
+      isTemplate({ id: "demo", name: "Demo", tokens: {}, modifiers: {} }),
+    ).toBe(false);
+    expect(isTemplate({ ...base, order: {} })).toBe(false);
   });
 });

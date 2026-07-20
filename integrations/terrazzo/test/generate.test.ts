@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Schema, Template } from "untheme";
 
-import { defineSchema, guard } from "untheme";
+import { defineSchema, isTemplate } from "untheme";
 
 import { generate } from "../src/generate";
 import { FIXTURES } from "./helpers";
@@ -38,7 +38,7 @@ describe("generate", () => {
     await writeFile(file, result.contents);
     const imported = await import(pathToFileURL(file.pathname).href);
     const config = imported.default;
-    if (!guard(config.theme)) {
+    if (!isTemplate(config.theme)) {
       throw new Error("generated theme is not structurally a theme");
     }
     const schema: Schema<Template> = defineSchema(config.theme);

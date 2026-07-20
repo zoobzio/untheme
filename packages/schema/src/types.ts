@@ -25,10 +25,14 @@ export type Type = (typeof TYPES)[number];
  */
 export type Refs = { [Y in Type]: string };
 
-/** Authoring references: any braced string, one per type. */
+/**
+ * Authoring references: any braced string, one per type.
+ */
 export type Open = { [Y in Type]: `{${string}}` };
 
-/** Dereferenced values: no references admitted at any type. */
+/**
+ * Dereferenced values: no references admitted at any type.
+ */
 export type Literal = { [Y in Type]: never };
 
 /**
@@ -52,7 +56,9 @@ export type Color = {
  */
 export type DimensionUnit = (typeof DIMENSION_UNITS)[number];
 
-/** A length with an absolute or root-relative unit. */
+/**
+ * A length with an absolute or root-relative unit.
+ */
 export type Dimension = {
   value: number;
   unit: DimensionUnit;
@@ -63,10 +69,14 @@ export type Dimension = {
  */
 export type DurationUnit = (typeof DURATION_UNITS)[number];
 
-/** A time span in milliseconds or seconds. */
+/**
+ * A time span in milliseconds or seconds.
+ */
 export type Duration = { value: number; unit: DurationUnit };
 
-/** A single family name or an ordered fallback stack. */
+/**
+ * A single family name or an ordered fallback stack.
+ */
 export type FontFamily = string | string[];
 
 /**
@@ -74,10 +84,14 @@ export type FontFamily = string | string[];
  */
 export type FontWeightKeyword = (typeof FONT_WEIGHTS)[number];
 
-/** A numeric weight or one of the named weights. */
+/**
+ * A numeric weight or one of the named weights.
+ */
 export type FontWeight = number | FontWeightKeyword;
 
-/** The four control-point coordinates of a cubic Bézier easing curve. */
+/**
+ * The four control-point coordinates of a cubic Bézier easing curve.
+ */
 export type CubicBezier = [number, number, number, number];
 
 /**
@@ -101,21 +115,27 @@ export type StrokeStyle<R extends Refs> =
       lineCap: LineCap;
     };
 
-/** A border: a color, a width, and a stroke style, each a value or reference. */
+/**
+ * A border: a color, a width, and a stroke style, each a value or reference.
+ */
 export type Border<R extends Refs> = {
   color: Color | R["color"];
   width: Dimension | R["dimension"];
   style: StrokeStyle<R> | R["strokeStyle"];
 };
 
-/** A transition: a duration, a delay, and a timing function. */
+/**
+ * A transition: a duration, a delay, and a timing function.
+ */
 export type Transition<R extends Refs> = {
   duration: Duration | R["duration"];
   delay: Duration | R["duration"];
   timingFunction: CubicBezier | R["cubicBezier"];
 };
 
-/** A single drop shadow: a color and four dimensions. */
+/**
+ * A single drop shadow: a color and four dimensions.
+ */
 export type Shadow<R extends Refs> = {
   color: Color | R["color"];
   offsetX: Dimension | R["dimension"];
@@ -124,13 +144,17 @@ export type Shadow<R extends Refs> = {
   spread: Dimension | R["dimension"];
 };
 
-/** A gradient stop: a color and a position in the unit interval. */
+/**
+ * A gradient stop: a color and a position in the unit interval.
+ */
 export type GradientStop<R extends Refs> = {
   color: Color | R["color"];
   position: number | R["number"];
 };
 
-/** A typography set: family, size, weight, letter spacing, and line height. */
+/**
+ * A typography set: family, size, weight, letter spacing, and line height.
+ */
 export type Typography<R extends Refs> = {
   fontFamily: FontFamily | R["fontFamily"];
   fontSize: Dimension | R["dimension"];
@@ -282,13 +306,19 @@ export type Template = {
   order: string[];
 };
 
-/** Any token name defined by a template. */
+/**
+ * Any token name defined by a template.
+ */
 export type Token<T extends Template> = keyof T["tokens"] & string;
 
-/** Any modifier (axis) name defined by a template. */
+/**
+ * Any modifier (axis) name defined by a template.
+ */
 export type Modifier<T extends Template> = keyof T["modifiers"] & string;
 
-/** Any context name defined by a template's modifier `M`. */
+/**
+ * Any context name defined by a template's modifier `M`.
+ */
 export type Context<
   T extends Template,
   M extends Modifier<T>,
@@ -309,12 +339,16 @@ export type Overrides<T extends Template> = {
   [K in Token<T>]?: Binding;
 };
 
-/** Every context of every modifier, each carrying its token overrides. */
+/**
+ * Every context of every modifier, each carrying its token overrides.
+ */
 export type Modifiers<T extends Template> = {
   [M in Modifier<T>]: { [C in Context<T, M>]: Overrides<T> };
 };
 
-/** The active context selected for each modifier. */
+/**
+ * The active context selected for each modifier.
+ */
 export type Input<T extends Template> = {
   [M in Modifier<T>]: Context<T, M>;
 };
@@ -423,7 +457,9 @@ export type Domain<T extends Template> = {
   patch: Patch<T>;
 };
 
-/** The name of a kind — a key of {@link Domain}. */
+/**
+ * The name of a kind — a key of {@link Domain}.
+ */
 export type Kind = keyof Domain<Template>;
 
 /**
