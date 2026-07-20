@@ -92,7 +92,6 @@ each channel to its mode's stop in the matching chroma column.
 ```ts
 import { defineUntheme } from "@untheme/core";
 import { preset } from "@untheme/aurora";
-import dracula from "@untheme/aurora/themes/dracula";
 import nord from "@untheme/aurora/themes/nord";
 
 const ut = defineUntheme(
@@ -106,12 +105,11 @@ const ut = defineUntheme(
     depth: "default",
     motion: "default",
   }),
-  { dracula, nord },
 );
 
 ut.swap("vibrancy", "vivid"); // electric dark, by composition
 ut.swap("contrast", "high"); // and accessible, contrast wins the collision
-ut.select("nord"); // re-tint every role through the ramps
+ut.apply(nord); // re-tint every role through the ramps
 ```
 
 The package also exports `AuroraTheme`, `AuroraLayer`, and
@@ -122,8 +120,8 @@ selections check against.
 
 Thirty-one variants, one subpath export each (`@untheme/aurora/themes/<id>`).
 The base palette is `aurora` itself — electric teal-green, violet, and
-magenta on cold blue-grays — and it appears in the catalog too, so a demo
-can always select its way back to the default.
+magenta on cold blue-grays — and it ships as a variant too, so a demo
+can always apply its way back to the default.
 
 Editor classics: `ayu`, `catppuccin`, `cyberdream`, `dracula`, `everforest`,
 `github`, `gruvbox`, `horizon`, `kanagawa`, `monokai`, `night_owl`, `nord`,

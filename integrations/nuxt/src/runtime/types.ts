@@ -17,11 +17,6 @@ export type AppTheme = Theme<AppContract>;
 export type AppThemeLayer = Layer<AppContract>;
 
 /**
- * The build-time catalog of switchable layers, keyed by its known theme keys.
- */
-export type AppThemes = Record<string, AppThemeLayer>;
-
-/**
  * The active selection — one context per modifier.
  */
 export type AppInput = Input<AppContract>;

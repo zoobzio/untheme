@@ -44,46 +44,4 @@ export const theme = {
   order: ["color"],
 };
 
-// The switchable catalog holds layers: identity plus what diverges from the
-// baseline. Alpha is the baseline itself, so it carries no overrides; bravo
-// rebinds the literal colors and carries a modifier override — its dark
-// context keeps primary on blue where the baseline flips to indigo — while
-// everything unstated resolves from the baseline.
-export const themes = {
-  alpha: { id: "alpha", name: "Alpha" },
-  bravo: {
-    id: "bravo",
-    name: "Bravo",
-    tokens: {
-      white: {
-        colorSpace: "srgb",
-        components: [0.98, 0.98, 0.98],
-        hex: "#fafafa",
-      },
-      black: {
-        colorSpace: "srgb",
-        components: [0.07, 0.07, 0.07],
-        hex: "#111111",
-      },
-      blue: {
-        colorSpace: "srgb",
-        components: [0.15, 0.39, 0.92],
-        hex: "#2563eb",
-      },
-      indigo: {
-        colorSpace: "srgb",
-        components: [0.31, 0.27, 0.9],
-        hex: "#4f46e5",
-      },
-    },
-    modifiers: {
-      color: {
-        dark: {
-          primary: "{blue}",
-        },
-      },
-    },
-  },
-};
-
 export const input = { color: "light" };

@@ -36,9 +36,9 @@ export type Config<T extends Template> = {
 
 /**
  * Read/write middleware over the state container. Each slot intercepts the
- * matching `config` field or catalog entry and transforms the value as it
- * passes through — the integration's hook for instrumenting state without the
- * service knowing about it. Omit a slot to pass the value through untouched.
+ * matching `config` field and transforms the value as it passes through — the
+ * integration's hook for instrumenting state without the service knowing
+ * about it. Omit a slot to pass the value through untouched.
  */
 export type Options<T extends Template> = {
   get?: {
@@ -47,7 +47,6 @@ export type Options<T extends Template> = {
       input?: (input: Input<T>) => Input<T>;
       override?: (override: Overrides<T>) => Overrides<T>;
     };
-    themes?: { [key: string]: (layer: Layer<T>) => Layer<T> };
   };
   set?: {
     config?: {
@@ -55,7 +54,6 @@ export type Options<T extends Template> = {
       input?: (input: Input<T>) => Input<T>;
       override?: (override: Overrides<T>) => Overrides<T>;
     };
-    themes?: { [key: string]: (layer: Layer<T>) => Layer<T> };
   };
 };
 
@@ -69,11 +67,6 @@ export interface Untheme<T extends Template> {
    * The caller-owned live state — the single place state is read or written raw.
    */
   config: Config<T>;
-
-  /**
-   * The catalog of switchable layers `select` / `create` / `remove` operate on.
-   */
-  themes: Record<string, Layer<T>>;
 
   /**
    * The validation bundle for the contract.
@@ -159,15 +152,10 @@ export interface Untheme<T extends Template> {
   apply: (layer: Layer<T>) => void;
 
   /**
-   * Switches to the catalog layer filed under `key`, and clears the override.
+   * Validates a layer against the contract and returns it unchanged; the
+   * active theme is not touched.
    */
-  select: (key: string) => void;
-
-  /**
-   * Files a layer in the catalog under its id and returns it resolved against
-   * the baseline as a complete theme. The active theme is not touched.
-   */
-  create: (layer: Layer<T>) => Theme<T>;
+  create: (layer: Layer<T>) => Layer<T>;
 
   /**
    * Snapshots the active theme and override as a detached theme; not
@@ -175,9 +163,4 @@ export interface Untheme<T extends Template> {
    * snapshot invalid.
    */
   extract: (id: string, name: string) => Theme<T>;
-
-  /**
-   * Drops a layer from the catalog by id; the active theme is unaffected.
-   */
-  remove: (id: string) => void;
 }

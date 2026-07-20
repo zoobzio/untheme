@@ -8,6 +8,14 @@
     ".": {
       "types": "./.dist/module.d.ts",
       "import": "./.dist/module.mjs"
+    },
+    "./config": {
+      "types": "./.dist/config.d.ts",
+      "import": "./.dist/config.mjs"
+    },
+    "./constant": {
+      "types": "./.dist/constant.d.ts",
+      "import": "./.dist/constant.mjs"
     }
   },
   "files": [
@@ -22,12 +30,15 @@
   },
   "dependencies": {
     "@nuxt/kit": "^4.4.6",
+    "h3": "^1.15.11",
     "untheme": "workspace:*",
     "vue": "^3.5.35"
   },
   "devDependencies": {
+    "@nuxt/nitro-server": "^4.4.6",
     "@nuxt/schema": "^4.4.6",
     "@types/node": "^25.9.1",
+    "nitropack": "^2.13.4",
     "nuxt": "^4.4.6"
   }
 }

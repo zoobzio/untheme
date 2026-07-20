@@ -22,15 +22,15 @@ describe("skeleton", () => {
       },
     });
 
-    expect(pieces.modifiers.color.light).toEqual({});
-    expect(pieces.modifiers.color.dark["color.primary.default"]).toBe(
+    expect(pieces.modifiers.color?.light).toEqual({});
+    expect(pieces.modifiers.color?.dark?.["color.primary.default"]).toBe(
       "{color.primary.50}",
     );
-    expect(pieces.modifiers.color.dark["color.surface"]).toMatchObject({
+    expect(pieces.modifiers.color?.dark?.["color.surface"]).toMatchObject({
       colorSpace: "srgb",
     });
-    expect(pieces.modifiers.density.default).toEqual({});
-    expect(pieces.modifiers.density.compact).toEqual({
+    expect(pieces.modifiers.density?.default).toEqual({});
+    expect(pieces.modifiers.density?.compact).toEqual({
       "size.md": { value: 6, unit: "px" },
     });
 

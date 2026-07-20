@@ -42,8 +42,13 @@ const color = (value: Inputs["color"]): string => {
   }
   const space = value.colorSpace;
   if (space === "hsl" || space === "hwb") {
-    const [first, second, third] = value.components;
-    return `${space}(${channel(first)} ${percentage(second)} ${percentage(third)}${alpha})`;
+    const parts = value.components.map((component, index) => {
+      if (index === 0) {
+        return channel(component);
+      }
+      return percentage(component);
+    });
+    return `${space}(${parts.join(" ")}${alpha})`;
   }
   const body = value.components.map(channel).join(" ");
   if (

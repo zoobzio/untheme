@@ -72,9 +72,12 @@ describe("untheme plugin", () => {
 
   it("mirrors the selection as data attributes and injects token CSS", async () => {
     await setup();
-    expect(headCalls[0].htmlAttrs["data-color"].value).toBe("light");
-    expect(headCalls[0].style.value[0].key).toBe("untheme");
-    const css = headCalls[0].style.value[0].innerHTML;
+    expect(headCalls[0]?.htmlAttrs["data-color"]?.value).toBe("light");
+    expect(headCalls[0]?.style.value[0]?.key).toBe("untheme");
+    const css = headCalls[0]?.style.value[0]?.innerHTML;
+    if (css === undefined) {
+      throw new Error("expected injected token CSS");
+    }
     expect(css).toContain(":root {");
     expect(css).toContain("--white: #ffffff;");
     expect(css).toContain("--primary: var(--blue);");
@@ -88,20 +91,20 @@ describe("untheme plugin", () => {
   describe("reactivity", () => {
     it("updates the data attribute when the context changes", async () => {
       await setup();
-      expect(headCalls[0].htmlAttrs["data-color"].value).toBe("light");
+      expect(headCalls[0]?.htmlAttrs["data-color"]?.value).toBe("light");
       config.value.input.color = "dark";
       await nextTick();
-      expect(headCalls[0].htmlAttrs["data-color"].value).toBe("dark");
+      expect(headCalls[0]?.htmlAttrs["data-color"]?.value).toBe("dark");
     });
 
     it("re-renders the token CSS when the context changes", async () => {
       await setup();
-      expect(headCalls[0].style.value[0].innerHTML).toContain(
+      expect(headCalls[0]?.style.value[0]?.innerHTML).toContain(
         "--primary: var(--blue);",
       );
       config.value.input.color = "dark";
       await nextTick();
-      expect(headCalls[0].style.value[0].innerHTML).toContain(
+      expect(headCalls[0]?.style.value[0]?.innerHTML).toContain(
         "--primary: var(--indigo);",
       );
     });

@@ -1,16 +1,19 @@
 {
   "compilerOptions": {
     "strict": true,
+    "noUncheckedIndexedAccess": true,
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "bundler",
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "types": ["node", "@nuxt/nitro-server"],
     "declaration": true,
     "declarationMap": true,
     "outDir": "../nuxt/.dist",
     "rootDir": "../nuxt",
     "paths": {
+      "@untheme/nuxt/constant": ["../nuxt/src/constant.ts"],
       "#app": ["../nuxt/src/stubs/app.d.ts"],
       "#imports": ["../nuxt/src/stubs/imports.d.ts"],
       "#build/untheme.mjs": ["../nuxt/src/stubs/build/untheme.d.mts"],

@@ -16,7 +16,11 @@ describe("verify", () => {
   it("catches a translation that drifts from Terrazzo's resolution", async () => {
     const { parsed } = await load("resolver.json");
     const core = assemble(parsed, {});
-    core.theme.tokens["color.surface"].$value = {
+    const surface = core.theme.tokens["color.surface"];
+    if (surface === undefined) {
+      throw new Error("expected the color.surface token");
+    }
+    surface.$value = {
       colorSpace: "srgb",
       components: [1, 0, 0],
       alpha: 1,
@@ -39,7 +43,11 @@ describe("verify", () => {
       verify(parsed.resolver, parsed.tokens, core.theme, core.input),
     ).not.toThrow();
 
-    core.theme.tokens["color.surface"].$value = {
+    const surface = core.theme.tokens["color.surface"];
+    if (surface === undefined) {
+      throw new Error("expected the color.surface token");
+    }
+    surface.$value = {
       colorSpace: "srgb",
       components: [1, 0, 0],
       alpha: 1,

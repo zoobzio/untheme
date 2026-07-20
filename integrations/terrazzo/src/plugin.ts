@@ -40,7 +40,7 @@ export const plugin = (options: PluginOptions = {}): Plugin => {
         map(catalog, (layer) => core.schema.parse.layer(layer)),
       );
       const contents = emit(
-        { base: core.theme, themes, input: core.input },
+        { theme: core.theme, themes, input: core.input },
         origin.href,
       );
       outputFile(options.filename ?? FILENAME, contents);

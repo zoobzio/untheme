@@ -58,17 +58,13 @@ export const verify = (
      * theme's own axes, defaults filling any gap.
      */
     const trimmed: Record<string, string> = {};
-    for (const axis of keys(input)) {
-      if (axis in selection) {
-        trimmed[axis] = selection[axis];
-        continue;
-      }
-      trimmed[axis] = input[axis];
+    for (const [axis, fallback] of entries(input)) {
+      trimmed[axis] = selection[axis] ?? fallback;
     }
     service.config.input = service.schema.parse.input(trimmed);
     const drifted: string[] = [];
-    for (const token of keys(applied)) {
-      const expected = literal(applied[token]);
+    for (const [token, normalized] of entries(applied)) {
+      const expected = literal(normalized);
       const actual = service.resolve(token);
       if (!isEqual(expected, actual)) {
         drifted.push(token);

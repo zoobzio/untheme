@@ -1,4 +1,4 @@
-import type { Contract, Layer, Binding } from "@untheme/schema";
+import type { Contract, Binding } from "@untheme/schema";
 import type { Config, Options, Untheme } from "./types";
 
 import { makeUntheme } from "./factory";
@@ -13,12 +13,9 @@ import { makeUntheme } from "./factory";
  * runtime-validated bindings.
  *
  * @param config - The caller-owned container: active theme, selection, override.
- * @param themes - The catalog of switchable layers, validated up front; the
- *   target of `select`, `create`, and `remove`.
- * @param options - Read/write middleware over `config` and `themes`.
+ * @param options - Read/write middleware over `config`.
  * @returns An {@link Untheme} service bound to the container.
  * @throws InvalidThemeError when the theme or selection violates the contract.
- * @throws InvalidLayerError when a registry layer steps outside the contract.
  */
 export const defineUntheme = <
   Tok extends string,
@@ -28,8 +25,7 @@ export const defineUntheme = <
   >,
 >(
   config: Config<Contract<Tok, Mod>>,
-  themes: Record<string, Layer<Contract<Tok, Mod>>> = {},
   options: Options<Contract<Tok, Mod>> = {},
 ): Untheme<Contract<Tok, Mod>> => {
-  return makeUntheme<Contract<Tok, Mod>>(config, themes, options);
+  return makeUntheme<Contract<Tok, Mod>>(config, options);
 };

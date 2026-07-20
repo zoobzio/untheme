@@ -15,7 +15,7 @@ import type {
 import type { Diff } from "@untheme/utils";
 import type { Config, Options, Untheme } from "./types";
 
-import { isRecord, map, values } from "@untheme/common";
+import { isRecord, map } from "@untheme/common";
 import { defineSchema } from "@untheme/schema";
 import { clone, copy, diff, merge } from "@untheme/utils";
 import {
@@ -24,7 +24,6 @@ import {
   InvalidPatchError,
   InvalidThemeError,
   UnknownModifierError,
-  UnknownThemeError,
   reframe,
 } from "./error";
 
@@ -41,24 +40,19 @@ import {
  * intercept and transform each read and write on the way through. Reads resolve
  * the active selection — base tokens overlaid with the selected context of each
  * modifier in `order` — then apply the user override on top. `set` writes only
- * the override; `swap` selects a modifier's context; `update` / `apply` /
- * `select` change the definition. Switching theme (`apply` / `select`) clears
- * the override.
+ * the override; `swap` selects a modifier's context; `update` and `apply`
+ * change the definition. Switching theme (`apply`) clears the override.
  *
- * The baseline — a snapshot of the theme at construction — is what `apply` and
- * `create` resolve layers against.
+ * The baseline — a snapshot of the theme at construction — is what `apply`
+ * resolves layers against.
  *
  * @param config - The caller-owned container: active theme, selection, override.
- * @param themes - The catalog of switchable layers, validated up front; the
- *   target of `select`, `create`, and `remove`.
- * @param options - Read/write middleware over `config` and `themes`.
+ * @param options - Read/write middleware over `config`.
  * @returns An {@link Untheme} service bound to the container.
  * @throws InvalidThemeError when the theme or selection violates the contract.
- * @throws InvalidLayerError when a registry layer steps outside the contract.
  */
 export const makeUntheme = <T extends Theme<T>>(
   config: Config<T>,
-  themes: Record<string, Layer<T>> = {},
   options: Options<T> = {},
 ): Untheme<T> => {
   /**
@@ -117,34 +111,6 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * The registry, fronted by per-key get/set middleware with the same
-   * passthrough semantics as {@link proxy}. A Proxy rather than fixed properties
-   * because `create` and `remove` add and drop keys at runtime; deletes pass
-   * straight through to the container.
-   */
-  const registry: Record<string, Layer<T>> = new Proxy(themes, {
-    get(target, key, receiver) {
-      const value = Reflect.get(target, key, receiver);
-      if (typeof key === "string") {
-        const through = options.get?.themes?.[key];
-        if (through) {
-          return through(value);
-        }
-      }
-      return value;
-    },
-    set(target, key, value, receiver) {
-      if (typeof key === "string") {
-        const through = options.set?.themes?.[key];
-        if (through) {
-          return Reflect.set(target, key, through(value), receiver);
-        }
-      }
-      return Reflect.set(target, key, value, receiver);
-    },
-  });
-
-  /**
    * Validation derived from the baseline — a complete theme is itself a valid
    * template. The theme is cloned on the way in, so `schema.base` doubles as
    * the detached baseline snapshot the merge and diff paths work from, never a
@@ -156,15 +122,6 @@ export const makeUntheme = <T extends Theme<T>>(
 
   // The seed selection must name a real context for every modifier.
   reframe(InvalidThemeError, () => schema.assert.input(proxy.input));
-
-  // Fail fast on a malformed seed registry. This is an early check only —
-  // `apply` (and so `select`) still re-validates every layer at the call
-  // site, since the registry can be mutated after construction.
-  reframe(InvalidLayerError, () => {
-    for (const layer of values(registry)) {
-      schema.assert.layer(layer);
-    }
-  });
 
   /**
    * The flat token map for a selection (default: active): every token bound to
@@ -303,31 +260,15 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * Switches to the registry layer filed under `key`: resolves it from the
-   * registry and hands it to {@link apply}, which validates it like any other
-   * layer. Throws {@link UnknownThemeError} when no theme is registered under
-   * `key`.
+   * Proves a layer against the contract and returns it unchanged — the
+   * validation gate for layers that arrive at runtime (fetched from elsewhere,
+   * built by a user) before they are handed to {@link apply} or stored by the
+   * caller. The active theme is not touched. Throws {@link InvalidLayerError}
+   * when the layer steps outside the contract.
    */
-  const select = (key: string) => {
-    const layer = registry[key];
-    if (!layer) {
-      throw new UnknownThemeError(key);
-    }
-    apply(layer);
-  };
-
-  /**
-   * Files a layer in the registry under its id, where {@link select} can switch
-   * to it, and returns the layer resolved against the baseline — its identity
-   * and bindings, gaps backfilled from the baseline — as a complete theme. The
-   * registry holds a detached copy of the layer; the active theme is not
-   * touched. Throws {@link InvalidLayerError} when the layer steps outside the
-   * contract.
-   */
-  const create = (layer: Layer<T>): Theme<T> => {
+  const create = (layer: Layer<T>): Layer<T> => {
     reframe(InvalidLayerError, () => schema.assert.layer(layer));
-    registry[layer.id] = copy(layer);
-    return merge<T>(schema.base, layer);
+    return layer;
   };
 
   /**
@@ -344,16 +285,6 @@ export const makeUntheme = <T extends Theme<T>>(
     });
     reframe(InvalidThemeError, () => schema.assert.theme(snapshot));
     return snapshot;
-  };
-
-  /**
-   * Drops a layer from the registry by id; a no-op when nothing is filed
-   * under it. The active theme is independent of the registry, so removing
-   * the live theme's entry leaves it standing — it just can no longer be
-   * reached by {@link select}.
-   */
-  const remove = (id: string) => {
-    delete registry[id];
   };
 
   /**
@@ -383,7 +314,6 @@ export const makeUntheme = <T extends Theme<T>>(
 
   return {
     config: proxy,
-    themes: registry,
     schema,
     modifiers,
     contexts,
@@ -397,9 +327,7 @@ export const makeUntheme = <T extends Theme<T>>(
     reset,
     update,
     apply,
-    select,
     create,
     extract,
-    remove,
   };
 };

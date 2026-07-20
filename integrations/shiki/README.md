@@ -73,9 +73,13 @@ an **open** string, so you reach anything TextMate distinguishes that LSP doesn'
 by adding your own rule —
 
 ```ts
-defineShikiTheme(untheme.schema, { ...map, punctuation: "code-punct" }, {
-  scopes: [{ scope: "punctuation", role: "punctuation" }],
-});
+defineShikiTheme(
+  untheme.schema,
+  { ...map, punctuation: "code-punct" },
+  {
+    scopes: [{ scope: "punctuation", role: "punctuation" }],
+  },
+);
 ```
 
 — giving TextMate's full granularity at no cost to the base. A hand-authored

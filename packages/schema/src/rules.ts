@@ -158,13 +158,12 @@ export const defineRules = <T extends Template>(
   ];
 
   /* A single reference or a literal value of some known type. */
-  const value = [
-    either(
-      "Value",
-      TYPES.map((type) => [shape[type].literal]),
-    ),
-  ];
-  const binding = [valued(reference("Binding", enums.tokens), value[0])];
+  const literal = either(
+    "Value",
+    TYPES.map((type) => [shape[type].literal]),
+  );
+  const value = [literal];
+  const binding = [valued(reference("Binding", enums.tokens), literal)];
   const id = [text("Identifier"), filled("Identifier")];
   const name = [text("Name"), filled("Name")];
 

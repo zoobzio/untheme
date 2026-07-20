@@ -44,12 +44,11 @@ export const defineRenderer = <T extends Template>(
     const slots = source.config.theme.tokens;
     const acc: Record<string, string> = {};
     for (const [token, binding] of entries(bindings)) {
-      if (binding === undefined) {
+      const slot = slots[token];
+      if (binding === undefined || slot === undefined) {
         continue;
       }
-      for (const [suffix, text] of entries(
-        emit<Type>(slots[token].$type, binding),
-      )) {
+      for (const [suffix, text] of entries(emit<Type>(slot.$type, binding))) {
         acc[`${property(token)}${suffix}`] = text;
       }
     }
@@ -90,13 +89,15 @@ export const defineRenderer = <T extends Template>(
 
   /**
    * One token's active binding as CSS text: its serialized value, or its
-   * `var()` indirection when the binding is a reference.
+   * `var()` indirection when the binding is a reference. A token outside the
+   * contract has no binding and resolves to empty text.
    */
   const value = (token: Token<T>): string => {
-    return serialize<Type>(
-      source.config.theme.tokens[token].$type,
-      source.tokens()[token],
-    );
+    const slot = source.config.theme.tokens[token];
+    if (slot === undefined) {
+      return "";
+    }
+    return serialize<Type>(slot.$type, source.tokens()[token]);
   };
 
   /**
@@ -137,7 +138,11 @@ export const defineRenderer = <T extends Template>(
     }
     const blocks = [block(":root", base)];
     for (const modifier of theme.order) {
-      for (const [context, overrides] of entries(theme.modifiers[modifier])) {
+      const contexts = theme.modifiers[modifier];
+      if (contexts === undefined) {
+        continue;
+      }
+      for (const [context, overrides] of entries(contexts)) {
         const decls = declarations(overrides);
         if (Object.keys(decls).length === 0) {
           continue;

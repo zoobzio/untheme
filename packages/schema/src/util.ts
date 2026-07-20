@@ -516,7 +516,7 @@ export const acyclic =
       return {
         code: "cycle",
         message: `${name} contains a reference cycle: ${cycle.join(" → ")}.`,
-        path: [cycle[0]],
+        path: cycle.slice(0, 1),
         received: cycle,
       };
     }

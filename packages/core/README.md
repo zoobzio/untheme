@@ -13,10 +13,7 @@ A theme is a flat map of tokens, each holding a `$type` and `$value`. On top of 
 ```ts
 import { defineUntheme } from "@untheme/core";
 
-const ut = defineUntheme(
-  { theme, input: { color: "dark" }, override: {} },
-  { midnight },
-);
+const ut = defineUntheme({ theme, input: { color: "dark" }, override: {} });
 
 ut.resolve("primary"); // follow the alias chain to a raw value
 ut.set("background", "blue"); // write to the override layer
@@ -25,10 +22,11 @@ ut.swap("color", "light"); // switch the color modifier's context
 ut.dirty(); // true — the override holds edits
 ut.reset(); // clears the override
 
-ut.select("midnight"); // switch to a catalogued theme by key
-ut.create(draftLayer); // resolve + file a new theme into the catalog
-ut.remove("midnight"); // drop a theme from the catalog
+ut.apply(midnight); // become another theme: the layer over the baseline
+ut.create(draftLayer); // validate a runtime-built layer against the contract
 ```
+
+The service holds no theme collection: it knows one active theme at a time, and `apply` switches between complete layers the caller supplies. Where alternative themes live — statically imported, lazy-loaded, fetched from an API — is the caller's concern, which keeps every theme except the active one out of the running state.
 
 Presets built with [`@untheme/kit`](../kit) produce the config for you: `defineUntheme(preset.use({ color: "dark" }))`. A `configure`-widened preset's theme is machine-built rather than authored, so it boots through the factory instead: `makeUntheme(app.use({ color: "dark" }))` — the same service, accepting any complete theme of a contract.
 
@@ -38,10 +36,9 @@ The service is pure behavior: every read and write goes through `config`, the ca
 
 ## The service
 
-`defineUntheme(state, registry?, options?)` returns an `Untheme<T>`:
+`defineUntheme(config, options?)` returns an `Untheme<T>`:
 
 - `config` — the caller-owned container: `theme`, `input`, `override`.
-- `themes` — the mutable catalog of theme layers (optional second argument; defaults to empty). `select` switches to an entry by key, `create` files new themes into it, and `remove` deletes them.
 - `schema` — guard vocabulary for the theme's token contract, from [`defineSchema`](../schema).
 - `modifiers()` — the modifier axes the contract declares, in composition order.
 - `contexts(modifier)` — the context names a modifier offers.
@@ -55,14 +52,12 @@ The service is pure behavior: every read and write goes through `config`, the ca
 - `reset()` — clears the user override.
 - `update(patch)` — merges a patch into the active theme; identity and the override are unchanged. Throws `InvalidPatchError` outside the contract.
 - `apply(layer)` — becomes that theme: the layer resolved against the baseline, and clears the override. Throws `InvalidLayerError` outside the contract.
-- `select(key)` — switches to the catalog layer filed under `key` (`apply` addressed by name), and clears the override. Throws `UnknownThemeError` when nothing is registered under `key`.
-- `create(layer)` — resolves a layer against the baseline into a complete theme and files it in the catalog under its id, where `select` can switch to it; the active theme is untouched. Throws `InvalidLayerError` outside the contract.
-- `extract(id, name)` — snapshots the active theme, including unsaved edits, as a detached theme under a new identity; returned, not filed in the catalog.
-- `remove(id)` — drops a theme from the catalog by id; a no-op when absent. The active theme is unaffected.
+- `create(layer)` — validates a layer against the contract and returns it unchanged; the active theme is untouched. Throws `InvalidLayerError` outside the contract.
+- `extract(id, name)` — snapshots the active theme, including unsaved edits, as a detached theme under a new identity.
 
 ## Baselines
 
-The service keeps exactly one baseline: a snapshot of the theme it was constructed with, captured once at creation. `apply` and `create` resolve layers against this baseline, so every theme produced this way carries the full token set, and `delta()` diffs the active theme against it. `dirty()` and `reset()` work directly on the user override — `dirty()` is true whenever the override holds any keys, `reset()` clears it — so edits made since the last `apply` / `select` / `create` are detectable and revertible.
+The service keeps exactly one baseline: a snapshot of the theme it was constructed with, captured once at creation. `apply` resolves layers against this baseline, so every theme adopted this way carries the full token set, and `delta()` diffs the active theme against it. `dirty()` and `reset()` work directly on the user override — `dirty()` is true whenever the override holds any keys, `reset()` clears it — so edits made since the last `apply` are detectable and revertible.
 
 ## Errors
 
@@ -71,12 +66,12 @@ Every boundary throws a semantic error rather than a bare `Error`, in two famili
 **Contract violations** — subclasses of [`SchemaError`](../schema), carrying the underlying `issues` so callers can react to each failure:
 
 - `InvalidThemeError` — the baseline theme handed to `defineUntheme` violates its own contract.
-- `InvalidLayerError` — a layer (registry seed, `apply`, `create`) steps outside the contract.
+- `InvalidLayerError` — a layer handed to `apply` or `create` steps outside the contract.
 - `InvalidPatchError` — a patch handed to `update` steps outside the contract.
 
 **Resolution failures** — subclasses of plain `Error`, carrying the offending lookup:
 
-- `UnknownThemeError` — `select` was handed a `key` that names no theme in the catalog.
+- `UnknownModifierError` — `contexts` was handed a name the contract declares no `modifier` under.
 - `CircularAliasError` — `resolve` hit an alias `chain` that loops back on itself; detected by tracking visited tokens, so the stack never overflows.
 
 `set` is the deliberate exception: as the hot-path interactive write it validates with the same guards but treats invalid writes as silent no-ops rather than throwing.

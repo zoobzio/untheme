@@ -20,9 +20,11 @@ describe("diff", () => {
     const edited = merge(theme, {
       tokens: { "color.bg": { colorSpace: "srgb", components: [1, 1, 1] } },
     });
-    expect(edited.tokens["color.bg"].$value).not.toBe(
-      theme.tokens["color.bg"].$value,
-    );
+    const slot = edited.tokens["color.bg"];
+    if (slot === undefined) {
+      throw new Error("expected a color.bg slot");
+    }
+    expect(slot.$value).not.toBe(theme.tokens["color.bg"].$value);
     expect(diff(theme, edited).tokens).toEqual({});
   });
 
@@ -44,9 +46,11 @@ describe("diff", () => {
       tokens: { "color.bg": { colorSpace: "hsl", components: [0, 0, 0] } },
     });
     const result = diff(theme, edited);
-    expect(result.tokens["color.bg"]).not.toBe(
-      edited.tokens["color.bg"].$value,
-    );
+    const slot = edited.tokens["color.bg"];
+    if (slot === undefined) {
+      throw new Error("expected a color.bg slot");
+    }
+    expect(result.tokens["color.bg"]).not.toBe(slot.$value);
   });
 
   it("holds only deviating bindings, token and context wise", () => {
@@ -90,8 +94,8 @@ describe("diff", () => {
     stripped.modifiers.mode.dark = {};
     const result = diff(theme, stripped);
 
-    expect(result.modifiers.mode.dark).toEqual({});
+    expect(result.modifiers.mode?.dark).toEqual({});
     const restored = merge(theme, { modifiers: result.modifiers });
-    expect(restored.modifiers.mode.dark).toEqual(theme.modifiers.mode.dark);
+    expect(restored.modifiers.mode?.dark).toEqual(theme.modifiers.mode.dark);
   });
 });

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { key, themes, axes, shuffle } = useDemo();
+const { key, themes, axes, shuffle } = await useDemo();
 </script>
 
 <template>

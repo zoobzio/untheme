@@ -118,7 +118,7 @@ export const generate = async (
     map(catalog, (layer) => core.schema.parse.layer(layer)),
   );
   const contents = emit(
-    { base: core.theme, themes, input: core.input },
+    { theme: core.theme, themes, input: core.input },
     url.href,
   );
   return { filename: options.filename ?? FILENAME, contents };

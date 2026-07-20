@@ -10,7 +10,6 @@ import {
   InvalidPatchError,
   InvalidThemeError,
   UnknownModifierError,
-  UnknownThemeError,
 } from "../src/error";
 import { black, blue, theme, white } from "./fixture";
 
@@ -52,14 +51,6 @@ describe("construction", () => {
     const config = makeConfig();
     Reflect.set(config.input, "mode", "high");
     expect(() => makeUntheme<T>(config)).toThrow(InvalidThemeError);
-  });
-
-  it("rejects a malformed seed layer", () => {
-    const bad = { id: "bad", name: "Bad", tokens: {} };
-    Reflect.set(bad, "tokens", { "color.bg": "{color.black}", ghost: black });
-    expect(() => makeUntheme<T>(makeConfig(), { bad })).toThrow(
-      InvalidLayerError,
-    );
   });
 });
 
@@ -296,7 +287,7 @@ describe("delta", () => {
   });
 });
 
-describe("apply / select", () => {
+describe("apply", () => {
   it("becomes the layer over the baseline and clears the override", () => {
     const u = makeUntheme<T>(makeConfig());
     u.set("color.bg", blue);
@@ -322,49 +313,18 @@ describe("apply / select", () => {
     // l1's accent change is gone — l2 resolved against the baseline
     expect(u.get("color.accent")).toEqual(blue);
   });
-
-  it("select applies a catalog layer; an unknown key throws", () => {
-    const u = makeUntheme<T>(makeConfig(), {
-      alt: {
-        id: "alt",
-        name: "Alt",
-        tokens: { "color.accent": "{color.white}" },
-      },
-    });
-    u.select("alt");
-    expect(u.config.theme.id).toBe("alt");
-    expect(u.get("color.accent")).toBe("{color.white}");
-    expect(() => u.select("missing")).toThrow(UnknownThemeError);
-  });
 });
 
-describe("create / extract / remove", () => {
-  it("create files the layer and returns it resolved against the baseline", () => {
+describe("create / extract", () => {
+  it("create returns the validated layer unchanged", () => {
     const u = makeUntheme<T>(makeConfig());
     const layer = {
       id: "made",
       name: "Made",
       tokens: { "color.bg": "{color.accent}" } as const,
     };
-    const made = u.create(layer);
-    expect(u.themes.made).toEqual(layer);
-    expect(u.themes.made).not.toBe(layer);
-    expect(made.id).toBe("made");
-    expect(made.tokens["color.bg"].$value).toBe("{color.accent}");
-    expect(made.tokens["color.bg"].$type).toBe("color");
+    expect(u.create(layer)).toBe(layer);
     expect(u.config.theme.id).toBe("demo");
-  });
-
-  it("created layers are reachable by select", () => {
-    const u = makeUntheme<T>(makeConfig());
-    u.create({
-      id: "made",
-      name: "Made",
-      tokens: { "color.accent": "{color.white}" },
-    });
-    u.select("made");
-    expect(u.config.theme.id).toBe("made");
-    expect(u.get("color.accent")).toBe("{color.white}");
   });
 
   it("create rejects a layer outside the contract", () => {
@@ -372,7 +332,6 @@ describe("create / extract / remove", () => {
     const tokens = { "color.bg": "{color.black}", ghost: black };
     const bad = { id: "bad", name: "Bad", tokens };
     expect(() => u.create(bad)).toThrow(InvalidLayerError);
-    expect(u.themes.bad).toBeUndefined();
   });
 
   it("extract bakes the override into a detached snapshot", () => {
@@ -382,7 +341,6 @@ describe("create / extract / remove", () => {
     expect(snap.id).toBe("snap");
     expect(snap.tokens["color.bg"].$value).toEqual(blue);
     expect(snap.tokens["color.bg"].$type).toBe("color");
-    expect(u.themes.snap).toBeUndefined();
     expect(u.config.theme.id).toBe("demo");
   });
 
@@ -390,123 +348,67 @@ describe("create / extract / remove", () => {
     const u = makeUntheme<T>(makeConfig());
     expect(() => u.extract("", "")).toThrow(InvalidThemeError);
   });
-
-  it("remove drops a catalog entry", () => {
-    const u = makeUntheme<T>(makeConfig(), {
-      alt: { id: "alt", name: "Alt", tokens: {} },
-    });
-    expect(u.themes.alt).toBeDefined();
-    u.remove("alt");
-    expect(u.themes.alt).toBeUndefined();
-  });
 });
 
 describe("Options middleware", () => {
   it("intercepts reads of the selection", () => {
-    const u = makeUntheme<T>(
-      makeConfig(),
-      {},
-      {
-        get: {
-          config: { input: () => ({ mode: "dark", contrast: "normal" }) },
-        },
+    const u = makeUntheme<T>(makeConfig(), {
+      get: {
+        config: { input: () => ({ mode: "dark", contrast: "normal" }) },
       },
-    );
+    });
     // reads see dark regardless of the stored selection
     expect(u.get("color.bg")).toBe("{color.black}");
   });
 
   it("intercepts writes of the override", () => {
     const writes: unknown[] = [];
-    const u = makeUntheme<T>(
-      makeConfig(),
-      {},
-      {
-        set: {
-          config: {
-            override: (override) => {
-              writes.push(override);
-              return override;
-            },
+    const u = makeUntheme<T>(makeConfig(), {
+      set: {
+        config: {
+          override: (override) => {
+            writes.push(override);
+            return override;
           },
         },
       },
-    );
+    });
     u.set("color.bg", blue);
     expect(writes).toHaveLength(1);
     expect(writes[0]).toEqual({ "color.bg": blue });
   });
 
   it("intercepts reads of the theme", () => {
-    const u = makeUntheme<T>(
-      makeConfig(),
-      {},
-      {
-        get: {
-          config: { theme: (value) => ({ ...value, name: "Seen" }) },
-        },
+    const u = makeUntheme<T>(makeConfig(), {
+      get: {
+        config: { theme: (value) => ({ ...value, name: "Seen" }) },
       },
-    );
+    });
     expect(u.config.theme.name).toBe("Seen");
   });
 
   it("intercepts reads of the override", () => {
-    const u = makeUntheme<T>(
-      makeConfig(),
-      {},
-      {
-        get: {
-          config: { override: () => ({ "color.bg": blue }) },
-        },
+    const u = makeUntheme<T>(makeConfig(), {
+      get: {
+        config: { override: () => ({ "color.bg": blue }) },
       },
-    );
+    });
     expect(u.get("color.bg")).toEqual(blue);
     expect(u.dirty()).toBe(true);
   });
 
-  it("intercepts registry reads and writes per key", () => {
-    const reads: string[] = [];
-    const u = makeUntheme<T>(
-      makeConfig(),
-      { alt: { id: "alt", name: "Alt", tokens: {} } },
-      {
-        get: {
-          themes: {
-            alt: (layer) => {
-              reads.push(layer.id);
-              return layer;
-            },
-          },
-        },
-        set: {
-          themes: {
-            made: (layer) => ({ ...layer, name: "Renamed" }),
-          },
-        },
-      },
-    );
-    u.select("alt");
-    expect(reads).toContain("alt");
-    u.create({ id: "made", name: "Made", tokens: {} });
-    expect(u.themes.made.name).toBe("Renamed");
-  });
-
   it("intercepts writes of the theme", () => {
     const writes: unknown[] = [];
-    const u = makeUntheme<T>(
-      makeConfig(),
-      {},
-      {
-        set: {
-          config: {
-            theme: (value) => {
-              writes.push(value.id);
-              return value;
-            },
+    const u = makeUntheme<T>(makeConfig(), {
+      set: {
+        config: {
+          theme: (value) => {
+            writes.push(value.id);
+            return value;
           },
         },
       },
-    );
+    });
     u.apply({ id: "alt", name: "Alt", tokens: {} });
     expect(writes).toEqual(["alt"]);
     expect(u.config.theme.id).toBe("alt");

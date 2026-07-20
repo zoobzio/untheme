@@ -16,15 +16,19 @@ maps each LSP role onto a carrier — many-to-one, reusing the `type` carrier fo
 the distinctions it wants:
 
 ```ts
-const theme = defineShikiTheme(untheme.schema, {
-  keyword: "syntax-keyword",
-  string: "syntax-string",
-  function: "syntax-function",
-  macro: "syntax-builtin",
-  type: "syntax-type",
-  namespace: "syntax-type",
-  // …
-}, { fg: "syntax-text", bg: "surface-container" });
+const theme = defineShikiTheme(
+  untheme.schema,
+  {
+    keyword: "syntax-keyword",
+    string: "syntax-string",
+    function: "syntax-function",
+    macro: "syntax-builtin",
+    type: "syntax-type",
+    namespace: "syntax-type",
+    // …
+  },
+  { fg: "syntax-text", bg: "surface-container" },
+);
 ```
 
 ## Run

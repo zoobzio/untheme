@@ -10,7 +10,10 @@ composition agree on every token at every selection.
 Token names keep their DTCG dotted paths (`color.primary.600`); the CSS
 renderer dashes them into custom properties. Theme documents are plain DTCG
 token files that rebind a subset of the base contract — each becomes a layer
-in the switchable catalog.
+in the generated catalog. The default export is the configuration (`theme`
+and `input`); the catalog is a named `themes` export, proven against the
+config's contract, for whatever serves it — the Nuxt module's `themes`
+option, a catalog provider, or a hand-rolled switcher.
 
 ## Plugin
 

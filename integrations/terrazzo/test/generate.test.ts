@@ -27,21 +27,23 @@ describe("generate", () => {
     /*
      * The generated module must be importable and must satisfy untheme's own
      * validation from the consumer's side — the same checks the nuxt module
-     * runs against a hand-authored config.
+     * runs against a hand-authored config. The output is TypeScript
+     * (`satisfies` types the catalog export), so the round trip goes through
+     * a `.ts` file that vitest transforms on import.
      */
     const out = new URL("./.generated/", import.meta.url);
     await mkdir(out, { recursive: true });
     await writeFile(new URL("./.gitignore", out), "*\n");
-    const file = new URL("./untheme.config.mjs", out);
+    const file = new URL("./untheme.config.ts", out);
     await writeFile(file, result.contents);
     const imported = await import(pathToFileURL(file.pathname).href);
     const config = imported.default;
-    if (!guard(config.base)) {
-      throw new Error("generated base is not structurally a theme");
+    if (!guard(config.theme)) {
+      throw new Error("generated theme is not structurally a theme");
     }
-    const schema: Schema<Template> = defineSchema(config.base);
+    const schema: Schema<Template> = defineSchema(config.theme);
     schema.assert.input(config.input);
-    for (const layer of Object.values(config.themes)) {
+    for (const layer of Object.values(imported.themes)) {
       schema.assert.layer(layer);
     }
   });

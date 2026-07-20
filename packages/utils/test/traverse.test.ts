@@ -18,6 +18,9 @@ describe("traverse", () => {
 
   it("keeps each modifier's own context keys", () => {
     const shape = traverse(theme.modifiers, () => true);
+    if (shape.mode === undefined || shape.contrast === undefined) {
+      throw new Error("expected mode and contrast modifiers");
+    }
     expect(keys(shape.mode).sort()).toEqual(["dark", "light"]);
     expect(keys(shape.contrast).sort()).toEqual(["high", "normal"]);
   });
@@ -26,15 +29,18 @@ describe("traverse", () => {
     const mirrored = traverse(theme.modifiers, (_, at) => {
       return at(theme.modifiers);
     });
-    expect(mirrored.mode.dark).toBe(theme.modifiers.mode.dark);
-    expect(mirrored.contrast.high).toBe(theme.modifiers.contrast.high);
-    expect(mirrored.mode.light).toBe(theme.modifiers.mode.light);
+    expect(mirrored.mode?.dark).toBe(theme.modifiers.mode.dark);
+    expect(mirrored.contrast?.high).toBe(theme.modifiers.contrast.high);
+    expect(mirrored.mode?.light).toBe(theme.modifiers.mode.light);
   });
 
   it("yields undefined from at where a sparse structure holds nothing", () => {
     const found = traverse(theme.modifiers, (_, at) => {
       return at({ mode: { dark: { "color.bg": "{color.fg}" } } });
     });
+    if (found.mode === undefined || found.contrast === undefined) {
+      throw new Error("expected mode and contrast modifiers");
+    }
     expect(found.mode.dark).toEqual({ "color.bg": "{color.fg}" });
     expect(found.mode.light).toBeUndefined();
     expect(found.contrast.high).toBeUndefined();
@@ -44,7 +50,7 @@ describe("traverse", () => {
     const merged = traverse(theme.modifiers, (overrides, at) => {
       return { ...at(theme.modifiers), ...overrides };
     });
-    expect(merged.mode.dark).toEqual(theme.modifiers.mode.dark);
-    expect(merged.contrast.normal).toEqual({});
+    expect(merged.mode?.dark).toEqual(theme.modifiers.mode.dark);
+    expect(merged.contrast?.normal).toEqual({});
   });
 });

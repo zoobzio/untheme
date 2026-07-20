@@ -14,7 +14,7 @@ those tokens — no reconfigure, no re-parse.
 CodeMirror highlights via Lezer, whose `tags` are its standard vocabulary for
 what a highlighter distinguishes (`keyword`, `typeName`, `variableName`,
 `function`, `string`, …). We adopt it rather than invent one, and — unlike a
-TextMate integration — there's no scope layer to collapse: Lezer tags *are* the
+TextMate integration — there's no scope layer to collapse: Lezer tags _are_ the
 semantic vocabulary, so you map tags to tokens directly.
 
 **You** own the interchange: a `map` from tag names to tokens in your contract.

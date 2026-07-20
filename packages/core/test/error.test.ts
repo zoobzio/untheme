@@ -9,7 +9,6 @@ import {
   InvalidPatchError,
   InvalidThemeError,
   UnknownModifierError,
-  UnknownThemeError,
   reframe,
 } from "../src/error";
 
@@ -54,18 +53,6 @@ describe("InvalidPatchError", () => {
     expect(error).toBeInstanceOf(SchemaError);
     expect(error.name).toBe("InvalidPatchError");
     expect(error.issues).toBe(issues);
-  });
-});
-
-describe("UnknownThemeError", () => {
-  it("names the missing key without carrying issues", () => {
-    const error = new UnknownThemeError("brand");
-
-    expect(error).toBeInstanceOf(Error);
-    expect(error).not.toBeInstanceOf(SchemaError);
-    expect(error.name).toBe("UnknownThemeError");
-    expect(error.key).toBe("brand");
-    expect(error.message).toBe('no theme registered under "brand"');
   });
 });
 

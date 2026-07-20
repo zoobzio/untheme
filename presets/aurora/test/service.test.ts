@@ -20,7 +20,6 @@ const boot = (input: Partial<AuroraInput> = {}) => {
       motion: "default",
       ...input,
     }),
-    { dracula },
   );
 };
 
@@ -125,14 +124,14 @@ describe("theme layers", () => {
   it("re-tints the roles through the ramps alone", () => {
     const ut = boot();
     const before = ut.resolve("primary");
-    ut.select("dracula");
+    ut.apply(dracula);
     expect(ut.resolve("primary")).not.toEqual(before);
     expect(ut.get("primary")).toBe("{primary-600}");
   });
 
-  it("keeps every axis working on the selected theme", () => {
+  it("keeps every axis working on the applied theme", () => {
     const ut = boot();
-    ut.select("dracula");
+    ut.apply(dracula);
     ut.swap("color", "dark");
     expect(ut.resolve("on-surface")).toEqual(ut.resolve("neutral-200"));
     ut.swap("contrast", "high");

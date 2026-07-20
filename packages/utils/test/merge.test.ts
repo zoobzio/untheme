@@ -16,16 +16,20 @@ describe("merge", () => {
 
   it("rebinds $value while preserving $type and metadata", () => {
     const result = merge(theme, { tokens: { "color.fg": "{color.accent}" } });
-    expect(result.tokens["color.fg"].$value).toBe("{color.accent}");
-    expect(result.tokens["color.fg"].$type).toBe("color");
-    expect(result.tokens["color.fg"].$description).toBe("Foreground");
+    expect(result.tokens["color.fg"]?.$value).toBe("{color.accent}");
+    expect(result.tokens["color.fg"]?.$type).toBe("color");
+    expect(result.tokens["color.fg"]?.$description).toBe("Foreground");
   });
 
   it("replaces a structured $value atomically, without interleaving keys", () => {
     const result = merge(theme, {
       tokens: { "color.fg": { colorSpace: "hsl", components: [0, 0, 0] } },
     });
-    const value = result.tokens["color.fg"].$value;
+    const slot = result.tokens["color.fg"];
+    if (slot === undefined) {
+      throw new Error("expected a color.fg slot");
+    }
+    const value = slot.$value;
 
     expect(value).toEqual({ colorSpace: "hsl", components: [0, 0, 0] });
     /* The alpha carried by the base srgb value must not survive the rebind. */
@@ -49,13 +53,12 @@ describe("merge", () => {
       },
     };
     const result = merge(theme, overlay);
-
-    expect(result.tokens["color.bg"].$value).toEqual(
-      overlay.tokens["color.bg"],
-    );
-    expect(result.tokens["color.bg"].$value).not.toBe(
-      overlay.tokens["color.bg"],
-    );
+    const slot = result.tokens["color.bg"];
+    if (slot === undefined) {
+      throw new Error("expected a color.bg slot");
+    }
+    expect(slot.$value).toEqual(overlay.tokens["color.bg"]);
+    expect(slot.$value).not.toBe(overlay.tokens["color.bg"]);
   });
 
   it("adopts a layer's identity", () => {
@@ -78,8 +81,8 @@ describe("merge", () => {
     const result = merge(theme, {
       modifiers: { mode: { light: { "color.bg": "{color.accent}" } } },
     });
-    expect(result.modifiers.mode.light["color.bg"]).toBe("{color.accent}");
-    expect(result.modifiers.mode.dark).toEqual(theme.modifiers.mode.dark);
+    expect(result.modifiers.mode?.light?.["color.bg"]).toBe("{color.accent}");
+    expect(result.modifiers.mode?.dark).toEqual(theme.modifiers.mode.dark);
     expect(result.modifiers.contrast).toEqual(theme.modifiers.contrast);
   });
 
@@ -89,7 +92,7 @@ describe("merge", () => {
       { tokens: { "color.bg": "{color.fg}" } },
       { tokens: { "color.bg": "{color.accent}" } },
     );
-    expect(result.tokens["color.bg"].$value).toBe("{color.accent}");
+    expect(result.tokens["color.bg"]?.$value).toBe("{color.accent}");
   });
 
   it("takes identity from the last overlay that carries one", () => {
@@ -116,7 +119,11 @@ describe("merge", () => {
   it("returns detached records", () => {
     const result = merge(theme, {});
     result.tokens["color.bg"] = { $type: "color", $value: "{color.fg}" };
-    result.modifiers.mode.dark = {};
+    const mode = result.modifiers.mode;
+    if (mode === undefined) {
+      throw new Error("expected a mode modifier");
+    }
+    mode.dark = {};
     expect(theme.tokens["color.bg"].$value).toEqual({
       colorSpace: "srgb",
       components: [1, 1, 1],

@@ -28,4 +28,6 @@ pnpm typecheck  # builds, then typechecks the generated config
 The JSON under `tokens/` is the example's source of truth: a faithful DTCG
 port of the `@untheme/aurora` preset (aurora's authored form is already
 DTCG-shaped, so the port is direct). The generated `.dist/untheme.config.ts`
-is the same shape `examples/nuxt` authors by hand.
+default-exports the same `theme`/`input` configuration `examples/nuxt`
+authors by hand, and exports the theme documents as a named `themes`
+catalog — what `examples/nuxt` passes to the module's `themes` option.

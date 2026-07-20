@@ -1,4 +1,4 @@
-import { defineUnthemeConfig } from "untheme/config";
+import { defineUnthemeConfig } from "@untheme/nuxt/config";
 
 import { preset } from "@untheme/aurora";
 
@@ -35,11 +35,13 @@ import tokyo_night from "@untheme/aurora/themes/tokyo_night";
 import vesper from "@untheme/aurora/themes/vesper";
 
 /**
- * The app's untheme configuration: the aurora base theme, the full catalog
- * of variants, and the default selection — one context per modifier axis.
+ * The app's untheme configuration: the aurora base theme, the default
+ * selection — one context per modifier axis — and the variant catalog. The
+ * catalog seeds the module's server catalog: served over the wire and
+ * fetched on demand, never bundled with the app.
  */
 export default defineUnthemeConfig({
-  base: preset.define({ id: "aurora", name: "Aurora" }),
+  theme: preset.define({ id: "aurora", name: "Aurora" }),
   themes: {
     abyss,
     aurora,

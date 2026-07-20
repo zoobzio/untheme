@@ -18,6 +18,9 @@ describe("layers", () => {
       origin: FIXTURES,
     });
     const layer = catalog["dark-ocean"];
+    if (layer === undefined) {
+      throw new Error("expected the dark-ocean layer");
+    }
     expect(layer.id).toBe("dark-ocean");
     expect(layer.name).toBe("dark-ocean");
     expect(layer.tokens).toEqual({

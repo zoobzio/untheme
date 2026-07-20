@@ -119,10 +119,12 @@ export interface GenerateResult {
 }
 
 /**
- * The validated pieces of an untheme configuration, ready to serialize.
+ * The validated pieces of a generated module, ready to serialize: the
+ * configuration (theme and boot selection) and the catalog layers the file
+ * exports alongside it.
  */
 export interface Assembled {
-  base: Theme<Template>;
+  theme: Theme<Template>;
   themes: Record<string, Layer<Template>>;
   input: Input<Template>;
 }

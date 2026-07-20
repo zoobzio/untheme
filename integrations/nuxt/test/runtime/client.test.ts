@@ -28,6 +28,11 @@ import { makeUntheme } from "../../src/runtime/client";
 
 const make = () => makeUntheme(nuxtApp as never);
 
+const bravo = themes.bravo;
+if (bravo === undefined) {
+  throw new Error("expected the bravo theme fixture");
+}
+
 describe("makeUntheme", () => {
   beforeEach(() => {
     states = {};
@@ -39,19 +44,21 @@ describe("makeUntheme", () => {
     const u = make();
     for (const key of [
       "config",
-      "themes",
       "schema",
+      "modifiers",
+      "contexts",
       "tokens",
       "get",
       "resolve",
       "swap",
-      "dirty",
       "set",
+      "delta",
+      "dirty",
+      "reset",
       "update",
       "apply",
       "create",
       "extract",
-      "reset",
     ]) {
       expect(u).toHaveProperty(key);
     }
@@ -69,7 +76,7 @@ describe("makeUntheme", () => {
       const u = make();
       u.swap("color", "dark");
       expect(u.config.input.color).toBe("dark");
-      expect(cookies["untheme-input"].value).toEqual({ color: "dark" });
+      expect(cookies["untheme-input"]?.value).toEqual({ color: "dark" });
     });
 
     it("recomputes tokens when the context flips", async () => {
@@ -84,9 +91,9 @@ describe("makeUntheme", () => {
   describe("apply", () => {
     it("switches theme, persists the key cookie, and emits untheme:theme", () => {
       const u = make();
-      u.apply(themes.bravo);
+      u.apply(bravo);
       expect(u.config.theme.id).toBe("bravo");
-      expect(cookies["untheme-key"].value).toBe("bravo");
+      expect(cookies["untheme-key"]?.value).toBe("bravo");
       expect(nuxtApp.callHook).toHaveBeenCalledWith(
         "untheme:theme",
         expect.objectContaining({ id: "bravo" }),
@@ -97,7 +104,7 @@ describe("makeUntheme", () => {
       const u = make();
       u.swap("color", "dark");
       expect(u.tokens().primary).toBe("{indigo}");
-      u.apply(themes.bravo);
+      u.apply(bravo);
       expect(u.tokens().primary).toBe("{blue}");
       expect(u.tokens().surface).toBe("{black}");
     });

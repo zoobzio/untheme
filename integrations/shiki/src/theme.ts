@@ -30,14 +30,16 @@ export const defineShikiTheme = <T extends Template>(
   const problems: string[] = [];
 
   const check = (label: string, token: Token<T>): void => {
-    if (!schema.check.token(token)) {
+    const slot = schema.base.tokens[token];
+    if (!schema.check.token(token) || slot === undefined) {
       problems.push(`${label} → "${token}" names no token in the contract`);
       return;
     }
 
-    const type = schema.base.tokens[token].$type;
-    if (type !== "color") {
-      problems.push(`${label} → "${token}" is a ${type} token, not a color`);
+    if (slot.$type !== "color") {
+      problems.push(
+        `${label} → "${token}" is a ${slot.$type} token, not a color`,
+      );
     }
   };
 

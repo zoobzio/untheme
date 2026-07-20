@@ -6,9 +6,10 @@ import untheme from "./untheme.config";
 /**
  * The aurora showcase.
  *
- * The theme wiring lives in `untheme.config.ts`: `base` is the theme the app
- * boots with, `themes` is the catalog the `useUntheme()` switcher chooses
- * from, and `input` is the initial selection (one context per modifier). The
+ * The theme wiring lives in `untheme.config.ts`: `theme` is the base the app
+ * boots with, `themes` is the catalog the module serves over its endpoints —
+ * listed for the switcher, fetched on demand when applied, never bundled —
+ * and `input` is the initial selection (one context per modifier). The
  * module flattens the active selection's tokens into `--token` CSS variables
  * on every render, and mirrors the selection as `data-<modifier>` attributes
  * on the document root.
@@ -33,6 +34,10 @@ export default defineNuxtConfig({
         {
           find: /^untheme$/,
           replacement: src("../../packages/untheme/src/index.ts"),
+        },
+        {
+          find: /^untheme\/catalog$/,
+          replacement: src("../../packages/untheme/src/catalog.ts"),
         },
         {
           find: /^untheme\/config$/,
@@ -63,8 +68,16 @@ export default defineNuxtConfig({
           replacement: src("../../packages/kit/src/index.ts"),
         },
         {
+          find: /^@untheme\/catalog$/,
+          replacement: src("../../packages/catalog/src/index.ts"),
+        },
+        {
           find: /^@untheme\/common$/,
           replacement: src("../../packages/common/src/index.ts"),
+        },
+        {
+          find: /^@untheme\/nuxt\/constant$/,
+          replacement: src("../../integrations/nuxt/src/constant.ts"),
         },
       ],
     },

@@ -15,9 +15,9 @@ export class InvalidThemeError extends SchemaError {
 }
 
 /**
- * Raised when a layer — a registry seed, or an argument to {@link apply} /
- * {@link create} — steps outside the contract. Carries the {@link Issue}s of
- * the failed {@link SchemaError} it wraps.
+ * Raised when a layer handed to {@link apply} / {@link create} steps outside
+ * the contract. Carries the {@link Issue}s of the failed {@link SchemaError}
+ * it wraps.
  */
 export class InvalidLayerError extends SchemaError {
   constructor(issues: Issue[]) {
@@ -38,27 +38,11 @@ export class InvalidPatchError extends SchemaError {
 }
 
 /**
- * Raised when {@link Untheme.select} is handed a key that names no theme in the
- * registry. Unlike the validation errors above this carries no {@link Issue}s —
- * a missing key is a lookup miss, not a contract violation — so it extends the
- * plain {@link Error} while still giving the failure a semantic identity and
- * the offending `key`.
- */
-export class UnknownThemeError extends Error {
-  readonly key: string;
-
-  constructor(key: string) {
-    super(`no theme registered under "${key}"`);
-    this.name = "UnknownThemeError";
-    this.key = key;
-  }
-}
-
-/**
  * Raised when {@link Untheme.contexts} is handed a name the contract declares
- * no modifier under. Like {@link UnknownThemeError} this is a lookup miss, not
- * a contract violation, so it extends the plain {@link Error} while carrying
- * the offending `modifier`.
+ * no modifier under. Unlike the validation errors above this carries no
+ * {@link Issue}s — a missing name is a lookup miss, not a contract violation —
+ * so it extends the plain {@link Error} while still giving the failure a
+ * semantic identity and the offending `modifier`.
  */
 export class UnknownModifierError extends Error {
   readonly modifier: string;
@@ -72,10 +56,11 @@ export class UnknownModifierError extends Error {
 
 /**
  * Raised when {@link Untheme.resolve} follows an alias chain that loops back on
- * itself. Like {@link UnknownThemeError} it carries no {@link Issue}s — a cycle
- * is a resolution failure, not a contract violation — so it extends the plain
- * {@link Error}, carrying the `chain` of token names up to and including the
- * repeat. Detected by tracking visited tokens, so the stack never overflows.
+ * itself. Like {@link UnknownModifierError} it carries no {@link Issue}s — a
+ * cycle is a resolution failure, not a contract violation — so it extends the
+ * plain {@link Error}, carrying the `chain` of token names up to and including
+ * the repeat. Detected by tracking visited tokens, so the stack never
+ * overflows.
  */
 export class CircularAliasError extends Error {
   readonly chain: string[];

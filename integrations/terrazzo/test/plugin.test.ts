@@ -25,6 +25,9 @@ describe("plugin", () => {
 
     const emitted = written["untheme.config.ts"];
     expect(emitted).toBeDefined();
+    if (emitted === undefined) {
+      throw new Error("expected untheme.config.ts to be written");
+    }
 
     const reference = await generate({
       source: "./resolver.json",
