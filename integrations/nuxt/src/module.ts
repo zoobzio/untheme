@@ -26,7 +26,8 @@ import { ASSETS, ENTRIES, MOUNT, THEMES } from "./constant";
  * and theme catalog; writes the base theme and selection to the
  * `untheme.mjs` build template; derives the `Token` union and `Mod` axis
  * structure into the `types/untheme.d.ts` type template; and registers the
- * runtime plugin and the `useUntheme` auto-import. Catalog layers are never
+ * runtime plugin and the `useUntheme` and `useUnthemeRenderer` auto-imports.
+ * Catalog layers are never
  * bundled with the app: they are written as JSON into the build directory,
  * mounted as nitro server assets, and served over the catalog wire protocol
  * — listings at `${MOUNT}/themes`, payloads at `${MOUNT}/themes/:id`.
@@ -157,6 +158,10 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
       {
         from: resolver.resolve("./runtime/composable"),
         name: "useUntheme",
+      },
+      {
+        from: resolver.resolve("./runtime/composable"),
+        name: "useUnthemeRenderer",
       },
       {
         from: resolver.resolve("./runtime/store"),

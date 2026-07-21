@@ -229,4 +229,11 @@ describe("untheme module", () => {
     const names = imports.map((entry: { name: string }) => entry.name);
     expect(names).toContain("useUntheme");
   });
+
+  it("auto-imports useUnthemeRenderer", () => {
+    mod.setup(options, nuxt);
+    const imports = kit.addImports.mock.calls[0]?.[0];
+    const names = imports.map((entry: { name: string }) => entry.name);
+    expect(names).toContain("useUnthemeRenderer");
+  });
 });
