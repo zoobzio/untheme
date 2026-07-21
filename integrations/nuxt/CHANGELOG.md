@@ -1,5 +1,15 @@
 # @untheme/nuxt
 
+## 0.2.1
+
+### Patch Changes
+
+- [`122322f`](https://github.com/zoobzio/untheme/commit/122322f17567b1330ccef0fe9c341f1472c808e4) Thanks [@zoobzio](https://github.com/zoobzio)! - Register `useUnthemeRenderer` as a module auto-import, so it resolves through
+  `#imports` like `useUntheme`. The composable shipped in the previous release but
+  was only reachable via an explicit path import.
+- Updated dependencies []:
+  - untheme@0.2.1
+
 ## 0.2.0
 
 ### Minor Changes

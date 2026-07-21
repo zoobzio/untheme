@@ -1,5 +1,13 @@
 # @untheme/aurora
 
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @untheme/kit@0.2.1
+  - @untheme/schema@0.2.1
+
 ## 0.2.0
 
 ### Patch Changes
