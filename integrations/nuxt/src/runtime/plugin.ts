@@ -8,7 +8,8 @@ import { makeUntheme } from "./client";
 
 /**
  * Nuxt plugin that builds the untheme service over an SSR-serializable,
- * reactive {@link AppConfig} container and provides it as `$untheme`.
+ * reactive {@link AppConfig} container and provides it as `$untheme`, alongside
+ * a CSS renderer bound to the same service as `$unthemeRenderer`.
  *
  * The container is held in {@link useState} so the active selection and theme
  * survive the server→client transfer; the service mutates it in place and Vue
@@ -23,7 +24,7 @@ export default defineNuxtPlugin({
   name: "untheme",
   setup: async (nuxtApp) => {
     const untheme = makeUntheme(nuxtApp);
-    const renderer = defineRenderer(untheme);
+    const unthemeRenderer = defineRenderer(untheme);
 
     const htmlAttrs: Record<string, ComputedRef<string>> = {};
     for (const modifier of untheme.modifiers()) {
@@ -37,7 +38,7 @@ export default defineNuxtPlugin({
       style: computed(() => [
         {
           key: "untheme",
-          innerHTML: renderer.root(),
+          innerHTML: unthemeRenderer.root(),
         },
       ]),
     });
@@ -47,6 +48,7 @@ export default defineNuxtPlugin({
     return {
       provide: {
         untheme,
+        unthemeRenderer,
       },
     };
   },

@@ -38,6 +38,19 @@ export type Variables<Tok extends string> = Record<Variable<Tok>, string> &
 export type Inputs = { [Y in Type]: Values<Open>[Y] | `{${string}}` };
 
 /**
+ * A static set of bindings to render, keyed by token. Each value is either a
+ * token name — emitted as a `var()` alias to that token's custom property, the
+ * bare form of a `{token}` reference — or a binding of the token's own type,
+ * exactly as the live accessor supplies. Partial: a set may cover any subset
+ * of the contract's tokens, and a token it omits emits no declaration. Passed
+ * to `root` and `variables` to render a fixed snapshot instead of the source's
+ * live bindings.
+ */
+export type Bindings<T extends Template> = Partial<
+  Record<Token<T>, Token<T> | Binding>
+>;
+
+/**
  * The subset of the core service a renderer reads: pass the service itself —
  * `defineRenderer(untheme)` — or any structurally matching container. Reads
  * stay lazy: each render pulls the active theme through the config getter
@@ -73,11 +86,18 @@ export type Renderer<T extends Template> = {
   /* One token's active binding as CSS text: a value, or its indirection. */
   value: (token: Token<T>) => string;
 
-  /* Every active declaration as data: property name to CSS text. */
-  variables: () => Variables<Token<T>>;
+  /*
+   * Every active declaration as data: property name to CSS text. Pass a static
+   * set of bindings to render that fixed snapshot instead of the source's live
+   * bindings.
+   */
+  variables: (bindings?: Bindings<T>) => Variables<Token<T>>;
 
-  /* The `:root` block over the active declarations. */
-  root: () => string;
+  /*
+   * The `:root` block over the active declarations, or over a static set of
+   * bindings when one is passed.
+   */
+  root: (bindings?: Bindings<T>) => string;
 
   /* The static cascade: base under `:root`, contexts as attribute blocks. */
   sheet: () => string;

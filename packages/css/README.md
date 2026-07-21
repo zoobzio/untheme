@@ -26,6 +26,26 @@ renderer.sheet();
 
 `root()` renders a single `:root` block over the renderer's active declarations (empty string if the contract holds no tokens). `variables()` gives the same declarations as data — a record of custom property name to CSS text, spreadable into a style object. `property(token)` and `var(token)` give the bare custom property name and its `var()` accessor for one token; `value(token)` gives one token's active binding as CSS text.
 
+## Rendering a static set
+
+`root(set)` and `variables(set)` render a fixed snapshot instead of the source's live bindings. The set is keyed by token; each value is either a **token name** — emitted as a `var()` alias to that token's custom property, the bare form of a `{token}` reference — or a **binding** of the token's own type, exactly as the live accessor supplies.
+
+```ts
+renderer.root({
+  "color.paper": { colorSpace: "srgb", components: [0, 0, 0] },
+  "color.accent": "color.white", // bare token name → var(--color-white)
+  "type.display": "type.body",   // typography alias, sibling and all
+});
+// :root {
+//   --color-paper: color(srgb 0 0 0);
+//   --color-accent: var(--color-white);
+//   --type-display: var(--type-body);
+//   --type-display-letter-spacing: var(--type-body-letter-spacing);
+// }
+```
+
+The set is partial: a token it omits emits no declaration, so a snapshot may cover any subset of the contract. The contract still supplies each token's `$type` — the set supplies only values. A token-name value serializes through the same path as an authored `{token}` reference, so a typography alias stays pair-wise. Omit the argument for the live behavior above.
+
 ## References always emit as var()
 
 A token bound to a `{other.token}` reference never inlines the target's value — it emits `var(--other-token)`, whole-value or nested inside a composite value (a border's color, a shadow's offset, a gradient stop's position). A gradient stop position that references a number token scales through `calc(var(--other-token) * 100%)`, since the position slot needs a percentage and the referenced custom property holds a unitless number.
@@ -46,6 +66,7 @@ Values serialize by each token's declared `$type`: color, dimension, duration, f
 - `Renderer<T>` — `defineRenderer`'s return: `property`, `var`, `value`, `variables`, `root`, `sheet`.
 - `Variable<Tok>` — a token's custom property name, e.g. `--color-bg`.
 - `Variables<Tok>` — the record `variables()` returns.
+- `Bindings<T>` — a static set for `root(set)`/`variables(set)`: each token mapped to a token-name alias or a binding.
 - `Dashed<S>` — a token name with dots replaced by dashes, the ident-safe form a custom property name is built from.
 - `Inputs` — the serializable input per token type: the type's own value shape, or a reference in its place.
 

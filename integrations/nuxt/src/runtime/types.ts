@@ -1,5 +1,6 @@
 import type { Token, Mod } from "#build/types/untheme.d.ts";
 import type { Config, Contract, Input, Layer, Theme, Untheme } from "untheme";
+import type { Renderer } from "untheme/css";
 
 /**
  * The active token contract, derived from the build-time template.
@@ -57,6 +58,7 @@ export interface UnthemeNuxtApp {
 declare module "#app" {
   interface NuxtApp {
     $untheme: AppUntheme;
+    $unthemeRenderer: Renderer<AppContract>;
   }
 
   // Declaration merging: fold the shared hook map into Nuxt's runtime hooks.

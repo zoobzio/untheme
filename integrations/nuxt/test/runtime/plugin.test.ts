@@ -70,6 +70,11 @@ describe("untheme plugin", () => {
     expect(provide.untheme).toBeDefined();
   });
 
+  it("provides the renderer bound to the service", async () => {
+    const provide = await setup();
+    expect(provide.unthemeRenderer).toBeDefined();
+  });
+
   it("mirrors the selection as data attributes and injects token CSS", async () => {
     await setup();
     expect(headCalls[0]?.htmlAttrs["data-color"]?.value).toBe("light");

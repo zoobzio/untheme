@@ -1,5 +1,7 @@
 import type { Contract } from "@untheme/schema";
 
+import type { Bindings } from "../src/types";
+
 import { describe, expect, it } from "vitest";
 
 import { map } from "objectively";
@@ -96,6 +98,63 @@ describe("defineRenderer", () => {
       void (() => renderer.property("color.ghost"));
       // @ts-expect-error not a token of the fixture
       void (() => renderer.var("color.ghost"));
+    });
+  });
+
+  describe("static set", () => {
+    const renderer = make();
+    const set: Bindings<typeof theme> = {
+      "color.paper": { colorSpace: "srgb", components: [0, 0, 0] },
+      "color.accent": "color.white",
+      "type.display": "type.body",
+    };
+
+    it("folds a binding object as its own value", () => {
+      expect(renderer.variables(set)["--color-paper"]).toBe(
+        "color(srgb 0 0 0)",
+      );
+    });
+
+    it("emits a bare token name as a var() alias", () => {
+      expect(renderer.variables(set)["--color-accent"]).toBe(
+        "var(--color-white)",
+      );
+    });
+
+    it("keeps a typography alias pair-wise, siblings and all", () => {
+      const variables = renderer.variables(set);
+      expect(variables["--type-display"]).toBe("var(--type-body)");
+      expect(variables["--type-display-letter-spacing"]).toBe(
+        "var(--type-body-letter-spacing)",
+      );
+    });
+
+    it("declares only the tokens the set carries", () => {
+      const variables = renderer.variables(set);
+      expect(variables["--color-white"]).toBeUndefined();
+      expect(variables["--space-sm"]).toBeUndefined();
+    });
+
+    it("still accepts an authored braced reference", () => {
+      expect(renderer.variables({ "color.accent": "{color.white}" })).toEqual({
+        "--color-accent": "var(--color-white)",
+      });
+    });
+
+    it("wraps the static set in a :root block", () => {
+      const css = renderer.root(set);
+      expect(css.match(/:root \{/g)).toHaveLength(1);
+      expect(css).toContain(" --color-accent: var(--color-white);");
+      expect(css).not.toContain("--space-sm");
+    });
+
+    it("renders no block for an empty set", () => {
+      expect(renderer.root({})).toBe("");
+    });
+
+    it("leaves the live accessors untouched", () => {
+      renderer.variables(set);
+      expect(renderer.variables()["--space-sm"]).toBe("4px");
     });
   });
 

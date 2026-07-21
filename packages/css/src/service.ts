@@ -1,5 +1,12 @@
 import type { Template, Token, Type } from "@untheme/schema";
-import type { Inputs, Renderer, Source, Variable, Variables } from "./types";
+import type {
+  Bindings,
+  Inputs,
+  Renderer,
+  Source,
+  Variable,
+  Variables,
+} from "./types";
 
 import { entries, map } from "objectively";
 
@@ -34,9 +41,12 @@ export const defineRenderer = <T extends Template>(
    * token, each keyed by the token's custom property name plus the emission's
    * suffix. Loosely keyed, since a generic template's tokens, overrides, and
    * bindings all erase to string keys; every caller hands it contract-keyed
-   * records. The cast asserts the fold produced exactly the variable keys;
-   * safe because each token's `""`-suffixed emission lands its own variable
-   * name and only typography's sibling suffix adds another.
+   * records. A binding that is itself a token name — the bare form a static set
+   * may carry — normalizes to that token's `{reference}`, so it serializes as a
+   * `var()` alias through the same path as an authored reference. The cast
+   * asserts the fold produced exactly the variable keys; safe because each
+   * token's `""`-suffixed emission lands its own variable name and only
+   * typography's sibling suffix adds another.
    */
   const declarations = (
     bindings: Partial<Record<string, Inputs[Type]>>,
@@ -48,7 +58,11 @@ export const defineRenderer = <T extends Template>(
       if (binding === undefined || slot === undefined) {
         continue;
       }
-      for (const [suffix, text] of entries(emit<Type>(slot.$type, binding))) {
+      const resolved =
+        typeof binding === "string" && slots[binding] !== undefined
+          ? `{${binding}}`
+          : binding;
+      for (const [suffix, text] of entries(emit<Type>(slot.$type, resolved))) {
         acc[`${property(token)}${suffix}`] = text;
       }
     }
@@ -103,18 +117,20 @@ export const defineRenderer = <T extends Template>(
   /**
    * Every active declaration as data: the flat bindings folded into a record
    * of custom property name to CSS text, directly spreadable into a style
-   * object.
+   * object. Given a static set of bindings, folds that snapshot instead of the
+   * source's live bindings.
    */
-  const variables = (): Variables<Token<T>> => {
-    return declarations(source.tokens());
+  const variables = (bindings?: Bindings<T>): Variables<Token<T>> => {
+    return declarations(bindings ?? source.tokens());
   };
 
   /**
-   * A single `:root` block over the active declarations, or `""` when the
-   * contract holds no tokens.
+   * A single `:root` block over the active declarations, or over a static set
+   * of bindings when one is passed. `""` when the set — live or given — holds
+   * no declarations.
    */
-  const root = (): string => {
-    const decls = variables();
+  const root = (bindings?: Bindings<T>): string => {
+    const decls = variables(bindings);
     if (Object.keys(decls).length === 0) {
       return "";
     }

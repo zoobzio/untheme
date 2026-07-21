@@ -1,4 +1,5 @@
-import type { AppUntheme } from "./types";
+import type { AppContract, AppUntheme } from "./types";
+import type { Renderer } from "untheme/css";
 
 import { useNuxtApp } from "#app";
 
@@ -15,4 +16,19 @@ import { useNuxtApp } from "#app";
 export const useUntheme = (): AppUntheme => {
   const { $untheme } = useNuxtApp();
   return $untheme;
+};
+
+/**
+ * Composable for the CSS renderer bound to the app's contract.
+ *
+ * The plugin builds one renderer over the same `$untheme` service and provides
+ * it as `$unthemeRenderer`, so every read stays lazy and reactive: `root()` and
+ * `variables()` re-render when the active selection, theme, or override changes.
+ * Use it to name a token's custom property (`property` / `var`), read a token's
+ * live value, or emit a static set with `root(set)` / `variables(set)` without
+ * touching the live bindings.
+ */
+export const useUnthemeRenderer = (): Renderer<AppContract> => {
+  const { $unthemeRenderer } = useNuxtApp();
+  return $unthemeRenderer;
 };
