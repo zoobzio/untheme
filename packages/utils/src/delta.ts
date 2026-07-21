@@ -1,4 +1,4 @@
-import { entries, isEqual } from "@untheme/common";
+import { entries, equals } from "objectively";
 
 import { copy } from "./copy";
 
@@ -12,7 +12,7 @@ import { copy } from "./copy";
 export const delta = <T extends object>(from: T, to: T): Partial<T> => {
   const result: Partial<T> = {};
   for (const [key, value] of entries(to)) {
-    if (!isEqual(from[key], value)) {
+    if (!equals(from[key], value)) {
       result[key] = copy(value);
     }
   }

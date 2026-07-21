@@ -2,7 +2,7 @@ import type { Resolver } from "@terrazzo/parser";
 import type { TokenNormalizedSet } from "@terrazzo/token-types";
 import type { Input, Template, Theme } from "untheme";
 
-import { entries, isEqual, keys } from "untheme/common";
+import { entries, equals, keys } from "objectively";
 import { makeUntheme } from "untheme";
 
 import { literal } from "./convert";
@@ -66,7 +66,7 @@ export const verify = (
     for (const [token, normalized] of entries(applied)) {
       const expected = literal(normalized);
       const actual = service.resolve(token);
-      if (!isEqual(expected, actual)) {
+      if (!equals(expected, actual)) {
         drifted.push(token);
       }
     }

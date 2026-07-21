@@ -1,7 +1,7 @@
 import type { ConfigInit, ParseOptions } from "@terrazzo/parser";
 
 import { parse } from "@terrazzo/parser";
-import { map } from "untheme/common";
+import { map } from "objectively";
 import { delta } from "untheme";
 
 import { binding } from "./convert";

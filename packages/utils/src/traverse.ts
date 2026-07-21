@@ -6,7 +6,7 @@ import type {
   Template,
 } from "@untheme/schema";
 
-import { remap } from "@untheme/common";
+import { remap } from "objectively";
 
 /**
  * Rebuilds a modifiers structure leaf by leaf: every context of every modifier

@@ -1,4 +1,4 @@
-import { isEqual, isRecord } from "@untheme/common";
+import { equals, record } from "objectively";
 
 /**
  * Rebuilds a value into fresh containers: arrays and plain records are
@@ -12,7 +12,7 @@ const rebuild = (value: unknown): unknown => {
     return value.map((entry) => rebuild(entry));
   }
 
-  if (isRecord(value)) {
+  if (record(value)) {
     const result: Record<string, unknown> = {};
     for (const key of Object.keys(value)) {
       result[key] = rebuild(value[key]);
@@ -41,7 +41,7 @@ const rebuild = (value: unknown): unknown => {
 export const copy = <T>(value: T): T => {
   const result = rebuild(value);
 
-  if (!isEqual(value, result)) {
+  if (!equals(value, result)) {
     throw new TypeError("could not copy value");
   }
 

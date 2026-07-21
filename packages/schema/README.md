@@ -1,6 +1,6 @@
 # @untheme/schema
 
-Types and runtime validation for untheme's token contract. Validation is built on the guards in `@untheme/common`.
+Types and runtime validation for untheme's token contract. Validation is built on the guards in [`objectively`](https://www.npmjs.com/package/objectively).
 
 A **template** declares the contract: which **tokens** exist, which **modifiers** (axes like `color`) exist and what **contexts** (options like `light`/`dark`) each carries, and the **order** modifiers compose in. `defineSchema` derives a validation bundle from a template, narrowed to its vocabulary. Use it to validate untrusted theme objects at runtime (e.g. JSON loaded from disk) — anything that passes is contract-bound and safe to render.
 

@@ -1,6 +1,6 @@
 import type { Enum, Rule, Rules, Shape, Template } from "./types";
 
-import { isDefinition, isObject } from "@untheme/common";
+import { has, object } from "objectively";
 
 import { CSS_BREAKOUT, TYPES } from "./constant";
 import {
@@ -27,6 +27,12 @@ import {
   unique,
   valued,
 } from "./util";
+
+/**
+ * Whether a value is a token definition: a non-array object carrying a
+ * `$value` member.
+ */
+const isDefinition = has("$value");
 
 /**
  * Composes a template's runtime {@link Rules}: a list of rules per kind built
@@ -74,7 +80,7 @@ export const defineRules = <T extends Template>(
     if (notObject) {
       return notObject;
     }
-    if (!isObject(v)) {
+    if (!object(v)) {
       return;
     }
     const stray = definitionSubset(v);

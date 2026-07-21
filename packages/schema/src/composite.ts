@@ -1,7 +1,7 @@
 import type { Rule } from "./types";
 
 import { LINE_CAP_SET, STROKE_STYLE_SET } from "./scalar";
-import { isObject } from "@untheme/common";
+import { object } from "objectively";
 
 import { all, list, member, mismatch, struct, valued } from "./util";
 
@@ -17,7 +17,7 @@ export const strokeStyleOf =
     if (typeof v === "string") {
       return member("Stroke style", STROKE_STYLE_SET)(v);
     }
-    if (isObject(v)) {
+    if (object(v)) {
       return struct(
         "stroke style",
         {
@@ -45,7 +45,7 @@ export const borderOf = (
   strokeStyle: Rule,
 ): Rule =>
   all([
-    mismatch("border", (v) => isObject(v) && "width" in v),
+    mismatch("border", (v) => object(v) && "width" in v),
     struct(
       "border",
       {
@@ -68,7 +68,7 @@ export const borderOf = (
  */
 export const transitionOf = (duration: Rule, cubicBezier: Rule): Rule =>
   all([
-    mismatch("transition", (v) => isObject(v) && "timingFunction" in v),
+    mismatch("transition", (v) => object(v) && "timingFunction" in v),
     struct(
       "transition",
       {
@@ -96,8 +96,8 @@ export const shadowOf = (
   dimension: Rule,
   reference: Rule,
 ): Rule => {
-  const object = all([
-    mismatch("shadow", (v) => isObject(v) && "offsetX" in v),
+  const single = all([
+    mismatch("shadow", (v) => object(v) && "offsetX" in v),
     struct(
       "shadow",
       {
@@ -110,12 +110,12 @@ export const shadowOf = (
       new Set(["color", "offsetX", "offsetY", "blur", "spread"]),
     ),
   ]);
-  const element = valued(reference, object);
+  const element = valued(reference, single);
   return (v) => {
     if (Array.isArray(v)) {
       return list("Shadow list", [element])(v);
     }
-    return object(v);
+    return single(v);
   };
 };
 
@@ -131,7 +131,7 @@ export const gradientOf = (color: Rule, number: Rule): Rule => {
   const stop: Rule = all([
     mismatch(
       "gradient stop",
-      (v) => isObject(v) && ("color" in v || "position" in v),
+      (v) => object(v) && ("color" in v || "position" in v),
     ),
     struct(
       "gradient stop",
@@ -169,7 +169,7 @@ export const typographyOf = (
   number: Rule,
 ): Rule =>
   all([
-    mismatch("typography", (v) => isObject(v) && "fontSize" in v),
+    mismatch("typography", (v) => object(v) && "fontSize" in v),
     struct(
       "typography",
       {

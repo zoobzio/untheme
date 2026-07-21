@@ -1,10 +1,16 @@
 import type { Shadow, Open, Type } from "@untheme/schema";
 import type { Inputs } from "./types";
 
-import { isReference } from "@untheme/common";
+import { wrapped } from "objectively";
 
 import { FONT_WEIGHT_NUMBERS, RESERVED_FAMILY_NAMES } from "./constant";
 import { indirection, property } from "./property";
+
+/**
+ * Whether a value is a reference in curly-brace syntax: a string wrapped in
+ * `{` and `}`.
+ */
+const isReference = wrapped("{", "}");
 
 /**
  * A single color channel: a finite number or the `none` sentinel.

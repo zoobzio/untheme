@@ -2,7 +2,7 @@ import type { Entry, Listing, Page } from "untheme/catalog";
 
 import { createError, defineEventHandler, getQuery } from "h3";
 import { isQuery, LIMIT, SORT } from "untheme/catalog";
-import { isRecord } from "untheme/common";
+import { record } from "objectively";
 import { useStorage } from "nitropack/runtime";
 
 import { ASSETS, ENTRIES } from "@untheme/nuxt/constant";
@@ -12,7 +12,7 @@ import { ASSETS, ENTRIES } from "@untheme/nuxt/constant";
  * written with: a non-empty id and name.
  */
 const isEntry = (value: unknown): value is Entry => {
-  if (!isRecord(value)) {
+  if (!record(value)) {
     return false;
   }
   if (typeof value.id !== "string" || value.id.length === 0) {

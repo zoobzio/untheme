@@ -1,6 +1,11 @@
 {
   "name": "@untheme/core",
   "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoobzio/untheme.git",
+    "directory": "packages/core"
+  },
   "type": "module",
   "main": "./.dist/index.mjs",
   "types": "./.dist/index.d.ts",
@@ -21,8 +26,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@untheme/common": "workspace:*",
     "@untheme/schema": "workspace:*",
-    "@untheme/utils": "workspace:*"
+    "@untheme/utils": "workspace:*",
+    "objectively": "^0.1.1"
   }
 }

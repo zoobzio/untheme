@@ -1,7 +1,7 @@
 import type { Resolver } from "@terrazzo/parser";
 import type { TokenNormalizedSet } from "@terrazzo/token-types";
 
-import { map } from "untheme/common";
+import { map } from "objectively";
 import { delta } from "untheme";
 
 import { binding, collisions, definition } from "./convert";

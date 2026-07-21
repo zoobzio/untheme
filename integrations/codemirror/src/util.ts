@@ -4,7 +4,7 @@ import type { Tag } from "@lezer/highlight";
 import type { CodeMirrorOptions, TagMap, TagRule, Rule } from "./types";
 
 import { property } from "untheme/css";
-import { entries } from "untheme/common";
+import { entries } from "objectively";
 import { EditorView } from "@codemirror/view";
 import { STYLE, TAGS } from "./constant";
 

@@ -144,6 +144,9 @@ importers:
 
   integrations/codemirror:
     dependencies:
+      objectively:
+        specifier: ^0.1.1
+        version: 0.1.1
       untheme:
         specifier: workspace:*
         version: link:../../packages/untheme
@@ -172,6 +175,9 @@ importers:
       h3:
         specifier: ^1.15.11
         version: 1.15.11
+      objectively:
+        specifier: ^0.1.1
+        version: 0.1.1
       untheme:
         specifier: workspace:*
         version: link:../../packages/untheme
@@ -213,6 +219,9 @@ importers:
       '@terrazzo/parser':
         specifier: ^2.4.0
         version: 2.4.0(yaml-to-momoa@0.0.9)
+      objectively:
+        specifier: ^0.1.1
+        version: 0.1.1
       untheme:
         specifier: workspace:*
         version: link:../../packages/untheme
@@ -226,35 +235,33 @@ importers:
 
   packages/catalog:
     dependencies:
-      '@untheme/common':
-        specifier: workspace:*
-        version: link:../common
       '@untheme/schema':
         specifier: workspace:*
         version: link:../schema
-
-  packages/common: {}
+      objectively:
+        specifier: ^0.1.1
+        version: 0.1.1
 
   packages/core:
     dependencies:
-      '@untheme/common':
-        specifier: workspace:*
-        version: link:../common
       '@untheme/schema':
         specifier: workspace:*
         version: link:../schema
       '@untheme/utils':
         specifier: workspace:*
         version: link:../utils
+      objectively:
+        specifier: ^0.1.1
+        version: 0.1.1
 
   packages/css:
     dependencies:
-      '@untheme/common':
-        specifier: workspace:*
-        version: link:../common
       '@untheme/schema':
         specifier: workspace:*
         version: link:../schema
+      objectively:
+        specifier: ^0.1.1
+        version: 0.1.1
 
   packages/kit:
     dependencies:
@@ -270,18 +277,15 @@ importers:
 
   packages/schema:
     dependencies:
-      '@untheme/common':
-        specifier: workspace:*
-        version: link:../common
+      objectively:
+        specifier: ^0.1.1
+        version: 0.1.1
 
   packages/untheme:
     dependencies:
       '@untheme/catalog':
         specifier: workspace:*
         version: link:../catalog
-      '@untheme/common':
-        specifier: workspace:*
-        version: link:../common
       '@untheme/core':
         specifier: workspace:*
         version: link:../core
@@ -300,12 +304,12 @@ importers:
 
   packages/utils:
     dependencies:
-      '@untheme/common':
-        specifier: workspace:*
-        version: link:../common
       '@untheme/schema':
         specifier: workspace:*
         version: link:../schema
+      objectively:
+        specifier: ^0.1.1
+        version: 0.1.1
 
   presets/aurora:
     dependencies:
@@ -3921,6 +3925,9 @@ packages:
     resolution: {integrity: sha512-vRyr0r4cbBapw07Xw8xrj9Teq3o7MUD35rSaTcanDbW+aK2XHDgJFiU6ZTj2GBw7Q12ysdsyFss+Vdz4hQ0Y6Q==}
     engines: {node: '>=18'}
     hasBin: true
+
+  objectively@0.1.1:
+    resolution: {integrity: sha512-Nhj9qY2BXXpLUWLtLNXTkqf0ZlSxPzVsKiQ5r5fT2NoYqaz3DKvQoBskyWQyvpW1dMAXpWlYmevEXeFRNSSPLg==}
 
   obug@2.1.1:
     resolution: {integrity: sha512-uTqF9MuPraAQ+IsnPf366RG4cP9RtUi7MLO1N3KEc+wb0a6yKpeL0lmk2IB1jY5KHPAlTc6T/JRdC/YqxHNwkQ==}
@@ -9544,6 +9551,8 @@ snapshots:
       citty: 0.2.2
       pathe: 2.0.3
       tinyexec: 1.2.4
+
+  objectively@0.1.1: {}
 
   obug@2.1.1: {}
 

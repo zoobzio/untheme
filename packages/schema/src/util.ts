@@ -1,6 +1,12 @@
 import type { Issue, Rule } from "./types";
 
-import { isObject, isReference } from "@untheme/common";
+import { object, wrapped } from "objectively";
+
+/**
+ * Whether a value is a reference in curly-brace syntax: a string wrapped in
+ * `{` and `}`.
+ */
+const isReference = wrapped("{", "}");
 
 /**
  * Type-agnostic rule builders. Each builder takes a name plus parameters and
@@ -40,7 +46,7 @@ export const collectRefs = (v: unknown): string[] => {
   if (Array.isArray(v)) {
     return v.flatMap(collectRefs);
   }
-  if (isObject(v)) {
+  if (object(v)) {
     return Object.values(v).flatMap(collectRefs);
   }
   return [];
@@ -236,7 +242,7 @@ export const referenceType =
 export const container =
   (name: string): Rule =>
   (v) => {
-    if (!isObject(v)) {
+    if (!object(v)) {
       return {
         code: "not_object",
         message: `${name} must be an object.`,
@@ -300,7 +306,7 @@ export const either =
 export const subset =
   (name: string, set: Set<string>): Rule =>
   (v) => {
-    if (!isObject(v)) {
+    if (!object(v)) {
       return;
     }
     for (const key of Object.keys(v)) {
@@ -322,7 +328,7 @@ export const subset =
 export const superset =
   (name: string, set: Set<string>): Rule =>
   (v) => {
-    if (!isObject(v)) {
+    if (!object(v)) {
       return;
     }
     for (const key of set) {
@@ -410,7 +416,7 @@ export const list =
 export const each =
   (rules: Rule[]): Rule =>
   (v) => {
-    if (!isObject(v)) {
+    if (!object(v)) {
       return;
     }
     for (const [key, value] of Object.entries(v)) {
@@ -429,7 +435,7 @@ export const each =
 export const keyed =
   (pick: (key: string) => Rule[]): Rule =>
   (v) => {
-    if (!isObject(v)) {
+    if (!object(v)) {
       return;
     }
     for (const [key, value] of Object.entries(v)) {
@@ -448,7 +454,7 @@ export const keyed =
 export const keys =
   (name: string, rules: Rule[]): Rule =>
   (v) => {
-    if (!isObject(v)) {
+    if (!object(v)) {
       return;
     }
     for (const key of Object.keys(v)) {
@@ -467,7 +473,7 @@ export const keys =
 export const fields =
   (name: string, members: Record<string, Rule[]>): Rule =>
   (v) => {
-    if (!isObject(v)) {
+    if (!object(v)) {
       return;
     }
     for (const key of Object.keys(v)) {
@@ -517,7 +523,7 @@ export const acyclic =
     edges: (entry: unknown) => string[],
   ): Rule =>
   (v) => {
-    if (!isObject(v)) {
+    if (!object(v)) {
       return;
     }
     const graph = new Map<string, string[]>();

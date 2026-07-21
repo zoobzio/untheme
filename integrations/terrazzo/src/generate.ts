@@ -9,7 +9,7 @@ import type {
 
 import { defineConfig, parse } from "@terrazzo/parser";
 import { SchemaError, defineSchema, isTemplate } from "untheme";
-import { map } from "untheme/common";
+import { map } from "objectively";
 
 import { FILENAME } from "./constant";
 import { skeleton } from "./contexts";

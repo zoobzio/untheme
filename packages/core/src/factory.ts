@@ -15,7 +15,7 @@ import type {
 import type { Diff } from "@untheme/utils";
 import type { Config, Options, Untheme } from "./types";
 
-import { isRecord, map } from "@untheme/common";
+import { record, map } from "objectively";
 import { defineSchema } from "@untheme/schema";
 import { clone, copy, diff, merge } from "@untheme/utils";
 import {
@@ -196,7 +196,7 @@ export const makeUntheme = <T extends Theme<T>>(
     if (Array.isArray(value)) {
       return value.map((entry) => substitute(entry, chain));
     }
-    if (isRecord(value)) {
+    if (record(value)) {
       return map(value, (entry) => substitute(entry, chain));
     }
     return value;

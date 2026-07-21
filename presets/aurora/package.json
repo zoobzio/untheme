@@ -1,6 +1,11 @@
 {
   "name": "@untheme/aurora",
   "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoobzio/untheme.git",
+    "directory": "presets/aurora"
+  },
   "type": "module",
   "main": "./.dist/index.mjs",
   "types": "./.dist/index.d.ts",

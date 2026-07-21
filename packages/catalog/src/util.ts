@@ -1,6 +1,6 @@
 import type { Entry, Page, Query, Sort } from "./types";
 
-import { isRecord } from "@untheme/common";
+import { record } from "objectively";
 
 /**
  * Whether a value is a whole non-negative count — the shape shared by
@@ -19,7 +19,7 @@ const isCount = (value: unknown): value is number => {
  * reason as {@link isQuery} — a sort is an instruction.
  */
 const isSort = (value: unknown): value is Sort => {
-  if (!isRecord(value)) {
+  if (!record(value)) {
     return false;
   }
   for (const key of Object.keys(value)) {
@@ -41,7 +41,7 @@ const isSort = (value: unknown): value is Sort => {
  * results disguised as filtered ones.
  */
 export const isQuery = (value: unknown): value is Query => {
-  if (!isRecord(value)) {
+  if (!record(value)) {
     return false;
   }
   for (const key of Object.keys(value)) {
@@ -73,7 +73,7 @@ export const isQuery = (value: unknown): value is Query => {
  * the instruction fields {@link isQuery} is strict about.
  */
 const isEntry = (value: unknown): value is Entry => {
-  if (!isRecord(value)) {
+  if (!record(value)) {
     return false;
   }
   if (typeof value.id !== "string" || value.id.length === 0) {
@@ -88,7 +88,7 @@ const isEntry = (value: unknown): value is Entry => {
  * counts and the entries is the producing catalog's responsibility.
  */
 export const isPage = (value: unknown): value is Page => {
-  if (!isRecord(value)) {
+  if (!record(value)) {
     return false;
   }
   if (!Array.isArray(value.entries)) {

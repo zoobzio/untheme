@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import * as catalog from "@untheme/catalog";
-import * as common from "@untheme/common";
 import * as core from "@untheme/core";
 import * as css from "@untheme/css";
 import * as kit from "@untheme/kit";
@@ -10,7 +9,6 @@ import * as utils from "@untheme/utils";
 
 import * as root from "../src/index";
 import * as catalogSubpath from "../src/catalog";
-import * as commonSubpath from "../src/common";
 import * as configSubpath from "../src/config";
 import * as cssSubpath from "../src/css";
 import * as kitSubpath from "../src/kit";
@@ -38,12 +36,9 @@ describe("star-export composition", () => {
     }
   });
 
-  it("mirrors catalog, common, css, and kit under their subpaths", () => {
+  it("mirrors catalog, css, and kit under their subpaths", () => {
     for (const name of Object.keys(catalog)) {
       expect.soft(catalogSubpath, name).toHaveProperty(name);
-    }
-    for (const name of Object.keys(common)) {
-      expect.soft(commonSubpath, name).toHaveProperty(name);
     }
     for (const name of Object.keys(css)) {
       expect.soft(cssSubpath, name).toHaveProperty(name);

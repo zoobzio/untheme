@@ -1,6 +1,6 @@
 # @untheme/utils
 
-Common structural helpers for untheme's theme shape. Types come from [`@untheme/schema`](../schema); guards and generic helpers come from [`@untheme/common`](../common).
+Common structural helpers for untheme's theme shape. Types come from [`@untheme/schema`](../schema); guards and generic helpers come from [`objectively`](https://www.npmjs.com/package/objectively).
 
 ## Exports
 

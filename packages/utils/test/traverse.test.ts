@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { keys } from "@untheme/common";
+import { keys } from "objectively";
 
 import { traverse } from "../src/traverse";
 import { theme } from "./fixture";

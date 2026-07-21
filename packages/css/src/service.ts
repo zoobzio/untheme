@@ -1,7 +1,7 @@
 import type { Template, Token, Type } from "@untheme/schema";
 import type { Inputs, Renderer, Source, Variable, Variables } from "./types";
 
-import { entries, map } from "@untheme/common";
+import { entries, map } from "objectively";
 
 import { property } from "./property";
 import { emit, serialize } from "./serialize";

@@ -1,6 +1,6 @@
 import type { Enum, Modifier, Template, Type } from "./types";
 
-import { keys, map, remap } from "@untheme/common";
+import { keys, map, remap } from "objectively";
 import {
   COLOR_SPACE_SET,
   DEFINITION_KEY_SET,

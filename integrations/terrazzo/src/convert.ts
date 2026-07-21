@@ -1,8 +1,20 @@
 import type { Source } from "./types";
 
-import { isDefinition, isReference } from "untheme/common";
+import { has, wrapped } from "objectively";
 import { REJECTED_TYPES } from "./constant";
 import { braced, cite, walk } from "./util";
+
+/**
+ * Whether a value is a token definition: a non-array object carrying a
+ * `$value` member.
+ */
+const isDefinition = has("$value");
+
+/**
+ * Whether a value is a reference in curly-brace syntax: a string wrapped in
+ * `{` and `}`.
+ */
+const isReference = wrapped("{", "}");
 
 /**
  * The authored binding for a token. A whole-token alias is reconstructed from

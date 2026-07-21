@@ -1,6 +1,11 @@
 {
   "name": "@untheme/kit",
   "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoobzio/untheme.git",
+    "directory": "packages/kit"
+  },
   "type": "module",
   "main": "./.dist/index.mjs",
   "types": "./.dist/index.d.ts",

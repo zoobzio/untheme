@@ -1,7 +1,7 @@
 import type { ConfigInit, Plugin } from "@terrazzo/parser";
 import type { PluginOptions } from "./types";
 
-import { map } from "untheme/common";
+import { map } from "objectively";
 
 import { FILENAME } from "./constant";
 import { emit } from "./emit";

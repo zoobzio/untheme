@@ -8,7 +8,6 @@
     [
       "untheme",
       "@untheme/catalog",
-      "@untheme/common",
       "@untheme/core",
       "@untheme/css",
       "@untheme/kit",

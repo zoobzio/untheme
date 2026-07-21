@@ -7,7 +7,7 @@ export default defineBuildConfig({
   externals: [
     "untheme",
     "untheme/css",
-    "untheme/common",
+    "objectively",
     "@codemirror/language",
     "@codemirror/state",
     "@codemirror/view",

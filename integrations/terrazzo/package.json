@@ -1,6 +1,11 @@
 {
   "name": "@untheme/terrazzo",
   "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoobzio/untheme.git",
+    "directory": "integrations/terrazzo"
+  },
   "type": "module",
   "main": "./.dist/index.mjs",
   "types": "./.dist/index.d.ts",
@@ -22,6 +27,7 @@
   },
   "dependencies": {
     "@terrazzo/parser": "^2.4.0",
+    "objectively": "^0.1.1",
     "untheme": "workspace:*"
   },
   "devDependencies": {

@@ -72,10 +72,6 @@ export default defineNuxtConfig({
           replacement: src("../../packages/catalog/src/index.ts"),
         },
         {
-          find: /^@untheme\/common$/,
-          replacement: src("../../packages/common/src/index.ts"),
-        },
-        {
           find: /^@untheme\/nuxt\/constant$/,
           replacement: src("../../integrations/nuxt/src/constant.ts"),
         },

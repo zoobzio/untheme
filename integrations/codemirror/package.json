@@ -1,6 +1,11 @@
 {
   "name": "@untheme/codemirror",
   "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoobzio/untheme.git",
+    "directory": "integrations/codemirror"
+  },
   "type": "module",
   "main": "./.dist/index.mjs",
   "types": "./.dist/index.d.ts",
@@ -27,6 +32,7 @@
     "@lezer/highlight": "^1.0.0"
   },
   "dependencies": {
+    "objectively": "^0.1.1",
     "untheme": "workspace:*"
   },
   "devDependencies": {

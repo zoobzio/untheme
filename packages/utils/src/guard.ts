@@ -1,6 +1,6 @@
 import type { Template } from "@untheme/schema";
 
-import { isObject, isRecord } from "@untheme/common";
+import { object, record } from "objectively";
 
 /**
  * Whether a value has the structural shape of a {@link Template}: a record
@@ -17,9 +17,9 @@ export const isTemplate = (v: unknown): v is Template => {
     "name" in v &&
     typeof v["name"] === "string" &&
     "tokens" in v &&
-    isObject(v["tokens"]) &&
+    object(v["tokens"]) &&
     "modifiers" in v &&
-    isRecord(v["modifiers"]) &&
+    record(v["modifiers"]) &&
     "order" in v &&
     Array.isArray(v["order"])
   );

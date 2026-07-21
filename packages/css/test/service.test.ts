@@ -2,7 +2,7 @@ import type { Contract } from "@untheme/schema";
 
 import { describe, expect, it } from "vitest";
 
-import { map } from "@untheme/common";
+import { map } from "objectively";
 import { defineSchema } from "@untheme/schema";
 
 import { defineRenderer } from "../src/service";

@@ -1,6 +1,11 @@
 {
   "name": "untheme",
   "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoobzio/untheme.git",
+    "directory": "packages/untheme"
+  },
   "type": "module",
   "main": "./.dist/index.mjs",
   "types": "./.dist/index.d.ts",
@@ -12,10 +17,6 @@
     "./catalog": {
       "types": "./.dist/catalog.d.ts",
       "import": "./.dist/catalog.mjs"
-    },
-    "./common": {
-      "types": "./.dist/common.d.ts",
-      "import": "./.dist/common.mjs"
     },
     "./config": {
       "types": "./.dist/config.d.ts",
@@ -42,7 +43,6 @@
   },
   "dependencies": {
     "@untheme/catalog": "workspace:*",
-    "@untheme/common": "workspace:*",
     "@untheme/core": "workspace:*",
     "@untheme/css": "workspace:*",
     "@untheme/kit": "workspace:*",

@@ -2,7 +2,7 @@ import type { Open, Shadow } from "@untheme/schema";
 
 import { describe, expect, it } from "vitest";
 
-import { entries } from "@untheme/common";
+import { entries } from "objectively";
 
 import { FONT_WEIGHT_NUMBERS, RESERVED_FAMILY_NAMES } from "../src/constant";
 import { emit, serialize } from "../src/serialize";

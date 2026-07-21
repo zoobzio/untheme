@@ -1,6 +1,6 @@
 import type { Rule } from "./types";
 
-import { isObject } from "@untheme/common";
+import { object } from "objectively";
 
 import {
   COLOR_SPACES,
@@ -60,7 +60,7 @@ export const component: Rule = (v) => {
  * alpha in the unit interval, and an optional hex fallback.
  */
 export const literalColor: Rule = all([
-  mismatch("color", (v) => isObject(v) && "colorSpace" in v),
+  mismatch("color", (v) => object(v) && "colorSpace" in v),
   struct(
     "color",
     {
@@ -77,7 +77,7 @@ export const literalColor: Rule = all([
  * A length: a numeric value carried by one of the known dimension units.
  */
 export const literalDimension: Rule = all([
-  mismatch("dimension", (v) => isObject(v) && "unit" in v),
+  mismatch("dimension", (v) => object(v) && "unit" in v),
   struct(
     "dimension",
     {
@@ -92,7 +92,7 @@ export const literalDimension: Rule = all([
  * A time span: a numeric value carried by one of the known duration units.
  */
 export const literalDuration: Rule = all([
-  mismatch("duration", (v) => isObject(v) && "unit" in v),
+  mismatch("duration", (v) => object(v) && "unit" in v),
   struct(
     "duration",
     {

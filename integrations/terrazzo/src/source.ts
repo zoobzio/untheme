@@ -1,7 +1,7 @@
 import type { Resolver } from "@terrazzo/parser";
 import type { SharedOptions } from "./types";
 
-import { entries, keys } from "untheme/common";
+import { entries, keys } from "objectively";
 
 import { synthetic } from "./contexts";
 

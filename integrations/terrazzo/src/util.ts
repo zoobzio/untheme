@@ -1,8 +1,14 @@
 import type { Source } from "./types";
 
-import { isRecord, isReference } from "untheme/common";
+import { record, wrapped } from "objectively";
 
 import { IDENTIFIER } from "./constant";
+
+/**
+ * Whether a value is a reference in curly-brace syntax: a string wrapped in
+ * `{` and `}`.
+ */
+const isReference = wrapped("{", "}");
 
 /**
  * A token named with its origin document, for error messages that point at
@@ -95,7 +101,7 @@ export const walk = (
       return walk(entry, undefined, token);
     });
   }
-  if (isRecord(node)) {
+  if (record(node)) {
     const out: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(node)) {
       if (key === "inset") {
@@ -109,7 +115,7 @@ export const walk = (
       if (value === undefined) {
         continue;
       }
-      if (isRecord(partial)) {
+      if (record(partial)) {
         out[key] = walk(value, partial[key], token);
         continue;
       }

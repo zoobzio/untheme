@@ -1,5 +1,5 @@
 import { createError, defineEventHandler, getRouterParam } from "h3";
-import { isRecord } from "untheme/common";
+import { record } from "objectively";
 import { useStorage } from "nitropack/runtime";
 
 import { ASSETS, THEMES } from "@untheme/nuxt/constant";
@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const stored = await useStorage(`assets:${ASSETS}`).getItem(THEMES);
-  if (!isRecord(stored)) {
+  if (!record(stored)) {
     throw createError({
       statusCode: 500,
       statusMessage: "Catalog payloads unavailable",

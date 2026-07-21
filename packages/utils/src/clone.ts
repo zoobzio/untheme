@@ -1,6 +1,6 @@
 import type { Template } from "@untheme/schema";
 
-import { isEqual } from "@untheme/common";
+import { equals } from "objectively";
 import { copy } from "./copy";
 
 /**
@@ -21,7 +21,7 @@ export const clone = <T extends Template>(theme: T): T => {
     order: copy(theme.order),
   };
 
-  if (!isEqual(theme, result)) {
+  if (!equals(theme, result)) {
     throw new TypeError("unable to clone a theme");
   }
 

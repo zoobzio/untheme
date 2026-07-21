@@ -1,7 +1,7 @@
 import type { Template, Theme } from "@untheme/schema";
 import type { Diff } from "./types";
 
-import { map } from "@untheme/common";
+import { map } from "objectively";
 import { delta } from "./delta";
 import { traverse } from "./traverse";
 

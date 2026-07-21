@@ -7,9 +7,15 @@ import type {
 } from "@untheme/schema";
 import type { Extension } from "./types";
 
-import { map, isDefinition } from "@untheme/common";
+import { has, map } from "objectively";
 import { copy } from "./copy";
 import { traverse } from "./traverse";
+
+/**
+ * Whether a value is a token definition: a non-array object carrying a
+ * `$value` member.
+ */
+const isDefinition = has("$value");
 
 /**
  * Widens a base contract with an {@link Extension} into a fresh contract over
