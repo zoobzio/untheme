@@ -34,7 +34,7 @@ renderer.sheet();
 renderer.root({
   "color.paper": { colorSpace: "srgb", components: [0, 0, 0] },
   "color.accent": "color.white", // bare token name → var(--color-white)
-  "type.display": "type.body",   // typography alias, sibling and all
+  "type.display": "type.body", // typography alias, sibling and all
 });
 // :root {
 //   --color-paper: color(srgb 0 0 0);
