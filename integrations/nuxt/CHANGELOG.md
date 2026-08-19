@@ -1,5 +1,16 @@
 # @untheme/nuxt
 
+## 0.2.2
+
+### Patch Changes
+
+- [`b8b4d47`](https://github.com/zoobzio/untheme/commit/b8b4d47702f8ff2e6150b2cdba95617ed35a0a39) Thanks [@zoobzio](https://github.com/zoobzio)! - Rename the generated app-level types from `App*` to `AppUntheme*`
+  (`AppUnthemeContract`, `AppUnthemeTheme`, `AppUnthemeThemeLayer`,
+  `AppUnthemeInput`, `AppUnthemeConfig`) so the auto-imported names don't
+  collide with app code. `AppUntheme` is unchanged.
+- Updated dependencies []:
+  - untheme@0.2.2
+
 ## 0.2.1
 
 ### Patch Changes
