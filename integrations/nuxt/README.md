@@ -63,7 +63,7 @@ At build time the module runs `defineSchema` against `base`, which validates the
 - `#build/untheme.mjs` — the `theme`, `themes`, and `input` data, plus a sibling `untheme.d.mts` that types them against the derived contract instead of the loose types TypeScript would otherwise infer from a `.mjs` file.
 - `#build/types/untheme.d.ts` — a `Token` union of every token name in `base`, an `Overrides` type for patches to those tokens, and a `Mod` type describing each modifier's contexts.
 
-It also registers the runtime plugin and two auto-imports: `useUntheme()` and `accessUntheme()`, plus the type imports `AppContract`, `AppTheme`, `AppThemeLayer`, `AppThemes`, `AppInput`, `AppConfig`, and `AppUntheme` — all derived from the generated contract.
+It also registers the runtime plugin and two auto-imports: `useUntheme()` and `accessUntheme()`, plus the type imports `AppUnthemeContract`, `AppUnthemeTheme`, `AppUnthemeThemeLayer`, `AppUnthemeThemes`, `AppUnthemeInput`, `AppUnthemeConfig`, and `AppUntheme` — all derived from the generated contract.
 
 ## `useUntheme()`
 

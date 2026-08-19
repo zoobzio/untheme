@@ -144,9 +144,9 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
         [
           `import type { Contract, Input } from "untheme";`,
           `import type { Token, Mod } from "./types/untheme";`,
-          `type AppContract = Contract<Token, Mod>;`,
-          `export const theme: AppContract;`,
-          `export const input: Input<AppContract>;`,
+          `type AppUnthemeContract = Contract<Token, Mod>;`,
+          `export const theme: AppUnthemeContract;`,
+          `export const input: Input<AppUnthemeContract>;`,
         ].join("\n"),
     });
 
@@ -168,11 +168,11 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
         name: "accessUntheme",
       },
       ...[
-        "AppContract",
-        "AppTheme",
-        "AppThemeLayer",
-        "AppInput",
-        "AppConfig",
+        "AppUnthemeContract",
+        "AppUnthemeTheme",
+        "AppUnthemeThemeLayer",
+        "AppUnthemeInput",
+        "AppUnthemeConfig",
         "AppUntheme",
       ].map((name) => ({
         from: resolver.resolve("./runtime/types"),

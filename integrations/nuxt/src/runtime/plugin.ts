@@ -8,7 +8,7 @@ import { makeUntheme } from "./client";
 
 /**
  * Nuxt plugin that builds the untheme service over an SSR-serializable,
- * reactive {@link AppConfig} container and provides it as `$untheme`, alongside
+ * reactive {@link AppUnthemeConfig} container and provides it as `$untheme`, alongside
  * a CSS renderer bound to the same service as `$unthemeRenderer`.
  *
  * The container is held in {@link useState} so the active selection and theme

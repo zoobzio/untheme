@@ -1,4 +1,4 @@
-import type { AppContract, AppUntheme } from "./types";
+import type { AppUnthemeContract, AppUntheme } from "./types";
 import type { Renderer } from "untheme/css";
 
 import { useNuxtApp } from "#app";
@@ -28,7 +28,7 @@ export const useUntheme = (): AppUntheme => {
  * live value, or emit a static set with `root(set)` / `variables(set)` without
  * touching the live bindings.
  */
-export const useUnthemeRenderer = (): Renderer<AppContract> => {
+export const useUnthemeRenderer = (): Renderer<AppUnthemeContract> => {
   const { $unthemeRenderer } = useNuxtApp();
   return $unthemeRenderer;
 };

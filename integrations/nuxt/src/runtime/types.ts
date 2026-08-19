@@ -5,32 +5,32 @@ import type { Renderer } from "untheme/css";
 /**
  * The active token contract, derived from the build-time template.
  */
-export type AppContract = Contract<Token, Mod>;
+export type AppUnthemeContract = Contract<Token, Mod>;
 
 /**
  * A resolved theme instance with typed token keys.
  */
-export type AppTheme = Theme<AppContract>;
+export type AppUnthemeTheme = Theme<AppUnthemeContract>;
 
 /**
  * A partial overlay carrying identity — what `apply` swaps in at runtime.
  */
-export type AppThemeLayer = Layer<AppContract>;
+export type AppUnthemeThemeLayer = Layer<AppUnthemeContract>;
 
 /**
  * The active selection — one context per modifier.
  */
-export type AppInput = Input<AppContract>;
+export type AppUnthemeInput = Input<AppUnthemeContract>;
 
 /**
  * The caller-owned state container the service operates on.
  */
-export type AppConfig = Config<AppContract>;
+export type AppUnthemeConfig = Config<AppUnthemeContract>;
 
 /**
  * The runtime theme service bound to the app's contract.
  */
-export type AppUntheme = Untheme<AppContract>;
+export type AppUntheme = Untheme<AppUnthemeContract>;
 
 /**
  * The runtime hooks the service emits, keyed by event name. Shared between the
@@ -38,8 +38,8 @@ export type AppUntheme = Untheme<AppContract>;
  */
 export interface UnthemeHooks {
   "untheme:ready": (service: AppUntheme) => void;
-  "untheme:input": (input: AppInput) => void;
-  "untheme:theme": (theme: AppTheme) => void;
+  "untheme:input": (input: AppUnthemeInput) => void;
+  "untheme:theme": (theme: AppUnthemeTheme) => void;
 }
 
 /**
@@ -58,7 +58,7 @@ export interface UnthemeNuxtApp {
 declare module "#app" {
   interface NuxtApp {
     $untheme: AppUntheme;
-    $unthemeRenderer: Renderer<AppContract>;
+    $unthemeRenderer: Renderer<AppUnthemeContract>;
   }
 
   // Declaration merging: fold the shared hook map into Nuxt's runtime hooks.

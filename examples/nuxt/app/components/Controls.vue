@@ -1,4 +1,4 @@
-<script setup lang="ts" generic="A extends keyof AppInput & string">
+<script setup lang="ts" generic="A extends keyof AppUnthemeInput & string">
 const { axis } = defineProps<{ axis: A }>();
 const { options, selection } = useControls(axis);
 </script>

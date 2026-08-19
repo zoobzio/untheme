@@ -3,7 +3,9 @@
  * contexts the schema allows for that axis; `selection` reads the axis's
  * current context and, when set, swaps the app to the chosen one.
  */
-export const useControls = <A extends keyof AppInput & string>(axis: A) => {
+export const useControls = <A extends keyof AppUnthemeInput & string>(
+  axis: A,
+) => {
   const untheme = useUntheme();
 
   const options = untheme.contexts(axis);

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref, reactive, nextTick, type Ref } from "vue";
-import type { AppConfig } from "../../src/runtime/types";
+import type { AppUnthemeConfig } from "../../src/runtime/types";
 import { theme, themes, input } from "../fixtures";
 
 interface HeadInput {
@@ -9,7 +9,7 @@ interface HeadInput {
 }
 
 const headCalls: HeadInput[] = [];
-let config: Ref<AppConfig>;
+let config: Ref<AppUnthemeConfig>;
 let cookies: Record<string, { value: unknown }>;
 const callHook = vi.fn();
 
@@ -28,7 +28,7 @@ vi.mock("#app", () => ({
 }));
 
 vi.mock("#imports", () => ({
-  useState: (key: string, init: () => AppConfig) => {
+  useState: (key: string, init: () => AppUnthemeConfig) => {
     const state = ref(init());
     if (key === "untheme:config") config = state;
     return state;
