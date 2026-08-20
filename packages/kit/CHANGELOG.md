@@ -1,5 +1,14 @@
 # @untheme/kit
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @untheme/core@0.2.3
+  - @untheme/schema@0.2.3
+  - @untheme/utils@0.2.3
+
 ## 0.2.2
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @untheme/codemirror
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - untheme@0.2.3
+
 ## 0.2.2
 
 ### Patch Changes
