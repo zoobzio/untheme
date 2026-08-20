@@ -27,6 +27,7 @@ interface FakeNuxt {
   options: {
     buildDir: string;
     nitro: { serverAssets?: { baseName: string; dir: string }[] };
+    _layers?: { config?: { untheme?: unknown } | null }[];
   };
   hook: ReturnType<typeof vi.fn>;
 }
@@ -235,5 +236,93 @@ describe("untheme module", () => {
     const imports = kit.addImports.mock.calls[0]?.[0];
     const names = imports.map((entry: { name: string }) => entry.name);
     expect(names).toContain("useUnthemeRenderer");
+  });
+
+  describe("layered configs", () => {
+    /**
+     * A named export parsed back out of the `untheme.mjs` build template.
+     */
+    const exported = (name: string): unknown => {
+      const content = template("untheme.mjs")!.getContents();
+      const match = new RegExp(`export const ${name} = (.*);`).exec(content);
+      return JSON.parse(match![1]!);
+    };
+
+    /**
+     * The defu-merged options nuxt would hand the module — corrupted on
+     * purpose, so a test only passes when the module resolves from the
+     * layers instead.
+     */
+    const corrupted = {
+      ...options,
+      theme: { ...theme, order: ["color", "color"] },
+    };
+
+    it("resolves from the layers instead of the merged options", () => {
+      nuxt.options._layers = [
+        { config: { untheme: { input: { color: "dark" } } } },
+        { config: { untheme: options } },
+      ];
+      mod.setup(corrupted, nuxt);
+      expect(exported("input")).toEqual({ color: "dark" });
+      expect(exported("theme")).toEqual(theme);
+    });
+
+    it("replaces the theme whole with the closest layer's", () => {
+      const rebuilt = structuredClone(theme);
+      rebuilt.id = "alpha-prime";
+      rebuilt.tokens.primary.$value = "{indigo}";
+      nuxt.options._layers = [
+        { config: { untheme: { theme: rebuilt } } },
+        { config: { untheme: options } },
+      ];
+      mod.setup(corrupted, nuxt);
+      const resolved = exported("theme") as typeof theme;
+      expect(resolved).toEqual(rebuilt);
+      expect(resolved.order).toEqual(["color"]);
+    });
+
+    it("resolves the catalog per key, closest layer winning", async () => {
+      nuxt.options._layers = [
+        {
+          config: {
+            untheme: {
+              themes: { bravo: { id: "bravo", name: "Bravo Prime" } },
+            },
+          },
+        },
+        { config: { untheme: options } },
+      ];
+      mod.setup(corrupted, nuxt);
+      await build();
+      const payloads: unknown = JSON.parse(
+        await readFile(
+          join(nuxt.options.buildDir, "untheme", "themes.json"),
+          "utf8",
+        ),
+      );
+      expect(payloads).toEqual({
+        bravo: { id: "bravo", name: "Bravo Prime" },
+        charlie: themes.charlie,
+      });
+    });
+
+    it("fails plainly when no layer authors a base theme", () => {
+      nuxt.options._layers = [
+        { config: { untheme: { input: { color: "dark" } } } },
+        { config: { untheme: { themes } } },
+      ];
+      expect(() => mod.setup(corrupted, nuxt)).toThrow(/no base theme/);
+    });
+
+    it("keeps the merged options when a single layer authors the config", () => {
+      nuxt.options._layers = [
+        { config: { untheme: { ...options, input: { color: "dark" } } } },
+        { config: {} },
+        { config: null },
+      ];
+      mod.setup(options, nuxt);
+      expect(exported("input")).toEqual(input);
+    });
   });
 });

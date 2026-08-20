@@ -1,5 +1,6 @@
 import type { Layer, Schema, Template, Theme } from "untheme";
 import type { NuxtUnthemeConfig } from "./config";
+import type { UnthemeLayerConfig } from "./resolve";
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -18,12 +19,16 @@ import {
 } from "@nuxt/kit";
 
 import { ASSETS, ENTRIES, MOUNT, THEMES } from "./constant";
+import { resolveUnthemeConfig } from "./resolve";
 
 /**
  * Nuxt module for untheme.
  *
- * At build time it validates the configured base theme, initial selection,
- * and theme catalog; writes the base theme and selection to the
+ * At build time it resolves the untheme config across Nuxt layers per
+ * member, the closest layer winning (Nuxt's own defu merge concatenates
+ * arrays, which corrupts array-valued bindings); validates the resolved base
+ * theme, initial selection, and theme catalog; writes the base theme and
+ * selection to the
  * `untheme.mjs` build template; derives the `Token` union and `Mod` axis
  * structure into the `types/untheme.d.ts` type template; and registers the
  * runtime plugin and the `useUntheme` and `useUnthemeRenderer` auto-imports.
@@ -40,15 +45,37 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
   setup: (options, nuxt) => {
     const resolver = createResolver(import.meta.url);
 
-    if (!options.theme) {
+    /*
+     * Nuxt merges layer configs with an array-concatenating defu before any
+     * module runs, which corrupts array-valued bindings (shadow lists,
+     * gradient stops, `cubicBezier` tuples, color components) and duplicates
+     * `order`. Each layer's own config survives on `nuxt.options._layers`,
+     * so when more than one layer authors an untheme config the module
+     * resolves the chain itself, per member, the closest layer winning. A
+     * single author keeps the merged options, inline module options
+     * included.
+     */
+    const authored = (nuxt.options._layers ?? [])
+      .map(
+        (layer) =>
+          (layer.config as { untheme?: UnthemeLayerConfig } | null)?.untheme,
+      )
+      .filter((layerConfig) => layerConfig !== undefined);
+
+    const config =
+      authored.length > 1
+        ? (resolveUnthemeConfig(authored) as NuxtUnthemeConfig)
+        : options;
+
+    if (!config.theme) {
       throw new Error(
         "untheme: no base theme configured — set `untheme.theme` in nuxt.config.",
       );
     }
 
-    const schema: Schema<Theme<Template>> = defineSchema(options.theme);
-    schema.assert.theme(options.theme);
-    schema.assert.input(options.input);
+    const schema: Schema<Theme<Template>> = defineSchema(config.theme);
+    schema.assert.theme(config.theme);
+    schema.assert.input(config.input);
 
     /*
      * The catalog, re-keyed by each layer's own id — the identity the wire
@@ -56,7 +83,7 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
      * contract here, so the routes serve stored payloads without re-proving.
      */
     const catalog: Record<string, Layer<Template>> = {};
-    for (const layer of Object.values(options.themes ?? {})) {
+    for (const layer of Object.values(config.themes ?? {})) {
       schema.assert.layer(layer);
       if (layer.id in catalog) {
         throw new Error(
@@ -131,8 +158,8 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
       write: true,
       getContents: () => {
         return [
-          `export const theme = ${JSON.stringify(options.theme)};`,
-          `export const input = ${JSON.stringify(options.input)};`,
+          `export const theme = ${JSON.stringify(config.theme)};`,
+          `export const input = ${JSON.stringify(config.input)};`,
         ].join("\n");
       },
     });
