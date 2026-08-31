@@ -62,6 +62,7 @@ At build time the module runs `defineSchema` against `base`, which validates the
 
 - `#build/untheme.mjs` — the `theme`, `themes`, and `input` data, plus a sibling `untheme.d.mts` that types them against the derived contract instead of the loose types TypeScript would otherwise infer from a `.mjs` file.
 - `#build/types/untheme.d.ts` — a `Token` union of every token name in `base`, an `Overrides` type for patches to those tokens, and a `Mod` type describing each modifier's contexts.
+- `#build/untheme.css` — the static cascade as plain CSS: the base bindings under `:root`, then each modifier context as a `[data-<modifier>="<context>"]` block, all inside the `untheme` cascade layer. Linked into the app's global CSS by default; see [Static CSS](#static-css).
 
 It also registers the runtime plugin and two auto-imports: `useUntheme()` and `accessUntheme()`, plus the type imports `AppUnthemeContract`, `AppUnthemeTheme`, `AppUnthemeThemeLayer`, `AppUnthemeThemes`, `AppUnthemeInput`, `AppUnthemeConfig`, and `AppUntheme` — all derived from the generated contract.
 
@@ -93,6 +94,20 @@ It also mirrors each modifier's selected context onto `<html>` as a `data-<modif
   box-shadow: none;
 }
 ```
+
+## Static CSS
+
+The module also renders the full static cascade — [`defineRenderer(...).sheet()`](../../packages/css) over the base theme — to a real file in the build directory, `#build/untheme.css`, and links it into the app's global CSS. Written to disk, the custom properties exist as plain CSS your tooling can see: editors index the file and autocomplete `var(--surface)` in your stylesheets, and the tokens resolve before hydration, without JavaScript, and in any context that loads the stylesheet but not the app.
+
+The whole cascade sits in an `@layer untheme` block, so the unlayered `<style>` the runtime plugin injects — which additionally carries live overrides and switched catalog themes — wins every equal-specificity conflict, wherever the stylesheet lands in the head. Your own unlayered CSS outranks the static cascade the same way.
+
+Set `css: false` in the module config to keep the file out of the bundle. It is still written to the build directory, so editor indexing keeps working and you can link it yourself where you want it in your own cascade:
+
+```css
+@import "#build/untheme.css";
+```
+
+The file regenerates with the rest of the build templates whenever the theme config changes.
 
 ## Cookies and SSR
 

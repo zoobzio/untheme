@@ -20,7 +20,7 @@ export type UnthemeLayerConfig = Partial<NuxtUnthemeConfig>;
  * corrupt them — augmenting a deeper layer's theme belongs at the authoring
  * site, through the preset that built it. `input` resolves per modifier and
  * `themes` per catalog key, a shared key replacing the deeper layer's entry
- * whole.
+ * whole. `css` is scalar, so the closest authored value stands.
  *
  * @param configs - The per-layer untheme configs, closest layer first.
  * @returns The resolved config; members no layer authored stay undefined.
@@ -47,5 +47,6 @@ export const resolveUnthemeConfig = (
       themes.length > 0
         ? (Object.assign({}, ...themes) as Record<string, Layer<Template>>)
         : undefined,
+    css: configs.find((config) => config.css !== undefined)?.css,
   };
 };

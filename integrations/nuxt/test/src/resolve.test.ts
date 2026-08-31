@@ -64,6 +64,13 @@ describe("resolveUnthemeConfig", () => {
     });
   });
 
+  it("resolves the css flag to the closest authored value", () => {
+    const resolved = resolveUnthemeConfig([{}, { css: false }, base]);
+    expect(resolved.css).toBe(false);
+    const overridden = resolveUnthemeConfig([{ css: true }, { css: false }]);
+    expect(overridden.css).toBe(true);
+  });
+
   it("leaves members no layer authored undefined", () => {
     const resolved = resolveUnthemeConfig([
       { input: { color: "dark" } },
@@ -72,5 +79,6 @@ describe("resolveUnthemeConfig", () => {
     expect(resolved.themes).toBeUndefined();
     const bare = resolveUnthemeConfig([{ input: { color: "dark" } }]);
     expect(bare.theme).toBeUndefined();
+    expect(bare.css).toBeUndefined();
   });
 });

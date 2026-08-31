@@ -23,3 +23,10 @@ export const ENTRIES = "entries.json";
  * answers with, keyed by id.
  */
 export const THEMES = "themes.json";
+
+/**
+ * The filename of the static cascade template the module writes into the
+ * build directory — the base bindings and every modifier context as plain
+ * CSS, importable from app stylesheets as `#build/untheme.css`.
+ */
+export const STYLESHEET = "untheme.css";

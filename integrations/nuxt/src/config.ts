@@ -19,6 +19,16 @@ export interface NuxtUnthemeConfig<
    * assets and mounts endpoints that answer listings and retrievals.
    */
   themes?: Record<string, Layer<T>>;
+
+  /**
+   * Whether the generated static cascade (`#build/untheme.css`) is linked
+   * into the app's global CSS. On by default, so the token custom properties
+   * exist as real CSS — before hydration, without JavaScript, and for any
+   * stylesheet authored against them. Set `false` to keep the file out of
+   * the bundle; it is still written to the build directory for editor
+   * indexing and manual `@import "#build/untheme.css"`.
+   */
+  css?: boolean;
 }
 
 /**

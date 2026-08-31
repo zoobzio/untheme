@@ -7,6 +7,9 @@ import { join } from "node:path";
 
 import { defineSchema } from "untheme";
 import { ROUTE } from "untheme/catalog";
+import { defineRenderer } from "untheme/css";
+
+import { map } from "objectively";
 
 import {
   defineNuxtModule,
@@ -18,7 +21,7 @@ import {
   createResolver,
 } from "@nuxt/kit";
 
-import { ASSETS, ENTRIES, MOUNT, THEMES } from "./constant";
+import { ASSETS, ENTRIES, MOUNT, STYLESHEET, THEMES } from "./constant";
 import { resolveUnthemeConfig } from "./resolve";
 
 /**
@@ -30,7 +33,9 @@ import { resolveUnthemeConfig } from "./resolve";
  * theme, initial selection, and theme catalog; writes the base theme and
  * selection to the
  * `untheme.mjs` build template; derives the `Token` union and `Mod` axis
- * structure into the `types/untheme.d.ts` type template; and registers the
+ * structure into the `types/untheme.d.ts` type template; renders the static
+ * cascade to the `untheme.css` template, linked into the app CSS unless
+ * `css: false` opts out; and registers the
  * runtime plugin and the `useUntheme` and `useUnthemeRenderer` auto-imports.
  * Catalog layers are never
  * bundled with the app: they are written as JSON into the build directory,
@@ -176,6 +181,36 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
           `export const input: Input<AppUnthemeContract>;`,
         ].join("\n"),
     });
+
+    /*
+     * The static cascade as a real stylesheet in the build directory: the
+     * base bindings under `:root`, then each modifier context as a
+     * data-attribute block — `defineRenderer(...).sheet()` over the resolved
+     * theme. Written to disk so editors index the custom properties and user
+     * CSS can `@import "#build/untheme.css"`, and linked into the app CSS
+     * unless `css: false` opts out. The renderer's source is a static
+     * container over the validated theme: `sheet()` reads only the theme,
+     * and the bindings accessor folds the base values so the other renderer
+     * reads stay coherent. The whole cascade sits in the `untheme` cascade
+     * layer, so the unlayered block the runtime plugin injects — carrying
+     * live overrides and swapped themes — wins every equal-specificity
+     * conflict regardless of where this stylesheet lands in the head.
+     */
+    const renderer = defineRenderer({
+      config: { theme: config.theme },
+      tokens: () => map(config.theme.tokens, (slot) => slot.$value),
+    });
+
+    addTemplate({
+      filename: STYLESHEET,
+      write: true,
+      getContents: () => `@layer untheme {\n${renderer.sheet()}\n}`,
+    });
+
+    if (config.css !== false) {
+      nuxt.options.css ||= [];
+      nuxt.options.css.unshift(join(nuxt.options.buildDir, STYLESHEET));
+    }
 
     addPlugin({
       src: resolver.resolve("./runtime/plugin"),

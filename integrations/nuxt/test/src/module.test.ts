@@ -26,6 +26,7 @@ import module from "../../src/module";
 interface FakeNuxt {
   options: {
     buildDir: string;
+    css?: string[];
     nitro: { serverAssets?: { baseName: string; dir: string }[] };
     _layers?: { config?: { untheme?: unknown } | null }[];
   };
@@ -46,7 +47,12 @@ const options: NuxtUnthemeConfig = { theme, themes, input };
  */
 const template = (filename: string) => {
   return kit.addTemplate.mock.calls
-    .map((call): { filename: string; getContents: () => string } => call[0])
+    .map(
+      (
+        call,
+      ): { filename: string; write?: boolean; getContents: () => string } =>
+        call[0],
+    )
     .find((entry) => entry.filename === filename);
 };
 
@@ -206,6 +212,43 @@ describe("untheme module", () => {
     const content = declaration!.getContents();
     expect(content).toContain("export const theme:");
     expect(content).toContain("export const input:");
+  });
+
+  it("writes the static cascade stylesheet inside the untheme layer", () => {
+    mod.setup(options, nuxt);
+    const stylesheet = template("untheme.css");
+    expect(stylesheet).toBeDefined();
+    expect(stylesheet!.write).toBe(true);
+    const content = stylesheet!.getContents();
+    expect(content.startsWith("@layer untheme {\n")).toBe(true);
+    expect(content.endsWith("\n}")).toBe(true);
+    expect(content).toContain(":root {");
+    expect(content).toContain(" --white: #ffffff;");
+    expect(content).toContain(" --surface: var(--white);");
+    expect(content).toContain('[data-color="dark"] {');
+    expect(content).toContain(" --primary: var(--indigo);");
+  });
+
+  it("links the stylesheet into the app css by default", () => {
+    mod.setup(options, nuxt);
+    expect(nuxt.options.css).toEqual([
+      join(nuxt.options.buildDir, "untheme.css"),
+    ]);
+  });
+
+  it("prepends the stylesheet ahead of css the app already carries", () => {
+    nuxt.options.css = ["~/assets/css/base.css"];
+    mod.setup(options, nuxt);
+    expect(nuxt.options.css).toEqual([
+      join(nuxt.options.buildDir, "untheme.css"),
+      "~/assets/css/base.css",
+    ]);
+  });
+
+  it("keeps the stylesheet out of the app css when `css` is false", () => {
+    mod.setup({ ...options, css: false }, nuxt);
+    expect(nuxt.options.css ?? []).toEqual([]);
+    expect(template("untheme.css")).toBeDefined();
   });
 
   it("registers a type template with the token union and modifier structure", () => {
