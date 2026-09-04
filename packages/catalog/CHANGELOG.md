@@ -1,5 +1,12 @@
 # @untheme/catalog
 
+## 0.3.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @untheme/schema@0.3.0
+
 ## 0.2.3
 
 ### Patch Changes
