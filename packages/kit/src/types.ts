@@ -1,88 +1,135 @@
-import type { Input, Layer, Binding, Theme } from "@untheme/schema";
-import type { Config } from "@untheme/core";
-import type { Extension } from "@untheme/utils";
-
-import type { extend } from "@untheme/utils";
+import type { Logger } from "@terrazzo/parser";
+import type { Input, Template, Theme } from "@untheme/schema";
 
 /**
- * A context override map in which every key must name a token of the contract
- * and every value must be a binding. The conditional defers inside generic
- * bodies, but as part of a constraint it is checked at each call site, where
- * the token union is concrete and the conditional evaluates.
+ * The authored `untheme.config.ts`: where the DTCG resolver document lives,
+ * the identity to give the base theme, and where the build writes.
  */
-export type CheckedContext<Tok extends string, C> = {
-  [K in keyof C]: K extends Tok ? Binding : never;
+export interface KitConfig {
+  /**
+   * The resolver document (or a plain token document): a path relative to the
+   * project root, an absolute URL, or an `npm:/` reference into an installed
+   * package (`npm:/@untheme/aurora/aurora.resolver.json`).
+   */
+  source: string | URL;
+
+  /**
+   * The base theme's id. Defaults to the slug of its name.
+   */
+  id?: string;
+
+  /**
+   * The base theme's display name. Defaults to the resolver document's
+   * `name`; required when the source is a plain token document.
+   */
+  name?: string;
+
+  /**
+   * The output directory, relative to the project root. Defaults to
+   * `untheme`.
+   */
+  outDir?: string;
+}
+
+/**
+ * The document loader every parse reads through: receives a document URL and
+ * the URL that referenced it, and returns the raw text.
+ */
+export type Req = (src: URL, origin: URL) => Promise<string>;
+
+/**
+ * The I/O hooks of a build.
+ */
+export interface GenerateOptions {
+  /**
+   * The project root: relative sources resolve against it, and `npm:/`
+   * references resolve from its packages. Defaults to `process.cwd()`.
+   */
+  cwd?: string;
+
+  /**
+   * Loader for every `file:` and remote document the parse touches — the seam
+   * for authenticated remote sources. Falls back to the filesystem for
+   * `file:` URLs and plain `fetch` for everything else. `npm:` URLs never
+   * reach it: they always resolve from the project's packages.
+   */
+  req?: Req;
+
+  /**
+   * The Terrazzo logger every parse reports through; defaults to Terrazzo's
+   * own (warnings to stderr).
+   */
+  logger?: Logger;
+}
+
+/** Options for {@link build}: the I/O hooks plus where the project lives. */
+export type BuildOptions = Omit<GenerateOptions, "cwd"> & {
+  /** The project root; defaults to `process.cwd()`. */
+  root?: string;
+
+  /** The config file, relative to `root`; defaults to `untheme.config.ts`. */
+  config?: string;
 };
 
 /**
- * The validator for an extension's modifiers literal: an existing axis may
- * only carry its existing contexts, a new axis may carry any, and every
- * context is a {@link CheckedContext}. Used as an F-bounded constraint on
- * `XMod`, so the inferred literal is validated wholesale at the call site.
+ * The validated base of a build: the base theme read off the DTCG documents,
+ * narrowed through untheme's own schema and proven against Terrazzo's own
+ * resolution, and the boot selection. What the emitters read.
  */
-export type CheckedModifiers<Tok extends string, Mod, XMod> = {
-  [M in keyof XMod]: M extends keyof Mod
-    ? {
-        [C in keyof XMod[M]]: C extends keyof Mod[M]
-          ? CheckedContext<Tok, XMod[M][C]>
-          : never;
-      }
-    : { [C in keyof XMod[M]]: CheckedContext<Tok, XMod[M][C]> };
-};
+export interface Core {
+  /** The base theme: every token, every modifier context, the order. */
+  theme: Theme<Template>;
+
+  /** The boot selection: each modifier's default context. */
+  input: Input<Template>;
+}
 
 /**
- * The axis and context key grid of a widened contract, values erased. A single
- * string-keyed mapped type, so it composes through repeated widenings and
- * stays reducible where an intersection would defer. Carried as a preset's
- * `ModK` so each level's extension is authored against the accumulated grid.
+ * A config resolved: the {@link Core} of the build, plus where it writes and
+ * what it read. What {@link resolveKit} returns — the in-memory form a
+ * consumer that wants documents rather than files (a framework module) works
+ * from.
  */
-export type Grid<ModK, XMod> = {
-  [M in (keyof ModK | keyof XMod) & string]: {
-    [C in keyof (ModK & XMod)[M] & string]: object;
-  };
-};
+export interface Kit extends Core {
+  /** The output directory, normalized and relative to the project root. */
+  outDir: string;
+
+  /**
+   * The absolute path of every local document the build read, the resolver
+   * first — what a dev server watches to rebuild on change.
+   */
+  documents: string[];
+}
+
+/** One emitted file, its path relative to the output directory. */
+export interface OutputFile {
+  path: string;
+  contents: string;
+}
 
 /**
- * The authoring handle for a preset. `Tok` is the token union, `ModK` the
- * modifier key grid, and `T` the theme the preset is bound to — the authored
- * contract at the root, an extended template after any `configure`.
+ * What {@link generate} returns: the files to write under `outDir`. No
+ * filesystem writes — the caller owns I/O.
  */
-export interface Preset<
-  Tok extends string,
-  ModK extends Record<string, Record<string, object>>,
-  T extends Theme<T>,
-> {
-  /**
-   * Resolves a variant layer against the base into a complete theme: its
-   * identity, its overrides merged over the base tokens and modifier contexts.
-   */
-  define: (layer: Layer<T>) => Theme<T>;
+export interface Output {
+  outDir: string;
+  files: OutputFile[];
+}
 
-  /**
-   * Derives a new preset whose base is this one widened by the extension: base
-   * tokens and existing contexts overridden where the extension binds them,
-   * new tokens and axes joining the contract, identity from the extension.
-   *
-   * The extension's known surface is checked — token keys everywhere, existing
-   * axes locked to their contexts — while what it adds is inferred: `XTok`
-   * from the tokens literal, `XMod` from the naked modifiers member. The
-   * result is a preset over the widened template, itself configurable.
-   */
-  configure: <
-    XTok extends string,
-    XMod extends Record<string, Record<string, object>> &
-      CheckedModifiers<Tok | XTok, ModK, XMod>,
-  >(
-    extension: Extension<Tok, ModK, XTok, XMod> & { modifiers: XMod },
-  ) => Preset<
-    Tok | XTok,
-    Grid<ModK, XMod>,
-    ReturnType<typeof extend<Tok, ModK, XTok, XMod>>
-  >;
-
-  /**
-   * Builds a ready service config for `defineUntheme`: the given selection, a
-   * detached copy of the preset's base theme, and an empty override.
-   */
-  use: (input: Input<T>) => Config<T>;
+/**
+ * The slice of a Terrazzo normalized token the conversion reads. Structural
+ * on purpose: every `TokenNormalized` satisfies it, and tests can hand-build
+ * minimal tokens without Terrazzo's full bookkeeping shape.
+ */
+export interface Source {
+  $type: string;
+  $value: unknown;
+  $description?: string | undefined;
+  $deprecated?: string | boolean | undefined;
+  $extensions?: Record<string, unknown> | undefined;
+  id: string;
+  source?: { filename?: string | undefined } | undefined;
+  originalValue?: unknown;
+  aliasOf?: string | undefined;
+  partialAliasOf?: unknown;
 }

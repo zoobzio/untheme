@@ -1,18 +1,17 @@
 import { fileURLToPath } from "node:url";
 import { defineNuxtConfig } from "nuxt/config";
 
-import untheme from "./untheme.config";
-
 /**
  * The aurora showcase.
  *
- * The theme wiring lives in `untheme.config.ts`: `theme` is the base the app
- * boots with, `themes` is the catalog the module serves over its endpoints —
- * listed for the switcher, fetched on demand when applied, never bundled —
- * and `input` is the initial selection (one context per modifier). The
- * module flattens the active selection's tokens into `--token` CSS variables
- * on every render, and mirrors the selection as `data-<modifier>` attributes
- * on the document root.
+ * The theme wiring lives in `untheme.config.ts`, which points at aurora's
+ * DTCG JSON: the module finds it and builds it through `@untheme/kit`, so
+ * no `untheme` options are needed here. The theme catalog the switcher
+ * lists is served by `server/api/untheme/[...path].get.ts` — fetched on
+ * demand when applied, never bundled. The module flattens the active
+ * selection's tokens into `--token` CSS variables on every render, and
+ * mirrors the selection as `data-<modifier>` attributes on the document
+ * root.
  */
 const src = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -64,19 +63,10 @@ export default defineNuxtConfig({
           replacement: src("../../packages/utils/src/index.ts"),
         },
         {
-          find: /^@untheme\/kit$/,
-          replacement: src("../../packages/kit/src/index.ts"),
-        },
-        {
           find: /^@untheme\/catalog$/,
           replacement: src("../../packages/catalog/src/index.ts"),
-        },
-        {
-          find: /^@untheme\/nuxt\/constant$/,
-          replacement: src("../../integrations/nuxt/src/constant.ts"),
         },
       ],
     },
   },
-  untheme,
 });

@@ -24,10 +24,13 @@ foreground.
 ```ts
 import { EditorView } from "@codemirror/view";
 import { javascript } from "@codemirror/lang-javascript";
-import { defineUntheme } from "untheme";
+import { makeUntheme } from "untheme";
+import { useUnthemeConfig } from "untheme/config";
 import { defineCodeMirrorTheme } from "@untheme/codemirror";
+import config, { type Contract } from "./untheme/config.mjs";
 
-const untheme = defineUntheme(config, themes);
+// The theme `untheme build` wrote from your DTCG JSON, carrying code-* tokens.
+const untheme = makeUntheme<Contract>(useUnthemeConfig(config));
 
 const theme = defineCodeMirrorTheme(
   untheme.schema,

@@ -1,24 +1,39 @@
-import type { Layer, Template } from "untheme";
+import type { Template } from "untheme";
 import type { UnthemeConfig } from "untheme/config";
 
 /**
- * The module's configuration: the canonical untheme config every integration
- * consumes, extended with the features the Nuxt module layers over it.
+ * The module's configuration. The theme is always authored as DTCG JSON that
+ * an `@untheme/kit` config points at; the module takes it one of two ways —
+ *
+ * - **Built here.** With no `theme`, the module loads the app's own
+ *   `untheme.config.ts` and builds it through the kit at build time. No
+ *   options are needed at all.
+ * - **Built elsewhere.** Pass the `theme` and `input` a kit build already
+ *   generated — a theme package in a monorepo, or a published one:
+ *
+ *   ```ts
+ *   import config from "@acme/theme/config";
+ *
+ *   export default defineNuxtConfig({
+ *     untheme: { ...config },
+ *   });
+ *   ```
+ *
+ * When more than one Nuxt layer sets `untheme`, the closest layer's value is
+ * used whole — options are never merged across layers.
+ *
  * Generic over the template so authoring infers the token and modifier
  * unions; the module itself consumes it at the root `Template`, since a Nuxt
  * module cannot carry a generic through `nuxt.config`.
  */
 export interface NuxtUnthemeConfig<
   T extends Template = Template,
-> extends UnthemeConfig<T> {
+> extends Partial<UnthemeConfig<T>> {
   /**
-   * The theme catalog: the layers the app's server serves over the catalog
-   * wire protocol. Keys are authoring convenience only — each layer's own
-   * `id` is the identity it is listed and retrieved under. Payloads are
-   * never bundled with the app: the module loads them into nitro's server
-   * assets and mounts endpoints that answer listings and retrievals.
+   * The kit config to build from, relative to the project root. Defaults to
+   * `untheme.config.ts`. Ignored when a `theme` is passed.
    */
-  themes?: Record<string, Layer<T>>;
+  config?: string;
 
   /**
    * Whether the generated static cascade (`#build/untheme.css`) is linked

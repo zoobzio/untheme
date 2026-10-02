@@ -13,6 +13,7 @@ export default tseslint.config(
       "**/.nuxt/",
       "**/.output/",
       "**/.generated/",
+      "examples/*/untheme/",
     ],
   },
   {

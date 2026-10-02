@@ -36,7 +36,6 @@ jobs:
           path: |
             packages/*/.dist
             integrations/*/.dist
-            presets/*/.dist
 
   # Lint and format read source only (no type-aware rules, no cross-package
   # resolution), so they run immediately without waiting on the build.

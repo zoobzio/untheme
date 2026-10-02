@@ -1,0 +1,363 @@
+{
+  "name": "Aurora Syntax",
+  "version": "2025.10",
+  "description": "Aurora widened with a syntax-* token group for code highlighting. Aurora's files are listed as sets and each of its modifiers is declared again, with the dark syntax bindings added to the dark color context.",
+  "sets": {
+    "colors": {
+      "sources": [
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/colors/primary.json"
+        },
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/colors/secondary.json"
+        },
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/colors/tertiary.json"
+        },
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/colors/error.json"
+        },
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/colors/success.json"
+        },
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/colors/warning.json"
+        },
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/colors/neutral.json"
+        },
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/colors/neutral-variant.json"
+        }
+      ]
+    },
+    "roles": {
+      "sources": [
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/roles/primary.json"
+        },
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/roles/secondary.json"
+        },
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/roles/tertiary.json"
+        },
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/roles/error.json"
+        },
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/roles/success.json"
+        },
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/roles/warning.json"
+        },
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/roles/surface.json"
+        }
+      ]
+    },
+    "typography": {
+      "sources": [
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/typography.json"
+        }
+      ]
+    },
+    "shape": {
+      "sources": [
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/shape.json"
+        }
+      ]
+    },
+    "space": {
+      "sources": [
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/space.json"
+        }
+      ]
+    },
+    "elevation": {
+      "sources": [
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/elevation.json"
+        }
+      ]
+    },
+    "motion": {
+      "sources": [
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/motion.json"
+        }
+      ]
+    },
+    "state": {
+      "sources": [
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/state.json"
+        }
+      ]
+    },
+    "blur": {
+      "sources": [
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/blur.json"
+        }
+      ]
+    },
+    "stroke": {
+      "sources": [
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/stroke.json"
+        }
+      ]
+    },
+    "border": {
+      "sources": [
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/border.json"
+        }
+      ]
+    },
+    "gradient": {
+      "sources": [
+        {
+          "$ref": "npm:/@untheme/aurora/tokens/gradient.json"
+        }
+      ]
+    },
+    "syntax": {
+      "description": "The syntax-* carrier tokens: each references one of aurora's ramps.",
+      "sources": [
+        {
+          "$ref": "./syntax.json"
+        }
+      ]
+    }
+  },
+  "modifiers": {
+    "color": {
+      "contexts": {
+        "light": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/color.json#/light"
+          }
+        ],
+        "dark": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/color.json#/dark"
+          },
+          {
+            "$ref": "./syntax-dark.json"
+          }
+        ]
+      },
+      "default": "light"
+    },
+    "vibrancy": {
+      "contexts": {
+        "balanced": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/vibrancy.json#/balanced"
+          }
+        ],
+        "muted": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/vibrancy.json#/muted"
+          }
+        ],
+        "vivid": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/vibrancy.json#/vivid"
+          }
+        ]
+      },
+      "default": "balanced"
+    },
+    "contrast": {
+      "contexts": {
+        "default": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/contrast.json#/default"
+          }
+        ],
+        "medium": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/contrast.json#/medium"
+          }
+        ],
+        "high": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/contrast.json#/high"
+          }
+        ]
+      },
+      "default": "default"
+    },
+    "text": {
+      "contexts": {
+        "sm": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/text.json#/sm"
+          }
+        ],
+        "md": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/text.json#/md"
+          }
+        ],
+        "lg": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/text.json#/lg"
+          }
+        ]
+      },
+      "default": "md"
+    },
+    "density": {
+      "contexts": {
+        "compact": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/density.json#/compact"
+          }
+        ],
+        "default": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/density.json#/default"
+          }
+        ],
+        "spacious": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/density.json#/spacious"
+          }
+        ]
+      },
+      "default": "default"
+    },
+    "radius": {
+      "contexts": {
+        "default": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/radius.json#/default"
+          }
+        ],
+        "sharp": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/radius.json#/sharp"
+          }
+        ],
+        "round": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/radius.json#/round"
+          }
+        ]
+      },
+      "default": "default"
+    },
+    "depth": {
+      "contexts": {
+        "default": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/depth.json#/default"
+          }
+        ],
+        "flat": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/depth.json#/flat"
+          }
+        ],
+        "deep": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/depth.json#/deep"
+          }
+        ]
+      },
+      "default": "default"
+    },
+    "motion": {
+      "contexts": {
+        "default": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/motion.json#/default"
+          }
+        ],
+        "reduced": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/motion.json#/reduced"
+          }
+        ],
+        "expressive": [
+          {
+            "$ref": "npm:/@untheme/aurora/modifiers/motion.json#/expressive"
+          }
+        ]
+      },
+      "default": "default"
+    }
+  },
+  "resolutionOrder": [
+    {
+      "$ref": "#/sets/colors"
+    },
+    {
+      "$ref": "#/sets/roles"
+    },
+    {
+      "$ref": "#/sets/typography"
+    },
+    {
+      "$ref": "#/sets/shape"
+    },
+    {
+      "$ref": "#/sets/space"
+    },
+    {
+      "$ref": "#/sets/elevation"
+    },
+    {
+      "$ref": "#/sets/motion"
+    },
+    {
+      "$ref": "#/sets/state"
+    },
+    {
+      "$ref": "#/sets/blur"
+    },
+    {
+      "$ref": "#/sets/stroke"
+    },
+    {
+      "$ref": "#/sets/border"
+    },
+    {
+      "$ref": "#/sets/gradient"
+    },
+    {
+      "$ref": "#/sets/syntax"
+    },
+    {
+      "$ref": "#/modifiers/color"
+    },
+    {
+      "$ref": "#/modifiers/vibrancy"
+    },
+    {
+      "$ref": "#/modifiers/contrast"
+    },
+    {
+      "$ref": "#/modifiers/text"
+    },
+    {
+      "$ref": "#/modifiers/density"
+    },
+    {
+      "$ref": "#/modifiers/radius"
+    },
+    {
+      "$ref": "#/modifiers/depth"
+    },
+    {
+      "$ref": "#/modifiers/motion"
+    }
+  ]
+}

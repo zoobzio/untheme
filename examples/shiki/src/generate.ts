@@ -2,21 +2,18 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { makeUntheme } from "untheme";
+import { useUnthemeConfig } from "untheme/config";
 import { defineRenderer } from "untheme/css";
 import { defineShikiTheme } from "@untheme/shiki";
 import type { SyntaxMap } from "@untheme/shiki";
 import { codeToHtml } from "shiki";
 
-import { syntax } from "./preset";
-
-/**
- * The widened aurora contract the configured preset carries.
- */
-type Contract = ReturnType<typeof syntax.use>["theme"];
+import config from "../untheme/config.mjs";
+import type { Contract } from "../untheme/config.mjs";
 
 /**
  * The interchange the app owns: each LSP semantic token type (the standard
- * vocabulary the shipped scopes route to) bound to one of the preset's carrier
+ * vocabulary the shipped scopes route to) bound to one of the theme's carrier
  * tokens. Many-to-one on purpose — this theme reuses the `type` carrier for
  * `namespace`/`class`/…, the `function` carrier for `method`, and so on,
  * surfacing only the distinctions it wants. Roles left out render at `fg`.
@@ -51,7 +48,7 @@ const MAP: SyntaxMap<Contract> = {
  * string and template, type, function, parameter, number, regex, operator.
  */
 const SAMPLE = `// A themed greeter
-import { defineUntheme } from "untheme";
+import { makeUntheme } from "untheme";
 
 type Mode = "light" | "dark";
 
@@ -64,21 +61,10 @@ export function greet(name: string, mode: Mode = "light"): number {
 `;
 
 /*
- * Boot the widened preset at its default selection and render over it. The
+ * Boot the built theme at its default selection and render over it. The
  * renderer's var() output is what the Shiki theme wraps every scope around.
  */
-const untheme = makeUntheme(
-  syntax.use({
-    color: "light",
-    vibrancy: "balanced",
-    contrast: "default",
-    text: "md",
-    density: "default",
-    radius: "default",
-    depth: "default",
-    motion: "default",
-  }),
-);
+const untheme = makeUntheme<Contract>(useUnthemeConfig(config));
 
 const renderer = defineRenderer(untheme);
 

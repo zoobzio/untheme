@@ -7,34 +7,21 @@
     "directory": "presets/aurora"
   },
   "type": "module",
-  "main": "./.dist/index.mjs",
-  "types": "./.dist/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./.dist/index.d.ts",
-      "import": "./.dist/index.mjs"
-    },
-    "./themes/*": {
-      "types": "./.dist/themes/*.d.ts",
-      "import": "./.dist/themes/*.mjs"
-    }
+    "./aurora.resolver.json": "./aurora.resolver.json",
+    "./tokens/*": "./tokens/*",
+    "./modifiers/*": "./modifiers/*",
+    "./themes/*": "./themes/*",
+    "./package.json": "./package.json"
   },
   "files": [
-    ".dist"
+    "aurora.resolver.json",
+    "tokens",
+    "modifiers",
+    "themes"
   ],
   "scripts": {
-    "build": "unbuild",
-    "stub": "unbuild --stub",
     "generate": "node scripts/generate.mjs",
-    "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "@untheme/kit": "workspace:*",
-    "@untheme/schema": "workspace:*"
-  },
-  "devDependencies": {
-    "@untheme/core": "workspace:*"
+    "lint": "eslint ."
   }
 }

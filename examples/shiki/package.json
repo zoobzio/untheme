@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "generate": "jiti src/generate.ts",
-    "typecheck": "tsc --noEmit",
+    "theme": "untheme build",
+    "generate": "untheme build && jiti src/generate.ts",
+    "typecheck": "untheme build && tsc --noEmit",
     "lint": "eslint ."
   },
   "dependencies": {
@@ -16,6 +17,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
+    "@untheme/kit": "workspace:*",
     "jiti": "^2.7.0",
     "typescript": "^6.0.3"
   }

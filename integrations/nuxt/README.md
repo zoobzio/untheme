@@ -2,73 +2,68 @@
 
 Nuxt module for runtime theming with untheme.
 
-Give the module a base theme and a catalog of switchable variants, and it validates them at build time, derives typed token unions, and wires up a runtime service, a reactive stylesheet, and cookie-backed persistence — no other setup required.
+Author the theme as DTCG JSON, point an `untheme.config.ts` at it, and the module builds it at build time, validates it, derives typed token unions, and wires up a runtime service, a reactive stylesheet, a static stylesheet, and cookie-backed persistence. Serving switchable themes is one server route file away.
 
 ## Setup
 
 ```ts
 // nuxt.config.ts
-import { defineUnthemeConfig } from "untheme/config";
-
 export default defineNuxtConfig({
   modules: ["@untheme/nuxt"],
-  untheme: defineUnthemeConfig({
-    base: {
-      id: "alpha",
-      name: "Alpha",
-      tokens: {
-        white: {
-          $type: "color",
-          $value: { colorSpace: "srgb", components: [1, 1, 1], hex: "#ffffff" },
-        },
-        black: {
-          $type: "color",
-          $value: { colorSpace: "srgb", components: [0, 0, 0], hex: "#000000" },
-        },
-        surface: { $type: "color", $value: "{white}" },
-        "on-surface": { $type: "color", $value: "{black}" },
-      },
-      modifiers: {
-        color: {
-          light: {},
-          dark: { surface: "{black}", "on-surface": "{white}" },
-        },
-      },
-      order: ["color"],
-    },
-    themes: {
-      bravo: {
-        id: "bravo",
-        name: "Bravo",
-        tokens: {
-          white: {
-            colorSpace: "srgb",
-            components: [0.98, 0.98, 0.98],
-            hex: "#fafafa",
-          },
-        },
-      },
-    },
-    input: { color: "light" },
-  }),
 });
 ```
 
-`base` is a complete theme — every token carries a `$type` and `$value`, and each modifier (here, `color`) declares the contexts that override those tokens for that axis. `themes` is a catalog of layers keyed by name: each layer states only what diverges from `base`, so `bravo` above only rebinds `white`. `input` is the selection to boot with, one context per modifier. `defineUnthemeConfig` is an identity helper — it does nothing at runtime, but types the config and infers the token and modifier unions from `base`.
+```ts
+// untheme.config.ts
+import { defineConfig } from "@untheme/kit";
+
+export default defineConfig({
+  source: "npm:/@untheme/aurora/aurora.resolver.json",
+});
+```
+
+The module gets its theme one of two ways:
+
+- **Built here.** With no `theme` in the options, it finds `untheme.config.ts` in the project root and builds it through [`@untheme/kit`](../../packages/kit), in memory — no `untheme build` step, nothing written to disk. `config` names another file. The config file and every JSON document the build read join Nuxt's watch list, so editing either restarts dev and builds again.
+- **Built elsewhere.** Pass the `theme` and `input` a kit build already generated — a theme package in a monorepo, or a published one — and the module uses them as passed:
+
+  ```ts
+  import config from "@acme/theme/config";
+
+  export default defineNuxtConfig({
+    modules: ["@untheme/nuxt"],
+    untheme: { ...config },
+  });
+  ```
+
+`theme` and `input` go together or not at all. `defineUnthemeConfig` from `@untheme/nuxt/config` is an identity helper that types the options.
+
+| Option   | Default             | Description                                                                  |
+| -------- | ------------------- | ---------------------------------------------------------------------------- |
+| `config` | `untheme.config.ts` | The kit config to build, relative to the project root. Ignored with `theme`. |
+| `theme`  | —                   | A built base theme. Pass it with `input`.                                    |
+| `input`  | —                   | The built boot selection, one context per modifier. Pass it with `theme`.    |
+| `css`    | `true`              | Whether `#build/untheme.css` is linked into the app's global CSS.            |
+
+**Nuxt layers.** When more than one layer sets `untheme`, the closest layer's value is used whole — the options are never merged across layers. Nuxt's own layer merge concatenates arrays, which would corrupt the array-valued bindings in a theme (color components, shadow lists, gradient stops), so the module reads each layer's own config instead.
 
 ## What it generates
 
-At build time the module runs `defineSchema` against `base`, which validates the theme and derives its token and modifier contract. From that it writes:
+At build time the module runs `defineSchema` against the theme, which validates it and the boot selection and derives the token and modifier contract. From that it writes:
 
-- `#build/untheme.mjs` — the `theme`, `themes`, and `input` data, plus a sibling `untheme.d.mts` that types them against the derived contract instead of the loose types TypeScript would otherwise infer from a `.mjs` file.
-- `#build/types/untheme.d.ts` — a `Token` union of every token name in `base`, an `Overrides` type for patches to those tokens, and a `Mod` type describing each modifier's contexts.
-- `#build/untheme.css` — the static cascade as plain CSS: the base bindings under `:root`, then each modifier context as a `[data-<modifier>="<context>"]` block, all inside the `untheme` cascade layer. Linked into the app's global CSS by default; see [Static CSS](#static-css).
+- `#build/untheme/config.mjs` — the `theme` and `input` data, with a sibling `config.d.mts` that types them against the `Contract`.
+- `#build/untheme/index.mjs` — the token and modifier lists and the `isToken` / `isModifier` guards, with a sibling `index.d.mts` carrying a `Token` union of every token name, an `Overrides` type for patches to those tokens, and a `Mod` type describing each modifier's contexts.
+- `#build/untheme.css` — the static cascade as plain CSS; see [Static CSS](#static-css).
 
-It also registers the runtime plugin and two auto-imports: `useUntheme()` and `accessUntheme()`, plus the type imports `AppUnthemeContract`, `AppUnthemeTheme`, `AppUnthemeThemeLayer`, `AppUnthemeThemes`, `AppUnthemeInput`, `AppUnthemeConfig`, and `AppUntheme` — all derived from the generated contract.
+The two `untheme/` modules are the ones `untheme build` writes: the module registers the output of `@untheme/kit`'s `emit` as its build templates.
+
+It also registers the runtime plugin and the auto-imports `useUntheme()`, `useUnthemeRenderer()` and `accessUntheme()`, plus the type imports `AppUnthemeContract`, `AppUnthemeTheme`, `AppUnthemeThemeLayer`, `AppUnthemeInput`, `AppUnthemeConfig`, and `AppUntheme` — all derived from the generated contract.
+
+It registers no server routes; see [Serving themes](#serving-themes).
 
 ## `useUntheme()`
 
-`useUntheme()` returns the theme service — [`@untheme/core`](../../packages/core)'s `Untheme`, bound to your app's token contract. Reads and writes flow through it directly; see that package's docs for the full API (`get`, `resolve`, `set`, `swap`, `apply`, `select`, `create`, `update`, `delta`, `dirty`, `reset`, …).
+`useUntheme()` returns the theme service — [`@untheme/core`](../../packages/core)'s `Untheme`, bound to your app's token contract. Reads and writes flow through it directly; see that package's docs for the full API (`get`, `resolve`, `set`, `swap`, `apply`, `create`, `update`, `delta`, `dirty`, `reset`, …).
 
 ```vue
 <script setup>
@@ -77,11 +72,55 @@ const ut = useUntheme();
 
 <template>
   <button @click="ut.swap('color', 'dark')">Dark mode</button>
-  <button @click="ut.select('bravo')">Switch to Bravo</button>
 </template>
 ```
 
-`accessUntheme()` is the lower-level state the service is built over: the reactive `config` and `themes` containers held in `useState`, and the raw `input`/`key` cookie refs. Most components only need `useUntheme()`.
+`useUnthemeRenderer()` returns the [CSS renderer](../../packages/css) the plugin builds over the same service, for naming a token's custom property (`var("primary")`), reading a live value, or emitting a static set. `accessUntheme()` is the lower-level state the service is built over: the reactive `config` container held in `useState`, and the raw `input`/`key` cookie refs. Most components only need `useUntheme()`.
+
+## Serving themes
+
+The service holds one active theme; other themes are layers the app fetches and `apply`s. To serve them, create one catch-all server route file. Its folder is the base the catalog client points at:
+
+```ts
+// server/api/untheme/[...path].get.ts
+import { createThemeHandler, listEntries } from "@untheme/nuxt/server";
+
+export default createThemeHandler({
+  list: (listing) => listEntries(entries, listing),
+  get: (id) => useStorage("themes").getItem(id),
+});
+```
+
+`createThemeHandler(provider)` returns one h3 event handler speaking the catalog wire protocol, so `defineClient` from `untheme/catalog` reads it unchanged:
+
+- `GET {base}/themes?q=<JSON query>` answers a page of entries;
+- `GET {base}/themes/{id}` answers one layer, or 404.
+
+The provider is `untheme/catalog`'s `Provider`: `list` receives the query already validated and normalized, and `get` returns a layer, or `null`/`undefined` for a miss. `listEntries(entries, listing)` filters, sorts and windows entries held in memory. The handler serves layers as the provider returns them; the browser client proves each one against the app's contract when it arrives.
+
+```ts
+// in the app
+import { defineClient } from "untheme/catalog";
+
+const catalog = defineClient(useUntheme().schema, { base: "/api/untheme" });
+const layer = await catalog.get("nord");
+if (layer) useUntheme().apply(layer);
+```
+
+Put the file in the folder above `themes` — `server/api/untheme/[...path].get.ts`, not `server/api/untheme/themes/[...id].get.ts`, which never matches the listing request. The catch-all may carry any name, or none (`[...].get.ts`): the handler reads the base off the route the file registered.
+
+### Aurora's themes
+
+An app built on [aurora](../../presets/aurora) can serve all 31 of its themes with no provider at all:
+
+```ts
+// server/api/untheme/[...path].get.ts
+import { createAuroraThemeHandler } from "@untheme/nuxt/aurora";
+
+export default createAuroraThemeHandler();
+```
+
+It lists aurora's manifest and answers each theme as a layer built from its JSON files — plain JSON reads, one lazy import per file, so the server bundle loads a theme's files only when it is requested. `@untheme/aurora` is an optional peer dependency: install it to use this entry. Each layer rebinds aurora's ramp tokens, so the app's contract must carry every one of aurora's ramps for the client to accept it.
 
 ## CSS
 
@@ -97,9 +136,9 @@ It also mirrors each modifier's selected context onto `<html>` as a `data-<modif
 
 ## Static CSS
 
-The module also renders the full static cascade — [`defineRenderer(...).sheet()`](../../packages/css) over the base theme — to a real file in the build directory, `#build/untheme.css`, and links it into the app's global CSS. Written to disk, the custom properties exist as plain CSS your tooling can see: editors index the file and autocomplete `var(--surface)` in your stylesheets, and the tokens resolve before hydration, without JavaScript, and in any context that loads the stylesheet but not the app.
+The module also renders the full static cascade — [`defineRenderer(...).sheet()`](../../packages/css) over the base theme — to a real file in the build directory, `#build/untheme.css`, and links it into the app's global CSS: the base bindings under `:root`, then each modifier context as a `[data-<modifier>="<context>"]` block. Written to disk, the custom properties exist as plain CSS your tooling can see: editors index the file and autocomplete `var(--surface)` in your stylesheets, and the tokens resolve before hydration, without JavaScript, and in any context that loads the stylesheet but not the app.
 
-The whole cascade sits in an `@layer untheme` block, so the unlayered `<style>` the runtime plugin injects — which additionally carries live overrides and switched catalog themes — wins every equal-specificity conflict, wherever the stylesheet lands in the head. Your own unlayered CSS outranks the static cascade the same way.
+The whole cascade sits in an `@layer untheme` block, so the unlayered `<style>` the runtime plugin injects — which additionally carries live overrides and switched themes — wins every equal-specificity conflict, wherever the stylesheet lands in the head. Your own unlayered CSS outranks the static cascade the same way.
 
 Set `css: false` in the module config to keep the file out of the bundle. It is still written to the build directory, so editor indexing keeps working and you can link it yourself where you want it in your own cascade:
 
@@ -107,24 +146,25 @@ Set `css: false` in the module config to keep the file out of the bundle. It is 
 @import "#build/untheme.css";
 ```
 
-The file regenerates with the rest of the build templates whenever the theme config changes.
+The file regenerates with the rest of the build templates whenever the theme changes.
 
 ## Cookies and SSR
 
-The selection and the active theme's key persist to two cookies, `untheme-input` and `untheme-key`, written automatically whenever `swap`, `apply`, or `select` changes them. On the server, the module reads these cookies back before rendering: a stored input is validated with `schema.check.input` and adopted if it matches the contract, and a stored theme key is looked up in the catalog and validated with `schema.check.layer` before being applied. A cookie that fails validation — for example, after a theme is removed from the catalog — is cleared instead of applied.
+The selection and the active theme's id persist to two cookies, `untheme-input` and `untheme-key`, written automatically whenever `swap` or `apply` changes them. On the server, the module reads the input cookie back before rendering: a stored input is validated with `schema.check.input` and adopted if it matches the contract, and cleared otherwise. The theme cookie is written but not yet read back.
 
 ## Hooks
 
 The service emits three Nuxt hooks:
 
-| Hook            | Fires when                                  | Payload                |
-| --------------- | ------------------------------------------- | ---------------------- |
-| `untheme:ready` | The plugin finishes setting up the service  | the `Untheme` service  |
-| `untheme:input` | The selection changes (`swap`)              | the new `input`        |
-| `untheme:theme` | The active theme changes (`apply`/`select`) | the new resolved theme |
+| Hook            | Fires when                                 | Payload                |
+| --------------- | ------------------------------------------ | ---------------------- |
+| `untheme:ready` | The plugin finishes setting up the service | the `Untheme` service  |
+| `untheme:input` | The selection changes (`swap`)             | the new `input`        |
+| `untheme:theme` | The active theme changes (`apply`)         | the new resolved theme |
 
 ## Related
 
-- [`untheme`](../../packages/untheme) — umbrella package re-exporting the core service, schema, and CSS/kit helpers.
+- [`@untheme/kit`](../../packages/kit) — builds the theme from DTCG JSON.
+- [`untheme`](../../packages/untheme) — umbrella package re-exporting the core service, schema, catalog, config and CSS helpers.
 - [`@untheme/core`](../../packages/core) — the runtime theme service `useUntheme()` returns.
-- [`@untheme/css`](../../packages/css) — the CSS renderer the plugin uses to build the stylesheet.
+- [`@untheme/css`](../../packages/css) — the CSS renderer the plugin uses to build the stylesheets.

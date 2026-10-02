@@ -1,0 +1,58 @@
+{
+  "surface": {
+    "$type": "color",
+    "$value": "{neutral-50}"
+  },
+  "on-surface": {
+    "$type": "color",
+    "$value": "{neutral-800}"
+  },
+  "on-surface-muted": {
+    "$type": "color",
+    "$value": "{neutral-600}"
+  },
+  "surface-container": {
+    "$type": "color",
+    "$value": "{neutral-100}"
+  },
+  "surface-container-high": {
+    "$type": "color",
+    "$value": "{neutral-200}"
+  },
+  "outline": {
+    "$type": "color",
+    "$value": "{neutral-variant-400}"
+  },
+  "outline-muted": {
+    "$type": "color",
+    "$value": "{neutral-variant-200}"
+  },
+  "scrim": {
+    "$type": "color",
+    "$value": "{neutral-950}"
+  },
+  "on-surface-medium-contrast": {
+    "$type": "color",
+    "$value": "{neutral-900}"
+  },
+  "on-surface-high-contrast": {
+    "$type": "color",
+    "$value": "{neutral-950}"
+  },
+  "on-surface-muted-medium-contrast": {
+    "$type": "color",
+    "$value": "{neutral-700}"
+  },
+  "on-surface-muted-high-contrast": {
+    "$type": "color",
+    "$value": "{neutral-800}"
+  },
+  "outline-medium-contrast": {
+    "$type": "color",
+    "$value": "{neutral-variant-500}"
+  },
+  "outline-high-contrast": {
+    "$type": "color",
+    "$value": "{neutral-variant-600}"
+  }
+}

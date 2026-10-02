@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 
-import { isPage, isQuery } from "../src/util";
+import { isPage, isQuery, toListing } from "../src/util";
+import { LIMIT, SORT } from "../src/constant";
 import { entries } from "./fixture";
 
 describe("isQuery", () => {
@@ -90,5 +91,25 @@ describe("isPage", () => {
   it("rejects non-records and a non-array entries", () => {
     expect(isPage([])).toBe(false);
     expect(isPage({ entries: {}, total: 0, limit: 20, offset: 0 })).toBe(false);
+  });
+});
+
+describe("toListing", () => {
+  it("fills an empty query with the default ordering and window", () => {
+    expect(toListing({})).toEqual({ sort: SORT, limit: LIMIT, offset: 0 });
+  });
+
+  it("keeps every field the query names", () => {
+    const query = {
+      search: "nord",
+      sort: { field: "id", direction: "desc" },
+      limit: 5,
+      offset: 10,
+    } as const;
+    expect(toListing(query)).toEqual(query);
+  });
+
+  it("carries no search member when the query names none", () => {
+    expect("search" in toListing({ limit: 5 })).toBe(false);
   });
 });

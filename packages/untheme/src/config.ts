@@ -5,8 +5,8 @@ import { clone, copy } from "@untheme/utils";
 /**
  * An application's untheme configuration: the base theme carrying the
  * contract and its default bindings, and the selection to boot with — one
- * context per modifier. The canonical shape every integration consumes,
- * conventionally authored in an `untheme.config.ts`.
+ * context per modifier. The canonical shape every integration consumes: what
+ * `@untheme/kit` builds from DTCG JSON and emits as its `config` module.
  */
 export interface UnthemeConfig<T extends Template> {
   /**
@@ -22,8 +22,9 @@ export interface UnthemeConfig<T extends Template> {
 }
 
 /**
- * Identity helper that types an untheme configuration and infers the token
- * and modifier unions from `theme`.
+ * Identity helper that types an untheme configuration — the built shape, a
+ * base theme and boot selection — and infers the token and modifier unions
+ * from `theme`.
  *
  * @param config - The untheme configuration.
  * @returns The same config, narrowed to its inferred types.
@@ -33,7 +34,7 @@ export const defineUnthemeConfig = <T extends Template>(
 ) => config;
 
 /**
- * Seeds a fresh runtime state container from an authored configuration: a
+ * Seeds a fresh runtime state container from a configuration: a
  * detached clone of the theme as the active theme, a detached copy of the
  * boot selection, and an empty override. Nothing is held by reference, so
  * every call yields an independent container — containers seeded for
@@ -41,7 +42,7 @@ export const defineUnthemeConfig = <T extends Template>(
  * state through the shared config.
  *
  * @param config - The untheme configuration.
- * @returns A fresh {@link Config} container, ready for `defineUntheme`.
+ * @returns A fresh {@link Config} container, ready for `makeUntheme`.
  */
 export const useUnthemeConfig = <T extends Template>(
   config: UnthemeConfig<T>,

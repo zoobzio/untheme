@@ -1,0 +1,66 @@
+{
+  "secondary": {
+    "$type": "color",
+    "$value": "{secondary-600}"
+  },
+  "on-secondary": {
+    "$type": "color",
+    "$value": "{secondary-50}"
+  },
+  "secondary-container": {
+    "$type": "color",
+    "$value": "{secondary-100}"
+  },
+  "on-secondary-container": {
+    "$type": "color",
+    "$value": "{secondary-800}"
+  },
+  "secondary-medium-contrast": {
+    "$type": "color",
+    "$value": "{secondary-700}"
+  },
+  "secondary-high-contrast": {
+    "$type": "color",
+    "$value": "{secondary-800}"
+  },
+  "on-secondary-container-medium-contrast": {
+    "$type": "color",
+    "$value": "{secondary-900}"
+  },
+  "on-secondary-container-high-contrast": {
+    "$type": "color",
+    "$value": "{secondary-950}"
+  },
+  "secondary-muted": {
+    "$type": "color",
+    "$value": "{secondary-muted-600}"
+  },
+  "secondary-vivid": {
+    "$type": "color",
+    "$value": "{secondary-vivid-600}"
+  },
+  "on-secondary-muted": {
+    "$type": "color",
+    "$value": "{secondary-muted-50}"
+  },
+  "on-secondary-vivid": {
+    "$type": "color",
+    "$value": "{secondary-vivid-50}"
+  },
+  "secondary-container-muted": {
+    "$type": "color",
+    "$value": "{secondary-muted-100}"
+  },
+  "secondary-container-vivid": {
+    "$type": "color",
+    "$value": "{secondary-vivid-100}"
+  },
+  "on-secondary-container-muted": {
+    "$type": "color",
+    "$value": "{secondary-muted-800}"
+  },
+  "on-secondary-container-vivid": {
+    "$type": "color",
+    "$value": "{secondary-vivid-800}"
+  }
+}

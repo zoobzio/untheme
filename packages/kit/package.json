@@ -15,8 +15,12 @@
       "import": "./.dist/index.mjs"
     }
   },
+  "bin": {
+    "untheme": "./bin/untheme.mjs"
+  },
   "files": [
-    ".dist"
+    ".dist",
+    "bin"
   ],
   "scripts": {
     "build": "unbuild",
@@ -26,8 +30,17 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@terrazzo/parser": "^2.4.0",
     "@untheme/core": "workspace:*",
     "@untheme/schema": "workspace:*",
-    "@untheme/utils": "workspace:*"
+    "@untheme/utils": "workspace:*",
+    "jiti": "^2.7.0",
+    "objectively": "^0.1.1"
+  },
+  "devDependencies": {
+    "@terrazzo/token-types": "^2.4.0",
+    "@types/node": "^25.9.1",
+    "@untheme/aurora": "workspace:*",
+    "@untheme/css": "workspace:*"
   }
 }

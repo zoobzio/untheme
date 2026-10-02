@@ -60,7 +60,7 @@ Two GET routes, hanging off a client's `base`:
 - `{base}/themes?q={json}` — the normalized listing, JSON-encoded in one parameter; answers a `Page`.
 - `{base}/themes/{id}` — one layer as pure JSON; answers 404 for a miss.
 
-A serving handler decodes `q`, proves it with `isQuery`, and hands it to its catalog — anything that speaks this shape can be consumed by `defineClient`, and anything built by `defineCatalog` can be served over it.
+A serving handler decodes `q`, proves it with `isQuery`, fills its gaps with `toListing`, and hands it to its catalog — anything that speaks this shape can be consumed by `defineClient`, and anything built by `defineCatalog` can be served over it.
 
 ## Related
 

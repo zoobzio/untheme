@@ -21,6 +21,14 @@
     "./constant": {
       "types": "./.dist/constant.d.ts",
       "import": "./.dist/constant.mjs"
+    },
+    "./server": {
+      "types": "./.dist/server.d.ts",
+      "import": "./.dist/server.mjs"
+    },
+    "./aurora": {
+      "types": "./.dist/aurora.d.ts",
+      "import": "./.dist/aurora.mjs"
     }
   },
   "files": [
@@ -29,22 +37,32 @@
   "scripts": {
     "build": "unbuild",
     "stub": "unbuild --stub",
+    "generate": "node scripts/aurora.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
     "@nuxt/kit": "^4.4.6",
+    "@untheme/kit": "workspace:*",
     "h3": "^1.15.11",
     "objectively": "^0.1.1",
     "untheme": "workspace:*",
     "vue": "^3.5.35"
   },
+  "peerDependencies": {
+    "@untheme/aurora": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@untheme/aurora": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@nuxt/nitro-server": "^4.4.6",
     "@nuxt/schema": "^4.4.6",
     "@types/node": "^25.9.1",
-    "nitropack": "^2.13.4",
+    "@untheme/aurora": "workspace:*",
     "nuxt": "^4.4.6"
   }
 }

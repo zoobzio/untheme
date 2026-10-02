@@ -25,10 +25,6 @@
     "./css": {
       "types": "./.dist/css.d.ts",
       "import": "./.dist/css.mjs"
-    },
-    "./kit": {
-      "types": "./.dist/kit.d.ts",
-      "import": "./.dist/kit.mjs"
     }
   },
   "files": [
@@ -45,7 +41,6 @@
     "@untheme/catalog": "workspace:*",
     "@untheme/core": "workspace:*",
     "@untheme/css": "workspace:*",
-    "@untheme/kit": "workspace:*",
     "@untheme/schema": "workspace:*",
     "@untheme/utils": "workspace:*"
   }

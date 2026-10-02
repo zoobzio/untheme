@@ -1,0 +1,35 @@
+{
+  "border-thin": {
+    "$type": "border",
+    "$value": {
+      "color": "{outline}",
+      "width": {
+        "value": 1,
+        "unit": "px"
+      },
+      "style": "{stroke-solid}"
+    }
+  },
+  "border-strong": {
+    "$type": "border",
+    "$value": {
+      "color": "{outline}",
+      "width": {
+        "value": 2,
+        "unit": "px"
+      },
+      "style": "{stroke-solid}"
+    }
+  },
+  "border-focus": {
+    "$type": "border",
+    "$value": {
+      "color": "{primary}",
+      "width": {
+        "value": 2,
+        "unit": "px"
+      },
+      "style": "{stroke-solid}"
+    }
+  }
+}

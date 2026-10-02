@@ -17,39 +17,45 @@ pnpm install
 pnpm --filter @untheme/example-nuxt dev
 ```
 
-Then open the printed URL. The libraries are aliased to their TypeScript source
-in `nuxt.config.ts`, so the example runs whether the workspace is stubbed
-(`pnpm dev`) or fully built — no separate build step needed.
+Then open the printed URL. The module builds the theme with `@untheme/kit` at
+startup, so build the workspace first (`pnpm build` from the root). The runtime
+libraries the app bundles are aliased to their TypeScript source in
+`nuxt.config.ts`.
 
 Other scripts: `build`, `preview`, `generate`, `typecheck`.
 
 ## How the theming is wired
 
-Everything untheme-specific lives in two places.
+Everything untheme-specific lives in three small files.
 
-**`untheme.config.ts`** hands the Nuxt module three things:
+**`untheme.config.ts`** points at aurora's DTCG JSON with an `npm:/` reference —
+`source: "npm:/@untheme/aurora/aurora.resolver.json"` — and nothing else. The
+[`@untheme/nuxt`](../../integrations/nuxt) module finds it, builds it through
+[`@untheme/kit`](../../packages/kit), and boots each of aurora's eight modifier
+axes (`color`, `vibrancy`, `contrast`, `text`, `density`, `radius`, `depth`,
+`motion`) at its default context. `nuxt.config.ts` sets no `untheme` options.
 
-- `base` — the theme the app boots with (`aurora`, via `preset.define(...)`).
-- `themes` — the catalog the switcher chooses from (all 31 aurora variants).
-- `input` — the initial selection, one context per modifier axis (`color`,
-  `vibrancy`, `contrast`, `text`, `density`, `radius`, `depth`, `motion`).
+**`server/api/untheme/[...path].get.ts`** serves the catalog the switcher
+chooses from — all 31 aurora themes — with `createAuroraThemeHandler()`.
+The file's folder, `/api/untheme`, is the base the catalog client in
+`app/composables/catalog.ts` points at.
 
-The [`@untheme/nuxt`](../../integrations/nuxt) module validates that config at
-build time and, on every render, flattens the active selection's tokens into
+On every render the module flattens the active selection's tokens into
 `--token` CSS variables on the document root and mirrors the selection as
 `data-<modifier>` attributes. The CSS in `app/assets/css` styles the page
 entirely against those variables, so a selection change restyles everything.
 
 ## What to read first
 
-| File                                                           | What it shows                                               |
-| -------------------------------------------------------------- | ----------------------------------------------------------- |
-| [`untheme.config.ts`](./untheme.config.ts)                     | The base theme, catalog, and default selection              |
-| [`app/composables/demo.ts`](./app/composables/demo.ts)         | `useDemo` — theme list, active-theme binding, and `shuffle` |
-| [`app/composables/controls.ts`](./app/composables/controls.ts) | `useControls` — two-way binding for one modifier axis       |
-| [`app/components/Demo.vue`](./app/components/Demo.vue)         | The demo bar that consumes both composables                 |
+| File                                                                               | What it shows                                               |
+| ---------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| [`untheme.config.ts`](./untheme.config.ts)                                         | The theme source: aurora's resolver document                |
+| [`server/api/untheme/[...path].get.ts`](./server/api/untheme/%5B...path%5D.get.ts) | The theme catalog route                                     |
+| [`app/composables/demo.ts`](./app/composables/demo.ts)                             | `useDemo` — theme list, active-theme binding, and `shuffle` |
+| [`app/composables/controls.ts`](./app/composables/controls.ts)                     | `useControls` — two-way binding for one modifier axis       |
+| [`app/components/Demo.vue`](./app/components/Demo.vue)                             | The demo bar that consumes both composables                 |
 
 Both composables call `useUntheme()` — the runtime service the module provides —
 and never touch CSS directly. `demo.ts` reads the theme catalog and drives
-`select`/`swap`; `controls.ts` binds a single axis to its allowed contexts. That
+`apply`/`swap`; `controls.ts` binds a single axis to its allowed contexts. That
 service, plus the generated variables, is the entire integration surface.

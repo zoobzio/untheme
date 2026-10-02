@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref, reactive, nextTick, type Ref } from "vue";
 import type { AppUnthemeConfig } from "../../src/runtime/types";
-import { theme, themes, input } from "../fixtures";
+import { theme, input } from "../fixtures";
 
 interface HeadInput {
   htmlAttrs: Record<string, { value: string }>;
@@ -13,14 +13,13 @@ let config: Ref<AppUnthemeConfig>;
 let cookies: Record<string, { value: unknown }>;
 const callHook = vi.fn();
 
-vi.mock("#build/untheme.mjs", () => ({
+vi.mock("#build/untheme/config.mjs", () => ({
   get theme() {
     return structuredClone(theme);
   },
   get input() {
     return structuredClone(input);
   },
-  themes,
 }));
 
 vi.mock("#app", () => ({

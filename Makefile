@@ -41,10 +41,10 @@ format: ## Format the repo with prettier
 inspect: ## Check formatting without writing (prettier --check)
 	pnpm inspect
 
-clean: ## Remove build output and example caches (.dist, .coverage, .nuxt)
+clean: ## Remove build output and example caches (.dist, .coverage, .nuxt, untheme/)
 	rm -rf .coverage
-	find packages integrations presets -maxdepth 2 -name .dist -type d -prune -exec rm -rf {} +
-	find examples -maxdepth 2 \( -name .nuxt -o -name .output \) -type d -prune -exec rm -rf {} +
+	find packages integrations -maxdepth 2 -name .dist -type d -prune -exec rm -rf {} +
+	find examples -maxdepth 2 \( -name .nuxt -o -name .output -o -name untheme \) -type d -prune -exec rm -rf {} +
 
 check: lint typecheck test ## Run lint/typecheck/test against existing build output
 

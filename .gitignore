@@ -6,3 +6,5 @@ dist
 .coverage
 *.log
 .idea
+# Theme modules `untheme build` writes in the examples
+examples/*/untheme

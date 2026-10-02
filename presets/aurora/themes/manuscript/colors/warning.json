@@ -1,0 +1,266 @@
+{
+  "warning-50": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.99608, 0.96471, 0.89804],
+      "hex": "#fef6e5"
+    }
+  },
+  "warning-100": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.97647, 0.92549, 0.80784],
+      "hex": "#f9ecce"
+    }
+  },
+  "warning-200": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.92549, 0.84314, 0.65882],
+      "hex": "#ecd7a8"
+    }
+  },
+  "warning-300": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.85098, 0.73725, 0.48235],
+      "hex": "#d9bc7b"
+    }
+  },
+  "warning-400": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.75294, 0.61961, 0.32157],
+      "hex": "#c09e52"
+    }
+  },
+  "warning-500": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.63922, 0.50588, 0.17255],
+      "hex": "#a3812c"
+    }
+  },
+  "warning-600": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.53333, 0.4, 0],
+      "hex": "#886600"
+    }
+  },
+  "warning-700": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.42353, 0.31765, 0],
+      "hex": "#6c5100"
+    }
+  },
+  "warning-800": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.32549, 0.23922, 0],
+      "hex": "#533d00"
+    }
+  },
+  "warning-900": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.23137, 0.16863, 0],
+      "hex": "#3b2b00"
+    }
+  },
+  "warning-950": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.16863, 0.11765, 0],
+      "hex": "#2b1e00"
+    }
+  },
+  "warning-muted-50": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.98039, 0.96471, 0.93725],
+      "hex": "#faf6ef"
+    }
+  },
+  "warning-muted-100": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.94902, 0.92549, 0.87451],
+      "hex": "#f2ecdf"
+    }
+  },
+  "warning-muted-200": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.88627, 0.84706, 0.76863],
+      "hex": "#e2d8c4"
+    }
+  },
+  "warning-muted-300": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.79608, 0.7451, 0.63529],
+      "hex": "#cbbea2"
+    }
+  },
+  "warning-muted-400": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.6902, 0.63529, 0.5098],
+      "hex": "#b0a282"
+    }
+  },
+  "warning-muted-500": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.57647, 0.51765, 0.39216],
+      "hex": "#938464"
+    }
+  },
+  "warning-muted-600": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.47451, 0.41569, 0.29412],
+      "hex": "#796a4b"
+    }
+  },
+  "warning-muted-700": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.38039, 0.32941, 0.21569],
+      "hex": "#615437"
+    }
+  },
+  "warning-muted-800": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.29412, 0.25098, 0.15294],
+      "hex": "#4b4027"
+    }
+  },
+  "warning-muted-900": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.21176, 0.17647, 0.09804],
+      "hex": "#362d19"
+    }
+  },
+  "warning-muted-950": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.14902, 0.12549, 0.06667],
+      "hex": "#262011"
+    }
+  },
+  "warning-vivid-50": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [1, 0.96471, 0.8902],
+      "hex": "#fff6e3"
+    }
+  },
+  "warning-vivid-100": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.99608, 0.92157, 0.75686],
+      "hex": "#feebc1"
+    }
+  },
+  "warning-vivid-200": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.95686, 0.83529, 0.57255],
+      "hex": "#f4d592"
+    }
+  },
+  "warning-vivid-300": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.8902, 0.72549, 0.3451],
+      "hex": "#e3b958"
+    }
+  },
+  "warning-vivid-400": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.79608, 0.60784, 0.03529],
+      "hex": "#cb9b09"
+    }
+  },
+  "warning-vivid-500": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.65882, 0.49804, 0],
+      "hex": "#a87f00"
+    }
+  },
+  "warning-vivid-600": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.53333, 0.4, 0],
+      "hex": "#886600"
+    }
+  },
+  "warning-vivid-700": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.42353, 0.31765, 0],
+      "hex": "#6c5100"
+    }
+  },
+  "warning-vivid-800": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.32549, 0.23922, 0],
+      "hex": "#533d00"
+    }
+  },
+  "warning-vivid-900": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.23137, 0.16863, 0],
+      "hex": "#3b2b00"
+    }
+  },
+  "warning-vivid-950": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.16863, 0.11765, 0],
+      "hex": "#2b1e00"
+    }
+  }
+}

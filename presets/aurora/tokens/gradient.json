@@ -1,0 +1,28 @@
+{
+  "gradient-brand": {
+    "$type": "gradient",
+    "$value": [
+      {
+        "color": "{primary-400}",
+        "position": 0
+      },
+      {
+        "color": "{tertiary-400}",
+        "position": 1
+      }
+    ]
+  },
+  "gradient-faint": {
+    "$type": "gradient",
+    "$value": [
+      {
+        "color": "{primary-100}",
+        "position": 0
+      },
+      {
+        "color": "{surface}",
+        "position": 1
+      }
+    ]
+  }
+}

@@ -5,7 +5,7 @@ import { theme, input } from "../fixtures";
 let states: Record<string, Ref<unknown>>;
 let cookies: Record<string, { value: unknown }>;
 
-vi.mock("#build/untheme.mjs", () => ({ theme, input }));
+vi.mock("#build/untheme/config.mjs", () => ({ theme, input }));
 
 vi.mock("#imports", () => ({
   useState: (key: string, init: () => unknown) => (states[key] ??= ref(init())),

@@ -81,7 +81,7 @@ The base template is validated against the `theme` kind at construction, so a ma
 - `Binding<T>` / `Reference<T>` / `Values<R>` — a token's value; a `{token}` reference; the value shape for every DTCG type, parameterized by reference availability (`Open` admits a `{token}` string per type, `Literal` admits none).
 - `Overrides<T>` / `Modifiers<T>` / `Input<T>` — a partial token map; the full modifier structure; a per-modifier context selection.
 - `Theme<T>` / `Layer<T>` / `Patch<T>` — the candidate shapes the kinds narrow to.
-- `Contract<Tok, Mod>` — a template parameterized by its token union and modifier structure, for inference; consumed by `extend` in [`@untheme/utils`](../utils).
+- `Contract<Tok, Mod>` — a template parameterized by its token union and modifier structure, for inference; the type [`@untheme/kit`](../kit)'s generated declarations name a built theme by.
 - `Domain<T>` — every kind mapped to the type it narrows to; `Kind` is its key.
 - `Schema<T>` — the bundle `defineSchema` returns; `Check<T>` / `Assert<T>` / `Parse<T>` / `Inspect<T>` are its per-kind families, and `Rules` is the unparameterized rule-list shape behind them.
 - `Result<V>` — an `inspect` outcome.

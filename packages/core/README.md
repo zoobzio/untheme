@@ -11,9 +11,14 @@ A theme is a flat map of tokens, each holding a `$type` and `$value`. On top of 
 ## Usage
 
 ```ts
-import { defineUntheme } from "@untheme/core";
+import { makeUntheme } from "@untheme/core";
+import type { Contract } from "./untheme/config.mjs";
 
-const ut = defineUntheme({ theme, input: { color: "dark" }, override: {} });
+const ut = makeUntheme<Contract>({
+  theme,
+  input: { color: "dark" },
+  override: {},
+});
 
 ut.resolve("primary"); // follow the alias chain to a raw value
 ut.set("background", "blue"); // write to the override layer
@@ -28,7 +33,7 @@ ut.create(draftLayer); // validate a runtime-built layer against the contract
 
 The service holds no theme collection: it knows one active theme at a time, and `apply` switches between complete layers the caller supplies. Where alternative themes live — statically imported, lazy-loaded, fetched from an API — is the caller's concern, which keeps every theme except the active one out of the running state.
 
-Presets built with [`@untheme/kit`](../kit) produce the config for you: `defineUntheme(preset.use({ color: "dark" }))`. A `configure`-widened preset's theme is machine-built rather than authored, so it boots through the factory instead: `makeUntheme(app.use({ color: "dark" }))` — the same service, accepting any complete theme of a contract.
+The theme comes from [`@untheme/kit`](../kit), which builds it from DTCG JSON: its `config` module exports the base `theme`, the boot `input`, and the `Contract` type that names the theme's tokens and modifiers. `useUnthemeConfig(config)` from `untheme/config` turns that into a fresh container — `makeUntheme<Contract>(useUnthemeConfig(config))`. The type argument is what makes token names, modifiers, and contexts autocomplete; without it the service runs over the root `Template`.
 
 ## The state container
 
@@ -36,7 +41,7 @@ The service is pure behavior: every read and write goes through `config`, the ca
 
 ## The service
 
-`defineUntheme(config, options?)` returns an `Untheme<T>`:
+`makeUntheme<T>(config, options?)` returns an `Untheme<T>`. The theme is validated against its own contract up front, and `options` can intercept each read and write of the container (`get`/`set` middleware per field):
 
 - `config` — the caller-owned container: `theme`, `input`, `override`.
 - `schema` — guard vocabulary for the theme's token contract, from [`defineSchema`](../schema).
@@ -65,7 +70,7 @@ Every boundary throws a semantic error rather than a bare `Error`, in two famili
 
 **Contract violations** — subclasses of [`SchemaError`](../schema), carrying the underlying `issues` so callers can react to each failure:
 
-- `InvalidThemeError` — the baseline theme handed to `defineUntheme` violates its own contract.
+- `InvalidThemeError` — the baseline theme handed to `makeUntheme` violates its own contract.
 - `InvalidLayerError` — a layer handed to `apply` or `create` steps outside the contract.
 - `InvalidPatchError` — a patch handed to `update` steps outside the contract.
 
@@ -79,5 +84,5 @@ Every boundary throws a semantic error rather than a bare `Error`, in two famili
 ## Related
 
 - [`@untheme/schema`](../schema) — token contract types and runtime guards.
-- [`@untheme/kit`](../kit) — authoring tool for reusable presets.
+- [`@untheme/kit`](../kit) — builds the theme from DTCG JSON.
 - [`untheme`](../untheme) — umbrella package re-exporting core and schema.

@@ -20,11 +20,14 @@ tokens you must define — bind the roles to whatever tokens you have, adding
 carrier tokens if you like.
 
 ```ts
-import { defineUntheme } from "untheme";
+import { makeUntheme } from "untheme";
+import { useUnthemeConfig } from "untheme/config";
 import { defineShikiTheme } from "@untheme/shiki";
 import { codeToHtml } from "shiki";
+import config, { type Contract } from "./untheme/config.mjs";
 
-const untheme = defineUntheme(config, themes);
+// The theme `untheme build` wrote from your DTCG JSON, carrying code-* tokens.
+const untheme = makeUntheme<Contract>(useUnthemeConfig(config));
 
 // Bind LSP roles to tokens in your contract. Roles autocomplete; unmapped ones
 // render at the default foreground. Many-to-one is fine — reuse a token to

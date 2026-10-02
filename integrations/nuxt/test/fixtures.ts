@@ -1,17 +1,17 @@
-import type { Token, Mod } from "#build/types/untheme.d.ts";
-import type { Contract, Layer } from "untheme";
+import type { Contract } from "#build/untheme/config.mjs";
+import type { Layer } from "untheme";
 
 /**
  * Shared test fixtures: the valid base theme and initial selection from the
- * build stub, whose token shape matches the stub's `#build/types` unions.
+ * build stub, whose token shape matches the stub's `#build/untheme` unions.
  */
-export { theme, input } from "../src/stubs/build/untheme.mjs";
+export { theme, input } from "../src/stubs/build/untheme/config.mjs";
 
 /**
- * A switchable catalog: layers inside the stub's contract, keyed the way an
- * app authors `untheme.themes`.
+ * A switchable catalog: layers inside the stub's contract, keyed by id the
+ * way a theme provider serves them.
  */
-export const themes: Record<string, Layer<Contract<Token, Mod>>> = {
+export const themes: Record<string, Layer<Contract>> = {
   bravo: {
     id: "bravo",
     name: "Bravo",

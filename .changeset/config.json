@@ -16,7 +16,6 @@
       "@untheme/nuxt",
       "@untheme/shiki",
       "@untheme/codemirror",
-      "@untheme/terrazzo",
       "@untheme/aurora"
     ]
   ],
@@ -25,7 +24,6 @@
   "ignore": [
     "@untheme/example-codemirror",
     "@untheme/example-nuxt",
-    "@untheme/example-shiki",
-    "@untheme/example-terrazzo"
+    "@untheme/example-shiki"
   ]
 }

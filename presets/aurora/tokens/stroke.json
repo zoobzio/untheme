@@ -1,0 +1,22 @@
+{
+  "stroke-solid": {
+    "$type": "strokeStyle",
+    "$value": "solid"
+  },
+  "stroke-dashed": {
+    "$type": "strokeStyle",
+    "$value": {
+      "dashArray": [
+        {
+          "value": 4,
+          "unit": "px"
+        },
+        {
+          "value": 2,
+          "unit": "px"
+        }
+      ],
+      "lineCap": "round"
+    }
+  }
+}

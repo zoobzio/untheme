@@ -7,10 +7,10 @@ Renders a theme's tokens to CSS custom properties.
 ## Usage
 
 ```ts
-import { defineUntheme } from "@untheme/core";
+import { makeUntheme } from "@untheme/core";
 import { defineRenderer } from "@untheme/css";
 
-const untheme = defineUntheme(config, themes);
+const untheme = makeUntheme<Contract>(config);
 const renderer = defineRenderer(untheme);
 
 renderer.root();

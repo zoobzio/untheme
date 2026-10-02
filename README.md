@@ -16,35 +16,62 @@ by a schema derived from the theme itself.
 ## Anatomy
 
 A theme is a flat map of DTCG token definitions, modifier axes whose contexts
-rebind subsets of them, and an order fixing composition precedence. The
-runtime service resolves tokens through the active selection:
+rebind subsets of them, and an order fixing composition precedence. Themes are
+authored as standard DTCG JSON — token files, and a
+[resolver document](https://www.designtokens.org/tr/2025.10/resolver/) that
+declares the modifiers:
+
+```json
+{
+  "name": "App",
+  "version": "2025.10",
+  "sets": {
+    "base": { "sources": [{ "$ref": "./tokens.json" }] }
+  },
+  "modifiers": {
+    "color": {
+      "contexts": {
+        "light": [],
+        "dark": [{ "primary": { "$type": "color", "$value": "{blue-200}" } }]
+      },
+      "default": "light"
+    }
+  },
+  "resolutionOrder": [
+    { "$ref": "#/sets/base" },
+    { "$ref": "#/modifiers/color" }
+  ]
+}
+```
+
+One `untheme.config.ts` points at it, and [`@untheme/kit`](./packages/kit)
+builds it:
 
 ```ts
-import { defineUntheme } from "untheme";
+// untheme.config.ts
+import { defineConfig } from "@untheme/kit";
 
-const untheme = defineUntheme({
-  theme: {
-    id: "app",
-    name: "App",
-    tokens: {
-      "blue-600": {
-        $type: "color",
-        $value: { colorSpace: "srgb", components: [0.15, 0.35, 0.9] },
-      },
-      "blue-200": {
-        $type: "color",
-        $value: { colorSpace: "srgb", components: [0.7, 0.8, 1] },
-      },
-      primary: { $type: "color", $value: "{blue-600}" },
-    },
-    modifiers: {
-      color: { light: {}, dark: { primary: "{blue-200}" } },
-    },
-    order: ["color"],
-  },
-  input: { color: "light" },
-  override: {},
-});
+export default defineConfig({ source: "./tokens/app.resolver.json" });
+```
+
+```sh
+untheme build
+```
+
+The build reads the documents with `@terrazzo/parser`, converts them to an
+untheme theme, validates it, proves it against Terrazzo's own resolution, and
+writes two modules with declarations into `untheme/`: `index.mjs` (the `Token`
+union, modifier and context types, guards) and `config.mjs` (the base theme
+and the boot selection — each modifier's `default` context). The runtime
+packages never touch Terrazzo; they consume the built config:
+
+```ts
+import { makeUntheme } from "untheme";
+import { useUnthemeConfig } from "untheme/config";
+
+import config, { type Contract } from "./untheme/config.mjs";
+
+const untheme = makeUntheme<Contract>(useUnthemeConfig(config));
 
 untheme.resolve("primary"); // the blue-600 color object
 untheme.swap("color", "dark"); // primary now follows {blue-200}
@@ -62,29 +89,20 @@ renderer.root(); // :root block over the active bindings
 renderer.sheet(); // static cascade: base + per-context attribute blocks
 ```
 
-Reusable presets — a base contract plus a catalog of variant layers — are
-authored with the kit (`untheme/kit`); the [aurora](./presets/aurora) preset
-is the reference: eight modifier axes over eight tonal ramps, with a large
-catalog of themes that each rebind only the ramps.
+The [aurora](./presets/aurora) preset is the reference theme: eight modifier
+axes over eight tonal ramps, shipped as DTCG JSON with 31 themes that each
+rebind only the ramps. Point a config at it with an `npm:/` reference —
+`source: "npm:/@untheme/aurora/aurora.resolver.json"` — or list its files in a
+resolver of your own to add tokens on top.
 
 ## Workspace
 
-| Directory                        | Contents                                                                                                                        |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| [`packages`](./packages)         | The library: the public [`untheme`](./packages/untheme) package and the internals behind it                                     |
-| [`presets`](./presets)           | Reusable presets — [`@untheme/aurora`](./presets/aurora) is the reference                                                       |
-| [`integrations`](./integrations) | Framework bridges — the Nuxt module, Shiki and CodeMirror highlighting, and the terrazzo DTCG codegen                           |
-| [`examples`](./examples)         | A themeable Nuxt app, Shiki and CodeMirror highlighting demos, and a terrazzo pipeline compiling DTCG JSON to an untheme config |
-
-## From DTCG token JSON
-
-Teams that already maintain DTCG token documents (with a resolver document
-describing modifiers) can generate their untheme configuration instead of
-authoring it: the [`@untheme/terrazzo`](./integrations/terrazzo) plugin
-compiles token JSON to an `untheme.config.ts`, keeping aliases live and
-proving the translation against Terrazzo's own resolution. See
-[`examples/terrazzo`](./examples/terrazzo) for the aurora preset expressed
-entirely as token JSON.
+| Directory                        | Contents                                                                                                    |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| [`packages`](./packages)         | The library: the public [`untheme`](./packages/untheme) package, the internals behind it, and the build kit |
+| [`presets`](./presets)           | Reusable presets as DTCG JSON — [`@untheme/aurora`](./presets/aurora) is the reference                      |
+| [`integrations`](./integrations) | Framework bridges — the Nuxt module, and Shiki and CodeMirror highlighting                                  |
+| [`examples`](./examples)         | A themeable Nuxt app, and Shiki and CodeMirror highlighting demos                                           |
 
 ## Development
 

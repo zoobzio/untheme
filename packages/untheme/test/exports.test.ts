@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import * as catalog from "@untheme/catalog";
 import * as core from "@untheme/core";
 import * as css from "@untheme/css";
-import * as kit from "@untheme/kit";
 import * as schema from "@untheme/schema";
 import * as utils from "@untheme/utils";
 
@@ -11,7 +10,6 @@ import * as root from "../src/index";
 import * as catalogSubpath from "../src/catalog";
 import * as configSubpath from "../src/config";
 import * as cssSubpath from "../src/css";
-import * as kitSubpath from "../src/kit";
 
 /* ESM silently drops a name exported by more than one module in an
    `export *` set; these guards fail loudly instead. */
@@ -36,15 +34,12 @@ describe("star-export composition", () => {
     }
   });
 
-  it("mirrors catalog, css, and kit under their subpaths", () => {
+  it("mirrors catalog and css under their subpaths", () => {
     for (const name of Object.keys(catalog)) {
       expect.soft(catalogSubpath, name).toHaveProperty(name);
     }
     for (const name of Object.keys(css)) {
       expect.soft(cssSubpath, name).toHaveProperty(name);
-    }
-    for (const name of Object.keys(kit)) {
-      expect.soft(kitSubpath, name).toHaveProperty(name);
     }
   });
 

@@ -20,8 +20,7 @@ export const zero = { value: 0, unit: "px" } as const;
 /**
  * A complete base theme with structured `$value`s that exercise deep copying:
  * a color's components array, a layered shadow list, a dimension, plus alias
- * references. Two modifier axes carry bare-binding overrides. Serves both as a
- * theme (for clone/merge/diff) and as a base contract (for extend).
+ * references. Two modifier axes carry bare-binding overrides.
  */
 export const theme: Contract<Tok, Mod> = {
   id: "demo",

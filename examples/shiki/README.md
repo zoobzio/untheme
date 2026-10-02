@@ -4,11 +4,17 @@ Shows the two halves a [`@untheme/shiki`](../../integrations/shiki) theme needs:
 **carrier tokens** to hold the colors, and the **interchange** binding LSP
 semantic token types to them.
 
-The carriers come from the [aurora](../../presets/aurora) preset, widened with
-`configure`. [`src/preset.ts`](./src/preset.ts) adds a `syntax-*` token group
-whose members reference aurora's tonal ramps and rebind for the dark context —
-authored exactly like aurora's own roles, so the colors flip light↔dark through
-the same modifier axis as everything else.
+The carriers come from the [aurora](../../presets/aurora) preset, widened in
+DTCG JSON. [`tokens/syntax.json`](./tokens/syntax.json) adds a `syntax-*` token
+group whose members reference aurora's tonal ramps, and
+[`tokens/syntax-dark.json`](./tokens/syntax-dark.json) rebinds them for the dark
+context — authored exactly like aurora's own roles, so the colors flip
+light↔dark through the same modifier axis as everything else.
+[`tokens/aurora-syntax.resolver.json`](./tokens/aurora-syntax.resolver.json)
+lists aurora's files from its package (`npm:/@untheme/aurora/...`) and adds
+these two: the syntax set after aurora's, and the dark file in the dark color
+context. [`untheme.config.ts`](./untheme.config.ts) points at that resolver,
+and `untheme build` writes the theme to `untheme/`.
 
 The interchange is the app's to own. [`src/generate.ts`](./src/generate.ts)
 maps each LSP role onto a carrier — many-to-one, reusing the `type` carrier for
@@ -37,7 +43,7 @@ const theme = defineShikiTheme(
 pnpm generate
 ```
 
-Builds `.dist/index.html`: aurora's full cascade in a `<style>` block, a code
+Runs `untheme build`, then builds `.dist/index.html`: aurora's full cascade in a `<style>` block, a code
 sample highlighted by the generated theme, and a light/dark toggle. Flipping it
 flips a single `data-color` attribute — the highlighted code re-themes through
 the custom-property graph, with no re-highlight.

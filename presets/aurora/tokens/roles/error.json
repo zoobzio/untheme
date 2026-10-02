@@ -1,0 +1,66 @@
+{
+  "error": {
+    "$type": "color",
+    "$value": "{error-600}"
+  },
+  "on-error": {
+    "$type": "color",
+    "$value": "{error-50}"
+  },
+  "error-container": {
+    "$type": "color",
+    "$value": "{error-100}"
+  },
+  "on-error-container": {
+    "$type": "color",
+    "$value": "{error-800}"
+  },
+  "error-medium-contrast": {
+    "$type": "color",
+    "$value": "{error-700}"
+  },
+  "error-high-contrast": {
+    "$type": "color",
+    "$value": "{error-800}"
+  },
+  "on-error-container-medium-contrast": {
+    "$type": "color",
+    "$value": "{error-900}"
+  },
+  "on-error-container-high-contrast": {
+    "$type": "color",
+    "$value": "{error-950}"
+  },
+  "error-muted": {
+    "$type": "color",
+    "$value": "{error-muted-600}"
+  },
+  "error-vivid": {
+    "$type": "color",
+    "$value": "{error-vivid-600}"
+  },
+  "on-error-muted": {
+    "$type": "color",
+    "$value": "{error-muted-50}"
+  },
+  "on-error-vivid": {
+    "$type": "color",
+    "$value": "{error-vivid-50}"
+  },
+  "error-container-muted": {
+    "$type": "color",
+    "$value": "{error-muted-100}"
+  },
+  "error-container-vivid": {
+    "$type": "color",
+    "$value": "{error-vivid-100}"
+  },
+  "on-error-container-muted": {
+    "$type": "color",
+    "$value": "{error-muted-800}"
+  },
+  "on-error-container-vivid": {
+    "$type": "color",
+    "$value": "{error-vivid-800}"
+  }
+}

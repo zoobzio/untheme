@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { defineUntheme } from "untheme";
+import type { Contract } from "untheme";
+
+import { makeUntheme } from "untheme";
 
 import { defineShikiTheme } from "../src/theme";
 import { SyntaxMappingError } from "../src/error";
@@ -30,7 +32,7 @@ const tokens: Record<string, ColorDef | NumberDef> = {
 };
 
 const schema = () => {
-  const untheme = defineUntheme({
+  const untheme = makeUntheme<Contract<string, Record<never, never>>>({
     theme: { id: "t", name: "T", tokens, modifiers: {}, order: [] },
     input: {},
     override: {},

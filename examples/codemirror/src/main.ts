@@ -1,4 +1,5 @@
 import { makeUntheme } from "untheme";
+import { useUnthemeConfig } from "untheme/config";
 import { defineRenderer } from "untheme/css";
 import { defineCodeMirrorTheme } from "@untheme/codemirror";
 import type { TagMap } from "@untheme/codemirror";
@@ -6,25 +7,15 @@ import { EditorView, lineNumbers } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { javascript } from "@codemirror/lang-javascript";
 
-import { syntax } from "./preset";
+import config from "../untheme/config.mjs";
+import type { Contract } from "../untheme/config.mjs";
 
 /*
- * Boot the aurora preset widened with syntax carriers, at its default
- * selection. The renderer emits the whole cascade — ramps, roles, and the
- * syntax-* carriers — as custom properties.
+ * Boot aurora widened with syntax carriers — the theme `untheme build` wrote
+ * to `untheme/` — at its default selection. The renderer emits the whole
+ * cascade — ramps, roles, and the syntax-* carriers — as custom properties.
  */
-const untheme = makeUntheme(
-  syntax.use({
-    color: "light",
-    vibrancy: "balanced",
-    contrast: "default",
-    text: "md",
-    density: "default",
-    radius: "default",
-    depth: "default",
-    motion: "default",
-  }),
-);
+const untheme = makeUntheme<Contract>(useUnthemeConfig(config));
 
 const renderer = defineRenderer(untheme);
 
@@ -50,11 +41,9 @@ button { font: inherit; padding: 0.5rem 1rem; margin-bottom: 1.5rem;
 document.head.appendChild(style);
 
 /*
- * The interchange: Lezer tag names → the preset's carrier tokens. Many-to-one,
+ * The interchange: Lezer tag names → the theme's carrier tokens. Many-to-one,
  * surfacing only the distinctions this theme wants.
  */
-type Contract = ReturnType<typeof syntax.use>["theme"];
-
 const MAP: TagMap<Contract> = {
   keyword: "syntax-keyword",
   controlKeyword: "syntax-keyword",
@@ -96,7 +85,7 @@ const theme = defineCodeMirrorTheme(untheme.schema, MAP, {
 });
 
 const SAMPLE = `// A themed greeter
-import { defineUntheme } from "untheme";
+import { makeUntheme } from "untheme";
 
 type Mode = "light" | "dark";
 

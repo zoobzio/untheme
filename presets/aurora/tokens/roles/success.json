@@ -1,0 +1,66 @@
+{
+  "success": {
+    "$type": "color",
+    "$value": "{success-600}"
+  },
+  "on-success": {
+    "$type": "color",
+    "$value": "{success-50}"
+  },
+  "success-container": {
+    "$type": "color",
+    "$value": "{success-100}"
+  },
+  "on-success-container": {
+    "$type": "color",
+    "$value": "{success-800}"
+  },
+  "success-medium-contrast": {
+    "$type": "color",
+    "$value": "{success-700}"
+  },
+  "success-high-contrast": {
+    "$type": "color",
+    "$value": "{success-800}"
+  },
+  "on-success-container-medium-contrast": {
+    "$type": "color",
+    "$value": "{success-900}"
+  },
+  "on-success-container-high-contrast": {
+    "$type": "color",
+    "$value": "{success-950}"
+  },
+  "success-muted": {
+    "$type": "color",
+    "$value": "{success-muted-600}"
+  },
+  "success-vivid": {
+    "$type": "color",
+    "$value": "{success-vivid-600}"
+  },
+  "on-success-muted": {
+    "$type": "color",
+    "$value": "{success-muted-50}"
+  },
+  "on-success-vivid": {
+    "$type": "color",
+    "$value": "{success-vivid-50}"
+  },
+  "success-container-muted": {
+    "$type": "color",
+    "$value": "{success-muted-100}"
+  },
+  "success-container-vivid": {
+    "$type": "color",
+    "$value": "{success-vivid-100}"
+  },
+  "on-success-container-muted": {
+    "$type": "color",
+    "$value": "{success-muted-800}"
+  },
+  "on-success-container-vivid": {
+    "$type": "color",
+    "$value": "{success-vivid-800}"
+  }
+}

@@ -1,13 +1,13 @@
-import type { Token, Mod } from "#build/types/untheme.d.ts";
-import type { AppUntheme, UnthemeNuxtApp } from "./types";
+import type { AppUntheme, AppUnthemeContract, UnthemeNuxtApp } from "./types";
 
-import { defineUntheme } from "untheme";
+// The core constructor, renamed: this module's own `makeUntheme` wraps it.
+import { makeUntheme as makeService } from "untheme";
 import { accessUntheme } from "./store";
 
 export const makeUntheme = (nuxtApp: UnthemeNuxtApp): AppUntheme => {
   const { config, cookies } = accessUntheme();
 
-  const service = defineUntheme<Token, Mod>(config.value, {
+  const service = makeService<AppUnthemeContract>(config.value, {
     set: {
       config: {
         theme: (theme) => {

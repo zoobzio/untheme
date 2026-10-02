@@ -1,13 +1,12 @@
 import type { Layer, Schema, Template } from "@untheme/schema";
-import type { Catalog, Page, Provider, Query, Listing } from "./types";
+import type { Catalog, Page, Provider, Query } from "./types";
 
 import {
   MalformedLayerError,
   MalformedPageError,
   MalformedQueryError,
 } from "./error";
-import { SORT, LIMIT } from "./constant";
-import { isPage, isQuery } from "./util";
+import { isPage, isQuery, toListing } from "./util";
 
 /**
  * Creates a {@link Catalog} from storage callbacks — the serving angle, and
@@ -39,16 +38,7 @@ export const defineCatalog = <T extends Template>(
       throw new MalformedQueryError(query);
     }
 
-    const listing: Listing = {
-      sort: query.sort ?? SORT,
-      limit: query.limit ?? LIMIT,
-      offset: query.offset ?? 0,
-    };
-    if (query.search !== undefined) {
-      listing.search = query.search;
-    }
-
-    const value = await provider.list(listing);
+    const value = await provider.list(toListing(query));
     if (!isPage(value)) {
       throw new MalformedPageError(value);
     }

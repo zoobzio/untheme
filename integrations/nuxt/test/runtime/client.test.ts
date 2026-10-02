@@ -11,11 +11,10 @@ let nuxtApp: { callHook: ReturnType<typeof vi.fn> };
 // A getter clones on every access so each `makeUntheme` seeds a fresh theme;
 // otherwise mutations from one test (the service writes through the reactive
 // proxy) would pollute the shared baseline read by the next.
-vi.mock("#build/untheme.mjs", () => ({
+vi.mock("#build/untheme/config.mjs", () => ({
   get theme() {
     return structuredClone(theme);
   },
-  themes,
   input,
 }));
 

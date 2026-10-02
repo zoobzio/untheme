@@ -29,11 +29,9 @@ import {
 
 /**
  * Builds the runtime {@link Untheme} service over a state container, for
- * any complete theme of a contract — an authored contract via
- * {@link defineUntheme}, or a machine-built theme (a `configure`-widened
- * preset, a merged theme) whose slot bindings only the runtime schema can
- * rule on. The theme is validated against its own contract up front either
- * way.
+ * any complete theme of a contract — typically the base theme `@untheme/kit`
+ * built from DTCG JSON, typed by the `Contract` its declarations carry. The
+ * theme is validated against its own contract up front.
  *
  * Every read and write goes through `proxy`, so the caller decides whether
  * state is plain (tests, node) or a reactive proxy (Vue); `options` can

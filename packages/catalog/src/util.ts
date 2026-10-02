@@ -1,6 +1,8 @@
-import type { Entry, Page, Query, Sort } from "./types";
+import type { Entry, Listing, Page, Query, Sort } from "./types";
 
 import { record } from "objectively";
+
+import { LIMIT, SORT } from "./constant";
 
 /**
  * Whether a value is a whole non-negative count — the shape shared by
@@ -64,6 +66,23 @@ export const isQuery = (value: unknown): value is Query => {
     return false;
   }
   return value.offset === undefined || isCount(value.offset);
+};
+
+/**
+ * Fills a query's gaps with the default ordering and window, yielding the
+ * concrete {@link Listing} a source answers. `search` is carried only when
+ * the query names one, so an unfiltered listing has no `search` member.
+ */
+export const toListing = (query: Query): Listing => {
+  const listing: Listing = {
+    sort: query.sort ?? SORT,
+    limit: query.limit ?? LIMIT,
+    offset: query.offset ?? 0,
+  };
+  if (query.search !== undefined) {
+    listing.search = query.search;
+  }
+  return listing;
 };
 
 /**

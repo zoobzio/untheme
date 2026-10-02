@@ -16,27 +16,6 @@ merge(theme, layer); // layer carries id/name → identity adopted (apply)
 merge(theme, layer, patch); // layer applied, then patched — last binding wins
 ```
 
-### `extend(base, extension)`
-
-Widens a base contract with an extension into a fresh contract over the union token and modifier sets. New tokens and new modifiers join; existing tokens are overridden; existing modifier contexts are deep-merged leaf by leaf, so the base's other tokens in that context are kept. The `order` the extension lists wins — any modifier it names is dropped from the base order, then the extension's order is appended. Neither input is mutated.
-
-```ts
-import { extend } from "@untheme/utils";
-
-const wide = extend(base, {
-  id: "wide",
-  name: "Wide",
-  tokens: { accent: "#0090ff", bg: "{accent}" }, // new token + override existing
-  modifiers: {
-    color: { dark: { fg: "{accent}" } }, // override an existing context (leaf)
-    density: { compact: {}, cozy: {} }, // a new modifier
-  },
-  order: ["density", "color"],
-});
-```
-
-Unlike `merge`, which stays within one contract, `extend` is the widening primitive: the result's token and modifier sets grow to include the extension's.
-
 ### `diff(from, to)`
 
 Computes the patch that turns `from` into `to`: every binding `to` holds that deviates from `from`, token by token and context by context. At the token level only the bound `$value` is compared and emitted — a token's metadata cannot drift through the patch pipeline. Identity and order are not compared. Empty maps mean the themes bind identically; applying the result to `from` via `merge` restores every binding `to` carries. A patch can add and override, never remove — a context override `from` holds that `to` dropped survives the restoration, and identity, order, and slot metadata are not part of it.
@@ -50,7 +29,7 @@ merge(pristine, deviation); // ≅ edited
 
 ## Primitives
 
-Supporting helpers that `merge`, `extend`, and `diff` are built on.
+Supporting helpers that `merge` and `diff` are built on.
 
 ### `clone(theme)`
 
@@ -72,12 +51,11 @@ The entries of `to` that deviate from `from`: every key `to` holds whose value i
 
 ### `traverse(modifiers, fn)`
 
-Rebuilds a modifiers structure leaf by leaf: every context of every modifier is mapped through the callback, each modifier keeping its own context keys. The callback's `at` accessor indexes another (possibly sparse) modifiers structure at the same modifier/context coordinates, so a leaf can be combined with its counterpart elsewhere. This is the primitive `diff`, `merge`, and `extend` are all built on.
+Rebuilds a modifiers structure leaf by leaf: every context of every modifier is mapped through the callback, each modifier keeping its own context keys. The callback's `at` accessor indexes another (possibly sparse) modifiers structure at the same modifier/context coordinates, so a leaf can be combined with its counterpart elsewhere. This is the primitive `diff` and `merge` are both built on.
 
 ## Types
 
 - `Overlay<T>` — the shape `merge` accepts: any subset of identity, tokens, modifiers, and order. Both a `Layer` and a `Patch` from [`@untheme/schema`](../schema) fit it.
-- `Extension<Tok, Mod, XTok, XMod>` — the shape `extend` accepts: new tokens (`XTok`) and new modifiers (`XMod`) over a base contract's tokens (`Tok`) and modifiers (`Mod`). An existing base token accepts an optional bare binding that rebinds its `$value` only; a new token requires a full slot definition. New modifier axes carry their complete context maps; existing axes take optional overrides.
 - `Diff<T>` — the shape `diff` returns: token and per-context override maps, always present (empty when nothing deviates).
 
 ## Related

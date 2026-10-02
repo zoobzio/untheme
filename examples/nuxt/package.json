@@ -17,6 +17,7 @@
     "untheme": "workspace:*"
   },
   "devDependencies": {
+    "@untheme/kit": "workspace:*",
     "vue-tsc": "^3.3.5"
   }
 }

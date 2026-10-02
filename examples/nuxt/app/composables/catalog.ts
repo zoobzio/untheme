@@ -1,8 +1,13 @@
 import { defineClient } from "untheme/catalog";
-import { MOUNT } from "@untheme/nuxt/constant";
 
 /**
- * The catalog client over the endpoints the untheme module serves. Entries
+ * The base of the catalog route: the folder of
+ * `server/api/untheme/[...path].get.ts`.
+ */
+const BASE = "/api/untheme";
+
+/**
+ * The catalog client over the app's theme route. Entries
  * feed the theme picker; payloads are fetched on demand when a theme is
  * applied — never bundled with the app. The client speaks native `fetch`
  * and reads responses itself, so the transport must hand over unconsumed
@@ -29,5 +34,5 @@ export const useCatalog = () => {
     return globalThis.fetch(url, init);
   };
 
-  return defineClient(untheme.schema, { base: MOUNT, fetch: transport });
+  return defineClient(untheme.schema, { base: BASE, fetch: transport });
 };

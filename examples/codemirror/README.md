@@ -5,8 +5,11 @@ with a light/dark toggle — the runtime counterpart to the static
 [shiki example](../shiki).
 
 The carrier tokens come from the [aurora](../../presets/aurora) preset widened
-with `configure` (shared with the shiki example's `src/preset.ts`).
-[`src/main.ts`](./src/main.ts) injects the renderer's cascade as a `<style>`,
+in DTCG JSON — the same `tokens/` files as the shiki example: aurora's files
+listed from its package by a resolver of its own, plus a `syntax-*` group and
+its dark bindings. `untheme build` writes the theme to `untheme/` before the
+dev server starts. [`src/main.ts`](./src/main.ts) boots it, injects the
+renderer's cascade as a `<style>`,
 maps Lezer tag names onto the carriers, and mounts an editor with the resulting
 extensions plus `@codemirror/lang-javascript`.
 

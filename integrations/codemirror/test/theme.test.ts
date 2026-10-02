@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { tags } from "@lezer/highlight";
-import { defineUntheme } from "untheme";
+import type { Contract } from "untheme";
+
+import { makeUntheme } from "untheme";
 
 import { defineCodeMirrorTheme } from "../src/theme";
 import { highlightRules } from "../src/util";
@@ -27,7 +29,7 @@ const tokens: Record<string, ColorDef | NumberDef> = {
 };
 
 const schema = () => {
-  const untheme = defineUntheme({
+  const untheme = makeUntheme<Contract<string, Record<never, never>>>({
     theme: { id: "t", name: "T", tokens, modifiers: {}, order: [] },
     input: {},
     override: {},

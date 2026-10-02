@@ -3,7 +3,7 @@ import type { Issue } from "@untheme/schema";
 import { SchemaError } from "@untheme/schema";
 
 /**
- * Raised when the base theme handed to {@link defineUntheme} violates its own
+ * Raised when the base theme handed to {@link makeUntheme} violates its own
  * contract. Extends {@link SchemaError}, so it carries the underlying
  * {@link Issue}s while naming *which* boundary rejected the value.
  */

@@ -1,11 +1,12 @@
-import type { Token, Mod } from "#build/types/untheme.d.ts";
-import type { Config, Contract, Input, Layer, Theme, Untheme } from "untheme";
+import type { Contract } from "#build/untheme/config.mjs";
+import type { Config, Input, Layer, Theme, Untheme } from "untheme";
 import type { Renderer } from "untheme/css";
 
 /**
- * The active token contract, derived from the build-time template.
+ * The active token contract: the `Contract` the build-time `config` module
+ * declares over its token and modifier unions.
  */
-export type AppUnthemeContract = Contract<Token, Mod>;
+export type AppUnthemeContract = Contract;
 
 /**
  * A resolved theme instance with typed token keys.

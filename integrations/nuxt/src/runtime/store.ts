@@ -2,7 +2,10 @@ import type { AppUnthemeConfig, AppUnthemeInput } from "./types";
 
 import { clone, copy } from "untheme";
 import { useCookie, useState } from "#imports";
-import { theme as buildTheme, input as buildInput } from "#build/untheme.mjs";
+import {
+  theme as buildTheme,
+  input as buildInput,
+} from "#build/untheme/config.mjs";
 
 /**
  * The per-request state and cookies the plugin and composable share. The
