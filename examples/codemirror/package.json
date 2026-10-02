@@ -8,7 +8,7 @@
     "dev": "untheme build && vite",
     "build": "untheme build && vite build",
     "typecheck": "untheme build && tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "oxlint"
   },
   "dependencies": {
     "@codemirror/language": "^6.12.3",

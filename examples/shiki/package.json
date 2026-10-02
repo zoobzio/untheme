@@ -7,7 +7,7 @@
     "theme": "untheme build",
     "generate": "untheme build && jiti src/generate.ts",
     "typecheck": "untheme build && tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "oxlint"
   },
   "dependencies": {
     "@untheme/aurora": "workspace:*",
