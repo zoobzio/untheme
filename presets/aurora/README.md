@@ -212,7 +212,7 @@ Modern open palettes: `flexoki`, `oxocarbon`.
 
 A theme's files are normal DTCG token files. As a layer, a theme is its `id`
 and `name` from the manifest and each token's `$value` as its binding — what
-`createAuroraThemeHandler` from `@untheme/nuxt/aurora` serves, so an app can
+the [Nuxt example](../../examples/nuxt)'s theme handler serves, so an app can
 switch between all of them. A resolver of your own can also list a theme's
 files as a set, after aurora's ramps, to build with that palette as its base.
 
@@ -240,10 +240,11 @@ nothing behind.
 Aurora has no tests of its own: it is the test fixture of
 [`@untheme/kit`](../../packages/kit), whose suite builds it, proves every
 context, and checks the contrast and vibrancy channels. After regenerating,
-also regenerate the theme map in `@untheme/nuxt` (`pnpm generate` there).
+also regenerate the Nuxt example's theme map (`pnpm generate:themes` in
+`examples/nuxt`).
 
 ## Related
 
 - [`@untheme/kit`](../../packages/kit) — builds this preset into a theme.
-- [`@untheme/nuxt`](../../integrations/nuxt) — serves its themes with
-  `createAuroraThemeHandler`.
+- [Nuxt example](../../examples/nuxt) — serves its themes over the catalog
+  protocol.

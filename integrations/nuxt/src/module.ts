@@ -37,8 +37,7 @@ import { closest, loadTheme } from "./theme";
  *
  * It registers no server routes. An app that serves a theme catalog mounts
  * one itself, in a server route file of its choosing, with
- * `createThemeHandler` from `@untheme/nuxt/server` (or
- * `createAuroraThemeHandler` from `@untheme/nuxt/aurora`).
+ * `createThemeHandler` from `@untheme/nuxt/server`.
  */
 export default defineNuxtModule<NuxtUnthemeConfig>({
   meta: {

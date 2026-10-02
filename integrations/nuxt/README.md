@@ -111,16 +111,7 @@ Put the file in the folder above `themes` — `server/api/untheme/[...path].get.
 
 ### Aurora's themes
 
-An app built on [aurora](../../presets/aurora) can serve all 31 of its themes with no provider at all:
-
-```ts
-// server/api/untheme/[...path].get.ts
-import { createAuroraThemeHandler } from "@untheme/nuxt/aurora";
-
-export default createAuroraThemeHandler();
-```
-
-It lists aurora's manifest and answers each theme as a layer built from its JSON files — plain JSON reads, one lazy import per file, so the server bundle loads a theme's files only when it is requested. `@untheme/aurora` is an optional peer dependency: install it to use this entry. Each layer rebinds aurora's ramp tokens, so the app's contract must carry every one of aurora's ramps for the client to accept it.
+To serve all 31 [aurora](../../presets/aurora) themes, see the [Nuxt example](../../examples/nuxt): its `server/aurora` folder builds a handler over aurora's theme files with `createThemeHandler`, which you can copy into your app.
 
 ## CSS
 

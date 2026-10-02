@@ -40,6 +40,12 @@ chooses from — all 31 aurora themes — with `createAuroraThemeHandler()`.
 The file's folder, `/api/untheme`, is the base the catalog client in
 `app/composables/catalog.ts` points at.
 
+**`server/aurora/`** defines that handler: `createThemeHandler` from
+`@untheme/nuxt/server` over aurora's theme manifest, with one lazy JSON import
+per theme file so the server bundle loads a theme only when it is requested.
+`files.ts` is generated from aurora's theme folders — rerun
+`pnpm generate:themes` after aurora's themes change.
+
 On every render the module flattens the active selection's tokens into
 `--token` CSS variables on the document root and mirrors the selection as
 `data-<modifier>` attributes. The CSS in `app/assets/css` styles the page

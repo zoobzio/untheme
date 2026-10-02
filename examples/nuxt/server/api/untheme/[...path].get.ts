@@ -1,4 +1,4 @@
-import { createAuroraThemeHandler } from "@untheme/nuxt/aurora";
+import { createAuroraThemeHandler } from "../../aurora";
 
 /**
  * The theme catalog: all 31 aurora themes over the catalog wire protocol —

@@ -3,7 +3,7 @@ import type { Entry } from "untheme/catalog";
 
 import manifest from "@untheme/aurora/themes/index.json" with { type: "json" };
 
-import { createThemeHandler, listEntries } from "../server";
+import { createThemeHandler, listEntries } from "@untheme/nuxt/server";
 import { files } from "./files";
 
 /**
@@ -58,7 +58,7 @@ export const auroraThemes: Entry[] = manifest;
  *
  * ```ts
  * // server/api/untheme/[...path].get.ts — base "/api/untheme"
- * import { createAuroraThemeHandler } from "@untheme/nuxt/aurora";
+ * import { createAuroraThemeHandler } from "~~/server/aurora";
  *
  * export default createAuroraThemeHandler();
  * ```
