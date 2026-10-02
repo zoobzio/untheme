@@ -1,5 +1,35 @@
 # untheme
 
+## 0.4.0
+
+### Minor Changes
+
+- [`56bb0c5`](https://github.com/zoobzio/untheme/commit/56bb0c5209738364727cacfeea2e9022d1c4e329) Thanks [@zoobzio](https://github.com/zoobzio)! - **Breaking:** the TypeScript authoring path is removed; themes are built from
+  DTCG JSON by `@untheme/kit`.
+
+  - `defineUntheme` is gone from `@untheme/core` and `untheme`. Boot the service
+    with `makeUntheme`, typed by the `Contract` the kit's `config` module
+    declares: `makeUntheme<Contract>(useUnthemeConfig(config))`.
+  - `extend` and the `Extension` type are gone from `@untheme/utils` and
+    `untheme`.
+  - The `untheme/kit` subpath is gone, and `untheme` no longer depends on
+    `@untheme/kit`: the kit is a build-time tool.
+
+  `untheme/config` keeps `UnthemeConfig`, `defineUnthemeConfig` and
+  `useUnthemeConfig`, which describe the built shape — `theme` and `input` —
+  the kit emits.
+
+### Patch Changes
+
+- [`f939c78`](https://github.com/zoobzio/untheme/commit/f939c78633ba251e126206b3b981bfeab84304a2) Thanks [@zoobzio](https://github.com/zoobzio)! - Tooling: replace ESLint and Prettier with oxlint and oxfmt, and upgrade Vitest
+  to v5. No runtime or API changes.
+- Updated dependencies [[`56bb0c5`](https://github.com/zoobzio/untheme/commit/56bb0c5209738364727cacfeea2e9022d1c4e329), [`56bb0c5`](https://github.com/zoobzio/untheme/commit/56bb0c5209738364727cacfeea2e9022d1c4e329)]:
+  - @untheme/catalog@0.4.0
+  - @untheme/core@0.4.0
+  - @untheme/utils@0.4.0
+  - @untheme/css@0.4.0
+  - @untheme/schema@0.4.0
+
 ## 0.3.0
 
 ### Patch Changes

@@ -1,5 +1,18 @@
 # @untheme/catalog
 
+## 0.4.0
+
+### Minor Changes
+
+- [`56bb0c5`](https://github.com/zoobzio/untheme/commit/56bb0c5209738364727cacfeea2e9022d1c4e329) Thanks [@zoobzio](https://github.com/zoobzio)! - `toListing(query)` is exported: it fills a query's gaps with the default
+  ordering and window, the normalization `defineCatalog` applies. A serving
+  handler uses it in place of its own copy.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @untheme/schema@0.4.0
+
 ## 0.3.0
 
 ### Patch Changes

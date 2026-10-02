@@ -1,5 +1,29 @@
 # @untheme/utils
 
+## 0.4.0
+
+### Minor Changes
+
+- [`56bb0c5`](https://github.com/zoobzio/untheme/commit/56bb0c5209738364727cacfeea2e9022d1c4e329) Thanks [@zoobzio](https://github.com/zoobzio)! - **Breaking:** the TypeScript authoring path is removed; themes are built from
+  DTCG JSON by `@untheme/kit`.
+
+  - `defineUntheme` is gone from `@untheme/core` and `untheme`. Boot the service
+    with `makeUntheme`, typed by the `Contract` the kit's `config` module
+    declares: `makeUntheme<Contract>(useUnthemeConfig(config))`.
+  - `extend` and the `Extension` type are gone from `@untheme/utils` and
+    `untheme`.
+  - The `untheme/kit` subpath is gone, and `untheme` no longer depends on
+    `@untheme/kit`: the kit is a build-time tool.
+
+  `untheme/config` keeps `UnthemeConfig`, `defineUnthemeConfig` and
+  `useUnthemeConfig`, which describe the built shape — `theme` and `input` —
+  the kit emits.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @untheme/schema@0.4.0
+
 ## 0.3.0
 
 ### Patch Changes

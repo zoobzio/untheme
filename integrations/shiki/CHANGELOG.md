@@ -1,5 +1,12 @@
 # @untheme/shiki
 
+## 0.4.0
+
+### Patch Changes
+
+- Updated dependencies [[`56bb0c5`](https://github.com/zoobzio/untheme/commit/56bb0c5209738364727cacfeea2e9022d1c4e329), [`f939c78`](https://github.com/zoobzio/untheme/commit/f939c78633ba251e126206b3b981bfeab84304a2)]:
+  - untheme@0.4.0
+
 ## 0.3.0
 
 ### Patch Changes
