@@ -1,0 +1,20 @@
+{
+  "$description": "No elevation shadows.",
+  "$extensions": {
+    "io.zoobz.untheme": {
+      "name": "Flat"
+    }
+  },
+  "elevation-low": {
+    "$type": "shadow",
+    "$value": "{elevation-none}"
+  },
+  "elevation-mid": {
+    "$type": "shadow",
+    "$value": "{elevation-none}"
+  },
+  "elevation-high": {
+    "$type": "shadow",
+    "$value": "{elevation-none}"
+  }
+}

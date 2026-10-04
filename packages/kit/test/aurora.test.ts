@@ -26,24 +26,24 @@ type Aurora = Contract<
 /** The kit package — a project root whose packages include aurora. */
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 
+/** Aurora's resolver document, as a config source. */
+const SOURCE = "npm:/@untheme/aurora/src/resolver.json";
+
 let kit: Kit;
 
 /**
- * Aurora's authored color modifier file, as written. The build drops an
+ * Aurora's authored dark color context, as written. The build drops an
  * override equal to the base value (`outline-medium-contrast` steps to the
  * same stop in both modes), so the dark context is checked at its source.
  */
 let authored: { color: { dark: Record<string, unknown> } };
 
 beforeAll(async () => {
-  kit = await resolveKit(
-    { source: "npm:/@untheme/aurora/themes/aurora/resolver.json" },
-    { cwd: ROOT },
-  );
+  kit = await resolveKit({ source: SOURCE }, { cwd: ROOT });
   const path = createRequire(import.meta.url).resolve(
-    "@untheme/aurora/modifiers/color.json",
+    "@untheme/aurora/src/modifiers/color/dark.json",
   );
-  authored = { color: JSON.parse(await readFile(path, "utf8")) };
+  authored = { color: { dark: JSON.parse(await readFile(path, "utf8")) } };
 });
 
 /** The modifier contexts of the built theme. */
@@ -66,6 +66,7 @@ describe("the aurora build", () => {
     expect(kit.theme.name).toBe("Aurora");
     expect(Object.keys(kit.theme.tokens)).toHaveLength(392);
     expect(kit.input).toEqual({
+      theme: "aurora",
       color: "light",
       vibrancy: "balanced",
       contrast: "default",
@@ -77,18 +78,31 @@ describe("the aurora build", () => {
     });
   });
 
-  it("reads the resolver, its color files, and every shared file", () => {
+  it("reads the resolver, every theme file, and every shared file", () => {
     const files = kit.documents.map((path) =>
-      path.replace(/\\/g, "/").replace(/^.*?\/aurora\//, ""),
+      path.replace(/\\/g, "/").replace(/^.*\/aurora\/src\//, ""),
     );
-    expect(files[0]).toBe("themes/aurora/resolver.json");
-    expect(
-      files.filter((file) => file.startsWith("themes/aurora/colors/")),
-    ).toHaveLength(8);
+    expect(files[0]).toBe("resolver.json");
+    expect(files.filter((file) => file.startsWith("modifiers/theme/"))).toEqual(
+      Object.keys(modifiers().theme ?? {}).map(
+        (id) => `modifiers/theme/${id}.json`,
+      ),
+    );
     expect(files.filter((file) => file.startsWith("tokens/"))).toHaveLength(17);
-    expect(files.filter((file) => file.startsWith("modifiers/"))).toEqual(
-      kit.theme.order.map((modifier) => `modifiers/${modifier}.json`),
-    );
+    for (const modifier of kit.theme.order) {
+      if (modifier === "theme") {
+        continue;
+      }
+      expect(
+        files
+          .filter((file) => file.startsWith(`modifiers/${modifier}/`))
+          .sort(),
+      ).toEqual(
+        Object.keys(modifiers()[modifier] ?? {})
+          .map((context) => `modifiers/${modifier}/${context}.json`)
+          .sort(),
+      );
+    }
   });
 
   it("resolves every token at the defaults", () => {
@@ -228,7 +242,7 @@ describe("the contrast axis", () => {
   });
 });
 
-describe("the aurora themes", () => {
+describe("the theme axis", () => {
   const require = createRequire(import.meta.url);
 
   /** A JSON file of the aurora package, by its package path. */
@@ -237,57 +251,189 @@ describe("the aurora themes", () => {
     return JSON.parse(await readFile(file, "utf8"));
   };
 
-  /** A theme built from its own resolver document. */
-  const build = (id: string) => {
-    return resolveKit(
-      { source: `npm:/@untheme/aurora/themes/${id}/resolver.json` },
-      { cwd: ROOT },
-    );
-  };
+  it("resolves first, so every other axis reads the active palette", () => {
+    expect(kit.theme.order[0]).toBe("theme");
+  });
 
-  it("ships every theme as the same resolver over its own ramps", async () => {
-    const shared = await read("themes/aurora/resolver.json");
-    const ramps = async (id: string) => {
-      const names: string[] = [];
-      for (const { $ref } of shared.sets.colors.sources) {
-        const file = await read(`themes/${id}/${$ref.replace("./", "")}`);
-        names.push(...Object.keys(file));
-      }
-      return names;
-    };
-    const tokens = await ramps("aurora");
-    expect(tokens).toHaveLength(220);
+  it("carries every theme as a context of the same ramps", async () => {
+    const themes = Object.keys(modifiers().theme ?? {});
+    expect(themes).toHaveLength(31);
 
-    const manifest: { id: string; name: string; description: string }[] =
-      await read("index.json");
-    expect(manifest).toHaveLength(31);
-    for (const { id, name, description } of manifest) {
-      expect(await read(`themes/${id}/resolver.json`)).toEqual({
-        ...shared,
-        name,
-        description,
-      });
-      expect(await ramps(id)).toEqual(tokens);
+    /* The token names of a theme file — its root metadata aside. */
+    const names = (file: Record<string, unknown>) =>
+      Object.keys(file).filter((key) => !key.startsWith("$"));
+
+    const ramps = names(await read("src/modifiers/theme/aurora.json"));
+    expect(ramps).toHaveLength(220);
+    for (const id of themes) {
+      expect(names(await read(`src/modifiers/theme/${id}.json`))).toEqual(
+        ramps,
+      );
     }
   });
 
-  it("builds a theme to the same contract, rebinding only its ramps", async () => {
-    const nord = await build("nord");
-    expect(nord.theme.id).toBe("nord");
-    expect(nord.theme.name).toBe("Nord");
-    expect(nord.input).toEqual(kit.input);
-    expect(nord.theme.order).toEqual(kit.theme.order);
-    expect(nord.theme.modifiers).toEqual(kit.theme.modifiers);
-    expect(Object.keys(nord.theme.tokens)).toEqual(
+  it("rebinds only ramp stops, and nothing at the default", () => {
+    expect(modifiers().theme?.aurora).toEqual({});
+    for (const [id, context] of Object.entries(modifiers().theme ?? {})) {
+      if (id === "aurora") {
+        continue;
+      }
+      expect(Object.keys(context).length).toBeGreaterThan(0);
+      for (const token of Object.keys(context)) {
+        expect(token).toMatch(/-\d+$/);
+      }
+    }
+  });
+
+  it("swaps the palette under the roles, in either mode", async () => {
+    const nord = await read("src/modifiers/theme/nord.json");
+    const ut = boot();
+    expect(ut.get("primary")).toBe("{primary-600}");
+    const before = ut.resolve("primary");
+    ut.swap("theme", "nord");
+    expect(ut.get("primary")).toBe("{primary-600}");
+    expect(ut.resolve("primary")).not.toEqual(before);
+    expect(ut.resolve("primary")).toMatchObject({
+      hex: nord["primary-600"].$value.hex,
+    });
+    ut.swap("color", "dark");
+    expect(ut.resolve("on-surface")).toEqual(ut.resolve("neutral-200"));
+    expect(ut.resolve("neutral-200")).toMatchObject({
+      hex: nord["neutral-200"].$value.hex,
+    });
+  });
+});
+
+describe("the aurora manifest", () => {
+  it("describes every axis, in order", () => {
+    expect(kit.manifest.map((modifier) => modifier.id)).toEqual(
+      kit.theme.order,
+    );
+    for (const modifier of kit.manifest) {
+      expect(modifier.description).toBeTypeOf("string");
+      expect(modifier.contexts.map((context) => context.id)).toEqual(
+        Object.keys(modifiers()[modifier.id] ?? {}),
+      );
+    }
+  });
+
+  it("names and describes every context of every axis", () => {
+    for (const modifier of kit.manifest) {
+      for (const context of modifier.contexts) {
+        expect(context.name).not.toBe("");
+        expect(context.description).toBeTypeOf("string");
+      }
+    }
+    const pick = (id: string) =>
+      kit.manifest.find((modifier) => modifier.id === id);
+    expect(pick("text")).toMatchObject({
+      name: "Text size",
+      contexts: [
+        { id: "sm", name: "Small" },
+        { id: "md", name: "Medium" },
+        { id: "lg", name: "Large" },
+      ],
+    });
+    expect(pick("density")?.contexts[1]).toEqual({
+      id: "default",
+      name: "Comfortable",
+      description: "The spacing scale as designed.",
+    });
+  });
+
+  it("names and describes every theme from its own file", () => {
+    const [theme] = kit.manifest;
+    expect(theme?.name).toBe("Theme");
+    expect(theme?.contexts).toHaveLength(31);
+    for (const context of theme?.contexts ?? []) {
+      expect(context.description).toBeTypeOf("string");
+    }
+    expect(
+      theme?.contexts.find((context) => context.id === "catppuccin"),
+    ).toEqual({
+      id: "catppuccin",
+      name: "Catppuccin Mocha",
+      description: "Soothing lavender and blue pastels, from Catppuccin Mocha",
+    });
+  });
+});
+
+describe("a narrowed aurora build", () => {
+  it("keeps only the themes the config lists, booting the first", async () => {
+    const narrowed = await resolveKit(
+      {
+        source: SOURCE,
+        modifiers: { theme: { contexts: ["nord", "dracula"] } },
+      },
+      { cwd: ROOT },
+    );
+    expect(Object.keys(narrowed.theme.modifiers.theme ?? {})).toEqual([
+      "nord",
+      "dracula",
+    ]);
+    expect(narrowed.input).toEqual({ ...kit.input, theme: "nord" });
+    expect(narrowed.theme.modifiers.theme?.nord).toEqual({});
+    expect(Object.keys(narrowed.theme.tokens)).toEqual(
       Object.keys(kit.theme.tokens),
     );
-    for (const [token, slot] of Object.entries(nord.theme.tokens)) {
-      if (!/-\d+$/.test(token)) {
+
+    /* The base is nord's palette now; everything but the ramps is as before. */
+    const ut = boot({ theme: "nord" });
+    for (const [token, slot] of Object.entries(narrowed.theme.tokens)) {
+      if (/-\d+$/.test(token)) {
+        expect(slot.$value).toEqual(ut.resolve(token));
+      } else {
         expect(slot).toEqual(kit.theme.tokens[token]);
       }
     }
-    expect(nord.theme.tokens["primary-500"]).not.toEqual(
-      kit.theme.tokens["primary-500"],
+    for (const modifier of kit.theme.order.slice(1)) {
+      expect(narrowed.theme.modifiers[modifier]).toEqual(
+        kit.theme.modifiers[modifier],
+      );
+    }
+  });
+
+  it("turns off an axis that shares its name with a set", async () => {
+    const narrowed = await resolveKit(
+      {
+        source: SOURCE,
+        modifiers: { theme: { contexts: ["aurora"] }, motion: false },
+      },
+      { cwd: ROOT },
+    );
+    expect(narrowed.theme.order).toEqual(
+      kit.theme.order.filter((modifier) => modifier !== "motion"),
+    );
+    expect(narrowed.input).not.toHaveProperty("motion");
+    expect(narrowed.theme.tokens).toEqual(kit.theme.tokens);
+    expect(
+      narrowed.documents.filter((path) =>
+        /modifiers[\\/]theme[\\/]/.test(path),
+      ),
+    ).toHaveLength(1);
+  });
+
+  it("adds a theme from a token file of the project's own", async () => {
+    const custom = await resolveKit(
+      {
+        source: SOURCE,
+        modifiers: {
+          theme: {
+            add: {
+              mine: "npm:/@untheme/aurora/src/modifiers/theme/nord.json",
+            },
+            contexts: ["aurora", "mine"],
+          },
+        },
+      },
+      { cwd: ROOT },
+    );
+    expect(Object.keys(custom.theme.modifiers.theme ?? {})).toEqual([
+      "aurora",
+      "mine",
+    ]);
+    expect(custom.theme.modifiers.theme?.mine).toEqual(
+      kit.theme.modifiers.theme?.nord,
     );
   });
 });

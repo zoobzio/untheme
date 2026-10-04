@@ -1,4 +1,5 @@
 import type { Core, OutputFile } from "./types";
+import { describe } from "./describe";
 import { banner, json, pair, union } from "./print";
 
 /**
@@ -89,12 +90,43 @@ const config = (core: Core): OutputFile[] =>
   );
 
 /**
+ * The `./manifest` entry: every modifier and each of its contexts with an
+ * id, a display name and a description — what an interface lists to let
+ * someone choose. Its own module, so a page that offers no choice never
+ * loads the prose.
+ */
+const manifest = (core: Core): OutputFile[] =>
+  pair(
+    "manifest",
+    [
+      banner(core.theme.id),
+      `export const manifest = ${json(core.manifest ?? describe(core.theme))};`,
+      "export default manifest;",
+    ],
+    [
+      banner(core.theme.id),
+      'import type { Context, Modifier } from "./index.mjs";',
+      "export interface Entry<Id extends string = string> {",
+      "  readonly id: Id;",
+      "  readonly name: string;",
+      "  readonly description?: string;",
+      "}",
+      "export type ModifierEntry<M extends Modifier = Modifier> = M extends Modifier",
+      "  ? Entry<M> & { readonly contexts: readonly Entry<Context<M>>[] }",
+      "  : never;",
+      "export declare const manifest: readonly ModifierEntry[];",
+      "export default manifest;",
+    ],
+  );
+
+/**
  * Emits every file a build produces —
  *
  * - `index` — `Token` / `Modifier` / `Mod` / `Context` types, the token and
  *   modifier lists, `isToken`, `isModifier`
  * - `config` — the base theme and boot selection, and `{ theme, input }` for
  *   `useUnthemeConfig`
+ * - `manifest` — each modifier and context with its id, name and description
  *
  * each module as an `.mjs` with its `.d.mts` beside it. No theme layers and
  * no CSS: the runtime renders CSS from the active theme.
@@ -102,8 +134,9 @@ const config = (core: Core): OutputFile[] =>
  * Takes only the {@link Core}, so a consumer that already holds a built theme
  * and selection (a framework module) emits the same modules the CLI writes.
  *
- * @param core - The base theme and boot selection.
+ * @param core - The base theme and boot selection, and the manifest when
+ * the consumer has one.
  */
 export const emit = (core: Core): OutputFile[] => {
-  return [...index(core), ...config(core)];
+  return [...index(core), ...config(core), ...manifest(core)];
 };

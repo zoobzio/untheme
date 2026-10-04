@@ -6,9 +6,7 @@ import { defineNuxtConfig } from "nuxt/config";
  *
  * The theme wiring lives in `untheme.config.ts`, which points at aurora's
  * DTCG JSON: the module finds it and builds it through `@untheme/kit`, so
- * no `untheme` options are needed here. The theme catalog the switcher
- * lists is served by `server/api/untheme/[...path].get.ts` — fetched on
- * demand when applied, never bundled. The module flattens the active
+ * no `untheme` options are needed here. The module flattens the active
  * selection's tokens into `--token` CSS variables on every render, and
  * mirrors the selection as `data-<modifier>` attributes on the document
  * root.

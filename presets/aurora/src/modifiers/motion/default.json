@@ -1,0 +1,8 @@
+{
+  "$description": "Durations and easing as designed.",
+  "$extensions": {
+    "io.zoobz.untheme": {
+      "name": "Standard"
+    }
+  }
+}

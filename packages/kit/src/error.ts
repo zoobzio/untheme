@@ -31,8 +31,11 @@ export class MalformedConfigError extends Error {
 
 /**
  * Raised when a config breaks the kit's rules — a missing source, an empty
- * identity, an output directory outside the project root. Carries every issue
- * found, not just the first, and is thrown before any document is read.
+ * identity, an output directory outside the project root, a modifier or a
+ * context the source does not declare. Carries every issue found, not just
+ * the first. Everything that can be decided without the documents is thrown
+ * before any is read; what a config says about modifiers is checked against
+ * the source once it is.
  */
 export class InvalidConfigError extends Error {
   readonly issues: string[];

@@ -17,6 +17,13 @@ export const OUT_DIR = "untheme";
 export const MANIFEST = ".untheme.json";
 
 /**
+ * The key under `$extensions` that untheme reads: `{ "name": "…" }` on a
+ * modifier, or at the root of a context's token file, is its display name in
+ * the manifest.
+ */
+export const EXTENSION = "io.zoobz.untheme";
+
+/**
  * The protocol of a source that lives in an installed package:
  * `npm:/@scope/pkg/file.json`. The slash after the colon is required — it
  * makes the URL hierarchical, so relative `$ref`s inside the package resolve

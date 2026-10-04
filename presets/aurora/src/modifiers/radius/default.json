@@ -1,0 +1,8 @@
+{
+  "$description": "The shape radii as designed.",
+  "$extensions": {
+    "io.zoobz.untheme": {
+      "name": "Rounded"
+    }
+  }
+}

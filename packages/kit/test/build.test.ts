@@ -76,6 +76,8 @@ describe("build", () => {
       "config.mjs",
       "index.d.mts",
       "index.mjs",
+      "manifest.d.mts",
+      "manifest.mjs",
     ]);
     const manifest = JSON.parse(
       await readFile(join(root, "untheme", ".untheme.json"), "utf8"),

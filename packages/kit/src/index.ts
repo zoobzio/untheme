@@ -1,5 +1,6 @@
 export * from "./build";
 export * from "./config";
+export * from "./describe";
 export * from "./constant";
 export * from "./emit";
 export * from "./error";

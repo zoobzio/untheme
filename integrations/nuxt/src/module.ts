@@ -48,7 +48,7 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
     const resolver = createResolver(import.meta.url);
 
     const config = closest(options, nuxt);
-    const { theme, input } = await loadTheme(config, nuxt);
+    const { theme, input, manifest } = await loadTheme(config, nuxt);
 
     const schema: Schema<Theme<Template>> = defineSchema(theme);
     schema.assert.theme(theme);
@@ -57,11 +57,12 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
     /*
      * The theme modules, exactly as `untheme build` writes them: `index`
      * carries the `Token` union, the `Mod` structure and the guards, `config`
-     * the base theme and boot selection. One generator — the kit's — serves
+     * the base theme and boot selection, `manifest` each modifier and context
+     * with its name and description. One generator — the kit's — serves
      * the CLI and this module, so an app importing `#build/untheme/*` and a
      * package importing a kit build see the same modules.
      */
-    for (const file of emit({ theme, input })) {
+    for (const file of emit({ theme, input, ...(manifest && { manifest }) })) {
       addTemplate({
         filename: `${MODULES}/${file.path}`,
         write: true,

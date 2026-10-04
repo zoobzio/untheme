@@ -1,14 +1,21 @@
-<script setup lang="ts" generic="A extends keyof AppUnthemeInput & string">
-const { axis } = defineProps<{ axis: A }>();
-const { options, selection } = useControls(axis);
+<script setup lang="ts">
+import type { ModifierEntry } from "#build/untheme/manifest.mjs";
+
+const { modifier } = defineProps<{ modifier: ModifierEntry }>();
+const { selection } = useControls(modifier.id);
 </script>
 
 <template>
-  <fieldset class="axis">
-    <legend class="axis-label">{{ axis }}</legend>
-    <select v-model="selection" :name="axis">
-      <option v-for="option in options" :key="option" :value="option">
-        {{ option }}
+  <fieldset class="axis" :title="modifier.description">
+    <legend class="axis-label">{{ modifier.name }}</legend>
+    <select v-model="selection" :name="modifier.id">
+      <option
+        v-for="context in modifier.contexts"
+        :key="context.id"
+        :value="context.id"
+        :title="context.description"
+      >
+        {{ context.name }}
       </option>
     </select>
   </fieldset>

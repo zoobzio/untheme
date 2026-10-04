@@ -1,0 +1,8 @@
+{
+  "$description": "Dark text on light surfaces.",
+  "$extensions": {
+    "io.zoobz.untheme": {
+      "name": "Light"
+    }
+  }
+}

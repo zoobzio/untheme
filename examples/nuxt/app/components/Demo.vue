@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { key, themes, axes, shuffle } = await useDemo();
+const { manifest, shuffle } = useDemo();
 </script>
 
 <template>
@@ -21,15 +21,11 @@ const { key, themes, axes, shuffle } = await useDemo();
       </div>
     </div>
     <div class="demo-axes">
-      <fieldset class="axis">
-        <legend class="axis-label">theme</legend>
-        <select v-model="key" aria-label="Theme">
-          <option v-for="theme in themes" :key="theme.id" :value="theme.id">
-            {{ theme.name }}
-          </option>
-        </select>
-      </fieldset>
-      <Controls v-for="axis in axes" :key="axis" :axis="axis" />
+      <Controls
+        v-for="modifier in manifest"
+        :key="modifier.id"
+        :modifier="modifier"
+      />
     </div>
   </aside>
 </template>

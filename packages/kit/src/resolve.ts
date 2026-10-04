@@ -9,11 +9,13 @@ import { OUT_DIR } from "./constant";
 import { loader } from "./loader";
 import { normalize } from "./path";
 import { directory, locate } from "./source";
+import { tailor } from "./tailor";
 import { validate } from "./validate";
 
 /**
  * Checks a config and resolves it into a {@link Kit}: reads the resolver
- * document and every document it references through `@terrazzo/parser`,
+ * document, tailors it to the config's `modifiers`, reads every document it
+ * then references through `@terrazzo/parser`,
  * converts the base theme — tokens, modifier contexts, order — and the boot
  * selection, validates both against untheme's schema, and proves the result
  * against Terrazzo's own resolution. The only step that reads documents. No
@@ -34,17 +36,22 @@ export const resolveKit = async (
   const url = locate(config.source, base);
 
   const { load, documents } = loader(root, options.req);
-  const parsed = await parse([{ filename: url, src: await load(url, base) }], {
+  let src = await load(url, base);
+  if (config.modifiers && Object.keys(config.modifiers).length > 0) {
+    src = tailor(src, config.modifiers, base);
+  }
+  const parsed = await parse([{ filename: url, src }], {
     config: defineConfig({}, { cwd: base }),
     req: load,
     logger: options.logger,
     skipLint: true,
   });
 
-  const { theme, input } = assemble(parsed, config);
+  const { theme, input, manifest } = assemble(parsed, config);
   return {
     theme,
     input,
+    manifest,
     outDir: normalize(config.outDir ?? OUT_DIR),
     documents,
   };

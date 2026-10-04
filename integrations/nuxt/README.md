@@ -18,7 +18,7 @@ export default defineNuxtConfig({
 import { defineConfig } from "@untheme/kit";
 
 export default defineConfig({
-  source: "npm:/@untheme/aurora/themes/aurora/resolver.json",
+  source: "npm:/@untheme/aurora/src/resolver.json",
 });
 ```
 
@@ -53,6 +53,7 @@ At build time the module runs `defineSchema` against the theme, which validates 
 
 - `#build/untheme/config.mjs` — the `theme` and `input` data, with a sibling `config.d.mts` that types them against the `Contract`.
 - `#build/untheme/index.mjs` — the token and modifier lists and the `isToken` / `isModifier` guards, with a sibling `index.d.mts` carrying a `Token` union of every token name, an `Overrides` type for patches to those tokens, and a `Mod` type describing each modifier's contexts.
+- `#build/untheme/manifest.mjs` — `manifest`: each modifier and its contexts with an id, a name and a description, for the selectors an app offers. Names and descriptions come from the theme's documents when the module builds the config itself; a theme passed in as `theme` and `input` gets titled ids.
 - `#build/untheme.css` — the static cascade as plain CSS; see [Static CSS](#static-css).
 
 The two `untheme/` modules are the ones `untheme build` writes: the module registers the output of `@untheme/kit`'s `emit` as its build templates.
@@ -111,7 +112,7 @@ Put the file in the folder above `themes` — `server/api/untheme/[...path].get.
 
 ### Aurora's themes
 
-To serve all 31 [aurora](../../presets/aurora) themes, see the [Nuxt example](../../examples/nuxt): its `server/aurora` folder builds a handler over aurora's theme files with `createThemeHandler`, which you can copy into your app.
+[Aurora](../../presets/aurora)'s 31 themes need no handler: they are the contexts of its `theme` modifier, built into the app's theme and switched with `useUntheme().swap("theme", "nord")`. The kit config's `modifiers.theme.contexts` keeps only the ones an app offers. See the [Nuxt example](../../examples/nuxt).
 
 ## CSS
 

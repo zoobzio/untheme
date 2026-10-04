@@ -1,11 +1,11 @@
 # @untheme/aurora
 
 The reference untheme preset: a compact semantic vocabulary over eight
-generated tonal ramps, eight modifier axes, and a catalog of thirty-one
-theme variants — shipped as [DTCG](https://www.designtokens.org/) JSON
-only. The package has no dependencies and no code: a folder per theme — its
-resolver document and its color files — and the token and modifier files
-every theme shares.
+generated tonal ramps and nine modifier axes — the palette itself among them,
+with thirty-one themes to choose from — shipped as
+[DTCG](https://www.designtokens.org/) JSON only. The package has no
+dependencies and no code: one resolver document, the token files it lists,
+and a folder per modifier with a file per context.
 
 Aurora demonstrates the full token model — every value family the schema
 validates appears at least once (colors, dimensions, durations, font
@@ -22,8 +22,9 @@ Tokens come in three tiers:
   each at the eleven Tailwind-style stops (`primary-50` … `primary-950`);
   the six accent ramps also carry muted and vivid chroma columns
   (`primary-muted-500`, `primary-vivid-500`, …) for the vibrancy axis.
-  These are the only literal colors in the contract, and the only part a
-  theme owns: generated from seed colors — see _Regenerating_ below.
+  These are the only literal colors in the contract, and the only tokens the
+  `theme` axis rebinds: generated from seed colors — see _Regenerating_
+  below.
 - **Roles** — a small semantic vocabulary: per accent family a fill, its
   text, a tinted container, and its text (`primary`, `on-primary`,
   `primary-container`, `on-primary-container`, …); the surfaces (`surface`,
@@ -45,10 +46,11 @@ automatically.
 
 ## The axes
 
-Eight modifier axes, composing in `order`:
+Nine modifier axes, composing in `order`:
 
 | Axis       | Contexts                             | Overrides                         |
 | ---------- | ------------------------------------ | --------------------------------- |
+| `theme`    | thirty-one palettes — see _Themes_   | the ramps                         |
 | `color`    | `light` / `dark`                     | color roles + channels            |
 | `vibrancy` | `muted` / `balanced` / `vivid`       | accent roles → chroma channels    |
 | `contrast` | `default` / `medium` / `high`        | shifted roles → contrast channels |
@@ -58,11 +60,12 @@ Eight modifier axes, composing in `order`:
 | `depth`    | `flat` / `default` / `deep`          | elevation shadows                 |
 | `motion`   | `default` / `reduced` / `expressive` | durations, delay, easing          |
 
-The base tokens are the default context of every axis, so each default
-context is empty. The axes override disjoint token sets — apart from
-`color`, `vibrancy`, and `contrast`, whose collisions are the point
-(below) — so all 2,916 combinations stay coherent without being
-individually authored. `contrast` follows `vibrancy` in `order`, so
+The base tokens are the default context of every axis: the `theme` axis
+supplies the ramps — the base has no palette of its own, its default theme
+is the palette — and every other default context rebinds nothing. The axes override
+disjoint token sets — apart from `color`, `vibrancy`, and `contrast`, whose
+collisions are the point (below) — so all 90,396 combinations stay coherent
+without being individually authored. `contrast` follows `vibrancy` in `order`, so
 accessibility wins their collision.
 
 ## The contrast channels
@@ -92,86 +95,90 @@ each channel to its mode's stop in the matching chroma column.
 
 ## Layout
 
-One JSON file per thing. Token names are flat (`primary-50`), so each one is
-also its CSS custom property (`--primary-50`).
+One JSON file per thing, all under `src/`. Token names are flat
+(`primary-50`), so each one is also its CSS custom property (`--primary-50`).
 
 ```
-index.json                   the manifest: id, name, description
-themes/
-  <id>/                      one folder per theme
-    resolver.json            sets and modifiers, in resolution order
-    colors/                  one file per color: its ramp
-      primary.json  secondary.json  tertiary.json     33 tokens each
-      error.json    success.json    warning.json      33 tokens each
-      neutral.json  neutral-variant.json              11 tokens each
-tokens/                      shared by every theme
-  roles/                     one file per color: its semantic tokens
-    primary.json  secondary.json  tertiary.json     16 tokens each
-    error.json    success.json    warning.json      16 tokens each
-    surface.json                                    14 tokens
-  typography.json  20
-  shape.json  4     space.json  10    elevation.json  4
-  motion.json 11    state.json   3    blur.json       3
-  stroke.json 2     border.json  3    gradient.json   2
-modifiers/                   shared: one file per modifier, one key per context
-  color.json  vibrancy.json  contrast.json  text.json
-  density.json  radius.json  depth.json  motion.json
+src/
+  resolver.json              sets and modifiers, in resolution order
+  tokens/                    the base: what every selection shares
+    roles/                   one file per color: its semantic tokens
+      primary.json  secondary.json  tertiary.json     16 tokens each
+      error.json    success.json    warning.json      16 tokens each
+      surface.json                                    14 tokens
+    typography.json  20
+    shape.json  4     space.json  10    elevation.json  4
+    motion.json 11    state.json   3    blur.json       3
+    stroke.json 2     border.json  3    gradient.json   2
+  modifiers/                 one folder per modifier, one file per context
+    theme/                   abyss.json … vesper.json     220 tokens each
+    color/                   light.json  dark.json
+    vibrancy/                balanced.json  muted.json  vivid.json
+    contrast/                default.json  medium.json  high.json
+    text/                    sm.json  md.json  lg.json
+    density/                 compact.json  default.json  spacious.json
+    radius/                  default.json  sharp.json  round.json
+    depth/                   default.json  flat.json  deep.json
+    motion/                  default.json  reduced.json  expressive.json
 ```
 
-- **A theme's resolver** is a complete resolver document. Its `colors` set
-  lists the color files beside it; every other set and every modifier
-  references the shared files. The 31 documents are identical apart from
-  `name` and `description`, so any theme stands in for any other.
-- **A color file** holds one ramp. An accent ramp has three columns of eleven
-  stops: base, muted and vivid. A neutral ramp has one column.
+- **The resolver** is the one document a build points at. Each set lists
+  token files; each modifier lists, per context, the one file in its folder.
+- **A context file** opens with its `$description` and its display name
+  (`$extensions["io.zoobz.untheme"].name`), then holds what its context
+  rebinds. A theme file holds the eight ramps — three columns of eleven stops
+  for an accent (base, muted, vivid), one column for a neutral. The default
+  context of every other modifier rebinds nothing: its file is the name and
+  description alone.
+- **Every modifier** carries a `description` and a display name in the
+  resolver, so a build's manifest names and describes every axis and every
+  option — enough to draw a picker for each.
 - **A role file** holds every semantic token of one color: for an accent, its
   4 roles (`primary`, `on-primary`, `primary-container`,
   `on-primary-container`), their 4 contrast channels (`*-medium-contrast`,
   `*-high-contrast`) and their 8 vibrancy channels (`*-muted`, `*-vivid`).
   `surface.json` holds the 8 surface roles and their 6 contrast channels.
-- **A modifier file** holds every context of one modifier, one top-level key
-  per context; the default context is an empty object. A resolver reads a
-  context with a JSON pointer: `../../modifiers/contrast.json#/high`.
 
-What each shared file needs:
+What each token file needs:
 
-| File             | Needs              |
-| ---------------- | ------------------ |
-| a `roles` file   | a theme's `colors` |
-| `border`         | `roles`, `stroke`  |
-| `gradient`       | `colors`, `roles`  |
-| every other file | nothing            |
+| File             | Needs             |
+| ---------------- | ----------------- |
+| a `roles` file   | a theme's ramps   |
+| `border`         | `roles`, `stroke` |
+| `gradient`       | a theme, `roles`  |
+| every other file | nothing           |
 
 What each modifier needs:
 
 | Modifier                               | Needs                                   |
 | -------------------------------------- | --------------------------------------- |
+| `theme`                                | nothing                                 |
 | `color`                                | `roles`, `gradient`                     |
 | `vibrancy`, `contrast`                 | `roles`                                 |
 | `text`                                 | `typography`                            |
 | `density`, `radius`, `depth`, `motion` | `space`, `shape`, `elevation`, `motion` |
 
 Every file is exported, so Node package resolution finds it:
-`@untheme/aurora/tokens/space.json`,
-`@untheme/aurora/themes/nord/colors/primary.json`.
+`@untheme/aurora/src/tokens/space.json`,
+`@untheme/aurora/src/modifiers/theme/nord.json`.
 
 ## Usage
 
-Point an [`@untheme/kit`](../../packages/kit) config at a theme's resolver
-document with an `npm:/` reference:
+Point an [`@untheme/kit`](../../packages/kit) config at the resolver document
+with an `npm:/` reference:
 
 ```ts
 // untheme.config.ts
 import { defineConfig } from "@untheme/kit";
 
 export default defineConfig({
-  source: "npm:/@untheme/aurora/themes/aurora/resolver.json",
+  source: "npm:/@untheme/aurora/src/resolver.json",
 });
 ```
 
 `untheme build` (or the [Nuxt module](../../integrations/nuxt), which builds
 the config itself) produces the base theme, booted at each axis's default —
-`light`, `balanced`, `default`, `md`, and `default` for the rest:
+`aurora`, `light`, `balanced`, `default`, `md`, and `default` for the rest:
 
 ```ts
 import { makeUntheme } from "untheme";
@@ -181,27 +188,55 @@ import config, { type Contract } from "./untheme/config.mjs";
 
 const ut = makeUntheme<Contract>(useUnthemeConfig(config));
 
+ut.swap("theme", "nord"); // another palette under the same roles
 ut.swap("color", "dark");
 ut.swap("vibrancy", "vivid"); // electric dark, by composition
 ut.swap("contrast", "high"); // and accessible, contrast wins the collision
 ```
 
-Every theme's resolver is a drop-in for that source — same tokens, same
-axes, same defaults, its own palette as the base
-(`npm:/@untheme/aurora/themes/nord/resolver.json`).
+### Taking only part of it
 
-To add tokens of your own, write your own resolver document: list a theme's
-color files and aurora's shared files as sets, add yours, and declare each
-modifier again with aurora's context files
-(`npm:/@untheme/aurora/modifiers/color.json#/dark`) plus any of yours. The tables above say which files a subset needs. The
-[shiki example](../../examples/shiki) adds a `syntax-*` group this way.
+The config's `modifiers` decides what of aurora a build carries. All
+thirty-one themes are over 6,000 ramp bindings; an app that offers three should
+build three:
+
+```ts
+export default defineConfig({
+  source: "npm:/@untheme/aurora/src/resolver.json",
+  modifiers: {
+    // Keep three themes, in this order, and boot nord.
+    theme: { contexts: ["nord", "dracula", "aurora"], default: "nord" },
+
+    // Add a palette of your own: a token file that rebinds the ramp tokens.
+    // theme: { add: { brand: "./tokens/brand.json" }, default: "brand" },
+
+    // Turn an axis off: its default stays in the base, the axis is gone.
+    depth: false,
+  },
+});
+```
+
+A theme left out is never read and is in neither the built theme nor its
+types. The build's `manifest.mjs` lists what was kept — each axis and each
+context with its name and description, read from the resolver and the context
+files — for the interface that offers the choice. See the kit's [Modifiers](../../packages/kit#modifiers) section for
+the rules.
+
+### Adding tokens
+
+To add tokens of your own, write your own resolver document: list aurora's
+token files as sets, add yours, and declare each modifier again with aurora's
+context files (`npm:/@untheme/aurora/src/modifiers/color/dark.json`) plus any
+of yours. The tables above say which files a subset needs. The
+[shiki example](../../examples/shiki) adds a `syntax-*` group this way, over
+one fixed palette — it lists `modifiers/theme/aurora.json` as a set.
 
 ## Themes
 
-Thirty-one themes, one folder each under `themes/`, listed with
-their name and description in `index.json`. The preset's own palette,
-`aurora` — electric teal-green, violet, and magenta on cold blue-grays — is
-one of them, with no special standing.
+Thirty-one themes, one file each under `src/modifiers/theme/` — the contexts
+of the `theme` modifier. The preset's own palette, `aurora` — electric
+teal-green, violet, and magenta on cold blue-grays — is the default, with no
+other special standing.
 
 Editor classics: `ayu`, `catppuccin`, `cyberdream`, `dracula`, `everforest`,
 `github`, `gruvbox`, `horizon`, `kanagawa`, `monokai`, `night_owl`, `nord`,
@@ -217,23 +252,13 @@ greens).
 
 Modern open palettes: `flexoki`, `oxocarbon`.
 
-A theme is used two ways:
-
-- **As a base theme.** Point a kit config's `source` at its resolver
-  (above). The base theme takes the document's `name`; its id is the slug of
-  that name unless the config sets `id`.
-- **As a layer.** A theme is its `id` and `name` from the manifest and each
-  token's `$value` in its color files as its binding — plain JSON reads, no
-  build. This is what the [Nuxt example](../../examples/nuxt)'s theme
-  handler serves, so an app can switch between all of them.
-
 ## Regenerating
 
-`index.json` and the files under `themes/` are generated; the committed
-JSON is what ships, and no color math runs at runtime. To change a palette,
-edit the seed hexes in `scripts/seeds.json`; to change what every theme
-shares — a set, a modifier, the resolution order — edit
-`scripts/resolver.json`. Then run:
+The files under `src/modifiers/theme/` are generated, and so are the contexts
+of the `theme` modifier in `src/resolver.json`; the committed JSON is what
+ships, and no color math runs at runtime. Everything else — the rest of the
+resolver, the token files, the other modifiers — is authored by hand. To
+change a palette or add a theme, edit `scripts/seeds.json`, then run:
 
 ```sh
 pnpm generate && pnpm format
@@ -246,19 +271,16 @@ peaks at the middle and tapers toward both ends (out-of-gamut colors
 reduce chroma until sRGB holds them). Every theme seeds all eight ramps
 individually; semantic seeds (`error`, `success`, `warning`) stay
 recognizably red, green, and amber across themes, hue-shifted toward each
-theme's temperature. Each theme's resolver is `scripts/resolver.json` under
-the theme's name, beside its color files. The `themes/` folder
-and the manifest are rewritten whole, so a theme removed from the seeds
-leaves nothing behind.
+theme's temperature. Each theme file opens with the theme's name and
+description from the seeds. The theme folder is rewritten whole, so a theme removed
+from the seeds leaves nothing behind.
 
 Aurora has no tests of its own: it is the test fixture of
 [`@untheme/kit`](../../packages/kit), whose suite builds it, proves every
-context, and checks the contrast and vibrancy channels. After regenerating,
-also regenerate the Nuxt example's theme map (`pnpm generate:themes` in
-`examples/nuxt`).
+context, and checks the contrast and vibrancy channels.
 
 ## Related
 
 - [`@untheme/kit`](../../packages/kit) — builds this preset into a theme.
-- [Nuxt example](../../examples/nuxt) — serves its themes over the catalog
-  protocol.
+- [Nuxt example](../../examples/nuxt) — restyles a page live across every
+  axis.

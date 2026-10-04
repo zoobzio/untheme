@@ -20,7 +20,7 @@ afterAll(async () => {
 });
 
 describe("generate", () => {
-  it("emits the index and config modules with declarations", async () => {
+  it("emits the index, config and manifest modules with declarations", async () => {
     const output = await generate({ source: "./resolver.json" }, { cwd: ROOT });
     expect(output.outDir).toBe("untheme");
     expect(output.files.map((file) => file.path)).toEqual([
@@ -28,6 +28,8 @@ describe("generate", () => {
       "index.d.mts",
       "config.mjs",
       "config.d.mts",
+      "manifest.mjs",
+      "manifest.d.mts",
     ]);
     for (const file of output.files) {
       expect(
@@ -63,6 +65,55 @@ describe("generate", () => {
       "export type Contract = UnthemeContract<Token, Mod>;",
     );
     expect(config).toContain("declare const config: UnthemeConfig<Contract>;");
+  });
+
+  it("declares only the contexts the config keeps", async () => {
+    const output = await generate(
+      {
+        source: "./resolver.json",
+        modifiers: { color: { contexts: ["dark"] } },
+      },
+      { cwd: ROOT },
+    );
+    const declarations = output.files.find(
+      (file) => file.path === "index.d.mts",
+    )!.contents;
+    expect(declarations).toContain('  "color": { "dark": Overrides };');
+    const index = output.files.find((file) => file.path === "index.mjs")!;
+    expect(index.contents).not.toContain('"light"');
+  });
+
+  it("emits the manifest of the contexts the config keeps", async () => {
+    const output = await generate(
+      {
+        source: "./resolver.json",
+        modifiers: {
+          color: { add: { dim: "./dim.json" }, contexts: ["dim", "dark"] },
+          density: false,
+        },
+      },
+      { cwd: ROOT },
+    );
+    const module = output.files.find((file) => file.path === "manifest.mjs")!;
+    const literal = module.contents
+      .split("export const manifest = ")[1]!
+      .split(";\nexport default")[0]!;
+    expect(JSON.parse(literal)).toEqual([
+      {
+        id: "color",
+        name: "Color",
+        contexts: [
+          { id: "dim", name: "Dim" },
+          { id: "dark", name: "Dark" },
+        ],
+      },
+    ]);
+    const declarations = output.files.find(
+      (file) => file.path === "manifest.d.mts",
+    )!.contents;
+    expect(declarations).toContain(
+      "export declare const manifest: readonly ModifierEntry[];",
+    );
   });
 
   it("emits a never union and an empty structure without modifiers", async () => {

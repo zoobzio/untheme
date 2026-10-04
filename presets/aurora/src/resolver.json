@@ -1,0 +1,536 @@
+{
+  "name": "Aurora",
+  "description": "The reference untheme preset: a semantic vocabulary over generated tonal ramps, with the palette itself as a modifier.",
+  "version": "2025.10",
+  "sets": {
+    "roles": {
+      "description": "The semantic color roles and their contrast and vibrancy channels, one file per color.",
+      "sources": [
+        {
+          "$ref": "./tokens/roles/primary.json"
+        },
+        {
+          "$ref": "./tokens/roles/secondary.json"
+        },
+        {
+          "$ref": "./tokens/roles/tertiary.json"
+        },
+        {
+          "$ref": "./tokens/roles/error.json"
+        },
+        {
+          "$ref": "./tokens/roles/success.json"
+        },
+        {
+          "$ref": "./tokens/roles/warning.json"
+        },
+        {
+          "$ref": "./tokens/roles/surface.json"
+        }
+      ]
+    },
+    "typography": {
+      "sources": [
+        {
+          "$ref": "./tokens/typography.json"
+        }
+      ]
+    },
+    "shape": {
+      "sources": [
+        {
+          "$ref": "./tokens/shape.json"
+        }
+      ]
+    },
+    "space": {
+      "sources": [
+        {
+          "$ref": "./tokens/space.json"
+        }
+      ]
+    },
+    "elevation": {
+      "sources": [
+        {
+          "$ref": "./tokens/elevation.json"
+        }
+      ]
+    },
+    "motion": {
+      "sources": [
+        {
+          "$ref": "./tokens/motion.json"
+        }
+      ]
+    },
+    "state": {
+      "sources": [
+        {
+          "$ref": "./tokens/state.json"
+        }
+      ]
+    },
+    "blur": {
+      "sources": [
+        {
+          "$ref": "./tokens/blur.json"
+        }
+      ]
+    },
+    "stroke": {
+      "sources": [
+        {
+          "$ref": "./tokens/stroke.json"
+        }
+      ]
+    },
+    "border": {
+      "sources": [
+        {
+          "$ref": "./tokens/border.json"
+        }
+      ]
+    },
+    "gradient": {
+      "sources": [
+        {
+          "$ref": "./tokens/gradient.json"
+        }
+      ]
+    }
+  },
+  "modifiers": {
+    "theme": {
+      "description": "The palette: each context is one theme's eight tonal ramps.",
+      "$extensions": {
+        "io.zoobz.untheme": {
+          "name": "Theme"
+        }
+      },
+      "contexts": {
+        "abyss": [
+          {
+            "$ref": "./modifiers/theme/abyss.json"
+          }
+        ],
+        "aurora": [
+          {
+            "$ref": "./modifiers/theme/aurora.json"
+          }
+        ],
+        "ayu": [
+          {
+            "$ref": "./modifiers/theme/ayu.json"
+          }
+        ],
+        "catppuccin": [
+          {
+            "$ref": "./modifiers/theme/catppuccin.json"
+          }
+        ],
+        "cyberdream": [
+          {
+            "$ref": "./modifiers/theme/cyberdream.json"
+          }
+        ],
+        "dracula": [
+          {
+            "$ref": "./modifiers/theme/dracula.json"
+          }
+        ],
+        "dune": [
+          {
+            "$ref": "./modifiers/theme/dune.json"
+          }
+        ],
+        "ember": [
+          {
+            "$ref": "./modifiers/theme/ember.json"
+          }
+        ],
+        "everforest": [
+          {
+            "$ref": "./modifiers/theme/everforest.json"
+          }
+        ],
+        "flexoki": [
+          {
+            "$ref": "./modifiers/theme/flexoki.json"
+          }
+        ],
+        "github": [
+          {
+            "$ref": "./modifiers/theme/github.json"
+          }
+        ],
+        "glacier": [
+          {
+            "$ref": "./modifiers/theme/glacier.json"
+          }
+        ],
+        "graphite": [
+          {
+            "$ref": "./modifiers/theme/graphite.json"
+          }
+        ],
+        "gruvbox": [
+          {
+            "$ref": "./modifiers/theme/gruvbox.json"
+          }
+        ],
+        "horizon": [
+          {
+            "$ref": "./modifiers/theme/horizon.json"
+          }
+        ],
+        "kanagawa": [
+          {
+            "$ref": "./modifiers/theme/kanagawa.json"
+          }
+        ],
+        "manuscript": [
+          {
+            "$ref": "./modifiers/theme/manuscript.json"
+          }
+        ],
+        "monokai": [
+          {
+            "$ref": "./modifiers/theme/monokai.json"
+          }
+        ],
+        "moss": [
+          {
+            "$ref": "./modifiers/theme/moss.json"
+          }
+        ],
+        "night_owl": [
+          {
+            "$ref": "./modifiers/theme/night_owl.json"
+          }
+        ],
+        "nord": [
+          {
+            "$ref": "./modifiers/theme/nord.json"
+          }
+        ],
+        "one_dark": [
+          {
+            "$ref": "./modifiers/theme/one_dark.json"
+          }
+        ],
+        "oxocarbon": [
+          {
+            "$ref": "./modifiers/theme/oxocarbon.json"
+          }
+        ],
+        "palenight": [
+          {
+            "$ref": "./modifiers/theme/palenight.json"
+          }
+        ],
+        "phosphor": [
+          {
+            "$ref": "./modifiers/theme/phosphor.json"
+          }
+        ],
+        "rose_pine": [
+          {
+            "$ref": "./modifiers/theme/rose_pine.json"
+          }
+        ],
+        "sakura": [
+          {
+            "$ref": "./modifiers/theme/sakura.json"
+          }
+        ],
+        "solarized": [
+          {
+            "$ref": "./modifiers/theme/solarized.json"
+          }
+        ],
+        "synthwave": [
+          {
+            "$ref": "./modifiers/theme/synthwave.json"
+          }
+        ],
+        "tokyo_night": [
+          {
+            "$ref": "./modifiers/theme/tokyo_night.json"
+          }
+        ],
+        "vesper": [
+          {
+            "$ref": "./modifiers/theme/vesper.json"
+          }
+        ]
+      },
+      "default": "aurora"
+    },
+    "color": {
+      "description": "The scheme: light or dark surfaces, with every role and channel rebound to match.",
+      "$extensions": {
+        "io.zoobz.untheme": {
+          "name": "Color scheme"
+        }
+      },
+      "contexts": {
+        "light": [
+          {
+            "$ref": "./modifiers/color/light.json"
+          }
+        ],
+        "dark": [
+          {
+            "$ref": "./modifiers/color/dark.json"
+          }
+        ]
+      },
+      "default": "light"
+    },
+    "vibrancy": {
+      "description": "How saturated the accents are: each accent role steps to its muted or vivid chroma column.",
+      "$extensions": {
+        "io.zoobz.untheme": {
+          "name": "Vibrancy"
+        }
+      },
+      "contexts": {
+        "balanced": [
+          {
+            "$ref": "./modifiers/vibrancy/balanced.json"
+          }
+        ],
+        "muted": [
+          {
+            "$ref": "./modifiers/vibrancy/muted.json"
+          }
+        ],
+        "vivid": [
+          {
+            "$ref": "./modifiers/vibrancy/vivid.json"
+          }
+        ]
+      },
+      "default": "balanced"
+    },
+    "contrast": {
+      "description": "How far text and outlines stand from their surfaces; wins its collisions with vibrancy.",
+      "$extensions": {
+        "io.zoobz.untheme": {
+          "name": "Contrast"
+        }
+      },
+      "contexts": {
+        "default": [
+          {
+            "$ref": "./modifiers/contrast/default.json"
+          }
+        ],
+        "medium": [
+          {
+            "$ref": "./modifiers/contrast/medium.json"
+          }
+        ],
+        "high": [
+          {
+            "$ref": "./modifiers/contrast/high.json"
+          }
+        ]
+      },
+      "default": "default"
+    },
+    "text": {
+      "description": "The size of the type scale.",
+      "$extensions": {
+        "io.zoobz.untheme": {
+          "name": "Text size"
+        }
+      },
+      "contexts": {
+        "sm": [
+          {
+            "$ref": "./modifiers/text/sm.json"
+          }
+        ],
+        "md": [
+          {
+            "$ref": "./modifiers/text/md.json"
+          }
+        ],
+        "lg": [
+          {
+            "$ref": "./modifiers/text/lg.json"
+          }
+        ]
+      },
+      "default": "md"
+    },
+    "density": {
+      "description": "How tightly the spacing scale packs.",
+      "$extensions": {
+        "io.zoobz.untheme": {
+          "name": "Density"
+        }
+      },
+      "contexts": {
+        "compact": [
+          {
+            "$ref": "./modifiers/density/compact.json"
+          }
+        ],
+        "default": [
+          {
+            "$ref": "./modifiers/density/default.json"
+          }
+        ],
+        "spacious": [
+          {
+            "$ref": "./modifiers/density/spacious.json"
+          }
+        ]
+      },
+      "default": "default"
+    },
+    "radius": {
+      "description": "How round the shape radii are.",
+      "$extensions": {
+        "io.zoobz.untheme": {
+          "name": "Corner radius"
+        }
+      },
+      "contexts": {
+        "default": [
+          {
+            "$ref": "./modifiers/radius/default.json"
+          }
+        ],
+        "sharp": [
+          {
+            "$ref": "./modifiers/radius/sharp.json"
+          }
+        ],
+        "round": [
+          {
+            "$ref": "./modifiers/radius/round.json"
+          }
+        ]
+      },
+      "default": "default"
+    },
+    "depth": {
+      "description": "How pronounced the elevation shadows are.",
+      "$extensions": {
+        "io.zoobz.untheme": {
+          "name": "Depth"
+        }
+      },
+      "contexts": {
+        "default": [
+          {
+            "$ref": "./modifiers/depth/default.json"
+          }
+        ],
+        "flat": [
+          {
+            "$ref": "./modifiers/depth/flat.json"
+          }
+        ],
+        "deep": [
+          {
+            "$ref": "./modifiers/depth/deep.json"
+          }
+        ]
+      },
+      "default": "default"
+    },
+    "motion": {
+      "description": "How much the interface moves: durations, delay and easing.",
+      "$extensions": {
+        "io.zoobz.untheme": {
+          "name": "Motion"
+        }
+      },
+      "contexts": {
+        "default": [
+          {
+            "$ref": "./modifiers/motion/default.json"
+          }
+        ],
+        "reduced": [
+          {
+            "$ref": "./modifiers/motion/reduced.json"
+          }
+        ],
+        "expressive": [
+          {
+            "$ref": "./modifiers/motion/expressive.json"
+          }
+        ]
+      },
+      "default": "default"
+    }
+  },
+  "resolutionOrder": [
+    {
+      "$ref": "#/sets/roles"
+    },
+    {
+      "$ref": "#/sets/typography"
+    },
+    {
+      "$ref": "#/sets/shape"
+    },
+    {
+      "$ref": "#/sets/space"
+    },
+    {
+      "$ref": "#/sets/elevation"
+    },
+    {
+      "$ref": "#/sets/motion"
+    },
+    {
+      "$ref": "#/sets/state"
+    },
+    {
+      "$ref": "#/sets/blur"
+    },
+    {
+      "$ref": "#/sets/stroke"
+    },
+    {
+      "$ref": "#/sets/border"
+    },
+    {
+      "$ref": "#/sets/gradient"
+    },
+    {
+      "$ref": "#/modifiers/theme"
+    },
+    {
+      "$ref": "#/modifiers/color"
+    },
+    {
+      "$ref": "#/modifiers/vibrancy"
+    },
+    {
+      "$ref": "#/modifiers/contrast"
+    },
+    {
+      "$ref": "#/modifiers/text"
+    },
+    {
+      "$ref": "#/modifiers/density"
+    },
+    {
+      "$ref": "#/modifiers/radius"
+    },
+    {
+      "$ref": "#/modifiers/depth"
+    },
+    {
+      "$ref": "#/modifiers/motion"
+    }
+  ]
+}

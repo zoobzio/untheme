@@ -1,0 +1,29 @@
+{
+  "$description": "Generously rounded corners.",
+  "$extensions": {
+    "io.zoobz.untheme": {
+      "name": "Round"
+    }
+  },
+  "shape-sm": {
+    "$type": "dimension",
+    "$value": {
+      "value": 8,
+      "unit": "px"
+    }
+  },
+  "shape-md": {
+    "$type": "dimension",
+    "$value": {
+      "value": 16,
+      "unit": "px"
+    }
+  },
+  "shape-lg": {
+    "$type": "dimension",
+    "$value": {
+      "value": 24,
+      "unit": "px"
+    }
+  }
+}

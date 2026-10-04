@@ -5,6 +5,8 @@ import type { NuxtUnthemeConfig } from "./config";
 
 import { resolve } from "node:path";
 
+import type { Manifest } from "@untheme/kit";
+
 import { FILENAME, loadConfig, resolveKit } from "@untheme/kit";
 
 /**
@@ -40,7 +42,9 @@ export const closest = (
  * selection a kit build elsewhere generated, taken as passed. Without one, the
  * app's own kit config is built here through `@untheme/kit` — nothing is
  * written to disk — and the config and every JSON document it read join
- * Nuxt's watch list, so editing either restarts dev and builds again.
+ * Nuxt's watch list, so editing either restarts dev and builds again. A theme
+ * built here also carries the manifest the kit read off its documents; one
+ * passed in does not, and the emitted manifest falls back to titled ids.
  *
  * @param options - The module's configuration.
  * @param nuxt - The Nuxt instance, for the project root and the watch list.
@@ -48,7 +52,7 @@ export const closest = (
 export const loadTheme = async (
   options: NuxtUnthemeConfig,
   nuxt: Nuxt,
-): Promise<UnthemeConfig<Template>> => {
+): Promise<UnthemeConfig<Template> & { manifest?: Manifest }> => {
   if (options.theme || options.input) {
     if (!options.theme || !options.input) {
       throw new Error(
@@ -63,5 +67,5 @@ export const loadTheme = async (
   nuxt.options.watch.push(path);
   const kit = await resolveKit(await loadConfig(path), { cwd: root });
   nuxt.options.watch.push(...kit.documents);
-  return { theme: kit.theme, input: kit.input };
+  return { theme: kit.theme, input: kit.input, manifest: kit.manifest };
 };

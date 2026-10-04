@@ -1,0 +1,8 @@
+{
+  "$description": "The contrast each role was designed at.",
+  "$extensions": {
+    "io.zoobz.untheme": {
+      "name": "Standard"
+    }
+  }
+}

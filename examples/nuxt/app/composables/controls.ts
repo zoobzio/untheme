@@ -1,7 +1,8 @@
 /**
  * Two-way binding for a single modifier axis. `options` is the list of
- * contexts the schema allows for that axis; `selection` reads the axis's
- * current context and, when set, swaps the app to the chosen one.
+ * contexts the schema allows for that axis — the manifest carries the same
+ * list with names and descriptions; `selection` reads the axis's current
+ * context and, when set, swaps the app to the chosen one.
  */
 export const useControls = <A extends keyof AppUnthemeInput & string>(
   axis: A,

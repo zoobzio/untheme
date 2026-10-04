@@ -6,6 +6,7 @@ import { SchemaError, defineSchema } from "@untheme/schema";
 import { isTemplate } from "@untheme/utils";
 
 import { skeleton } from "./contexts";
+import { describe } from "./describe";
 import { identity } from "./identity";
 import { verify } from "./verify";
 
@@ -50,7 +51,7 @@ export const reframe = <T>(tokens: TokenNormalizedSet, run: () => T): T => {
 export const assemble = (
   parsed: { resolver: Resolver | undefined; tokens: TokenNormalizedSet },
   options: Pick<KitConfig, "id" | "name">,
-): Core => {
+): Required<Core> => {
   const pieces = skeleton(parsed.resolver, parsed.tokens);
   const { id, name } = identity(options, parsed.resolver);
   const base: unknown = {
@@ -69,5 +70,5 @@ export const assemble = (
   const theme = reframe(parsed.tokens, () => schema.parse.theme(base));
   const input = reframe(parsed.tokens, () => schema.parse.input(pieces.input));
   verify(parsed.resolver, parsed.tokens, theme, input);
-  return { theme, input };
+  return { theme, input, manifest: describe(theme, parsed.resolver) };
 };

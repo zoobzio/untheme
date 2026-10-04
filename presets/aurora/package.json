@@ -8,17 +8,11 @@
   },
   "type": "module",
   "exports": {
-    "./index.json": "./index.json",
-    "./themes/*": "./themes/*",
-    "./tokens/*": "./tokens/*",
-    "./modifiers/*": "./modifiers/*",
+    "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
   "files": [
-    "index.json",
-    "themes",
-    "tokens",
-    "modifiers"
+    "src"
   ],
   "scripts": {
     "generate": "node scripts/generate.mjs",

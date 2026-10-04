@@ -10,8 +10,8 @@ import { request } from "./source";
 
 /**
  * Resolves an `npm:/` URL to the file it names, through Node package
- * resolution from the project root: `npm:/@untheme/aurora/tokens/space.json`
- * is `@untheme/aurora/tokens/space.json` as the project would import it, so
+ * resolution from the project root: `npm:/@untheme/aurora/src/tokens/space.json`
+ * is `@untheme/aurora/src/tokens/space.json` as the project would import it, so
  * the package must export the file. The URL's fragment (a JSON pointer) is
  * not part of the file.
  *

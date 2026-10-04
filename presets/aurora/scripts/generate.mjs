@@ -1,16 +1,15 @@
 /**
  * Regenerates the themes from scripts/seeds.json as DTCG JSON: each theme as
- * a folder, themes/<id>/, holding its resolver document (resolver.json) and
- * one file per ramp (colors/<color>.json), with the manifest in index.json.
- * A theme's resolver is scripts/resolver.json — the sets and modifiers every
- * theme shares, and the theme's own color files — under the theme's own
- * name, so every theme is a drop-in for every other. Each seed contributes
- * its hue and chroma; every ramp shares one OKLCH lightness ladder across
- * the eleven Tailwind-style stops (50–950), with a chroma curve that peaks
- * at the middle and tapers toward both ends. The accent ramps additionally
- * emit muted and vivid chroma columns for the vibrancy axis; the neutral
- * ramps are exempt. Out of gamut colors reduce chroma until sRGB can hold
- * them. Run with `pnpm generate && pnpm format`.
+ * one token document, src/modifiers/theme/<id>.json, holding its name, its
+ * description and its eight ramps,
+ * and the contexts of the `theme` modifier in src/resolver.json — one per
+ * theme, in seed order. Each seed contributes its hue and chroma;
+ * every ramp shares one OKLCH lightness ladder across the eleven
+ * Tailwind-style stops (50–950), with a chroma curve that peaks at the middle
+ * and tapers toward both ends. The accent ramps additionally emit muted and
+ * vivid chroma columns for the vibrancy axis; the neutral ramps are exempt.
+ * Out of gamut colors reduce chroma until sRGB can hold them. Run with
+ * `pnpm generate && pnpm format`.
  */
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 
@@ -180,39 +179,37 @@ const themes = JSON.parse(
 );
 
 /*
- * The shared resolver document: every set, every modifier, and the
- * resolution order, its references written as a file in a theme's folder
- * reads them — the theme's own colors beside it, everything else in the
- * package's shared folders.
+ * The themes: one document per theme, every ramp in it. The theme folder is
+ * regenerated whole, so a theme removed from the seeds leaves no file behind.
  */
-const shared = JSON.parse(
-  await readFile(new URL("resolver.json", import.meta.url), "utf8"),
-);
+await rm(new URL("src/modifiers/theme/", ROOT), {
+  recursive: true,
+  force: true,
+});
+for (const [id, theme] of Object.entries(themes)) {
+  const document = {
+    $description: theme.description,
+    $extensions: { "io.zoobz.untheme": { name: theme.name } },
+  };
+  for (const [name, seed] of Object.entries(theme.seeds)) {
+    Object.assign(document, ramp(name, seed));
+  }
+  await write(`src/modifiers/theme/${id}.json`, document);
+}
 
 /*
- * The themes: each a folder with the shared document under the theme's own
- * name and one file per ramp — the only part that differs between themes —
- * and the manifest that names them. The themes folder is regenerated whole,
- * so a theme removed from the seeds leaves no folder behind.
+ * The resolver document is authored; only the contexts of its `theme`
+ * modifier are generated — one per theme, each the theme's own document.
  */
-await rm(new URL("themes/", ROOT), { recursive: true, force: true });
-for (const [id, theme] of Object.entries(themes)) {
-  for (const [name, seed] of Object.entries(theme.seeds)) {
-    await write(`themes/${id}/colors/${name}.json`, ramp(name, seed));
-  }
-  await write(`themes/${id}/resolver.json`, {
-    name: theme.name,
-    description: theme.description,
-    ...shared,
-  });
-}
-await write(
-  "index.json",
-  Object.entries(themes).map(([id, theme]) => ({
-    id,
-    name: theme.name,
-    description: theme.description,
-  })),
+const resolver = JSON.parse(
+  await readFile(new URL("src/resolver.json", ROOT), "utf8"),
 );
+resolver.modifiers.theme.contexts = Object.fromEntries(
+  Object.keys(themes).map((id) => [
+    id,
+    [{ $ref: `./modifiers/theme/${id}.json` }],
+  ]),
+);
+await write("src/resolver.json", resolver);
 
 console.log(`generated ${Object.keys(themes).length} themes`);

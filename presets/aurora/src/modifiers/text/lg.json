@@ -1,0 +1,43 @@
+{
+  "$description": "A larger type scale, for easier reading.",
+  "$extensions": {
+    "io.zoobz.untheme": {
+      "name": "Large"
+    }
+  },
+  "display-size": {
+    "$type": "dimension",
+    "$value": {
+      "value": 3.5,
+      "unit": "rem"
+    }
+  },
+  "headline-size": {
+    "$type": "dimension",
+    "$value": {
+      "value": 2.25,
+      "unit": "rem"
+    }
+  },
+  "title-size": {
+    "$type": "dimension",
+    "$value": {
+      "value": 1.375,
+      "unit": "rem"
+    }
+  },
+  "body-size": {
+    "$type": "dimension",
+    "$value": {
+      "value": 1.125,
+      "unit": "rem"
+    }
+  },
+  "label-size": {
+    "$type": "dimension",
+    "$value": {
+      "value": 1,
+      "unit": "rem"
+    }
+  }
+}

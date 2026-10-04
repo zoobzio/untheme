@@ -1,0 +1,8 @@
+{
+  "$description": "The type scale at its designed size.",
+  "$extensions": {
+    "io.zoobz.untheme": {
+      "name": "Medium"
+    }
+  }
+}

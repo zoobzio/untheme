@@ -1,0 +1,8 @@
+{
+  "$description": "The spacing scale as designed.",
+  "$extensions": {
+    "io.zoobz.untheme": {
+      "name": "Comfortable"
+    }
+  }
+}

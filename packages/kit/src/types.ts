@@ -2,16 +2,54 @@ import type { Logger } from "@terrazzo/parser";
 import type { Input, Template, Theme } from "@untheme/schema";
 
 /**
+ * What a config changes about one modifier of the resolver document. Any
+ * member alone is enough.
+ */
+export interface ModifierConfig {
+  /**
+   * Contexts of the config's own, by name: each the token file — or files,
+   * later ones winning — that the context applies. A path relative to the
+   * project root, an absolute URL, or an `npm:/` reference, like `source`.
+   * A context may only rebind tokens the base defines.
+   */
+  add?: Record<string, string | URL | (string | URL)[]>;
+
+  /**
+   * The contexts the build keeps, in the order the contract lists them. A
+   * context left out is not built: it is in neither the theme nor the types,
+   * and its files are never read. Defaults to every context the document
+   * declares, then the added ones.
+   */
+  contexts?: string[];
+
+  /**
+   * The context the modifier boots at — its tokens become the base. Defaults
+   * to the document's own default when that context is kept, else to the
+   * first kept context.
+   */
+  default?: string;
+}
+
+/**
  * The authored `untheme.config.ts`: where the DTCG resolver document lives,
- * the identity to give the base theme, and where the build writes.
+ * the identity to give the base theme, what to keep of its modifiers, and
+ * where the build writes.
  */
 export interface KitConfig {
   /**
    * The resolver document (or a plain token document): a path relative to the
    * project root, an absolute URL, or an `npm:/` reference into an installed
-   * package (`npm:/@untheme/aurora/themes/aurora/resolver.json`).
+   * package (`npm:/@untheme/aurora/src/resolver.json`).
    */
   source: string | URL;
+
+  /**
+   * Changes to the document's modifiers, by modifier name: contexts to add,
+   * which ones to keep, and which one boots — or `false` to turn the modifier
+   * off, leaving its default context in the base and the modifier out of the
+   * contract. A modifier not named here is built as the document declares it.
+   */
+  modifiers?: Record<string, ModifierConfig | false>;
 
   /**
    * The base theme's id. Defaults to the slug of its name.
@@ -71,10 +109,29 @@ export type BuildOptions = Omit<GenerateOptions, "cwd"> & {
   config?: string;
 };
 
+/** One thing an interface offers by name: a modifier, or one of its contexts. */
+export interface Entry {
+  /** The modifier's or context's name in the contract. */
+  id: string;
+
+  /** The display name: authored in the documents, else the id, titled. */
+  name: string;
+
+  /** The description authored in the documents, when there is one. */
+  description?: string;
+}
+
+/**
+ * The modifiers of a built theme as an interface presents them: one entry per
+ * modifier, in the theme's order, each with an entry per context it kept, in
+ * contract order.
+ */
+export type Manifest = (Entry & { contexts: Entry[] })[];
+
 /**
  * The validated base of a build: the base theme read off the DTCG documents,
  * narrowed through untheme's own schema and proven against Terrazzo's own
- * resolution, and the boot selection. What the emitters read.
+ * resolution, the boot selection, and the manifest. What the emitters read.
  */
 export interface Core {
   /** The base theme: every token, every modifier context, the order. */
@@ -82,6 +139,13 @@ export interface Core {
 
   /** The boot selection: each modifier's default context. */
   input: Input<Template>;
+
+  /**
+   * The modifiers and their contexts, named and described. Optional for a
+   * consumer that holds only a built theme and selection: the emitters then
+   * derive one from the theme, each name the id, titled.
+   */
+  manifest?: Manifest;
 }
 
 /**
@@ -91,6 +155,9 @@ export interface Core {
  * from.
  */
 export interface Kit extends Core {
+  /** The modifiers and their contexts, named and described. */
+  manifest: Manifest;
+
   /** The output directory, normalized and relative to the project root. */
   outDir: string;
 
