@@ -1,5 +1,16 @@
 # untheme
 
+## 0.5.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @untheme/catalog@0.5.0
+  - @untheme/core@0.5.0
+  - @untheme/css@0.5.0
+  - @untheme/schema@0.5.0
+  - @untheme/utils@0.5.0
+
 ## 0.4.0
 
 ### Minor Changes

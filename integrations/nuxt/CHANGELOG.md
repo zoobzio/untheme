@@ -1,5 +1,19 @@
 # @untheme/nuxt
 
+## 0.5.0
+
+### Minor Changes
+
+- [`0a1d799`](https://github.com/zoobzio/untheme/commit/0a1d79977c917251d31baf869b69315bdeac1f0e) Thanks [@zoobzio](https://github.com/zoobzio)! - The module registers `#build/untheme/manifest.mjs` beside the other theme
+  modules: each modifier and its contexts with an id, a name and a description,
+  as `@untheme/kit` emits it.
+
+### Patch Changes
+
+- Updated dependencies [[`0a1d799`](https://github.com/zoobzio/untheme/commit/0a1d79977c917251d31baf869b69315bdeac1f0e)]:
+  - @untheme/kit@0.5.0
+  - untheme@0.5.0
+
 ## 0.4.0
 
 ### Minor Changes
