@@ -18,7 +18,7 @@ export default defineNuxtConfig({
 import { defineConfig } from "@untheme/kit";
 
 export default defineConfig({
-  source: "npm:/@untheme/aurora/aurora.resolver.json",
+  source: "npm:/@untheme/aurora/themes/aurora/resolver.json",
 });
 ```
 

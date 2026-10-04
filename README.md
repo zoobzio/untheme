@@ -90,10 +90,11 @@ renderer.sheet(); // static cascade: base + per-context attribute blocks
 ```
 
 The [aurora](./presets/aurora) preset is the reference theme: eight modifier
-axes over eight tonal ramps, shipped as DTCG JSON with 31 themes that each
-rebind only the ramps. Point a config at it with an `npm:/` reference —
-`source: "npm:/@untheme/aurora/aurora.resolver.json"` — or list its files in a
-resolver of your own to add tokens on top.
+axes over eight tonal ramps, shipped as DTCG JSON: 31 interchangeable
+themes, each a resolver document over its own ramp files. Point a
+config at one with an `npm:/` reference —
+`source: "npm:/@untheme/aurora/themes/aurora/resolver.json"` — or list its
+files in a resolver of your own to add tokens on top.
 
 ## Workspace
 

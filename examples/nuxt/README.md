@@ -29,7 +29,7 @@ Other scripts: `build`, `preview`, `generate`, `typecheck`.
 Everything untheme-specific lives in three small files.
 
 **`untheme.config.ts`** points at aurora's DTCG JSON with an `npm:/` reference —
-`source: "npm:/@untheme/aurora/aurora.resolver.json"` — and nothing else. The
+`source: "npm:/@untheme/aurora/themes/aurora/resolver.json"` — and nothing else. The
 [`@untheme/nuxt`](../../integrations/nuxt) module finds it, builds it through
 [`@untheme/kit`](../../packages/kit), and boots each of aurora's eight modifier
 axes (`color`, `vibrancy`, `contrast`, `text`, `density`, `radius`, `depth`,
@@ -42,7 +42,7 @@ The file's folder, `/api/untheme`, is the base the catalog client in
 
 **`server/aurora/`** defines that handler: `createThemeHandler` from
 `@untheme/nuxt/server` over aurora's theme manifest, with one lazy JSON import
-per theme file so the server bundle loads a theme only when it is requested.
+per color file so the server bundle loads a theme only when it is requested.
 `files.ts` is generated from aurora's theme folders — rerun
 `pnpm generate:themes` after aurora's themes change.
 

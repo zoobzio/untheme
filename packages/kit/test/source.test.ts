@@ -19,9 +19,12 @@ describe("locate", () => {
   });
 
   it("keeps an npm reference absolute, and relative paths inside it resolve", () => {
-    const url = locate("npm:/@untheme/aurora/aurora.resolver.json", base);
-    expect(url.href).toBe("npm:/@untheme/aurora/aurora.resolver.json");
-    expect(new URL("./tokens/space.json", url).href).toBe(
+    const url = locate(
+      "npm:/@untheme/aurora/themes/aurora/resolver.json",
+      base,
+    );
+    expect(url.href).toBe("npm:/@untheme/aurora/themes/aurora/resolver.json");
+    expect(new URL("../../tokens/space.json", url).href).toBe(
       "npm:/@untheme/aurora/tokens/space.json",
     );
   });

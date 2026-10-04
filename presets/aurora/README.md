@@ -3,8 +3,9 @@
 The reference untheme preset: a compact semantic vocabulary over eight
 generated tonal ramps, eight modifier axes, and a catalog of thirty-one
 theme variants — shipped as [DTCG](https://www.designtokens.org/) JSON
-only. The package has no dependencies and no code: a resolver document,
-the token files, the modifier files, and the theme files.
+only. The package has no dependencies and no code: a folder per theme — its
+resolver document and its color files — and the token and modifier files
+every theme shares.
 
 Aurora demonstrates the full token model — every value family the schema
 validates appears at least once (colors, dimensions, durations, font
@@ -21,8 +22,8 @@ Tokens come in three tiers:
   each at the eleven Tailwind-style stops (`primary-50` … `primary-950`);
   the six accent ramps also carry muted and vivid chroma columns
   (`primary-muted-500`, `primary-vivid-500`, …) for the vibrancy axis.
-  These are the only literal colors in the contract, generated from seed
-  colors — see _Regenerating_ below.
+  These are the only literal colors in the contract, and the only part a
+  theme owns: generated from seed colors — see _Regenerating_ below.
 - **Roles** — a small semantic vocabulary: per accent family a fill, its
   text, a tinted container, and its text (`primary`, `on-primary`,
   `primary-container`, `on-primary-container`, …); the surfaces (`surface`,
@@ -38,8 +39,8 @@ Tokens come in three tiers:
   composites), state-layer opacities, strokes, borders, and the brand
   gradients.
 
-Because roles reference ramps rather than literals, a theme variant rebinds
-_only the 220 ramp values_ — every role and every modifier context follows
+Because roles reference ramps rather than literals, a theme defines _only
+the 220 ramp values_ — every role and every modifier context follows
 automatically.
 
 ## The axes
@@ -95,12 +96,15 @@ One JSON file per thing. Token names are flat (`primary-50`), so each one is
 also its CSS custom property (`--primary-50`).
 
 ```
-aurora.resolver.json         sets and modifiers, in resolution order
-tokens/
-  colors/                    one file per color: its ramp
-    primary.json  secondary.json  tertiary.json     33 tokens each
-    error.json    success.json    warning.json      33 tokens each
-    neutral.json  neutral-variant.json              11 tokens each
+index.json                   the manifest: id, name, description
+themes/
+  <id>/                      one folder per theme
+    resolver.json            sets and modifiers, in resolution order
+    colors/                  one file per color: its ramp
+      primary.json  secondary.json  tertiary.json     33 tokens each
+      error.json    success.json    warning.json      33 tokens each
+      neutral.json  neutral-variant.json              11 tokens each
+tokens/                      shared by every theme
   roles/                     one file per color: its semantic tokens
     primary.json  secondary.json  tertiary.json     16 tokens each
     error.json    success.json    warning.json      16 tokens each
@@ -109,14 +113,15 @@ tokens/
   shape.json  4     space.json  10    elevation.json  4
   motion.json 11    state.json   3    blur.json       3
   stroke.json 2     border.json  3    gradient.json   2
-modifiers/                   one file per modifier, one key per context
+modifiers/                   shared: one file per modifier, one key per context
   color.json  vibrancy.json  contrast.json  text.json
   density.json  radius.json  depth.json  motion.json
-themes/
-  index.json                 the manifest: id, name, description
-  <id>/colors/               the same eight files as tokens/colors
 ```
 
+- **A theme's resolver** is a complete resolver document. Its `colors` set
+  lists the color files beside it; every other set and every modifier
+  references the shared files. The 31 documents are identical apart from
+  `name` and `description`, so any theme stands in for any other.
 - **A color file** holds one ramp. An accent ramp has three columns of eleven
   stops: base, muted and vivid. A neutral ramp has one column.
 - **A role file** holds every semantic token of one color: for an accent, its
@@ -125,17 +130,14 @@ themes/
   `*-high-contrast`) and their 8 vibrancy channels (`*-muted`, `*-vivid`).
   `surface.json` holds the 8 surface roles and their 6 contrast channels.
 - **A modifier file** holds every context of one modifier, one top-level key
-  per context; the default context is an empty object. The resolver reads a
-  context with a JSON pointer: `./modifiers/contrast.json#/high`.
-- **A theme folder** mirrors `tokens/` and holds only the files the theme
-  rebinds. Every theme rebinds exactly the 220 ramp tokens, so every theme
-  folder is `colors/` with eight files.
+  per context; the default context is an empty object. A resolver reads a
+  context with a JSON pointer: `../../modifiers/contrast.json#/high`.
 
-What each base file needs:
+What each shared file needs:
 
 | File             | Needs              |
 | ---------------- | ------------------ |
-| a `roles` file   | the `colors` files |
+| a `roles` file   | a theme's `colors` |
 | `border`         | `roles`, `stroke`  |
 | `gradient`       | `colors`, `roles`  |
 | every other file | nothing            |
@@ -150,19 +152,20 @@ What each modifier needs:
 | `density`, `radius`, `depth`, `motion` | `space`, `shape`, `elevation`, `motion` |
 
 Every file is exported, so Node package resolution finds it:
-`@untheme/aurora/tokens/space.json`, `@untheme/aurora/themes/nord/colors/primary.json`.
+`@untheme/aurora/tokens/space.json`,
+`@untheme/aurora/themes/nord/colors/primary.json`.
 
 ## Usage
 
-Point an [`@untheme/kit`](../../packages/kit) config at the resolver document
-with an `npm:/` reference:
+Point an [`@untheme/kit`](../../packages/kit) config at a theme's resolver
+document with an `npm:/` reference:
 
 ```ts
 // untheme.config.ts
 import { defineConfig } from "@untheme/kit";
 
 export default defineConfig({
-  source: "npm:/@untheme/aurora/aurora.resolver.json",
+  source: "npm:/@untheme/aurora/themes/aurora/resolver.json",
 });
 ```
 
@@ -183,18 +186,22 @@ ut.swap("vibrancy", "vivid"); // electric dark, by composition
 ut.swap("contrast", "high"); // and accessible, contrast wins the collision
 ```
 
-To add tokens of your own, write your own resolver document: list aurora's
-files as sets, add yours, and declare each modifier again with aurora's
-context files (`npm:/@untheme/aurora/modifiers/color.json#/dark`) plus any of
-yours. The tables above say which files a subset needs. The
+Every theme's resolver is a drop-in for that source — same tokens, same
+axes, same defaults, its own palette as the base
+(`npm:/@untheme/aurora/themes/nord/resolver.json`).
+
+To add tokens of your own, write your own resolver document: list a theme's
+color files and aurora's shared files as sets, add yours, and declare each
+modifier again with aurora's context files
+(`npm:/@untheme/aurora/modifiers/color.json#/dark`) plus any of yours. The tables above say which files a subset needs. The
 [shiki example](../../examples/shiki) adds a `syntax-*` group this way.
 
 ## Themes
 
-Thirty-one variants, one folder each under `themes/`, listed with their name
-and description in `themes/index.json`. The base palette is `aurora` itself —
-electric teal-green, violet, and magenta on cold blue-grays — and it ships as
-a variant too, so a demo can always apply its way back to the default.
+Thirty-one themes, one folder each under `themes/`, listed with
+their name and description in `index.json`. The preset's own palette,
+`aurora` — electric teal-green, violet, and magenta on cold blue-grays — is
+one of them, with no special standing.
 
 Editor classics: `ayu`, `catppuccin`, `cyberdream`, `dracula`, `everforest`,
 `github`, `gruvbox`, `horizon`, `kanagawa`, `monokai`, `night_owl`, `nord`,
@@ -210,17 +217,23 @@ greens).
 
 Modern open palettes: `flexoki`, `oxocarbon`.
 
-A theme's files are normal DTCG token files. As a layer, a theme is its `id`
-and `name` from the manifest and each token's `$value` as its binding — what
-the [Nuxt example](../../examples/nuxt)'s theme handler serves, so an app can
-switch between all of them. A resolver of your own can also list a theme's
-files as a set, after aurora's ramps, to build with that palette as its base.
+A theme is used two ways:
+
+- **As a base theme.** Point a kit config's `source` at its resolver
+  (above). The base theme takes the document's `name`; its id is the slug of
+  that name unless the config sets `id`.
+- **As a layer.** A theme is its `id` and `name` from the manifest and each
+  token's `$value` in its color files as its binding — plain JSON reads, no
+  build. This is what the [Nuxt example](../../examples/nuxt)'s theme
+  handler serves, so an app can switch between all of them.
 
 ## Regenerating
 
-The files under `tokens/colors/` and `themes/` are generated; the committed
+`index.json` and the files under `themes/` are generated; the committed
 JSON is what ships, and no color math runs at runtime. To change a palette,
-edit the seed hexes in `scripts/seeds.json` and run:
+edit the seed hexes in `scripts/seeds.json`; to change what every theme
+shares — a set, a modifier, the resolution order — edit
+`scripts/resolver.json`. Then run:
 
 ```sh
 pnpm generate && pnpm format
@@ -230,12 +243,13 @@ The generator (`scripts/generate.mjs`) expands each seed into a tonal ramp
 in OKLCH: the seed contributes hue and chroma, every ramp shares one
 perceptual lightness ladder across the eleven stops, and a chroma curve
 peaks at the middle and tapers toward both ends (out-of-gamut colors
-reduce chroma until sRGB holds them). The base ramps and every theme seed
-all eight ramps individually; semantic seeds (`error`, `success`,
-`warning`) stay recognizably red, green, and amber across themes,
-hue-shifted toward each theme's temperature. The `themes/` folder and its
-manifest are rewritten whole, so a theme removed from the seeds leaves
-nothing behind.
+reduce chroma until sRGB holds them). Every theme seeds all eight ramps
+individually; semantic seeds (`error`, `success`, `warning`) stay
+recognizably red, green, and amber across themes, hue-shifted toward each
+theme's temperature. Each theme's resolver is `scripts/resolver.json` under
+the theme's name, beside its color files. The `themes/` folder
+and the manifest are rewritten whole, so a theme removed from the seeds
+leaves nothing behind.
 
 Aurora has no tests of its own: it is the test fixture of
 [`@untheme/kit`](../../packages/kit), whose suite builds it, proves every

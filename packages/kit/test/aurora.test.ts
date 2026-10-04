@@ -37,7 +37,7 @@ let authored: { color: { dark: Record<string, unknown> } };
 
 beforeAll(async () => {
   kit = await resolveKit(
-    { source: "npm:/@untheme/aurora/aurora.resolver.json" },
+    { source: "npm:/@untheme/aurora/themes/aurora/resolver.json" },
     { cwd: ROOT },
   );
   const path = createRequire(import.meta.url).resolve(
@@ -77,12 +77,15 @@ describe("the aurora build", () => {
     });
   });
 
-  it("reads the resolver, every token file, and every modifier file", () => {
+  it("reads the resolver, its color files, and every shared file", () => {
     const files = kit.documents.map((path) =>
-      path.replace(/\\/g, "/").replace(/^.*\/aurora\//, ""),
+      path.replace(/\\/g, "/").replace(/^.*?\/aurora\//, ""),
     );
-    expect(files[0]).toBe("aurora.resolver.json");
-    expect(files.filter((file) => file.startsWith("tokens/"))).toHaveLength(25);
+    expect(files[0]).toBe("themes/aurora/resolver.json");
+    expect(
+      files.filter((file) => file.startsWith("themes/aurora/colors/")),
+    ).toHaveLength(8);
+    expect(files.filter((file) => file.startsWith("tokens/"))).toHaveLength(17);
     expect(files.filter((file) => file.startsWith("modifiers/"))).toEqual(
       kit.theme.order.map((modifier) => `modifiers/${modifier}.json`),
     );
@@ -222,5 +225,69 @@ describe("the contrast axis", () => {
     const ut = boot({ color: "dark", contrast: "medium" });
     expect(ut.get("on-surface")).toBe("{on-surface-medium-contrast}");
     expect(ut.get("on-surface-medium-contrast")).toBe("{neutral-100}");
+  });
+});
+
+describe("the aurora themes", () => {
+  const require = createRequire(import.meta.url);
+
+  /** A JSON file of the aurora package, by its package path. */
+  const read = async (path: string) => {
+    const file = require.resolve(`@untheme/aurora/${path}`);
+    return JSON.parse(await readFile(file, "utf8"));
+  };
+
+  /** A theme built from its own resolver document. */
+  const build = (id: string) => {
+    return resolveKit(
+      { source: `npm:/@untheme/aurora/themes/${id}/resolver.json` },
+      { cwd: ROOT },
+    );
+  };
+
+  it("ships every theme as the same resolver over its own ramps", async () => {
+    const shared = await read("themes/aurora/resolver.json");
+    const ramps = async (id: string) => {
+      const names: string[] = [];
+      for (const { $ref } of shared.sets.colors.sources) {
+        const file = await read(`themes/${id}/${$ref.replace("./", "")}`);
+        names.push(...Object.keys(file));
+      }
+      return names;
+    };
+    const tokens = await ramps("aurora");
+    expect(tokens).toHaveLength(220);
+
+    const manifest: { id: string; name: string; description: string }[] =
+      await read("index.json");
+    expect(manifest).toHaveLength(31);
+    for (const { id, name, description } of manifest) {
+      expect(await read(`themes/${id}/resolver.json`)).toEqual({
+        ...shared,
+        name,
+        description,
+      });
+      expect(await ramps(id)).toEqual(tokens);
+    }
+  });
+
+  it("builds a theme to the same contract, rebinding only its ramps", async () => {
+    const nord = await build("nord");
+    expect(nord.theme.id).toBe("nord");
+    expect(nord.theme.name).toBe("Nord");
+    expect(nord.input).toEqual(kit.input);
+    expect(nord.theme.order).toEqual(kit.theme.order);
+    expect(nord.theme.modifiers).toEqual(kit.theme.modifiers);
+    expect(Object.keys(nord.theme.tokens)).toEqual(
+      Object.keys(kit.theme.tokens),
+    );
+    for (const [token, slot] of Object.entries(nord.theme.tokens)) {
+      if (!/-\d+$/.test(token)) {
+        expect(slot).toEqual(kit.theme.tokens[token]);
+      }
+    }
+    expect(nord.theme.tokens["primary-500"]).not.toEqual(
+      kit.theme.tokens["primary-500"],
+    );
   });
 });

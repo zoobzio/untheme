@@ -23,7 +23,7 @@ import { defineConfig } from "@untheme/kit";
 
 export default defineConfig({
   // Required. The resolver document: a path, a URL, or an npm:/ reference.
-  source: "npm:/@untheme/aurora/aurora.resolver.json",
+  source: "npm:/@untheme/aurora/themes/aurora/resolver.json",
 
   // Optional. They replace the identity from the resolver document.
   id: "app",
@@ -59,10 +59,10 @@ A `source` — and every `$ref` inside the documents — is one of:
 - **A URL** (`https://tokens.example.com/app.resolver.json`). Remote documents
   are fetched without credentials; pass a `req` loader to authenticate.
 - **An `npm:/` reference** into an installed package:
-  `npm:/@untheme/aurora/aurora.resolver.json`. It resolves with Node package
+  `npm:/@untheme/aurora/themes/aurora/resolver.json`. It resolves with Node package
   resolution from the project root, so the package must export the file. The
   slash after the colon is required: it makes relative `$ref`s inside the
-  package resolve (`./tokens/space.json` →
+  package resolve (`../../tokens/space.json` →
   `npm:/@untheme/aurora/tokens/space.json`).
 
 ## Composition

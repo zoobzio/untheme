@@ -1,7 +1,7 @@
 import type { EventHandler } from "h3";
 import type { Entry } from "untheme/catalog";
 
-import manifest from "@untheme/aurora/themes/index.json" with { type: "json" };
+import manifest from "@untheme/aurora/index.json" with { type: "json" };
 
 import { createThemeHandler, listEntries } from "@untheme/nuxt/server";
 import { files } from "./files";
@@ -17,8 +17,8 @@ export interface AuroraLayer {
 
 /**
  * One aurora theme as a layer: its `id` and `name` from aurora's manifest,
- * and each token's `$value` from every file of the theme folder as its
- * binding. Plain JSON reads — no Terrazzo at run time. Resolves `undefined`
+ * and each token's `$value` from every color file of the theme folder as
+ * its binding. Plain JSON reads — no Terrazzo at run time. Resolves `undefined`
  * for an id aurora does not ship.
  *
  * @param id - The theme id.

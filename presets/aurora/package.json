@@ -8,17 +8,17 @@
   },
   "type": "module",
   "exports": {
-    "./aurora.resolver.json": "./aurora.resolver.json",
+    "./index.json": "./index.json",
+    "./themes/*": "./themes/*",
     "./tokens/*": "./tokens/*",
     "./modifiers/*": "./modifiers/*",
-    "./themes/*": "./themes/*",
     "./package.json": "./package.json"
   },
   "files": [
-    "aurora.resolver.json",
+    "index.json",
+    "themes",
     "tokens",
-    "modifiers",
-    "themes"
+    "modifiers"
   ],
   "scripts": {
     "generate": "node scripts/generate.mjs",

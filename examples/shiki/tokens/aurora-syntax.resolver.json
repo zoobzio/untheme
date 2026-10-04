@@ -6,28 +6,28 @@
     "colors": {
       "sources": [
         {
-          "$ref": "npm:/@untheme/aurora/tokens/colors/primary.json"
+          "$ref": "npm:/@untheme/aurora/themes/aurora/colors/primary.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/tokens/colors/secondary.json"
+          "$ref": "npm:/@untheme/aurora/themes/aurora/colors/secondary.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/tokens/colors/tertiary.json"
+          "$ref": "npm:/@untheme/aurora/themes/aurora/colors/tertiary.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/tokens/colors/error.json"
+          "$ref": "npm:/@untheme/aurora/themes/aurora/colors/error.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/tokens/colors/success.json"
+          "$ref": "npm:/@untheme/aurora/themes/aurora/colors/success.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/tokens/colors/warning.json"
+          "$ref": "npm:/@untheme/aurora/themes/aurora/colors/warning.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/tokens/colors/neutral.json"
+          "$ref": "npm:/@untheme/aurora/themes/aurora/colors/neutral.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/tokens/colors/neutral-variant.json"
+          "$ref": "npm:/@untheme/aurora/themes/aurora/colors/neutral-variant.json"
         }
       ]
     },

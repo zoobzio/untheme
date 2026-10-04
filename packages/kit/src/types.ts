@@ -9,7 +9,7 @@ export interface KitConfig {
   /**
    * The resolver document (or a plain token document): a path relative to the
    * project root, an absolute URL, or an `npm:/` reference into an installed
-   * package (`npm:/@untheme/aurora/aurora.resolver.json`).
+   * package (`npm:/@untheme/aurora/themes/aurora/resolver.json`).
    */
   source: string | URL;
 

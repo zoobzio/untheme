@@ -1,14 +1,16 @@
 /**
- * Regenerates the tonal ramps from scripts/seeds.json as DTCG JSON: the base
- * ramps into tokens/colors/<color>.json, and each theme's re-seeded ramps
- * into themes/<id>/colors/<color>.json, with the theme manifest in
- * themes/index.json. Each seed contributes its hue and chroma; every ramp
- * shares one OKLCH lightness ladder across the eleven Tailwind-style stops
- * (50–950), with a chroma curve that peaks at the middle and tapers toward
- * both ends. The accent ramps additionally emit muted and vivid chroma
- * columns for the vibrancy axis; the neutral ramps are exempt. Out of gamut
- * colors reduce chroma until sRGB can hold them. Run with
- * `pnpm generate && pnpm format`.
+ * Regenerates the themes from scripts/seeds.json as DTCG JSON: each theme as
+ * a folder, themes/<id>/, holding its resolver document (resolver.json) and
+ * one file per ramp (colors/<color>.json), with the manifest in index.json.
+ * A theme's resolver is scripts/resolver.json — the sets and modifiers every
+ * theme shares, and the theme's own color files — under the theme's own
+ * name, so every theme is a drop-in for every other. Each seed contributes
+ * its hue and chroma; every ramp shares one OKLCH lightness ladder across
+ * the eleven Tailwind-style stops (50–950), with a chroma curve that peaks
+ * at the middle and tapers toward both ends. The accent ramps additionally
+ * emit muted and vivid chroma columns for the vibrancy axis; the neutral
+ * ramps are exempt. Out of gamut colors reduce chroma until sRGB can hold
+ * them. Run with `pnpm generate && pnpm format`.
  */
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 
@@ -173,39 +175,44 @@ const write = async (path, document) => {
   await writeFile(url, `${JSON.stringify(document, null, 2)}\n`);
 };
 
-/** Writes one file per ramp under a `colors/` folder. */
-const ramps = async (folder, seeds) => {
-  for (const [name, seed] of Object.entries(seeds)) {
-    await write(`${folder}/colors/${name}.json`, ramp(name, seed));
-  }
-};
-
-const seeds = JSON.parse(
+const themes = JSON.parse(
   await readFile(new URL("seeds.json", import.meta.url), "utf8"),
 );
 
-/* The base ramps. */
-await ramps("tokens", seeds.base);
+/*
+ * The shared resolver document: every set, every modifier, and the
+ * resolution order, its references written as a file in a theme's folder
+ * reads them — the theme's own colors beside it, everything else in the
+ * package's shared folders.
+ */
+const shared = JSON.parse(
+  await readFile(new URL("resolver.json", import.meta.url), "utf8"),
+);
 
 /*
- * The themes: each a folder mirroring tokens/, holding only the files it
- * rebinds — today the eight ramps — and the manifest that names them. The
- * themes folder is regenerated whole, so a theme removed from the seeds
- * leaves no folder behind.
+ * The themes: each a folder with the shared document under the theme's own
+ * name and one file per ramp — the only part that differs between themes —
+ * and the manifest that names them. The themes folder is regenerated whole,
+ * so a theme removed from the seeds leaves no folder behind.
  */
 await rm(new URL("themes/", ROOT), { recursive: true, force: true });
-for (const [id, theme] of Object.entries(seeds.themes)) {
-  await ramps(`themes/${id}`, theme.seeds);
+for (const [id, theme] of Object.entries(themes)) {
+  for (const [name, seed] of Object.entries(theme.seeds)) {
+    await write(`themes/${id}/colors/${name}.json`, ramp(name, seed));
+  }
+  await write(`themes/${id}/resolver.json`, {
+    name: theme.name,
+    description: theme.description,
+    ...shared,
+  });
 }
 await write(
-  "themes/index.json",
-  Object.entries(seeds.themes).map(([id, theme]) => ({
+  "index.json",
+  Object.entries(themes).map(([id, theme]) => ({
     id,
     name: theme.name,
     description: theme.description,
   })),
 );
 
-console.log(
-  `generated ${Object.keys(seeds.base).length} base ramps and ${Object.keys(seeds.themes).length} themes`,
-);
+console.log(`generated ${Object.keys(themes).length} themes`);

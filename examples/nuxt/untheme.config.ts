@@ -8,5 +8,5 @@ import { defineConfig } from "@untheme/kit";
  * `server/api/untheme/[...path].get.ts`.
  */
 export default defineConfig({
-  source: "npm:/@untheme/aurora/aurora.resolver.json",
+  source: "npm:/@untheme/aurora/themes/aurora/resolver.json",
 });

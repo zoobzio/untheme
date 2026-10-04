@@ -10,10 +10,10 @@ const ROOT = fileURLToPath(new URL("..", import.meta.url));
 describe("installed", () => {
   it("resolves an npm reference through the project's packages", () => {
     const path = installed(
-      new URL("npm:/@untheme/aurora/aurora.resolver.json"),
+      new URL("npm:/@untheme/aurora/themes/aurora/resolver.json"),
       ROOT,
     );
-    expect(path).toMatch(/aurora[\\/]aurora\.resolver\.json$/);
+    expect(path).toMatch(/themes[\\/]aurora[\\/]resolver\.json$/);
   });
 
   it("ignores the JSON pointer of a reference", () => {
@@ -35,7 +35,7 @@ describe("loader", () => {
   it("reads npm references off disk and records them", async () => {
     const { load, documents } = loader(ROOT);
     const src = await load(
-      new URL("npm:/@untheme/aurora/aurora.resolver.json"),
+      new URL("npm:/@untheme/aurora/themes/aurora/resolver.json"),
       new URL("file:///"),
     );
     expect(JSON.parse(src)).toHaveProperty("resolutionOrder");
@@ -65,7 +65,7 @@ describe("loader", () => {
     });
     await expect(
       load(
-        new URL("npm:/@untheme/aurora/aurora.resolver.json"),
+        new URL("npm:/@untheme/aurora/themes/aurora/resolver.json"),
         new URL("file:///"),
       ),
     ).resolves.toContain("resolutionOrder");

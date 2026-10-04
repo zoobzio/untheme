@@ -1,136 +1,130 @@
 {
-  "name": "Aurora Syntax",
+  "name": "Dracula",
+  "description": "Vivid purple, pink, and cyan on cool darks, from Dracula",
   "version": "2025.10",
-  "description": "Aurora widened with a syntax-* token group for code highlighting. Aurora's files are listed as sets and each of its modifiers is declared again, with the dark syntax bindings added to the dark color context.",
   "sets": {
     "colors": {
+      "description": "The theme's eight tonal ramps, one file per color.",
       "sources": [
         {
-          "$ref": "npm:/@untheme/aurora/themes/aurora/colors/primary.json"
+          "$ref": "./colors/primary.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/themes/aurora/colors/secondary.json"
+          "$ref": "./colors/secondary.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/themes/aurora/colors/tertiary.json"
+          "$ref": "./colors/tertiary.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/themes/aurora/colors/error.json"
+          "$ref": "./colors/error.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/themes/aurora/colors/success.json"
+          "$ref": "./colors/success.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/themes/aurora/colors/warning.json"
+          "$ref": "./colors/warning.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/themes/aurora/colors/neutral.json"
+          "$ref": "./colors/neutral.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/themes/aurora/colors/neutral-variant.json"
+          "$ref": "./colors/neutral-variant.json"
         }
       ]
     },
     "roles": {
+      "description": "The semantic color roles and their contrast and vibrancy channels, one file per color.",
       "sources": [
         {
-          "$ref": "npm:/@untheme/aurora/tokens/roles/primary.json"
+          "$ref": "../../tokens/roles/primary.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/tokens/roles/secondary.json"
+          "$ref": "../../tokens/roles/secondary.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/tokens/roles/tertiary.json"
+          "$ref": "../../tokens/roles/tertiary.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/tokens/roles/error.json"
+          "$ref": "../../tokens/roles/error.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/tokens/roles/success.json"
+          "$ref": "../../tokens/roles/success.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/tokens/roles/warning.json"
+          "$ref": "../../tokens/roles/warning.json"
         },
         {
-          "$ref": "npm:/@untheme/aurora/tokens/roles/surface.json"
+          "$ref": "../../tokens/roles/surface.json"
         }
       ]
     },
     "typography": {
       "sources": [
         {
-          "$ref": "npm:/@untheme/aurora/tokens/typography.json"
+          "$ref": "../../tokens/typography.json"
         }
       ]
     },
     "shape": {
       "sources": [
         {
-          "$ref": "npm:/@untheme/aurora/tokens/shape.json"
+          "$ref": "../../tokens/shape.json"
         }
       ]
     },
     "space": {
       "sources": [
         {
-          "$ref": "npm:/@untheme/aurora/tokens/space.json"
+          "$ref": "../../tokens/space.json"
         }
       ]
     },
     "elevation": {
       "sources": [
         {
-          "$ref": "npm:/@untheme/aurora/tokens/elevation.json"
+          "$ref": "../../tokens/elevation.json"
         }
       ]
     },
     "motion": {
       "sources": [
         {
-          "$ref": "npm:/@untheme/aurora/tokens/motion.json"
+          "$ref": "../../tokens/motion.json"
         }
       ]
     },
     "state": {
       "sources": [
         {
-          "$ref": "npm:/@untheme/aurora/tokens/state.json"
+          "$ref": "../../tokens/state.json"
         }
       ]
     },
     "blur": {
       "sources": [
         {
-          "$ref": "npm:/@untheme/aurora/tokens/blur.json"
+          "$ref": "../../tokens/blur.json"
         }
       ]
     },
     "stroke": {
       "sources": [
         {
-          "$ref": "npm:/@untheme/aurora/tokens/stroke.json"
+          "$ref": "../../tokens/stroke.json"
         }
       ]
     },
     "border": {
       "sources": [
         {
-          "$ref": "npm:/@untheme/aurora/tokens/border.json"
+          "$ref": "../../tokens/border.json"
         }
       ]
     },
     "gradient": {
       "sources": [
         {
-          "$ref": "npm:/@untheme/aurora/tokens/gradient.json"
-        }
-      ]
-    },
-    "syntax": {
-      "description": "The syntax-* carrier tokens: each references one of aurora's ramps.",
-      "sources": [
-        {
-          "$ref": "./syntax.json"
+          "$ref": "../../tokens/gradient.json"
         }
       ]
     }
@@ -140,15 +134,12 @@
       "contexts": {
         "light": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/color.json#/light"
+            "$ref": "../../modifiers/color.json#/light"
           }
         ],
         "dark": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/color.json#/dark"
-          },
-          {
-            "$ref": "./syntax-dark.json"
+            "$ref": "../../modifiers/color.json#/dark"
           }
         ]
       },
@@ -158,17 +149,17 @@
       "contexts": {
         "balanced": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/vibrancy.json#/balanced"
+            "$ref": "../../modifiers/vibrancy.json#/balanced"
           }
         ],
         "muted": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/vibrancy.json#/muted"
+            "$ref": "../../modifiers/vibrancy.json#/muted"
           }
         ],
         "vivid": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/vibrancy.json#/vivid"
+            "$ref": "../../modifiers/vibrancy.json#/vivid"
           }
         ]
       },
@@ -178,17 +169,17 @@
       "contexts": {
         "default": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/contrast.json#/default"
+            "$ref": "../../modifiers/contrast.json#/default"
           }
         ],
         "medium": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/contrast.json#/medium"
+            "$ref": "../../modifiers/contrast.json#/medium"
           }
         ],
         "high": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/contrast.json#/high"
+            "$ref": "../../modifiers/contrast.json#/high"
           }
         ]
       },
@@ -198,17 +189,17 @@
       "contexts": {
         "sm": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/text.json#/sm"
+            "$ref": "../../modifiers/text.json#/sm"
           }
         ],
         "md": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/text.json#/md"
+            "$ref": "../../modifiers/text.json#/md"
           }
         ],
         "lg": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/text.json#/lg"
+            "$ref": "../../modifiers/text.json#/lg"
           }
         ]
       },
@@ -218,17 +209,17 @@
       "contexts": {
         "compact": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/density.json#/compact"
+            "$ref": "../../modifiers/density.json#/compact"
           }
         ],
         "default": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/density.json#/default"
+            "$ref": "../../modifiers/density.json#/default"
           }
         ],
         "spacious": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/density.json#/spacious"
+            "$ref": "../../modifiers/density.json#/spacious"
           }
         ]
       },
@@ -238,17 +229,17 @@
       "contexts": {
         "default": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/radius.json#/default"
+            "$ref": "../../modifiers/radius.json#/default"
           }
         ],
         "sharp": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/radius.json#/sharp"
+            "$ref": "../../modifiers/radius.json#/sharp"
           }
         ],
         "round": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/radius.json#/round"
+            "$ref": "../../modifiers/radius.json#/round"
           }
         ]
       },
@@ -258,17 +249,17 @@
       "contexts": {
         "default": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/depth.json#/default"
+            "$ref": "../../modifiers/depth.json#/default"
           }
         ],
         "flat": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/depth.json#/flat"
+            "$ref": "../../modifiers/depth.json#/flat"
           }
         ],
         "deep": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/depth.json#/deep"
+            "$ref": "../../modifiers/depth.json#/deep"
           }
         ]
       },
@@ -278,17 +269,17 @@
       "contexts": {
         "default": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/motion.json#/default"
+            "$ref": "../../modifiers/motion.json#/default"
           }
         ],
         "reduced": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/motion.json#/reduced"
+            "$ref": "../../modifiers/motion.json#/reduced"
           }
         ],
         "expressive": [
           {
-            "$ref": "npm:/@untheme/aurora/modifiers/motion.json#/expressive"
+            "$ref": "../../modifiers/motion.json#/expressive"
           }
         ]
       },
@@ -331,9 +322,6 @@
     },
     {
       "$ref": "#/sets/gradient"
-    },
-    {
-      "$ref": "#/sets/syntax"
     },
     {
       "$ref": "#/modifiers/color"
