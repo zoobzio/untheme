@@ -15,7 +15,9 @@ import { validate } from "./validate";
 /**
  * Checks a config and resolves it into a {@link Kit}: reads the resolver
  * document, tailors it to the config's `modifiers`, reads every document it
- * then references through `@terrazzo/parser`,
+ * then references through `@terrazzo/parser` — its `alphabetize` off, since
+ * that sort is the single largest cost of every resolution and the skeleton
+ * restores the same order once per token set —
  * converts the base theme — tokens, modifier contexts, order — and the boot
  * selection, validates both against untheme's schema, and proves the result
  * against Terrazzo's own resolution. The only step that reads documents. No
@@ -41,7 +43,7 @@ export const resolveKit = async (
     src = tailor(src, config.modifiers, base);
   }
   const parsed = await parse([{ filename: url, src }], {
-    config: defineConfig({}, { cwd: base }),
+    config: defineConfig({ alphabetize: false }, { cwd: base }),
     req: load,
     logger: options.logger,
     skipLint: true,

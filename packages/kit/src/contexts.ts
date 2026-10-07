@@ -1,10 +1,26 @@
 import type { Resolver, ResolverModifierNormalized } from "@terrazzo/parser";
 import type { TokenNormalizedSet } from "@terrazzo/token-types";
 
-import { map } from "objectively";
+import { entries, map } from "objectively";
 import { delta } from "@untheme/utils";
 
 import { binding, collisions, definition } from "./convert";
+
+/**
+ * The collation Terrazzo alphabetizes by: natural, numeric-aware, en-US. One
+ * collator for the build — the parser builds one per comparison and re-sorts
+ * every group index on every resolution, which is why the kit runs it with
+ * `alphabetize` off and orders each token set here instead.
+ */
+const collator = new Intl.Collator("en-us", { numeric: true });
+
+/**
+ * A token set re-keyed in Terrazzo's alphabetical order, so the emitted
+ * modules read exactly as a parse with `alphabetize` on would have written
+ * them.
+ */
+export const sorted = <T>(set: Record<string, T>): Record<string, T> =>
+  Object.fromEntries(entries(set).sort(([a], [b]) => collator.compare(a, b)));
 
 /**
  * The pieces of a base theme read off a resolver document: the complete token
@@ -91,7 +107,7 @@ export const skeleton = (
   if (!resolver || modifiers.length === 0) {
     collisions(Object.keys(tokens));
     return {
-      tokens: map(tokens, definition),
+      tokens: map(sorted(tokens), definition),
       modifiers: {},
       order: [],
       input: {},
@@ -109,7 +125,7 @@ export const skeleton = (
     input[name] = modifier.default;
   }
 
-  const base = resolver.apply(input);
+  const base = sorted(resolver.apply(input));
   collisions(Object.keys(base));
   const flat = map(base, binding);
 
@@ -122,7 +138,7 @@ export const skeleton = (
         overrides[context] = {};
         continue;
       }
-      const applied = resolver.apply({ ...input, [name]: context });
+      const applied = sorted(resolver.apply({ ...input, [name]: context }));
       const alien = Object.keys(applied).filter((key) => !(key in base));
       if (alien.length > 0) {
         throw new Error(

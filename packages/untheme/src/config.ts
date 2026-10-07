@@ -1,6 +1,7 @@
 import type { Input, Template } from "@untheme/schema";
 import type { Config } from "@untheme/core";
-import { clone, copy } from "@untheme/utils";
+import { copy } from "objectively";
+import { clone } from "@untheme/utils";
 
 /**
  * An application's untheme configuration: the base theme carrying the

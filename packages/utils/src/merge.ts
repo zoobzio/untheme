@@ -1,10 +1,9 @@
 import type { Template, Theme } from "@untheme/schema";
 import type { Overlay } from "./types";
 
-import { map } from "objectively";
+import { copy, map } from "objectively";
 
 import { clone } from "./clone";
-import { copy } from "./copy";
 import { traverse } from "./traverse";
 
 /**

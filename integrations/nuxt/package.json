@@ -41,7 +41,7 @@
     "@nuxt/kit": "^4.4.6",
     "@untheme/kit": "workspace:*",
     "h3": "^1.15.11",
-    "objectively": "^0.1.1",
+    "objectively": "^0.1.2",
     "untheme": "workspace:*",
     "vue": "^3.5.35"
   },

@@ -1,6 +1,4 @@
-import { entries, equals } from "objectively";
-
-import { copy } from "./copy";
+import { copy, entries, equals } from "objectively";
 
 /**
  * The entries of `to` that deviate from `from`: every key `to` holds whose

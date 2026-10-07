@@ -15,9 +15,9 @@ import type {
 import type { Diff } from "@untheme/utils";
 import type { Config, Options, Untheme } from "./types";
 
-import { record, map } from "objectively";
+import { copy, map, record } from "objectively";
 import { defineSchema } from "@untheme/schema";
-import { clone, copy, diff, merge } from "@untheme/utils";
+import { clone, diff, merge } from "@untheme/utils";
 import {
   CircularAliasError,
   InvalidLayerError,

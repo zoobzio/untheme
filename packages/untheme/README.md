@@ -12,12 +12,12 @@ Themes are authored as DTCG JSON and built by [`@untheme/kit`](../kit), a build-
 
 ## Entry points
 
-| Import            | Re-exports                                                                               | Provides                                                                                                                                                                         |
-| ----------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `untheme`         | [`@untheme/core`](../core), [`@untheme/schema`](../schema), [`@untheme/utils`](../utils) | `makeUntheme`, `Untheme`, `Config`, `defineSchema`, `Schema`, `Contract`, `Theme`, `Layer`, `Patch`, `Input`, `SchemaError`, `clone`/`copy`/`merge`/`diff`/`delta`/`traverse`, … |
-| `untheme/catalog` | [`@untheme/catalog`](../catalog)                                                         | `defineCatalog`, `defineClient`, `Catalog`, `Provider`, `Entry`, `Query`, `Page`, …                                                                                              |
-| `untheme/config`  | —                                                                                        | `UnthemeConfig`, `defineUnthemeConfig`, `useUnthemeConfig` — the built shape (`theme`/`input`) the kit emits and every integration consumes                                      |
-| `untheme/css`     | [`@untheme/css`](../css)                                                                 | `defineRenderer`, `Renderer`, `serialize`, `emit`, `property`, `Variables`, …                                                                                                    |
+| Import            | Re-exports                                                                               | Provides                                                                                                                                                                  |
+| ----------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `untheme`         | [`@untheme/core`](../core), [`@untheme/schema`](../schema), [`@untheme/utils`](../utils) | `makeUntheme`, `Untheme`, `Config`, `defineSchema`, `Schema`, `Contract`, `Theme`, `Layer`, `Patch`, `Input`, `SchemaError`, `clone`/`merge`/`diff`/`delta`/`traverse`, … |
+| `untheme/catalog` | [`@untheme/catalog`](../catalog)                                                         | `defineCatalog`, `defineClient`, `Catalog`, `Provider`, `Entry`, `Query`, `Page`, …                                                                                       |
+| `untheme/config`  | —                                                                                        | `UnthemeConfig`, `defineUnthemeConfig`, `useUnthemeConfig` — the built shape (`theme`/`input`) the kit emits and every integration consumes                               |
+| `untheme/css`     | [`@untheme/css`](../css)                                                                 | `defineRenderer`, `Renderer`, `serialize`, `emit`, `property`, `Variables`, …                                                                                             |
 
 ## Usage
 

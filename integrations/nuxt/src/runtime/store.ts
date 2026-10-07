@@ -1,6 +1,7 @@
 import type { AppUnthemeConfig, AppUnthemeInput } from "./types";
 
-import { clone, copy } from "untheme";
+import { copy } from "objectively";
+import { clone } from "untheme";
 import { useCookie, useState } from "#imports";
 import {
   theme as buildTheme,

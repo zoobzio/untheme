@@ -1,29 +1,12 @@
 import type { Template } from "@untheme/schema";
 
-import { equals } from "objectively";
-import { copy } from "./copy";
+import { copy, remap } from "objectively";
 
 /**
- * Deep copy of a theme, facet by facet: identity, tokens, modifiers, and order
- * are each rebuilt through {@link copy}, so no definition object, nested
- * `$value` structure, or override map is shared with the source. Mutating the
- * clone at any depth never reaches the original.
- *
- * Because {@link copy} reaches every value through plain property access,
- * cloning a reactive proxy yields an inert, plain snapshot.
+ * A detached plain copy of a theme: every facet rebuilt through {@link copy},
+ * landing on the theme's own type through `remap` rather than a whole-theme
+ * equality pass over the source.
  */
 export const clone = <T extends Template>(theme: T): T => {
-  const result = {
-    id: theme.id,
-    name: theme.name,
-    tokens: copy(theme.tokens),
-    modifiers: copy(theme.modifiers),
-    order: copy(theme.order),
-  };
-
-  if (!equals(theme, result)) {
-    throw new TypeError("unable to clone a theme");
-  }
-
-  return result;
+  return remap<T, T>(theme, (facet) => copy(facet));
 };

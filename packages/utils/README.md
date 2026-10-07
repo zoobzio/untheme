@@ -33,17 +33,13 @@ Supporting helpers that `merge` and `diff` are built on.
 
 ### `clone(theme)`
 
-Deep copy of a theme, facet by facet: identity, tokens, modifiers, and order are each rebuilt through `copy`, so no definition object, nested `$value` structure, or override map is shared with the source. Because `copy` reaches every value through plain property access, cloning a reactive proxy yields an inert, plain snapshot. `clone` throws a `TypeError` if the rebuilt theme isn't structurally equal to the source.
+Deep copy of a theme, facet by facet: identity, tokens, modifiers, and order are each rebuilt through objectively's `copy`, so no definition object, nested `$value` structure, or override map is shared with the source. Every value is reached through plain property access in a single walk, so cloning a reactive proxy yields an inert, plain snapshot and reads each member once.
 
 ```ts
 import { clone } from "@untheme/utils";
 
 const snapshot = clone(theme); // detached from any reactive proxy
 ```
-
-### `copy(value)`
-
-Deep copy of plain data: records and arrays are rebuilt from fresh containers, so mutating the copy never reaches the source. Non-plain values — functions and class instances, such as those a token's `$extensions` may carry — pass through by reference rather than being duplicated. `structuredClone` is never used: it throws on functions and detaches proxies through a mechanism `copy` deliberately avoids.
 
 ### `delta(from, to)`
 
