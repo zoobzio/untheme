@@ -40,7 +40,6 @@
   "devDependencies": {
     "@terrazzo/token-types": "^2.4.0",
     "@types/node": "^25.9.1",
-    "@untheme/aurora": "workspace:*",
     "@untheme/css": "workspace:*"
   }
 }

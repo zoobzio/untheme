@@ -7,15 +7,49 @@
     "directory": "presets/aurora"
   },
   "type": "module",
+  "main": "./.dist/index.mjs",
+  "types": "./.dist/index.d.mts",
   "exports": {
+    ".": {
+      "types": "./.dist/index.d.mts",
+      "import": "./.dist/index.mjs"
+    },
+    "./config": {
+      "types": "./.dist/config.d.mts",
+      "import": "./.dist/config.mjs"
+    },
+    "./manifest": {
+      "types": "./.dist/manifest.d.mts",
+      "import": "./.dist/manifest.mjs"
+    },
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
   "files": [
+    ".dist",
     "src"
   ],
   "scripts": {
+    "build": "untheme build",
+    "stub": "untheme build",
     "generate": "node scripts/generate.mjs",
-    "lint": "oxlint"
+    "lint": "oxlint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "untheme": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "untheme": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "@untheme/kit": "workspace:*",
+    "@untheme/testing": "workspace:*",
+    "typescript": "^6.0.3",
+    "untheme": "workspace:*"
   }
 }

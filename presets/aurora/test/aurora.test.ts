@@ -1,67 +1,49 @@
-import type { Contract, Input } from "@untheme/schema";
-import type { Kit } from "../src/types";
+import type { Kit } from "@untheme/kit";
 
 import { readFile } from "node:fs/promises";
-import { createRequire } from "node:module";
+import { relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { makeUntheme } from "@untheme/core";
-import { defineSchema } from "@untheme/schema";
+import { proveTheme } from "@untheme/testing";
 
-import { resolveKit } from "../src/resolve";
+import { SRC, build, boot as bootKit } from "./helpers";
 
 /**
- * Aurora is the fixture of the kit. It has only DTCG JSON. A build of it checks
- * the structure: a valid contract, references that resolve, and every context
- * verified against Terrazzo. The checks below cover what a build cannot detect:
- * the channel tokens ("channels") that the color, vibrancy, and contrast axes
- * route through, and how those three axes resolve their collisions.
+ * The documents of the preset, built by the kit. A build checks the
+ * structure: a valid contract, references that resolve, and every context
+ * verified against Terrazzo. The checks below cover what a build cannot
+ * detect: the channel tokens ("channels") that the color, vibrancy, and
+ * contrast axes route through, and how those three axes resolve their
+ * collisions.
  */
-type Aurora = Contract<
-  string,
-  Record<string, Record<string, Record<string, never>>>
->;
-
-/** The kit package. It is a project root whose packages include aurora. */
-const ROOT = fileURLToPath(new URL("..", import.meta.url));
-
-/** Aurora's resolver document, as a config source. */
-const SOURCE = "npm:/@untheme/aurora/src/resolver.json";
-
 let kit: Kit;
 
 /**
- * Aurora's authored dark color context, as written. The build drops an override
+ * The authored dark color context, as written. The build drops an override
  * that equals the base value. For example, `outline-medium-contrast` steps to
  * the same stop in both modes. The test checks the dark context at its source.
  */
 let authored: { color: { dark: Record<string, unknown> } };
 
+/** A JSON document of the preset, by its path under `src/`. */
+const read = async (path: string) =>
+  JSON.parse(await readFile(new URL(path, SRC), "utf8"));
+
 beforeAll(async () => {
-  kit = await resolveKit({ source: SOURCE }, { cwd: ROOT });
-  const path = createRequire(import.meta.url).resolve(
-    "@untheme/aurora/src/modifiers/color/dark.json",
-  );
-  authored = { color: { dark: JSON.parse(await readFile(path, "utf8")) } };
+  kit = await build();
+  authored = { color: { dark: await read("modifiers/color/dark.json") } };
 });
 
 /** The modifier contexts of the built theme. */
 const modifiers = () => kit.theme.modifiers;
 
 /** A service over the built theme, at the defaults plus the given contexts. */
-const boot = (input: Partial<Record<string, string>> = {}) => {
-  return makeUntheme<Aurora>({
-    theme: structuredClone(kit.theme) as Aurora,
-    input: { ...kit.input, ...input } as Input<Aurora>,
-    override: {},
-  });
-};
+const boot = (selection: Partial<Record<string, string>> = {}) =>
+  bootKit(kit, selection);
 
 describe("the aurora build", () => {
   it("is a valid contract, booted at each modifier's default", () => {
-    const schema = defineSchema(kit.theme);
-    expect(() => schema.assert.theme(kit.theme)).not.toThrow();
     expect(kit.theme.id).toBe("aurora");
     expect(kit.theme.name).toBe("Aurora");
     expect(Object.keys(kit.theme.tokens)).toHaveLength(392);
@@ -78,9 +60,14 @@ describe("the aurora build", () => {
     });
   });
 
+  it("is sound at the boot selection and at each single-context change", () => {
+    expect(() => proveTheme(kit.theme)).not.toThrow();
+  });
+
   it("reads the resolver, every theme file, and every shared file", () => {
+    const src = fileURLToPath(SRC);
     const files = kit.documents.map((path) =>
-      path.replace(/\\/g, "/").replace(/^.*\/aurora\/src\//, ""),
+      relative(src, path).replace(/\\/g, "/"),
     );
     expect(files[0]).toBe("resolver.json");
     expect(files.filter((file) => file.startsWith("modifiers/theme/"))).toEqual(
@@ -102,13 +89,6 @@ describe("the aurora build", () => {
           .map((context) => `modifiers/${modifier}/${context}.json`)
           .sort(),
       );
-    }
-  });
-
-  it("resolves every token at the defaults", () => {
-    const ut = boot();
-    for (const token of Object.keys(kit.theme.tokens)) {
-      expect(() => ut.resolve(token)).not.toThrow();
     }
   });
 
@@ -243,14 +223,6 @@ describe("the contrast axis", () => {
 });
 
 describe("the theme axis", () => {
-  const require = createRequire(import.meta.url);
-
-  /** A JSON file of the aurora package, by its package path. */
-  const read = async (path: string) => {
-    const file = require.resolve(`@untheme/aurora/${path}`);
-    return JSON.parse(await readFile(file, "utf8"));
-  };
-
   it("resolves first, so every other axis reads the active palette", () => {
     expect(kit.theme.order[0]).toBe("theme");
   });
@@ -262,12 +234,10 @@ describe("the theme axis", () => {
     const names = (file: Record<string, unknown>) =>
       Object.keys(file).filter((key) => !key.startsWith("$"));
 
-    const ramps = names(await read("src/modifiers/theme/aurora.json"));
+    const ramps = names(await read("modifiers/theme/aurora.json"));
     expect(ramps).toHaveLength(220);
     for (const id of themes) {
-      expect(names(await read(`src/modifiers/theme/${id}.json`))).toEqual(
-        ramps,
-      );
+      expect(names(await read(`modifiers/theme/${id}.json`))).toEqual(ramps);
     }
   });
 
@@ -285,7 +255,7 @@ describe("the theme axis", () => {
   });
 
   it("swaps the palette under the roles, in either mode", async () => {
-    const nord = await read("src/modifiers/theme/nord.json");
+    const nord = await read("modifiers/theme/nord.json");
     const ut = boot();
     expect(ut.get("primary")).toBe("{primary-600}");
     const before = ut.resolve("primary");
