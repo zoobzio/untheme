@@ -2,6 +2,8 @@
 
 Each example has a theme as DTCG JSON. The theme is aurora, or aurora plus tokens of the example. The example builds the theme with [`@untheme/kit`](../packages/kit). The example uses the [`untheme`](../packages/untheme) package and an integration from [`../integrations`](../integrations).
 
+Each example has a test suite that uses [`@untheme/testing`](../packages/testing). The tests check the logic of the example against a mock theme with a few tokens. The tests do not build aurora.
+
 | Example                    | Directory             | Description                                                                              |
 | -------------------------- | --------------------- | ---------------------------------------------------------------------------------------- |
 | [codemirror](./codemirror) | `examples/codemirror` | A CodeMirror 6 editor that uses the tokens as its theme. It has a light and dark toggle. |

@@ -23,24 +23,26 @@ JSON files.
 
 ## Interchange
 
-[`src/generate.ts`](./src/generate.ts) maps each LSP role to a carrier. Several
-roles share a carrier. The `type` carrier serves `namespace` and `class`, and
-the `function` carrier serves `method`.
+[`src/theme.ts`](./src/theme.ts) maps each LSP role to a carrier. Several roles
+share a carrier. The `type` carrier serves `namespace` and `class`, and the
+`function` carrier serves `method`. [`src/generate.ts`](./src/generate.ts)
+builds the Shiki theme from the map.
 
 ```ts
-const theme = defineShikiTheme(
-  untheme.schema,
-  {
-    keyword: "syntax-keyword",
-    string: "syntax-string",
-    function: "syntax-function",
-    macro: "syntax-builtin",
-    type: "syntax-type",
-    namespace: "syntax-type",
-    // more roles
-  },
-  { fg: "syntax-text", bg: "surface-container" },
-);
+export const MAP = {
+  keyword: "syntax-keyword",
+  string: "syntax-string",
+  function: "syntax-function",
+  macro: "syntax-builtin",
+  type: "syntax-type",
+  namespace: "syntax-type",
+  // more roles
+} as const satisfies SyntaxMap<Contract>;
+
+const theme = defineShikiTheme(untheme.schema, MAP, {
+  fg: "syntax-text",
+  bg: "surface-container",
+});
 ```
 
 ## Run
@@ -65,3 +67,22 @@ The script prints the two-hop path from scope to color:
 A Shiki span reads `var(--syntax-keyword)`. The cascade resolves it to
 `var(--primary-600)` under `:root` and to `var(--primary-400)` under
 `[data-color="dark"]`. The ramp of aurora defines the final color.
+
+## Test
+
+```sh
+pnpm test
+```
+
+[`test/theme.test.ts`](./test/theme.test.ts) checks the interchange without a
+build of aurora. A mock theme from [`@untheme/testing`](../../packages/testing)
+defines only the carriers that the map names, over two stops of two ramps. The
+tests check three things:
+
+- Every role binds to a color token of the contract.
+- Each scope reaches its carrier through a `var()`.
+- A swap of the color context rebinds the carriers, and the Shiki theme does
+  not change.
+
+The map is declared `as const`, so the same constant type-checks against the
+mock contract and the real contract.

@@ -23,7 +23,7 @@ Open the printed URL. The module builds the theme with `@untheme/kit` at
 startup, so build the workspace first. `nuxt.config.ts` aliases the runtime
 libraries that the app bundles to their TypeScript source.
 
-Other scripts: `build`, `preview`, `generate`, `typecheck`.
+Other scripts: `build`, `preview`, `generate`, `typecheck`, `test`.
 
 ## Theme wiring
 
@@ -67,3 +67,25 @@ variables, so a selection change restyles the page.
 Both composables call `useUntheme()`, the runtime service of the module.
 `demo.ts` lists the axes and shuffles the selection. `controls.ts` binds one axis
 to its allowed contexts.
+
+## Test
+
+```sh
+pnpm --filter @untheme/example-nuxt test
+```
+
+[`test/nuxt/composables.test.ts`](./test/nuxt/composables.test.ts) runs the
+composables in vitest. The tests use no Nuxt environment and no build of aurora.
+A mock theme from [`@untheme/testing`](../../packages/testing) stands in for the
+build. The theme is in [`test/nuxt/fixtures.ts`](./test/nuxt/fixtures.ts). It
+has two axes over a few tokens. `mockModules` supplies the
+`#build/untheme/manifest.mjs` module that the demo imports. A stub of
+`useUntheme` returns a service over a reactive container, the same way the
+plugin of the module builds one over `useState`.
+
+The tests check four things:
+
+- The contexts that an axis offers.
+- The two-way binding of an axis.
+- The prose of the manifest.
+- `shuffle` picks a selection that the contract accepts.

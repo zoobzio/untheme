@@ -5,43 +5,11 @@ import { makeUntheme } from "untheme";
 import { useUnthemeConfig } from "untheme/config";
 import { defineRenderer } from "untheme/css";
 import { defineShikiTheme } from "@untheme/shiki";
-import type { SyntaxMap } from "@untheme/shiki";
 import { codeToHtml } from "shiki";
 
 import config from "../untheme/config.mjs";
 import type { Contract } from "../untheme/config.mjs";
-
-/**
- * The interchange that the app owns. It binds each LSP semantic token type to
- * one carrier token of the theme. The shipped scopes route to these types.
- * Several types share a carrier. The `type` carrier serves `namespace` and
- * `class`, and the `function` carrier serves `method`. Roles that the map
- * omits render at `fg`.
- */
-const MAP: SyntaxMap<Contract> = {
-  keyword: "syntax-keyword",
-  modifier: "syntax-keyword",
-  string: "syntax-string",
-  regexp: "syntax-regex",
-  comment: "syntax-comment",
-  number: "syntax-number",
-  function: "syntax-function",
-  method: "syntax-function",
-  macro: "syntax-builtin",
-  decorator: "syntax-tag",
-  type: "syntax-type",
-  class: "syntax-type",
-  enum: "syntax-type",
-  interface: "syntax-type",
-  struct: "syntax-type",
-  typeParameter: "syntax-type",
-  namespace: "syntax-type",
-  parameter: "syntax-parameter",
-  variable: "syntax-variable",
-  enumMember: "syntax-variable",
-  property: "syntax-property",
-  operator: "syntax-operator",
-};
+import { MAP, OPTIONS } from "./theme";
 
 /**
  * A TypeScript snippet with many syntax roles: comment, keyword, string,
@@ -73,11 +41,7 @@ const renderer = defineRenderer(untheme);
  * token for its LSP role. `bg` styles the block behind the code and `fg`
  * styles the unclassified text. The whole block flips between light and dark.
  */
-const theme = defineShikiTheme(untheme.schema, MAP, {
-  name: "aurora-syntax",
-  fg: "syntax-text",
-  bg: "surface-container",
-});
+const theme = defineShikiTheme(untheme.schema, MAP, OPTIONS);
 
 const highlighted = await codeToHtml(SAMPLE, { lang: "ts", theme });
 

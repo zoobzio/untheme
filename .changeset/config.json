@@ -12,6 +12,7 @@
       "@untheme/css",
       "@untheme/kit",
       "@untheme/schema",
+      "@untheme/testing",
       "@untheme/utils",
       "@untheme/nuxt",
       "@untheme/shiki",

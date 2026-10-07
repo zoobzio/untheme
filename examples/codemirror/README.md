@@ -10,12 +10,12 @@ a resolver that lists the aurora files from its package, a `syntax-*` group,
 and the dark bindings of the group. `untheme build` writes the theme to
 `untheme/` before the dev server starts.
 
-[`src/main.ts`](./src/main.ts) does four things:
+[`src/theme.ts`](./src/theme.ts) maps Lezer tag names to the carriers and binds
+the editor chrome to tokens. [`src/main.ts`](./src/main.ts) does three things:
 
 - It boots the built theme.
 - It adds the renderer cascade to the page as a `<style>`.
-- It maps Lezer tag names to the carriers.
-- It mounts an editor with the resulting extensions and
+- It mounts an editor with the extensions from the map and
   `@codemirror/lang-javascript`.
 
 ## Run
@@ -37,3 +37,19 @@ syntax both re-theme.
 - `renderer.sheet()` defines those custom properties under `:root` and rebinds
   them under `[data-color="dark"]`.
 - The toggle flips the attribute and CSS does the rest.
+
+## Test
+
+```sh
+pnpm test
+```
+
+[`test/theme.test.ts`](./test/theme.test.ts) checks the map and the chrome
+without a build of aurora. A mock theme from
+[`@untheme/testing`](../../packages/testing) defines only the carriers that the
+map and the chrome name. The tests check four things:
+
+- Every binding names a color token of the contract.
+- The editor gets its two extensions.
+- A binding to a token that is not a color is rejected.
+- A swap of the color context rebinds the carriers through the cascade.

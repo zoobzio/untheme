@@ -2,13 +2,13 @@ import { makeUntheme } from "untheme";
 import { useUnthemeConfig } from "untheme/config";
 import { defineRenderer } from "untheme/css";
 import { defineCodeMirrorTheme } from "@untheme/codemirror";
-import type { TagMap } from "@untheme/codemirror";
 import { EditorView, lineNumbers } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { javascript } from "@codemirror/lang-javascript";
 
 import config from "../untheme/config.mjs";
 import type { Contract } from "../untheme/config.mjs";
+import { CHROME, MAP } from "./theme";
 
 /*
  * Boots the theme that `untheme build` wrote to `untheme/`, at its default
@@ -42,48 +42,10 @@ button { font: inherit; padding: 0.5rem 1rem; margin-bottom: 1.5rem;
 document.head.appendChild(style);
 
 /*
- * The interchange from Lezer tag names to the carrier tokens of the theme.
- * Several tags share one carrier.
+ * The interchange and the chrome are in `theme.ts`. The tests check both
+ * against a mock contract.
  */
-const MAP: TagMap<Contract> = {
-  keyword: "syntax-keyword",
-  controlKeyword: "syntax-keyword",
-  definitionKeyword: "syntax-keyword",
-  operatorKeyword: "syntax-keyword",
-  moduleKeyword: "syntax-keyword",
-  modifier: "syntax-keyword",
-  self: "syntax-keyword",
-  bool: "syntax-keyword",
-  null: "syntax-keyword",
-  comment: "syntax-comment",
-  lineComment: "syntax-comment",
-  blockComment: "syntax-comment",
-  string: "syntax-string",
-  character: "syntax-string",
-  number: "syntax-number",
-  regexp: "syntax-regex",
-  escape: "syntax-regex-constant",
-  variableName: "syntax-variable",
-  definition: "syntax-variable",
-  function: "syntax-function",
-  propertyName: "syntax-property",
-  typeName: "syntax-type",
-  className: "syntax-type",
-  namespace: "syntax-type",
-  tagName: "syntax-tag",
-  attributeName: "syntax-parameter",
-  operator: "syntax-operator",
-  punctuation: "syntax-punctuation",
-  bracket: "syntax-punctuation",
-};
-
-const theme = defineCodeMirrorTheme(untheme.schema, MAP, {
-  background: "surface-container-high",
-  foreground: "syntax-text",
-  caret: "syntax-text",
-  selection: "outline-muted",
-  gutterForeground: "syntax-comment",
-});
+const theme = defineCodeMirrorTheme(untheme.schema, MAP, CHROME);
 
 const SAMPLE = `// A themed greeter
 import { makeUntheme } from "untheme";
