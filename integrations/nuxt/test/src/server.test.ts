@@ -11,9 +11,8 @@ import { createThemeHandler, listEntries } from "../../src/server";
 import { theme, themes } from "../fixtures";
 
 /*
- * A manifest whose ids and names deliberately order differently — the id
- * `abyss` sorts first while its name `The Abyss` sorts last — so sort-field
- * assertions can tell the fields apart.
+ * A manifest where the order by id differs from the order by name. The id
+ * `abyss` sorts first and the name `The Abyss` sorts last.
  */
 const manifest: Entry[] = [
   { id: "nord", name: "Nord" },
@@ -22,13 +21,13 @@ const manifest: Entry[] = [
   { id: "abyss", name: "The Abyss" },
 ];
 
-/** The base the handler is mounted under, as a route file's folder would be. */
+/** The base URL that the handler is mounted under. */
 const BASE = "http://app.test/api/untheme";
 
 /**
- * Serves a handler the way Nitro does for a catch-all route file at
- * `server/api/untheme/[...path].get.ts`: every request under the base reaches
- * it, and it reads the rest of the path itself.
+ * Serves a handler as Nitro does for a catch-all route file at
+ * `server/api/untheme/[...path].get.ts`. Each request under the base reaches
+ * the handler.
  */
 const serve = (handler: EventHandler) => {
   const app = createApp();
@@ -37,7 +36,7 @@ const serve = (handler: EventHandler) => {
   return (path: string) => web(new Request(`${BASE}${path}`));
 };
 
-/** A JSON body, or the status of a failed response. */
+/** Returns the JSON body, or the status of a failed response. */
 const read = async (response: Response): Promise<unknown> => {
   if (!response.ok) {
     return { status: response.status };
@@ -45,7 +44,7 @@ const read = async (response: Response): Promise<unknown> => {
   return response.json();
 };
 
-/** The `q` param for a query. */
+/** Returns the `q` param for a query. */
 const q = (query: object) => `?q=${encodeURIComponent(JSON.stringify(query))}`;
 
 describe("listEntries", () => {
@@ -238,9 +237,9 @@ describe("createThemeHandler", () => {
 
   describe("in a catch-all route file", () => {
     /**
-     * Serves the handler the way Nitro does for a catch-all route file under
-     * `server/<base>/`: a router matches the base plus the catch-all, and the
-     * handler reads the base off the matched route.
+     * Serves the handler as Nitro does for a catch-all route file under
+     * `server/<base>/`. A router matches the base plus the catch-all. The
+     * handler reads the base from the matched route.
      */
     const route = (base: string, catchAll = "**:path") => {
       const app = createApp();

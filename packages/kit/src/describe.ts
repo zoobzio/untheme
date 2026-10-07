@@ -8,8 +8,8 @@ import { EXTENSION } from "./constant";
 import { axes } from "./contexts";
 
 /**
- * A display name for an id that carries none of its own: its words split on
- * `-`, `_` and `.`, each capitalized — `night_owl` is `Night Owl`.
+ * Makes a display name from an id. The function splits the id on `-`, `_`, `.`,
+ * and whitespace, and capitalizes each word. `night_owl` becomes `Night Owl`.
  */
 export const title = (id: string): string => {
   return id
@@ -19,7 +19,7 @@ export const title = (id: string): string => {
     .join(" ");
 };
 
-/** The display name a node's untheme extension carries, when it has one. */
+/** Returns the display name in the untheme extension of a node, when it has one. */
 const named = (node: { $extensions?: unknown }): string | undefined => {
   const { $extensions } = node;
   if (!record($extensions)) {
@@ -32,7 +32,7 @@ const named = (node: { $extensions?: unknown }): string | undefined => {
   return undefined;
 };
 
-/** An entry: the id, its name or the titled id, and a description when set. */
+/** Makes an entry. The name is `name` or the titled id. A set description is included. */
 const entry = (id: string, name?: string, description?: unknown): Entry => {
   const found: Entry = { id, name: name ?? title(id) };
   if (typeof description === "string" && description !== "") {
@@ -42,20 +42,20 @@ const entry = (id: string, name?: string, description?: unknown): Entry => {
 };
 
 /**
- * Describes a built theme's modifiers for an interface that lets someone
- * choose among them: per modifier, in order, its id, name and description,
- * and the same for each context it kept.
+ * Describes the modifiers of a built theme for an interface that lets a person
+ * choose among them. For each modifier, in order, the result has its id, name,
+ * and description. The result has the same for each kept context.
  *
- * The descriptions travel with the documents. A modifier's is its
- * `description` in the resolver document; a context's is the `$description`
- * at the root of the token file — or inline source — it applies, the last
- * one that has it winning. A name is the `name` under the `io.zoobz.untheme` key of
- * `$extensions`, on the modifier or at the root of the context's source;
- * without one it is the id, titled. Without a resolver — a theme built
- * elsewhere — every entry is its id and titled name.
+ * The descriptions come from the documents. The description of a modifier is its
+ * `description` in the resolver document. The description of a context is the
+ * `$description` at the root of the token file, or inline source, that the
+ * context applies. The last source that has one wins. A name is the `name` under
+ * the `io.zoobz.untheme` key of `$extensions`, on the modifier or at the root of
+ * the source of the context. When there is no such name, the name is the titled
+ * id. When there is no resolver, every entry has its titled id as its name.
  *
- * @param theme - The built theme: its order and the contexts it kept.
- * @param resolver - The parsed resolver the theme was built from.
+ * @param theme - The built theme. It sets the order and the kept contexts.
+ * @param resolver - The parsed resolver that the theme was built from.
  */
 export const describe = (
   theme: Theme<Template>,

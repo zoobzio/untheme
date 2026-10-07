@@ -9,9 +9,9 @@ import {
 } from "#build/untheme/config.mjs";
 
 /**
- * The per-request state and cookies the plugin and composable share. The
- * build module's exports are process-wide singletons, so every seed is a
- * detached copy — never a reference SSR writes could reach across requests.
+ * Returns the state and the cookies that the plugin and the composable share.
+ * The state is a copy of the theme and the input of the build module. Each
+ * request has its own state.
  */
 export const accessUntheme = () => {
   const config = useState<AppUnthemeConfig>("untheme:config", () => ({

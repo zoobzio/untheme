@@ -29,8 +29,8 @@ describe("identity", () => {
   it("suppresses the synthetic bridge name of a plain token document", async () => {
     const { parsed } = await load("base.json");
 
-    /* A plain document parses to a synthetic tzMode resolver that still
-       carries Terrazzo's own name; identity must not adopt it. */
+    /* A plain document parses to a synthetic tzMode resolver that has a name
+       from Terrazzo. identity ignores that name. */
     expect(parsed.resolver?.source.name).toBeDefined();
     expect(() => identity({}, parsed.resolver)).toThrow(/no theme identity/);
     expect(identity({ name: "Base" }, parsed.resolver)).toEqual({

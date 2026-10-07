@@ -1,9 +1,7 @@
 import type { KitConfig } from "./types";
 
 /**
- * Identity helper that types an `untheme.config.ts`.
- *
- * @param config - The kit config.
- * @returns The same config.
+ * Types an `untheme.config.ts`. The function returns the config that it
+ * receives.
  */
 export const defineConfig = (config: KitConfig): KitConfig => config;

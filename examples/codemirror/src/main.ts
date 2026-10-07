@@ -11,18 +11,19 @@ import config from "../untheme/config.mjs";
 import type { Contract } from "../untheme/config.mjs";
 
 /*
- * Boot aurora widened with syntax carriers — the theme `untheme build` wrote
- * to `untheme/` — at its default selection. The renderer emits the whole
- * cascade — ramps, roles, and the syntax-* carriers — as custom properties.
+ * Boots the theme that `untheme build` wrote to `untheme/`, at its default
+ * selection. The theme is aurora with the syntax carriers. The renderer emits
+ * the whole cascade as custom properties: ramps, roles, and the syntax-*
+ * carriers.
  */
 const untheme = makeUntheme<Contract>(useUnthemeConfig(config));
 
 const renderer = defineRenderer(untheme);
 
 /*
- * Drop the cascade into the page. `sheet()` gives `:root` plus the
- * `[data-color="dark"]` block; flipping the attribute on <html> re-resolves
- * every var() the editor's styles reference — no reconfigure.
+ * Adds the cascade to the page. `sheet()` returns the `:root` block and the
+ * `[data-color="dark"]` block. A change to the attribute on <html> re-resolves
+ * every var() in the styles of the editor.
  */
 const style = document.createElement("style");
 style.textContent = `
@@ -41,8 +42,8 @@ button { font: inherit; padding: 0.5rem 1rem; margin-bottom: 1.5rem;
 document.head.appendChild(style);
 
 /*
- * The interchange: Lezer tag names → the theme's carrier tokens. Many-to-one,
- * surfacing only the distinctions this theme wants.
+ * The interchange from Lezer tag names to the carrier tokens of the theme.
+ * Several tags share one carrier.
  */
 const MAP: TagMap<Contract> = {
   keyword: "syntax-keyword",

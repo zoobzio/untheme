@@ -1,11 +1,10 @@
 import { copy, entries, equals } from "objectively";
 
 /**
- * The entries of `to` that deviate from `from`: every key `to` holds whose
- * value is not structurally equal to the one `from` holds. Emitted values are
- * copies, so the result shares no structure with `to`. Keys with structurally
- * equal values drop out; two objects that bind identically yield an empty
- * result.
+ * Returns the entries of `to` that differ from `from`. An entry differs when
+ * its value and the value of the same key in `from` differ at any depth.
+ * The result holds copies of the values. Two objects with equal values give an
+ * empty result.
  */
 export const delta = <T extends object>(from: T, to: T): Partial<T> => {
   const result: Partial<T> = {};

@@ -74,9 +74,9 @@ export const QUOTES = [
 ];
 
 /**
- * The aurora field: one blurred orb per entry, cycling the accent families
- * (p/t/s). Fixed literals within the design's thresholds — SSR and
- * hydration must agree, so nothing here is randomized per render.
+ * The aurora field: one blurred orb per entry. The entries cycle the accent
+ * families p, t, and s. The values are fixed literals. A render on the server
+ * and a render in the browser produce the same markup.
  */
 export const ORBS = [
   {
@@ -178,10 +178,10 @@ export const ORBS = [
 ];
 
 /**
- * The aurora curtains: light ribbons hung from the top of the page, each
- * swaying on its own time loop, cycling the accent families (p/t/s). Fixed
- * literals within the design's thresholds — SSR and hydration must agree,
- * so nothing here is randomized per render.
+ * The aurora curtains: one light ribbon per entry, hung from the top of the
+ * page. Each ribbon sways on its own time loop. The entries cycle the accent
+ * families p, t, and s. The values are fixed literals. A render on the server
+ * and a render in the browser produce the same markup.
  */
 export const BANDS = [
   {

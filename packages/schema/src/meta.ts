@@ -4,9 +4,10 @@ import { defineShape } from "./shape";
 import type { Meta, Template } from "./types";
 
 /**
- * Derives the {@link Meta} for a template in three stages: the enum sets are
- * read off the template's tokens and modifiers, the shape rules draw their
- * reference checks from those sets, and the kind rules compose both.
+ * Derives the {@link Meta} for a template in three stages. First, the function
+ * reads the enum sets from the tokens and modifiers of the template. Second,
+ * the shape rules use the sets for their reference checks. Third, the kind
+ * rules use the sets and the shape rules.
  *
  * @param base - The template whose keys define the contract.
  */

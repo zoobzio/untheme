@@ -13,20 +13,19 @@ import { tailor } from "./tailor";
 import { validate } from "./validate";
 
 /**
- * Checks a config and resolves it into a {@link Kit}: reads the resolver
- * document, tailors it to the config's `modifiers`, reads every document it
- * then references through `@terrazzo/parser` — its `alphabetize` off, since
- * that sort is the single largest cost of every resolution and the skeleton
- * restores the same order once per token set —
- * converts the base theme — tokens, modifier contexts, order — and the boot
- * selection, validates both against untheme's schema, and proves the result
- * against Terrazzo's own resolution. The only step that reads documents. No
- * filesystem writes — {@link generate} turns the result into files; a caller
- * that wants the documents themselves stops here.
+ * Validates a config and resolves it into a {@link Kit}. The function reads the
+ * resolver document and tailors it to the `modifiers` of the config. It reads
+ * every document that the resolver references with `@terrazzo/parser`, with
+ * `alphabetize` off. It converts the base theme and the boot selection. The base
+ * theme has the tokens, the modifier contexts, and the order. It validates both
+ * with the untheme schema and verifies the result against the Terrazzo
+ * resolution. This is the only step that reads documents. {@link generate} turns
+ * the result into files.
  *
  * @param config - The kit config.
  * @param options - The project root and I/O hooks.
- * @throws InvalidConfigError when the config breaks a rule, before reading.
+ * @throws InvalidConfigError when the config breaks a rule. The function throws
+ * before it reads a document.
  */
 export const resolveKit = async (
   config: KitConfig,

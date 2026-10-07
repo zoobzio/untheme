@@ -1,13 +1,12 @@
 import type { Layer, Template } from "@untheme/schema";
 
 /**
- * A catalog's knowledge of one theme: the identity and discovery metadata
- * `list` carries, never the payload. What a picker renders and a query
- * filters on; the theme itself stays behind `get` until someone applies it.
+ * The metadata of one theme in a listing. An entry has an id and a name. An
+ * entry has no payload. `get` returns the theme.
  */
 export interface Entry {
   /**
-   * The layer's id — the argument `get` takes to retrieve the payload.
+   * The layer id. Pass it to `get` to retrieve the payload.
    */
   id: string;
 
@@ -18,7 +17,7 @@ export interface Entry {
 }
 
 /**
- * The ordering of a listing: one entry field, ascending or descending.
+ * The ordering of a listing: one entry field and a direction.
  */
 export interface Sort {
   /**
@@ -33,68 +32,64 @@ export interface Sort {
 }
 
 /**
- * A listing request as pure data: filter, order, and window, every field
- * JSON-serializable, so one query crosses process and network boundaries
- * unchanged. The model is mandatory in full — every catalog answers every
- * field — so a query that works against one source works identically
- * against any other.
+ * A listing request as data. The request has a filter, an order, and a window.
+ * All fields are JSON-serializable. Every catalog answers every field.
  */
 export interface Query {
   /**
-   * Keep only entries whose name contains the text, case-insensitively.
+   * The text to search for. An entry matches when its name contains the text.
+   * The match ignores case.
    */
   search?: string;
 
   /**
-   * The ordering of the matches before the window is cut.
+   * The ordering of the matches. The window applies after the ordering.
    */
   sort?: Sort;
 
   /**
-   * The window size: how many entries one page carries.
+   * The maximum number of entries in one page.
    */
   limit?: number;
 
   /**
-   * The window position: how many matches to skip before the page starts.
+   * The number of matches to skip before the page starts.
    */
   offset?: number;
 }
 
 /**
- * A query with its gaps filled: the concrete listing a source answers.
- * Catalogs normalize at their front door, so callbacks always receive a
- * complete window and ordering, and a client puts the caller's own
- * defaults on the wire rather than deferring to the remote end's.
+ * A query with all defaults filled. A catalog normalizes each query to a
+ * listing. A provider receives a complete window and ordering. A client sends
+ * its own defaults on the network.
  */
 export interface Listing {
   /**
-   * Keep only entries whose name contains the text, case-insensitively;
-   * absent when the listing is unfiltered.
+   * The text to search for. The field is absent when the listing has no filter.
    */
   search?: string;
 
   /**
-   * The ordering of the matches before the window is cut.
+   * The ordering of the matches. The window applies after the ordering.
    */
   sort: Sort;
 
   /**
-   * The window size: how many entries one page carries.
+   * The maximum number of entries in one page.
    */
   limit: number;
 
   /**
-   * The window position: how many matches to skip before the page starts.
+   * The number of matches to skip before the page starts.
    */
   offset: number;
 }
 
 /**
- * One page of a listing: the entries inside the requested window, and the
- * numbers to page by. `total` counts every match of the query's filters,
- * not the page; `limit` and `offset` echo the window actually applied,
- * defaults included.
+ * One page of a listing. The page has the entries in the requested window and
+ * the numbers to page by. `total` counts all matches of the filters of the
+ * query across all pages. `limit` and `offset` hold the window that the catalog
+ * applied, including defaults.
  */
 export interface Page {
   /**
@@ -108,90 +103,83 @@ export interface Page {
   total: number;
 
   /**
-   * The window size the page was cut with.
+   * The window size of the page.
    */
   limit: number;
 
   /**
-   * The window position the page was cut at.
+   * The window position of the page.
    */
   offset: number;
 }
 
 /**
- * A source of themes for an {@link Untheme} service: discovery through
- * `list`, retrieval through `get`. A catalog is a pure resolver — it holds
- * no state, and every call resolves against the underlying source — so
- * caching lives with the caller, where the environment already provides it.
+ * A source of themes for an {@link Untheme} service. `list` discovers themes.
+ * `get` retrieves a theme. A catalog holds no state. Each call resolves against
+ * the source.
  *
- * Both constructors produce this shape: a provider fronting storage
- * callbacks, a client fronting a remote endpoint speaking the wire
- * protocol. The shapes matching is what lets catalogs chain — a provider's
- * callbacks can delegate to a client, so an app serves its own themes and
- * falls back to a remote service through one interface.
+ * {@link defineCatalog} and {@link defineClient} both return this shape. A
+ * callback of a provider can call a client. An app can serve its own themes and
+ * use a remote service through one interface.
  */
 export interface Catalog<T extends Template> {
   /**
-   * The manifest window a query selects: entry metadata for discovery,
-   * never payloads. An omitted query lists the first page under the
+   * Returns the page of entries that a query selects. A page has entry metadata
+   * and no payloads. A call with no query returns the first page with the
    * default window.
    */
   list: (query?: Query) => Promise<Page>;
 
   /**
-   * One layer by id, proven against the contract. Resolves `undefined` on
-   * a miss; a payload that exists but fails the contract throws rather
-   * than passing as a miss.
+   * Returns one layer by id. The function checks the layer against the
+   * contract. The function resolves `undefined` on a miss. The function throws
+   * when a payload exists and fails the contract.
    */
   get: (id: string) => Promise<Layer<T> | undefined>;
 }
 
 /**
- * The storage callbacks a provider catalog fronts — the seam a host binds
- * to wherever its themes actually live: build-emitted JSON, a database, a
- * key-value store, another catalog. Both callbacks return raw untrusted
- * data; the constructor proves every result against its schema before the
- * catalog surfaces it, so implementations hand back storage reads as-is,
- * without casting.
+ * The storage callbacks of a provider catalog. Bind them to the place where the
+ * themes are, such as build-emitted JSON, a database, a key-value store, or
+ * another catalog. Each callback returns raw data. The catalog checks each
+ * result against its schema.
  */
 export interface Provider {
   /**
-   * Answers a listing: receives the query already validated and normalized
-   * to a concrete window, and returns whatever the source holds for it —
-   * directly or behind a promise, awaited either way — proven as a
-   * {@link Page} on the way out.
+   * Answers a listing. The callback receives the validated query with a
+   * concrete window. The callback returns the result directly or in a promise.
+   * The catalog checks the result as a {@link Page}.
    */
   list: (listing: Listing) => unknown;
 
   /**
-   * Answers a retrieval: returns the stored payload for the id — directly
-   * or behind a promise, awaited either way — proven as a layer on the way
-   * out, with `null` / `undefined` meaning a miss.
+   * Answers a retrieval. The callback returns the stored payload for the id,
+   * directly or in a promise. `null` and `undefined` mean a miss. The catalog
+   * checks the payload as a layer.
    */
   get: (id: string) => unknown;
 }
 
 /**
- * The transport a client catalog speaks through: where to make requests,
- * and what to send with them. The client owns the wire protocol; this
- * config only points it somewhere and authenticates it.
+ * The transport config of a client catalog. It sets where to send requests and
+ * what to send with them.
  */
 export interface Client {
   /**
-   * The URL the wire routes extend — an app's own mount point or a remote
-   * service's origin.
+   * The URL that the routes extend. Use the mount point of the app or the
+   * origin of a remote service.
    */
   base: string;
 
   /**
-   * Headers sent with every request; authentication lives here.
+   * Headers sent with every request. Use them for authentication.
    */
   headers?: Record<string, string>;
 
   /**
-   * The fetch implementation requests go through. Defaults to the global;
-   * the injection point for a request-aware fetch during SSR, or one that
-   * carries credentials, retries, or caching.
+   * The fetch implementation for requests. The default is the global `fetch`.
+   * Use it to inject a fetch for server-side rendering, or a fetch with
+   * credentials, retries, or caching.
    */
   fetch?: typeof globalThis.fetch;
 }

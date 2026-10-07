@@ -7,9 +7,8 @@ import type { KitConfig } from "./types";
 import { MalformedConfigError, MissingConfigError } from "./error";
 
 /**
- * Whether a value has the outer shape of a {@link KitConfig}: a plain record
- * whose `source` is a string or a URL. A shape test only — whether the
- * members satisfy the kit's rules is {@link validate}'s concern.
+ * Whether a value is a plain record with a `source` that is a string or a URL.
+ * {@link validate} checks the other members.
  */
 const isConfig = (value: unknown): value is KitConfig => {
   if (!record(value)) {
@@ -19,14 +18,14 @@ const isConfig = (value: unknown): value is KitConfig => {
 };
 
 /**
- * Loads an `untheme.config.ts` — or any TypeScript / JavaScript config file —
- * through jiti and returns its default export. Only the outer shape is checked
- * here; {@link resolveKit} validates the rest. An error thrown while the file
- * itself runs propagates untouched.
+ * Loads a config file through jiti and returns its default export. The file can
+ * be TypeScript or JavaScript. The function checks the outer shape of the
+ * export. {@link resolveKit} validates the rest. An error that the file throws
+ * while it runs reaches the caller.
  *
  * @param path - The absolute path to the config file.
- * @throws MissingConfigError when there is no file at `path`.
- * @throws MalformedConfigError when the default export is not config-shaped.
+ * @throws MissingConfigError when no file exists at `path`.
+ * @throws MalformedConfigError when the default export is not a config.
  */
 export const loadConfig = async (path: string): Promise<KitConfig> => {
   if (!existsSync(path)) {

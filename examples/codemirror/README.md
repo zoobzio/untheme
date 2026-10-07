@@ -1,17 +1,22 @@
 # codemirror example
 
-A live CodeMirror 6 editor themed by [`@untheme/codemirror`](../../integrations/codemirror),
-with a light/dark toggle — the runtime counterpart to the static
-[shiki example](../shiki).
+A CodeMirror 6 editor with a light/dark toggle. The editor uses the theme from
+[`@untheme/codemirror`](../../integrations/codemirror). It is the runtime
+counterpart of the [shiki example](../shiki).
 
-The carrier tokens come from the [aurora](../../presets/aurora) preset widened
-in DTCG JSON — the same `tokens/` files as the shiki example: aurora's files
-listed from its package by a resolver of its own, plus a `syntax-*` group and
-its dark bindings. `untheme build` writes the theme to `untheme/` before the
-dev server starts. [`src/main.ts`](./src/main.ts) boots it, injects the
-renderer's cascade as a `<style>`,
-maps Lezer tag names onto the carriers, and mounts an editor with the resulting
-extensions plus `@codemirror/lang-javascript`.
+The carrier tokens come from the [aurora](../../presets/aurora) preset, with
+extra DTCG JSON files. The files in `tokens/` match the shiki example. They are
+a resolver that lists the aurora files from its package, a `syntax-*` group,
+and the dark bindings of the group. `untheme build` writes the theme to
+`untheme/` before the dev server starts.
+
+[`src/main.ts`](./src/main.ts) does four things:
+
+- It boots the built theme.
+- It adds the renderer cascade to the page as a `<style>`.
+- It maps Lezer tag names to the carriers.
+- It mounts an editor with the resulting extensions and
+  `@codemirror/lang-javascript`.
 
 ## Run
 
@@ -19,17 +24,16 @@ extensions plus `@codemirror/lang-javascript`.
 pnpm --filter @untheme/example-codemirror dev
 ```
 
-Open the printed URL (default `http://localhost:5173`). Toggle light/dark: it
-flips a single `data-color` attribute on `<html>`, and every `var()` the
-editor's generated styles reference re-resolves through the cascade — the whole
-editor, chrome and syntax, re-themes with **no reconfigure and no re-parse**.
+Open the printed URL, which is `http://localhost:5173` by default. The toggle
+flips the `data-color` attribute on `<html>`. Every `var()` in the generated
+styles of the editor re-resolves through the cascade. The editor chrome and the
+syntax both re-theme.
 
-## The wiring
+## Wiring
 
-- The editor's tokens carry `color: var(--syntax-keyword)` etc. (from the
-  `HighlightStyle`), its chrome carries `var(--surface-container-high)` etc.
-  (from the `EditorView.theme`).
+- The editor tokens use `color: var(--syntax-keyword)` and similar values, from
+  the `HighlightStyle`. The editor chrome uses `var(--surface-container-high)`
+  and similar values, from the `EditorView.theme`.
 - `renderer.sheet()` defines those custom properties under `:root` and rebinds
   them under `[data-color="dark"]`.
-- Flipping the attribute is the only thing that happens on toggle; CSS does the
-  rest.
+- The toggle flips the attribute and CSS does the rest.

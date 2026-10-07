@@ -4,14 +4,11 @@ import type { Renderer } from "untheme/css";
 import { useNuxtApp } from "#app";
 
 /**
- * Composable for the active theme, selection, and switchable catalog.
- *
- * This is the instrumentation layer over the raw `$untheme` service: every
- * read and write flows through the reactive `config` container, and the
- * mutating actions are wrapped to persist the selection to cookies and emit a
- * Nuxt hook for observability. Cookies carry only the selection — the active
- * `input` and the chosen theme `key` — never arbitrary edits, so `set` /
- * `update` report without persisting.
+ * Returns the `$untheme` service for the active theme, the selection, and the
+ * catalog. Each read and write goes through the reactive `config` container.
+ * The actions that change the theme or the selection save the selection to
+ * cookies and call a Nuxt hook. The cookies hold the active `input` and the
+ * theme `key`.
  */
 export const useUntheme = (): AppUntheme => {
   const { $untheme } = useNuxtApp();
@@ -19,14 +16,12 @@ export const useUntheme = (): AppUntheme => {
 };
 
 /**
- * Composable for the CSS renderer bound to the app's contract.
- *
- * The plugin builds one renderer over the same `$untheme` service and provides
- * it as `$unthemeRenderer`, so every read stays lazy and reactive: `root()` and
- * `variables()` re-render when the active selection, theme, or override changes.
- * Use it to name a token's custom property (`property` / `var`), read a token's
- * live value, or emit a static set with `root(set)` / `variables(set)` without
- * touching the live bindings.
+ * Returns the CSS renderer for the contract of the app. The plugin provides
+ * the renderer as `$unthemeRenderer`. The renderer reads the same `$untheme`
+ * service. `root()` and `variables()` render again when the active selection,
+ * theme, or override changes. Use the renderer to get the custom property of
+ * a token with `property` or `var`, to read the live value of a token, or to
+ * emit a static set with `root(set)` or `variables(set)`.
  */
 export const useUnthemeRenderer = (): Renderer<AppUnthemeContract> => {
   const { $unthemeRenderer } = useNuxtApp();

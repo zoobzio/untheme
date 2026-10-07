@@ -20,8 +20,7 @@ const color = (n: number): ColorDef => ({
 });
 
 /**
- * A contract with a handful of color tokens to bind roles to, plus one
- * non-color token so the color-type check has something to reject.
+ * Four color tokens and one number token.
  */
 const tokens: Record<string, ColorDef | NumberDef> = {
   ink: color(0.1),

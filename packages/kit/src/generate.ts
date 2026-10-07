@@ -3,14 +3,15 @@ import { emit } from "./emit";
 import { resolveKit } from "./resolve";
 
 /**
- * Generates the contract and key modules from a kit config: checks and
- * resolves it through {@link resolveKit}, and emits the modules for `outDir`.
- * An app imports them by relative path; a published package points its
- * `exports` at them. No filesystem writes.
+ * Generates the contract and key modules from a kit config. The function
+ * validates and resolves the config with {@link resolveKit}, then emits the
+ * modules for `outDir`. An app imports the modules by relative path. A published
+ * package points its `exports` at them.
  *
  * @param config - The kit config.
  * @param options - The project root and I/O hooks.
- * @throws InvalidConfigError when the config breaks a rule, before reading.
+ * @throws InvalidConfigError when the config breaks a rule. The function throws
+ * before it reads a document.
  */
 export const generate = async (
   config: KitConfig,

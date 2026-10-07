@@ -2,8 +2,8 @@ import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 
 /**
- * Resolves a source designator to a URL: absolute URLs (`https:`, `file:`,
- * `npm:`) pass through, a plain path lands under `base`.
+ * Resolves a source designator to a URL. An absolute URL (`https:`, `file:`,
+ * `npm:`) stays as it is. A plain path resolves against `base`.
  */
 export const locate = (source: string | URL, base: URL): URL => {
   if (typeof source === "string") {
@@ -13,9 +13,9 @@ export const locate = (source: string | URL, base: URL): URL => {
 };
 
 /**
- * The default document loader: the filesystem for `file:` URLs, plain `fetch`
- * for everything else. Carries no credentials — authenticated sources go
- * through a caller-supplied `req` instead.
+ * The default document loader. It reads `file:` URLs from the filesystem and
+ * uses `fetch` for all other URLs. Authenticated sources use a `req` that the
+ * caller supplies.
  */
 export const request = async (src: URL): Promise<string> => {
   if (src.protocol === "file:") {
@@ -31,8 +31,8 @@ export const request = async (src: URL): Promise<string> => {
 };
 
 /**
- * A directory as a trailing-slash file URL — the base that relative source
- * paths resolve against.
+ * Makes a file URL with a trailing slash from a directory path. Relative source
+ * paths resolve against it.
  */
 export const directory = (path: string): URL => {
   return new URL(`${pathToFileURL(path).href}/`);

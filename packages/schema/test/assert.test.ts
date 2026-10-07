@@ -9,7 +9,7 @@ const assert: Assert<typeof template> = defineAssert(meta);
 
 const color = { colorSpace: "srgb", components: [0, 0, 0] } as const;
 
-/** The issue codes a throwing assertion carries, or `[]` when it passes. */
+/** Returns the issue codes of the error that the assertion throws. Returns `[]` when the assertion passes. */
 const thrownCodes = (run: () => void): Code[] => {
   try {
     run();
@@ -59,9 +59,8 @@ describe("defineAssert", () => {
   });
 
   it("collects every failing rule in one pass", () => {
-    /* Dropping a required token trips completeness while an extra token trips
-       the subset check; assert reports both rather than stopping at the
-       first — the behavior that sets it apart from a check. */
+    /* A missing required token fails the completeness rule. An extra token
+       fails the subset rule. The assertion reports both issues. */
     const tokens = { ...template.tokens };
     Reflect.deleteProperty(tokens, "space.md");
     const codes = thrownCodes(() =>

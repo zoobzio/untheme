@@ -7,10 +7,10 @@ import { loadConfig } from "./load";
 import { writeOutput } from "./write";
 
 /**
- * The whole build, end to end: load the config, generate, and write the output
- * directory. What the CLI runs.
+ * Runs the whole build. The function loads the config, generates the output, and
+ * writes the output directory. The CLI runs this function.
  *
- * @param options - The root, config path, and I/O hooks.
+ * @param options - The root, the config path, and the I/O hooks.
  */
 export const build = async (options: BuildOptions = {}): Promise<Output> => {
   const { root: rootOption, config: configOption, ...hooks } = options;

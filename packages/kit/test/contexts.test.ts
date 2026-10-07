@@ -86,9 +86,8 @@ describe("skeleton", () => {
 
   it("normalizes legacy string colors into spec objects", async () => {
     /*
-     * The one deliberate legacy-form case: Terrazzo accepts pre-2025 string
-     * colors, warns, and normalizes them — the quiet logger suppresses that
-     * expected warning only here.
+     * Terrazzo accepts pre-2025 string colors, warns, and normalizes them.
+     * The quiet logger hides the warning.
      */
     const parsed = await inline(
       "virtual/legacy.json",

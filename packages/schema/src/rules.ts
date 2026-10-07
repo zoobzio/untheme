@@ -29,27 +29,27 @@ import {
 } from "./util";
 
 /**
- * Whether a value is a token definition: a non-array object carrying a
- * `$value` member.
+ * Checks that a value is a token definition. A token definition is an object
+ * that is not an array and has a `$value` member.
  */
 const isDefinition = has("$value");
 
 /**
- * Composes a template's runtime {@link Rules}: a list of rules per kind built
- * from the atoms in `util`. Membership, completeness, and reference checks read
- * the template's sets off {@link Enum}; every token slot resolves to the
- * value rule for its declared type in {@link Shape} — a reference to a token
- * of that type, or a structured value in place — and the composite kinds reuse
- * those rules.
+ * Builds the runtime {@link Rules} for a template. The function makes a list
+ * of rules for each kind with the atoms in `util`. The membership,
+ * completeness, and reference checks read the sets in {@link Enum}. Each token
+ * slot uses the value rule for its declared type in {@link Shape}. The value
+ * rule accepts a reference to a token of that type or a structured value. The
+ * composite kinds use the same value rules.
  *
- * @param enums - The template's token, modifier, context, and type sets.
- * @param shape - The literal and value rule for each token type.
+ * @param enums - The token, modifier, context, and type sets of the template.
+ * @param shape - The literal rule and the value rule for each token type.
  */
 export const defineRules = <T extends Template>(
   enums: Enum<T>,
   shape: Shape,
 ): Rules => {
-  /* $deprecated is inert: a boolean flag or an explanatory string. */
+  /* $deprecated is a boolean flag or an explanatory string. */
   const deprecated: Rule = (v) => {
     if (typeof v === "boolean" || typeof v === "string") {
       return;
@@ -61,7 +61,7 @@ export const defineRules = <T extends Template>(
     };
   };
 
-  /* The atoms a definition composes, built once and shared across calls. */
+  /* The atoms of a definition. */
   const definitionContainer = container("Definition");
   const definitionSubset = subset("Definition", enums.definitionKeys);
   const definitionSuperset = superset(
@@ -72,9 +72,8 @@ export const defineRules = <T extends Template>(
   const descriptionText = text("$description");
   const extensionsContainer = container("$extensions");
 
-  /* A single token definition: a known type, a value valid for that type, and
-     inert metadata. The $type/$value correlation is resolved here — the value
-     is checked against the rule for its own declared type. */
+  /* A token definition has a known type, a value for that type, and metadata.
+     The rule checks the value against the rule for the declared type. */
   const definition: Rule = (v) => {
     const notObject = definitionContainer(v);
     if (notObject) {
@@ -122,11 +121,9 @@ export const defineRules = <T extends Template>(
     }
   };
 
-  /* A partial override map: a subset of tokens, each rebinding its value
-     against that token's declared type, with no reference cycle among the
-     map's own entries — those win composition together, so such a cycle can
-     never resolve. References that leave the map are a resolution-time
-     concern. */
+  /* A partial override map is a subset of the tokens. The rule checks each
+     value against the declared type of its token. The rule rejects a reference
+     cycle among the entries of the map. */
   const overrideRules: Record<string, Rule[]> = {};
   for (const token of enums.tokens) {
     overrideRules[token] = [shape[enums.types[token]].value];
@@ -141,7 +138,7 @@ export const defineRules = <T extends Template>(
     acyclic("Overrides", enums.tokens, collectRefs),
   ];
 
-  /* Edges of the reference graph: the tokens a definition's value names. */
+  /* The edges of the reference graph are the tokens that a value names. */
   const definitionEdges = (entry: unknown): string[] => {
     if (isDefinition(entry)) {
       return collectRefs(entry.$value);
@@ -149,8 +146,8 @@ export const defineRules = <T extends Template>(
     return [];
   };
 
-  /* A complete token map: every token present under a well-formed key, each a
-     valid definition, no reference cycles. */
+  /* A complete token map has every token under a valid key. Each entry is a
+     valid definition. The map has no reference cycle. */
   const tokensRule = [
     container("Tokens"),
     keys("Tokens", [
@@ -163,7 +160,7 @@ export const defineRules = <T extends Template>(
     acyclic("Tokens", enums.tokens, definitionEdges),
   ];
 
-  /* A single reference or a literal value of some known type. */
+  /* A literal value of any known type. */
   const literal = either(
     "Value",
     TYPES.map((type) => [shape[type].literal]),
@@ -173,8 +170,9 @@ export const defineRules = <T extends Template>(
   const id = [text("Identifier"), filled("Identifier")];
   const name = [text("Name"), filled("Name")];
 
-  /* Per-modifier context maps. Complete requires every context; partial does
-     not. Each context carries a partial override map. */
+  /* The context maps for each modifier. The complete map requires every
+     context. The partial map requires no context. Each context holds a partial
+     override map. */
   const completeFields: Record<string, Rule[]> = {};
   const partialFields: Record<string, Rule[]> = {};
   const inputFields: Record<string, Rule[]> = {};
@@ -202,7 +200,7 @@ export const defineRules = <T extends Template>(
     container("Modifiers"),
     fields("Modifiers", partialFields),
   ];
-  /* Composition precedence: an exact permutation of the axes. */
+  /* The order is a permutation of the modifiers. */
   const order = [
     list("Order", [member("Modifier", enums.modifiers)]),
     unique("Order"),

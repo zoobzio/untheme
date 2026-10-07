@@ -28,37 +28,33 @@ import {
 } from "./error";
 
 /**
- * Builds the runtime {@link Untheme} service over a state container, for
- * any complete theme of a contract — typically the base theme `@untheme/kit`
- * built from DTCG JSON, typed by the `Contract` its declarations carry. The
- * theme is validated against its own contract up front.
+ * Makes an {@link Untheme} service over a state container. The container
+ * holds a complete theme of a contract. The function checks the theme against
+ * its own contract.
  *
- * Every read and write goes through `proxy`, so the caller decides whether
- * state is plain (tests, node) or a reactive proxy (Vue); `options` can
- * intercept and transform each read and write on the way through. Reads resolve
- * the active selection — base tokens overlaid with the selected context of each
- * modifier in `order` — then apply the user override on top. `set` writes only
- * the override; `swap` selects a modifier's context; `update` and `apply`
- * change the definition. Switching theme (`apply`) clears the override.
+ * The service reads and writes the container. The container can be a plain
+ * object or a reactive proxy. The `options` argument can change each value
+ * that the service reads or writes. A read gives the base tokens, then the
+ * selected context of each modifier in `order`, then the user override. `set`
+ * writes the override. `swap` selects a context of a modifier. `update` and
+ * `apply` change the theme. `apply` also clears the override.
  *
- * The baseline — a snapshot of the theme at construction — is what `apply`
- * resolves layers against.
+ * The baseline is a copy of the theme from the time of construction. `apply`
+ * resolves layers against the baseline.
  *
- * @param config - The caller-owned container: active theme, selection, override.
- * @param options - Read/write middleware over `config`.
- * @returns An {@link Untheme} service bound to the container.
- * @throws InvalidThemeError when the theme or selection violates the contract.
+ * @param config - The container with the active theme, the selection, and the override.
+ * @param options - The middleware for reads and writes of `config`.
+ * @returns The service for the container.
+ * @throws InvalidThemeError when the theme or the selection violates the contract.
  */
 export const makeUntheme = <T extends Theme<T>>(
   config: Config<T>,
   options: Options<T> = {},
 ): Untheme<T> => {
   /**
-   * The active state, fronted by get/set middleware. Reads pull the raw value
-   * from the container and pipe it through the matching `options.get`
-   * middleware on the way out; writes pipe the incoming value through
-   * `options.set` before storing it. The container stays the source of truth;
-   * a missing middleware is a passthrough.
+   * The active state. A read gets the value from the container and passes it
+   * to the matching `options.get` middleware. A write passes the value to the
+   * matching `options.set` middleware and stores the result in the container.
    */
   const proxy: Config<T> = {
     get theme() {
@@ -109,22 +105,21 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * Validation derived from the baseline — a complete theme is itself a valid
-   * template. The theme is cloned on the way in, so `schema.base` doubles as
-   * the detached baseline snapshot the merge and diff paths work from, never a
-   * live reference into a reactive container.
+   * The schema for the baseline theme. A complete theme is a valid template.
+   * The service copies the theme before it makes the schema. `schema.base` is
+   * the baseline that `merge` and `diff` read.
    */
   const schema: Schema<T> = reframe(InvalidThemeError, () =>
     defineSchema(clone(proxy.theme)),
   );
 
-  // The seed selection must name a real context for every modifier.
+  // Checks that the initial selection names a context for each modifier.
   reframe(InvalidThemeError, () => schema.assert.input(proxy.input));
 
   /**
-   * The flat token map for a selection (default: active): every token bound to
-   * its `$value`, overlaid with the selected context of each modifier in
-   * `order`, then the user override last.
+   * Returns the flat token map for a selection. The default selection is the
+   * active one. The map binds each token to its `$value`, then adds the
+   * selected context of each modifier in `order`, then adds the user override.
    */
   const tokens = (
     input: Input<T> = proxy.input,
@@ -138,11 +133,11 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * A token's effective binding for the active selection, override included.
-   * Layers are probed from the top of the stack down — the user override,
-   * then each modifier's selected context in reverse `order`, then the base
-   * slot — and the first layer binding the token wins, mirroring the overlay
-   * precedence of {@link tokens} without assembling the full map.
+   * Returns the binding of a token for the active selection. The function
+   * checks the user override first. Then it checks the selected context of
+   * each modifier in reverse `order`. Then it checks the base slot. The first
+   * layer that binds the token gives the result. This order gives the same
+   * result as {@link tokens}.
    */
   const get = (token: Token<T>): Binding => {
     const override = proxy.override[token];
@@ -163,11 +158,10 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * Writes a token into the user override layer — the topmost resolution layer,
-   * applied over the active selection. The single-entry map is validated as an
-   * override, so an unknown token or a value invalid for that token's declared
-   * type is a silent no-op. The override holds a detached copy of the value.
-   * Tracked by `dirty`, cleared by `reset`.
+   * Writes a token to the user override. The function checks the entry as an
+   * override. If the token is unknown, or the value is not valid for the type
+   * of the token, the function does nothing. The override holds a copy of the
+   * value. `dirty` reports the override and `reset` clears it.
    */
   const set = (token: Token<T>, value: Binding) => {
     if (!schema.check.overrides({ [token]: value })) {
@@ -177,16 +171,14 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * Replaces every reference inside a value with its target's dereferenced
-   * value: a whole-value reference is followed to its token, and arrays and
-   * records are rebuilt member by member so references nested in composite
-   * values resolve in place. `chain` carries the tokens already being resolved
-   * on this branch.
+   * Replaces each reference in a value with the resolved value of its target.
+   * The function follows a reference that is the whole value. It also replaces
+   * references in the members of arrays and records. `chain` holds the tokens
+   * that the current branch already resolves.
    */
   const substitute = (value: unknown, chain: Set<Token<T>>): unknown => {
     if (schema.check.reference(value)) {
       const inner = value.slice(1, -1);
-      // Re-proves what `check.reference` guaranteed, narrowing the slice.
       if (schema.check.token(inner)) {
         return follow(inner, chain);
       }
@@ -201,10 +193,9 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * Dereferences a token's effective binding. Each hop extends a branch-local
-   * copy of `chain`, so sibling references to a shared token never collide,
-   * while a chain that loops back on itself throws {@link CircularAliasError}
-   * instead of recursing until the call stack overflows.
+   * Resolves the binding of a token. Each step adds the token to a copy of
+   * `chain`. The function throws {@link CircularAliasError} when a chain
+   * returns to a token that it already holds.
    */
   const follow = (token: Token<T>, chain: Set<Token<T>>): unknown => {
     if (chain.has(token)) {
@@ -214,23 +205,22 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * A token's fully dereferenced value for the active selection: no references
-   * remain at any depth. The result is narrowed through `parse.value`, so
-   * resolving a token outside the contract throws the schema's error rather
-   * than returning undefined.
+   * Returns the value of a token for the active selection, with no references
+   * at any depth. The function parses the result with `parse.value`. It throws
+   * the schema error for a token outside the contract.
    */
   const resolve = (token: Token<T>): Values<Open>[Type] => {
     return schema.parse.value(follow(token, new Set()));
   };
 
   /**
-   * The modifiers (axes) the contract declares, in composition order.
+   * Returns the modifiers of the contract in composition order.
    */
   const modifiers = () => proxy.theme.order;
 
   /**
-   * The context names a modifier offers. Throws {@link UnknownModifierError}
-   * when the contract declares no modifier under the name.
+   * Returns the context names of a modifier. Throws {@link UnknownModifierError}
+   * when the contract has no modifier with that name.
    */
   const contexts = (modifier: Modifier<T>): string[] => {
     const axis = proxy.theme.modifiers[modifier];
@@ -241,9 +231,9 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * Selects a context for a modifier, replacing the selection so reactive reads
-   * re-resolve. Throws {@link InvalidThemeError} when the context is not one
-   * the modifier declares.
+   * Selects a context for a modifier. The function replaces the selection
+   * object. Throws {@link InvalidThemeError} when the context is not a
+   * context of the modifier.
    */
   const swap = <M extends Modifier<T>, C extends Context<T, M>>(
     modifier: M,
@@ -255,9 +245,9 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * Merges a patch's bindings over the active theme; identity is preserved.
-   * Throws {@link InvalidPatchError} when the patch steps outside the
-   * contract.
+   * Merges the bindings of a patch into the active theme. The identity of the
+   * theme stays the same. Throws {@link InvalidPatchError} when the patch
+   * violates the contract.
    */
   const update = (patch: Patch<T>) => {
     reframe(InvalidPatchError, () => schema.assert.patch(patch));
@@ -265,9 +255,9 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * Adopts a layer: becomes that theme — the layer resolved against the
-   * baseline — and clears the user override. Throws {@link InvalidLayerError}
-   * when the layer steps outside the contract.
+   * Makes the active theme from a layer and the baseline, and clears the user
+   * override. Throws {@link InvalidLayerError} when the layer violates the
+   * contract.
    */
   const apply = (layer: Layer<T>) => {
     reframe(InvalidLayerError, () => schema.assert.layer(layer));
@@ -276,11 +266,10 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * Proves a layer against the contract and returns it unchanged — the
-   * validation gate for layers that arrive at runtime (fetched from elsewhere,
-   * built by a user) before they are handed to {@link apply} or stored by the
-   * caller. The active theme is not touched. Throws {@link InvalidLayerError}
-   * when the layer steps outside the contract.
+   * Checks a layer against the contract and returns the layer. Use the
+   * function on a layer from outside, before {@link apply}. The active theme
+   * stays the same. Throws {@link InvalidLayerError} when the layer violates
+   * the contract.
    */
   const create = (layer: Layer<T>): Layer<T> => {
     reframe(InvalidLayerError, () => schema.assert.layer(layer));
@@ -288,10 +277,9 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * Snapshots the active theme with the user override baked into its base
-   * tokens, as a detached theme under a new identity. The snapshot is
-   * returned, not registered. Throws {@link InvalidThemeError} when the
-   * identity leaves it invalid.
+   * Returns a copy of the active theme with a new `id` and `name`. The copy
+   * has the user override in its base tokens. Throws {@link InvalidThemeError}
+   * when the new identity makes the theme invalid.
    */
   const extract = (id: string, name: string): Theme<T> => {
     const snapshot = merge<T>(proxy.theme, {
@@ -304,10 +292,9 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * The effective drift from the baseline: the active theme with the user
-   * override baked into its tokens, diffed against the baseline. Bindings that
-   * still match the baseline drop out, leaving a patch of everything `set` /
-   * `update` / `apply` changed. Identity is not compared.
+   * Returns the difference between the baseline and the active theme with the
+   * user override in its tokens. The result is a patch with each binding that
+   * `set`, `update`, or `apply` changed. The function ignores the identity.
    */
   const delta = (): Diff<T> => {
     return diff<T>(
@@ -317,12 +304,12 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * Whether the user override holds any edits.
+   * Returns `true` when the user override has an entry.
    */
   const dirty = () => Object.keys(proxy.override).length > 0;
 
   /**
-   * Clears the user override, discarding the live edits.
+   * Removes all entries from the user override.
    */
   const reset = () => {
     proxy.override = {};

@@ -20,11 +20,9 @@ vi.mock("@nuxt/kit", () => ({
 }));
 
 /*
- * The kit's own tests exercise loading and building; here both are stubbed so
- * the module's local build runs without documents. `resolveKit` answers with
- * the fixture theme under another id, so a test can tell a local build from a
- * passed contract. The kit's `emit` is the real one: the module's templates
- * are whatever the kit generates.
+ * The tests stub the loader and `resolveKit` of the kit. `resolveKit` answers
+ * with the fixture theme under another id. This id shows that a theme comes
+ * from the local build. The tests use the real `emit` of the kit.
  */
 const built = vi.hoisted(() => ({ id: "built" }));
 
@@ -42,7 +40,7 @@ vi.mock("@untheme/kit", async (original) => ({
 import { emit, loadConfig, resolveKit } from "@untheme/kit";
 import module from "../../src/module";
 
-/** The kit config the stubbed loader answers with. */
+/** The kit config that the stubbed loader returns. */
 const authored = { source: "./tokens/a.resolver.json" };
 
 interface FakeNuxt {
@@ -66,8 +64,8 @@ const mod = module as unknown as ModuleDef;
 const options: NuxtUnthemeConfig = { theme, input };
 
 /**
- * The registered template carrying the filename, or undefined when none
- * was registered under it.
+ * Returns the registered template with the filename, or `undefined` when no
+ * template has that filename.
  */
 const template = (filename: string) => {
   return kit.addTemplate.mock.calls
@@ -81,7 +79,7 @@ const template = (filename: string) => {
 };
 
 /**
- * A named export parsed back out of the `untheme/config.mjs` build template.
+ * Returns a named export parsed from the `untheme/config.mjs` build template.
  */
 const exported = (name: string): unknown => {
   const content = template("untheme/config.mjs")!.getContents();
@@ -285,9 +283,8 @@ describe("untheme module", () => {
 
   describe("layered configs", () => {
     /**
-     * The defu-merged options nuxt would hand the module — corrupted on
-     * purpose, so a test only passes when the module reads the layers
-     * instead.
+     * The merged options that Nuxt passes to the module. The `order` list
+     * has a duplicate.
      */
     const corrupted = {
       ...options,

@@ -1,5 +1,5 @@
-/* hero.css — Hero.vue: the masthead-below hero (eyebrow, headline, lede,
-   actions) and its staggered entrance. */
+/* Styles `Hero.vue`: the eyebrow, the headline, the lede, the actions, and the
+   staggered entrance. */
 
 .hero {
   position: relative;
@@ -32,7 +32,7 @@
   background-clip: text;
   color: transparent;
 }
-/* vivid makes the accent word and eyebrow read electric (effect the tokens can't carry alone) */
+/* vivid adds a glow to the accent word */
 [data-vibrancy="vivid"] .hero-accent {
   filter: drop-shadow(
     0 0 18px color-mix(in srgb, var(--primary) 30%, transparent)
@@ -61,8 +61,9 @@
   color: var(--on-surface-muted);
 }
 
-/* hero copy staggers in on load; expressive lengthens + overshoots, reduced stills it
-   (reveal-up keyframe + reduced-motion reset live in layout.css) */
+/* The hero copy enters in stages on load. Expressive motion lengthens the
+   stages and adds overshoot. Reduced motion stops them. The reveal-up keyframe
+   and the reduced-motion reset are in layout.css. */
 .hero-copy > * {
   animation: reveal-up var(--duration-slow) var(--easing-enter) both;
 }

@@ -3,28 +3,28 @@ import type { Config, Input, Layer, Theme, Untheme } from "untheme";
 import type { Renderer } from "untheme/css";
 
 /**
- * The active token contract: the `Contract` the build-time `config` module
- * declares over its token and modifier unions.
+ * The token contract of the app. This is the `Contract` that the build-time
+ * `config` module declares for its token and modifier unions.
  */
 export type AppUnthemeContract = Contract;
 
 /**
- * A resolved theme instance with typed token keys.
+ * A resolved theme with typed token keys.
  */
 export type AppUnthemeTheme = Theme<AppUnthemeContract>;
 
 /**
- * A partial overlay carrying identity — what `apply` swaps in at runtime.
+ * A partial overlay with an identity. `apply` takes a layer at runtime.
  */
 export type AppUnthemeThemeLayer = Layer<AppUnthemeContract>;
 
 /**
- * The active selection — one context per modifier.
+ * The active selection. It has one context for each modifier.
  */
 export type AppUnthemeInput = Input<AppUnthemeContract>;
 
 /**
- * The caller-owned state container the service operates on.
+ * The state container that the service reads and changes.
  */
 export type AppUnthemeConfig = Config<AppUnthemeContract>;
 
@@ -34,8 +34,8 @@ export type AppUnthemeConfig = Config<AppUnthemeContract>;
 export type AppUntheme = Untheme<AppUnthemeContract>;
 
 /**
- * The runtime hooks the service emits, keyed by event name. Shared between the
- * `#app` augmentation and {@link UnthemeNuxtApp} so the two never drift.
+ * The runtime hooks of the service, keyed by event name. The `#app`
+ * augmentation and {@link UnthemeNuxtApp} use this type.
  */
 export interface UnthemeHooks {
   "untheme:ready": (service: AppUntheme) => void;
@@ -44,10 +44,7 @@ export interface UnthemeHooks {
 }
 
 /**
- * The minimal `nuxtApp` surface the instrumentation needs. Typing against this
- * instead of `NuxtApp` keeps `makeUntheme` off the `NuxtApp.$untheme` →
- * `AppUntheme` → `makeUntheme` cycle that otherwise makes the augmentation
- * recursive.
+ * The part of `nuxtApp` that `makeUntheme` uses. It has the `callHook` method.
  */
 export interface UnthemeNuxtApp {
   callHook<H extends keyof UnthemeHooks>(
@@ -62,7 +59,6 @@ declare module "#app" {
     $unthemeRenderer: Renderer<AppUnthemeContract>;
   }
 
-  // Declaration merging: fold the shared hook map into Nuxt's runtime hooks.
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface RuntimeNuxtHooks extends UnthemeHooks {}
 }

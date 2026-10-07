@@ -9,19 +9,18 @@ import { EditorView } from "@codemirror/view";
 import { STYLE, TAGS } from "./constant";
 
 /**
- * A token's `var()` indirection, built from the same custom-property naming the
- * CSS renderer uses — so a tag colored here points at the exact property the
- * renderer emits, and the editor re-themes when that token is rebound.
+ * Returns a `var()` reference to the custom property of the token. The name of
+ * the property is the name that the CSS renderer emits.
  */
 export const reference = <T extends Template>(token: Token<T>): string => {
   return `var(${property(token)})`;
 };
 
 /**
- * The `HighlightStyle` rules for a map plus any raw-tag rules: each mapped tag
- * name resolved to its Lezer tag and its token's `var()`, the style-only tags
- * (`emphasis`, `strong`) carried even when unmapped. Kept separate so it can be
- * exercised without constructing an editor.
+ * Makes the `HighlightStyle` rules for a map and for optional raw-tag rules.
+ * Each mapped tag name becomes a rule with its Lezer tag and the `var()`
+ * reference of its token. The function also adds a rule for `emphasis` and for
+ * `strong` when the map omits them.
  */
 export const highlightRules = <T extends Template>(
   map: TagMap<T>,
@@ -69,8 +68,9 @@ export const highlightRules = <T extends Template>(
 };
 
 /**
- * The editor chrome as an `EditorView.theme` — each surface colored from a
- * bound token, or omitted so CodeMirror's default (transparent) stands.
+ * Makes an `EditorView.theme` for the editor chrome. Each part of the editor
+ * gets the color of its token. A part with no token keeps the CodeMirror
+ * default.
  */
 export const editorTheme = <T extends Template>(
   options: CodeMirrorOptions<T>,

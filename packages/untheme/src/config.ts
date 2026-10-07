@@ -4,46 +4,42 @@ import { copy } from "objectively";
 import { clone } from "@untheme/utils";
 
 /**
- * An application's untheme configuration: the base theme carrying the
- * contract and its default bindings, and the selection to boot with — one
- * context per modifier. The canonical shape every integration consumes: what
- * `@untheme/kit` builds from DTCG JSON and emits as its `config` module.
+ * The untheme configuration of an application. It has the base theme with the
+ * contract and the default bindings, and the selection to start with. Each
+ * integration reads this shape. `@untheme/kit` builds it from DTCG JSON and
+ * writes it as the `config` module.
  */
 export interface UnthemeConfig<T extends Template> {
   /**
-   * The complete base theme: every token with its `$type` and `$value`, and
-   * each modifier's contexts.
+   * The complete base theme. It has each token with its `$type` and `$value`,
+   * and the contexts of each modifier.
    */
   theme: T;
 
   /**
-   * The selection to boot with: one context per modifier.
+   * The starting selection with one context for each modifier.
    */
   input: Input<T>;
 }
 
 /**
- * Identity helper that types an untheme configuration — the built shape, a
- * base theme and boot selection — and infers the token and modifier unions
- * from `theme`.
+ * Types an untheme configuration. The function infers the token names and the
+ * modifier names from `theme`.
  *
  * @param config - The untheme configuration.
- * @returns The same config, narrowed to its inferred types.
+ * @returns The same configuration, with the inferred types.
  */
 export const defineUnthemeConfig = <T extends Template>(
   config: UnthemeConfig<T>,
 ) => config;
 
 /**
- * Seeds a fresh runtime state container from a configuration: a
- * detached clone of the theme as the active theme, a detached copy of the
- * boot selection, and an empty override. Nothing is held by reference, so
- * every call yields an independent container — containers seeded for
- * concurrent sessions (SSR requests, previews) cannot reach each other's
- * state through the shared config.
+ * Makes a state container from a configuration. The container has a copy of
+ * the theme as the active theme, a copy of the starting selection, and an
+ * empty override. Each call makes a new container.
  *
  * @param config - The untheme configuration.
- * @returns A fresh {@link Config} container, ready for `makeUntheme`.
+ * @returns A {@link Config} container for `makeUntheme`.
  */
 export const useUnthemeConfig = <T extends Template>(
   config: UnthemeConfig<T>,

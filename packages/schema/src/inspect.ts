@@ -3,10 +3,10 @@ import type { Inspect, Parse, Result, Template } from "./types";
 import { SchemaError } from "./error";
 
 /**
- * Builds the {@link Inspect} bundle: each kind runs its {@link Parse} and
- * captures the outcome as a {@link Result} instead of throwing — success with
- * the narrowed value, failure with the issues. Any non-{@link SchemaError}
- * propagates.
+ * Builds the {@link Inspect} bundle. Each kind runs its {@link Parse} and
+ * returns a {@link Result}. A success result holds the narrowed value. A
+ * failure result holds the issues. Errors of other types propagate to the
+ * caller.
  */
 export const defineInspect = <T extends Template>(
   parse: Parse<T>,

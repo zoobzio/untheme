@@ -192,7 +192,7 @@ describe("tokens", () => {
   });
 
   it("rejects a reference cycle", () => {
-    /* A one-token schema whose only token references itself. */
+    /* A schema with one token that references itself. */
     const selfEnums = defineEnum({
       id: "s",
       name: "S",

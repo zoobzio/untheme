@@ -1,13 +1,13 @@
 import { defineMeta } from "../src/meta";
 import type { Code, Issue, Rule, Template } from "../src/types";
 
-/* A dimension used often enough to name once. */
+/* A dimension that the template uses many times. */
 export const zero = { value: 0, unit: "px" } as const;
 
 /**
- * A realistic template that exercises every token type, a composite that
- * references another composite, two modifier axes with contexts, and aliases
- * between tokens. Shared by the suites so each does not restate a contract.
+ * A template for the test suites. The template has every token type, a
+ * composite that references another composite, two modifier axes with
+ * contexts, and aliases between tokens.
  */
 export const template = {
   id: "demo",
@@ -108,10 +108,10 @@ export const template = {
   order: ["mode", "contrast"],
 } satisfies Template;
 
-/** The derived meta for the fixture, shared by the validator-family suites. */
+/** The meta of the fixture template. */
 export const meta = defineMeta(template);
 
-/** Runs a rule list and returns the first issue any rule raises. */
+/** Runs a rule list and returns the first issue. */
 export const first = (rules: Rule[], v: unknown): Issue | undefined => {
   for (const rule of rules) {
     const issue = rule(v);
@@ -122,7 +122,7 @@ export const first = (rules: Rule[], v: unknown): Issue | undefined => {
   return undefined;
 };
 
-/** Every issue code a rule list raises for a value, in order. */
+/** Returns the issue codes of a rule list for a value, in order. */
 export const codes = (rules: Rule[], v: unknown): Code[] => {
   const found: Code[] = [];
   for (const rule of rules) {

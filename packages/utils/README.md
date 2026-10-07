@@ -1,60 +1,71 @@
 # @untheme/utils
 
-Common structural helpers for untheme's theme shape. Types come from [`@untheme/schema`](../schema); guards and generic helpers come from [`objectively`](https://www.npmjs.com/package/objectively).
+Helpers for the theme shape of untheme. The types come from [`@untheme/schema`](../schema). The guards and generic helpers come from [`objectively`](https://www.npmjs.com/package/objectively).
 
-## Exports
+## Install
 
-### `merge(theme, ...overlays)`
+```sh
+pnpm add @untheme/utils
+```
 
-Merges overlays over a complete theme into a fresh theme, left to right: later overlays win where they bind the same token, token by token and context by context. Identity and order transfer from the last overlay that carries them. No input is mutated; with no overlays the result is a plain copy.
+## `merge`
+
+`merge(theme, ...overlays)` merges overlays into a complete theme and returns a new theme. The function applies the overlays from left to right. A later overlay replaces an earlier binding of the same token or the same context. The identity and the order come from the last overlay that has them. With no overlays, the result is a copy of the theme.
 
 ```ts
 import { merge } from "@untheme/utils";
 
-merge(theme, patch); // patch has no identity → identity preserved (update)
-merge(theme, layer); // layer carries id/name → identity adopted (apply)
-merge(theme, layer, patch); // layer applied, then patched — last binding wins
+merge(theme, patch); // a patch has no identity, so the identity stays
+merge(theme, layer); // a layer has an id and a name, so they replace the identity
+merge(theme, layer, patch); // the function applies the layer, then the patch
 ```
 
-### `diff(from, to)`
+> - A token override replaces the `$value` of the slot. The slot keeps its `$type`, its description, and its other metadata.
+> - The function skips an overlay key that has no base slot.
 
-Computes the patch that turns `from` into `to`: every binding `to` holds that deviates from `from`, token by token and context by context. At the token level only the bound `$value` is compared and emitted — a token's metadata cannot drift through the patch pipeline. Identity and order are not compared. Empty maps mean the themes bind identically; applying the result to `from` via `merge` restores every binding `to` carries. A patch can add and override, never remove — a context override `from` holds that `to` dropped survives the restoration, and identity, order, and slot metadata are not part of it.
+## `diff`
+
+`diff(from, to)` makes the patch that turns `from` into `to`. The patch holds each binding of `to` that differs from `from`, for each token and for each context. For a token, the function compares and returns the `$value`. The function ignores the identity and the order.
 
 ```ts
 import { diff, merge } from "@untheme/utils";
 
 const deviation = diff(pristine, edited);
-merge(pristine, deviation); // ≅ edited
+merge(pristine, deviation); // has the bindings of edited
 ```
 
-## Primitives
+> - Empty maps mean that the themes have the same bindings.
+> - The patch holds added and changed bindings only. A context override that `to` drops stays in the merged result.
+> - The patch has no identity, no order, and no slot metadata.
 
-Supporting helpers that `merge` and `diff` are built on.
+## `clone`
 
-### `clone(theme)`
-
-Deep copy of a theme, facet by facet: identity, tokens, modifiers, and order are each rebuilt through objectively's `copy`, so no definition object, nested `$value` structure, or override map is shared with the source. Every value is reached through plain property access in a single walk, so cloning a reactive proxy yields an inert, plain snapshot and reads each member once.
+`clone(theme)` makes a deep copy of a theme. The function copies the identity, the tokens, the modifiers, and the order with `copy` from `objectively`. The copy shares no object with the source. A clone of a reactive proxy is a plain object. The function reads each member one time.
 
 ```ts
 import { clone } from "@untheme/utils";
 
-const snapshot = clone(theme); // detached from any reactive proxy
+const snapshot = clone(theme);
 ```
 
-### `delta(from, to)`
+## `delta`
 
-The entries of `to` that deviate from `from`: every key `to` holds whose value is not structurally equal to the one `from` holds. Emitted values are copies, so the result shares no structure with `to`. Keys with structurally equal values drop out; two objects that bind identically yield an empty result.
+`delta(from, to)` returns the entries of `to` that differ from `from`. An entry differs when its value and the value of the same key in `from` differ at any depth. The result holds copies of the values. Two objects with equal values give an empty result.
 
-### `traverse(modifiers, fn)`
+## `traverse`
 
-Rebuilds a modifiers structure leaf by leaf: every context of every modifier is mapped through the callback, each modifier keeping its own context keys. The callback's `at` accessor indexes another (possibly sparse) modifiers structure at the same modifier/context coordinates, so a leaf can be combined with its counterpart elsewhere. This is the primitive `diff` and `merge` are both built on.
+`traverse(modifiers, fn)` makes a new modifiers structure. The function calls `fn` for each context of each modifier. The result has the same modifier keys and context keys. `fn` receives the function `at`. `at` reads the same modifier and context in another modifiers structure. `at` returns the overrides, or `undefined` when the other structure has no entry there. `diff` and `merge` use `traverse`.
+
+## `isTemplate`
+
+`isTemplate(value)` returns `true` when a value has the shape of a `Template`. A template is a record with a string `id`, a string `name`, an object `tokens`, a record `modifiers`, and an array `order`.
 
 ## Types
 
-- `Overlay<T>` — the shape `merge` accepts: any subset of identity, tokens, modifiers, and order. Both a `Layer` and a `Patch` from [`@untheme/schema`](../schema) fit it.
-- `Diff<T>` — the shape `diff` returns: token and per-context override maps, always present (empty when nothing deviates).
+- `Overlay<T>`: the argument type of `merge`. It can have any of the identity, the tokens, the modifiers, and the order. A `Layer` and a `Patch` from [`@untheme/schema`](../schema) both have this shape.
+- `Diff<T>`: the result type of `diff`. It has a token override map and an override map for each context. A map is empty when the themes have the same bindings.
 
 ## Related
 
-- [`@untheme/schema`](../schema) — token contract types and runtime validation.
-- [`@untheme/core`](../core) — the runtime theme service.
+- [`@untheme/schema`](../schema): token contract types and runtime validation.
+- [`@untheme/core`](../core): the runtime theme service.

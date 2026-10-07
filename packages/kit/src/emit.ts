@@ -3,9 +3,10 @@ import { describe } from "./describe";
 import { banner, json, pair, union } from "./print";
 
 /**
- * The modifier structure as a type literal: each modifier mapped to its
- * contexts, each context to the `Overrides` it may carry — the `Mod`
- * parameter of untheme's `Contract`. `{}` when the theme has no modifiers.
+ * Returns the modifier structure as a type literal. The literal maps each
+ * modifier to its contexts, and each context to `Overrides`. This is the `Mod`
+ * parameter of the untheme `Contract`. The literal is `{}` when the theme has no
+ * modifiers.
  */
 const structure = (modifiers: Core["theme"]["modifiers"]): string => {
   const axes = Object.entries(modifiers);
@@ -22,9 +23,8 @@ const structure = (modifiers: Core["theme"]["modifiers"]): string => {
 };
 
 /**
- * The root entry: the token and modifier names, their guards, and the
- * explicit unions every other declaration is typed by. Carries no token data,
- * so importing a guard never pulls the theme into a bundle.
+ * Makes the root entry. It has the token names, the modifier names, their
+ * guards, and the explicit unions that every other declaration uses.
  */
 const index = (core: Core): OutputFile[] => {
   const { theme } = core;
@@ -62,10 +62,9 @@ const index = (core: Core): OutputFile[] => {
 };
 
 /**
- * The `./config` entry: the base theme and boot selection, and the
- * `{ theme, input }` config `useUnthemeConfig` seeds a runtime container
- * from. Plain data — no runtime import of untheme — typed against the exact
- * token and modifier unions.
+ * Makes the `./config` entry. It has the base theme, the boot selection, and the
+ * `{ theme, input }` config that `useUnthemeConfig` seeds a runtime container
+ * from. The declarations use the token and modifier unions.
  */
 const config = (core: Core): OutputFile[] =>
   pair(
@@ -90,10 +89,9 @@ const config = (core: Core): OutputFile[] =>
   );
 
 /**
- * The `./manifest` entry: every modifier and each of its contexts with an
- * id, a display name and a description — what an interface lists to let
- * someone choose. Its own module, so a page that offers no choice never
- * loads the prose.
+ * Makes the `./manifest` entry. It lists each modifier and each of its contexts
+ * with an id, a display name, and a description. An interface lists these to let
+ * a person choose. The entry is its own module.
  */
 const manifest = (core: Core): OutputFile[] =>
   pair(
@@ -120,22 +118,23 @@ const manifest = (core: Core): OutputFile[] =>
   );
 
 /**
- * Emits every file a build produces —
+ * Emits every file of a build.
  *
- * - `index` — `Token` / `Modifier` / `Mod` / `Context` types, the token and
- *   modifier lists, `isToken`, `isModifier`
- * - `config` — the base theme and boot selection, and `{ theme, input }` for
- *   `useUnthemeConfig`
- * - `manifest` — each modifier and context with its id, name and description
+ * - `index` has the `Token`, `Modifier`, `Mod`, and `Context` types, the token
+ *   and modifier lists, `isToken`, and `isModifier`.
+ * - `config` has the base theme, the boot selection, and `{ theme, input }` for
+ *   `useUnthemeConfig`.
+ * - `manifest` has each modifier and context with its id, name, and description.
  *
- * each module as an `.mjs` with its `.d.mts` beside it. No theme layers and
- * no CSS: the runtime renders CSS from the active theme.
+ * Each module is an `.mjs` file with a `.d.mts` file beside it. The runtime
+ * renders CSS from the active theme.
  *
- * Takes only the {@link Core}, so a consumer that already holds a built theme
- * and selection (a framework module) emits the same modules the CLI writes.
+ * The function takes a {@link Core}. A consumer that holds a built theme and
+ * selection, such as a framework module, can emit the same modules that the CLI
+ * writes.
  *
- * @param core - The base theme and boot selection, and the manifest when
- * the consumer has one.
+ * @param core - The base theme, the boot selection, and the manifest when the
+ * consumer has one.
  */
 export const emit = (core: Core): OutputFile[] => {
   return [...index(core), ...config(core), ...manifest(core)];

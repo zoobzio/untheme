@@ -11,8 +11,8 @@ import * as catalogSubpath from "../src/catalog";
 import * as configSubpath from "../src/config";
 import * as cssSubpath from "../src/css";
 
-/* ESM silently drops a name exported by more than one module in an
-   `export *` set; these guards fail loudly instead. */
+/* ESM drops a name that more than one module exports in an `export *` set.
+   These tests fail when that happens. */
 describe("star-export composition", () => {
   const sources = { core, schema, utils };
 

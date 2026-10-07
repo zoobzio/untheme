@@ -2,52 +2,53 @@ import type { Logger } from "@terrazzo/parser";
 import type { Input, Template, Theme } from "@untheme/schema";
 
 /**
- * What a config changes about one modifier of the resolver document. Any
- * member alone is enough.
+ * What a config changes about one modifier of the resolver document. Each member
+ * is optional.
  */
 export interface ModifierConfig {
   /**
-   * Contexts of the config's own, by name: each the token file — or files,
-   * later ones winning — that the context applies. A path relative to the
-   * project root, an absolute URL, or an `npm:/` reference, like `source`.
-   * A context may only rebind tokens the base defines.
+   * Contexts of the config's own, by name. Each context applies a token file or a
+   * list of token files. Later files win. A source is a path relative to the
+   * project root, an absolute URL, or an `npm:/` reference, like `source`. A
+   * context can rebind only the tokens that the base defines.
    */
   add?: Record<string, string | URL | (string | URL)[]>;
 
   /**
-   * The contexts the build keeps, in the order the contract lists them. A
-   * context left out is not built: it is in neither the theme nor the types,
-   * and its files are never read. Defaults to every context the document
-   * declares, then the added ones.
+   * The contexts that the build keeps, in the order that the contract lists them.
+   * The theme and the types omit a context that the list omits, and the build
+   * skips its files. Defaults to every context that the document declares,
+   * then the added contexts.
    */
   contexts?: string[];
 
   /**
-   * The context the modifier boots at — its tokens become the base. Defaults
-   * to the document's own default when that context is kept, else to the
-   * first kept context.
+   * The context that the modifier boots at. The tokens of this context become the
+   * base. Defaults to the default context of the document when the build keeps it.
+   * Otherwise defaults to the first kept context.
    */
   default?: string;
 }
 
 /**
- * The authored `untheme.config.ts`: where the DTCG resolver document lives,
- * the identity to give the base theme, what to keep of its modifiers, and
+ * The authored `untheme.config.ts`. It sets where the DTCG resolver document
+ * lives, the id and name of the base theme, what to keep of its modifiers, and
  * where the build writes.
  */
 export interface KitConfig {
   /**
-   * The resolver document (or a plain token document): a path relative to the
-   * project root, an absolute URL, or an `npm:/` reference into an installed
-   * package (`npm:/@untheme/aurora/src/resolver.json`).
+   * The resolver document or a plain token document. The value is a path relative
+   * to the project root, an absolute URL, or an `npm:/` reference into an
+   * installed package, for example `npm:/@untheme/aurora/src/resolver.json`.
    */
   source: string | URL;
 
   /**
-   * Changes to the document's modifiers, by modifier name: contexts to add,
-   * which ones to keep, and which one boots — or `false` to turn the modifier
-   * off, leaving its default context in the base and the modifier out of the
-   * contract. A modifier not named here is built as the document declares it.
+   * Changes to the modifiers of the document, by modifier name. A modifier config
+   * adds contexts, keeps contexts, and sets the boot context. The value `false`
+   * turns the modifier off. The base keeps the default context of that modifier,
+   * and the contract omits the modifier. The build uses the declaration of the
+   * document for every other modifier.
    */
   modifiers?: Record<string, ModifierConfig | false>;
 
@@ -57,8 +58,8 @@ export interface KitConfig {
   id?: string;
 
   /**
-   * The base theme's display name. Defaults to the resolver document's
-   * `name`; required when the source is a plain token document.
+   * The display name of the base theme. Defaults to the `name` of the resolver
+   * document. A plain token document requires this member.
    */
   name?: string;
 
@@ -70,8 +71,9 @@ export interface KitConfig {
 }
 
 /**
- * The document loader every parse reads through: receives a document URL and
- * the URL that referenced it, and returns the raw text.
+ * The document loader that every parse reads through. The function receives a
+ * document URL and the URL that referenced it. The function returns the raw
+ * text.
  */
 export type Req = (src: URL, origin: URL) => Promise<string>;
 
@@ -86,97 +88,98 @@ export interface GenerateOptions {
   cwd?: string;
 
   /**
-   * Loader for every `file:` and remote document the parse touches — the seam
-   * for authenticated remote sources. Falls back to the filesystem for
-   * `file:` URLs and plain `fetch` for everything else. `npm:` URLs never
-   * reach it: they always resolve from the project's packages.
+   * The loader for every `file:` and remote document that the parse reads. Use it
+   * for authenticated remote sources. Defaults to the filesystem for `file:` URLs
+   * and to `fetch` for all other URLs. `npm:` URLs resolve from the packages of
+   * the project.
    */
   req?: Req;
 
   /**
-   * The Terrazzo logger every parse reports through; defaults to Terrazzo's
-   * own (warnings to stderr).
+   * The Terrazzo logger that every parse reports through. Defaults to the logger
+   * of Terrazzo, which writes warnings to stderr.
    */
   logger?: Logger;
 }
 
-/** Options for {@link build}: the I/O hooks plus where the project lives. */
+/** Options for {@link build}. The type has the I/O hooks and the project location. */
 export type BuildOptions = Omit<GenerateOptions, "cwd"> & {
-  /** The project root; defaults to `process.cwd()`. */
+  /** The project root. Defaults to `process.cwd()`. */
   root?: string;
 
-  /** The config file, relative to `root`; defaults to `untheme.config.ts`. */
+  /** The config file, relative to `root`. Defaults to `untheme.config.ts`. */
   config?: string;
 };
 
-/** One thing an interface offers by name: a modifier, or one of its contexts. */
+/** An interface entry for a modifier or one of its contexts. */
 export interface Entry {
-  /** The modifier's or context's name in the contract. */
+  /** The name of the modifier or context in the contract. */
   id: string;
 
-  /** The display name: authored in the documents, else the id, titled. */
+  /** The display name. It is the name authored in the documents, or the titled id. */
   name: string;
 
-  /** The description authored in the documents, when there is one. */
+  /** The description authored in the documents. */
   description?: string;
 }
 
 /**
- * The modifiers of a built theme as an interface presents them: one entry per
- * modifier, in the theme's order, each with an entry per context it kept, in
- * contract order.
+ * The modifiers of a built theme as an interface presents them. The type has one
+ * entry per modifier, in the order of the theme. Each entry has one entry per
+ * kept context, in contract order.
  */
 export type Manifest = (Entry & { contexts: Entry[] })[];
 
 /**
- * The validated base of a build: the base theme read off the DTCG documents,
- * narrowed through untheme's own schema and proven against Terrazzo's own
- * resolution, the boot selection, and the manifest. What the emitters read.
+ * The validated base of a build. It has the base theme that the kit reads from
+ * the DTCG documents, the boot selection, and the manifest. The kit narrows the
+ * theme with the untheme schema and verifies it against the Terrazzo resolution.
+ * The emitters read this type.
  */
 export interface Core {
-  /** The base theme: every token, every modifier context, the order. */
+  /** The base theme. It has every token, every modifier context, and the order. */
   theme: Theme<Template>;
 
   /** The boot selection: each modifier's default context. */
   input: Input<Template>;
 
   /**
-   * The modifiers and their contexts, named and described. Optional for a
-   * consumer that holds only a built theme and selection: the emitters then
-   * derive one from the theme, each name the id, titled.
+   * The modifiers and their contexts, with names and descriptions. A consumer that
+   * holds only a built theme and selection can omit it. The emitters then derive a
+   * manifest from the theme. Each name is the titled id.
    */
   manifest?: Manifest;
 }
 
 /**
- * A config resolved: the {@link Core} of the build, plus where it writes and
- * what it read. What {@link resolveKit} returns — the in-memory form a
- * consumer that wants documents rather than files (a framework module) works
- * from.
+ * A resolved config. It has the {@link Core} of the build, the output directory,
+ * and the documents that the build read. {@link resolveKit} returns it. A
+ * consumer that works with documents, such as a framework module, uses this
+ * form.
  */
 export interface Kit extends Core {
-  /** The modifiers and their contexts, named and described. */
+  /** The modifiers and their contexts, with names and descriptions. */
   manifest: Manifest;
 
   /** The output directory, normalized and relative to the project root. */
   outDir: string;
 
   /**
-   * The absolute path of every local document the build read, the resolver
-   * first — what a dev server watches to rebuild on change.
+   * The absolute path of each local document that the build read, with the
+   * resolver first. A dev server watches these paths to rebuild on change.
    */
   documents: string[];
 }
 
-/** One emitted file, its path relative to the output directory. */
+/** One emitted file. `path` is relative to the output directory. */
 export interface OutputFile {
   path: string;
   contents: string;
 }
 
 /**
- * What {@link generate} returns: the files to write under `outDir`. No
- * filesystem writes — the caller owns I/O.
+ * What {@link generate} returns. `files` holds the files to write under
+ * `outDir`.
  */
 export interface Output {
   outDir: string;
@@ -184,9 +187,9 @@ export interface Output {
 }
 
 /**
- * The slice of a Terrazzo normalized token the conversion reads. Structural
- * on purpose: every `TokenNormalized` satisfies it, and tests can hand-build
- * minimal tokens without Terrazzo's full bookkeeping shape.
+ * The slice of a Terrazzo normalized token that the conversion reads. Every
+ * `TokenNormalized` satisfies it. A test can build a minimal token of this
+ * type.
  */
 export interface Source {
   $type: string;

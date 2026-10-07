@@ -11,7 +11,7 @@ const shape = defineShape(enums);
 const color = { colorSpace: "srgb", components: [0, 0, 0] } as const;
 const dim = { value: 4, unit: "px" } as const;
 
-/* A same-type token in the fixture and a valid literal, per type. */
+/* A token of the same type in the fixture and a valid literal for each type. */
 const cases: { type: Type; token: string; literal: unknown }[] = [
   { type: "color", token: "color.bg", literal: color },
   { type: "dimension", token: "space.sm", literal: dim },
@@ -80,7 +80,6 @@ describe("defineShape", () => {
     });
 
     it(`${type}: rejects a reference to a different-type token`, () => {
-      /* space.sm is a dimension; color is not. */
       const other = type === "dimension" ? "{color.bg}" : "{space.sm}";
       expect(shape[type].value(other)?.code).toBe("type_mismatch");
     });

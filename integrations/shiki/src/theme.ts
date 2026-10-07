@@ -8,19 +8,18 @@ import { reference, style } from "./util";
 import { SyntaxMappingError } from "./error";
 
 /**
- * Builds a Shiki theme from a `role → token` map. Every scope's color is
- * emitted as the `var()` indirection to the token its role resolves to, so the
- * highlighted output re-themes when a modifier context or theme layer rebinds
- * those tokens — no re-highlight, the same live-reference cascade the CSS
- * renderer relies on. Register the result with Shiki once; it never regenerates.
+ * Makes a Shiki theme from a map of roles to tokens. The color of each scope
+ * is a `var()` reference to the token that the role maps to. The highlighted
+ * output changes color when a modifier context or theme layer rebinds those
+ * tokens.
  *
- * `schema` (`untheme.schema`) anchors the token type and re-proves the map at
- * call time: every bound token must exist and be a color, or a
- * {@link SyntaxMappingError} lists what's wrong. `map` is the interchange the
- * user owns — the LSP roles the shipped `scopes` produce, bound to their
- * tokens; a role left unmapped leaves its scopes at the default foreground.
- * The universal `BASIC_SCOPES` always applies; `options.scopes` adds rules on
- * top, overriding the base where they name the same scope.
+ * `schema` is `untheme.schema`. The function checks that each token in `map`,
+ * `options.fg`, and `options.bg` exists in the contract and has the type
+ * `color`. The function throws a {@link SyntaxMappingError} that lists each
+ * invalid binding. A scope with an unmapped role renders in the default
+ * foreground color. The function applies `BASIC_SCOPES`, then the rules in
+ * `options.scopes`. A rule in `options.scopes` replaces a base rule that names
+ * the same scope.
  */
 export const defineShikiTheme = <T extends Template>(
   schema: Schema<T>,

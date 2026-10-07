@@ -10,7 +10,7 @@ import {
 } from "../src/composite";
 import type { Rule } from "../src/types";
 
-/* A rule that records every value it sees and always passes. */
+/* A rule that records each value and passes. */
 const spy = () => {
   const calls: unknown[] = [];
   const rule: Rule = (v) => {
@@ -20,7 +20,7 @@ const spy = () => {
   return { rule, calls };
 };
 
-/* A rule that always passes and one that always fails with a marker. */
+/* A rule that passes and a rule that fails with a marker. */
 const ok: Rule = () => undefined;
 const no: Rule = (v) => ({
   code: "not_number",

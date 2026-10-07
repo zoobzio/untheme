@@ -10,7 +10,7 @@ import {
   MalformedQueryError,
 } from "../src/error";
 
-/* One concrete issue to exercise the SchemaError family. */
+/* One issue for the SchemaError tests. */
 const issues: Issue[] = [
   { code: "unknown_key", message: "ghost is not in the contract" },
 ];

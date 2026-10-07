@@ -51,7 +51,6 @@ describe("defineInspect", () => {
     const boom = (): never => {
       throw new RangeError("boom");
     };
-    /* Every method throws a plain error; `() => never` satisfies each slot. */
     const parse = {
       modifier: boom,
       value: boom,

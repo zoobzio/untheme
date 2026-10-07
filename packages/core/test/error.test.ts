@@ -12,7 +12,7 @@ import {
   reframe,
 } from "../src/error";
 
-/* Two concrete issues, one carrying a path, to exercise message rendering. */
+/* Two issues. One issue has a path. */
 const issues: Issue[] = [
   { code: "missing_key", message: "color.fg is required", path: ["color.fg"] },
   { code: "unknown_key", message: "color.extra is not in the contract" },

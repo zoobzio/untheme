@@ -8,20 +8,21 @@ import { highlightRules, editorTheme } from "./util";
 import { SyntaxMappingError } from "./error";
 
 /**
- * Builds a CodeMirror theme from a `tag → token` map: a `syntaxHighlighting`
- * extension over the tags, plus an `EditorView.theme` for the editor chrome.
- * Every color is the `var()` indirection to a token, so the editor re-themes
- * when a modifier context or theme layer rebinds those tokens — no reconfigure,
- * the same live-reference cascade the CSS renderer relies on.
+ * Makes a CodeMirror theme from a map of Lezer tag names to tokens. The
+ * function returns an array of two extensions. One extension is a
+ * `syntaxHighlighting` extension for the tags. The other extension is an
+ * `EditorView.theme` for the editor chrome. Each color is a `var()` reference
+ * to a token. The editor changes color when a modifier context or theme layer
+ * rebinds those tokens.
  *
- * `schema` (`untheme.schema`) anchors the token type and re-proves the map at
- * call time: every bound token must exist and be a color, or a
- * {@link SyntaxMappingError} lists what's wrong. `map` is the interchange the
- * user owns — Lezer tag names bound to their tokens; an unmapped tag renders at
- * the editor foreground. `options` binds the chrome and adds raw-tag rules.
+ * `schema` is `untheme.schema`. The function checks that each token in `map`,
+ * in the chrome options, and in `options.tags` exists in the contract and has
+ * the type `color`. The function throws a {@link SyntaxMappingError} that
+ * lists each invalid binding. A tag with no mapped token renders in the editor
+ * foreground color. `options` sets the chrome tokens and adds rules for raw
+ * Lezer tags.
  *
- * Returns the extensions to drop into an editor's `extensions` array; the user
- * supplies the language support themselves.
+ * Add the returned extensions to the `extensions` array of an editor.
  */
 export const defineCodeMirrorTheme = <T extends Template>(
   schema: Schema<T>,

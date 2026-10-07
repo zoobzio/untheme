@@ -8,30 +8,30 @@ import { readListing } from "./query";
 import { readTarget } from "./route";
 
 /**
- * Creates the one event handler that serves a theme catalog over the
- * catalog wire protocol, so `defineClient` from `untheme/catalog` reads it
- * unchanged:
+ * Creates the event handler that serves a theme catalog with the catalog wire
+ * protocol. `defineClient` from `untheme/catalog` reads this protocol. The
+ * handler answers two requests.
  *
- * - `GET {base}/themes?q=<JSON query>` answers a page of entries
- * - `GET {base}/themes/{id}` answers one layer, or 404
+ * - `GET {base}/themes?q=<JSON query>` answers a page of entries.
+ * - `GET {base}/themes/{id}` answers one layer, or 404.
  *
- * Put it in a catch-all server route file; the file's folder is the base:
+ * Put the handler in a catch-all server route file. The folder of the file is
+ * the base.
  *
  * ```ts
- * // server/api/untheme/[...path].get.ts — base "/api/untheme"
+ * // server/api/untheme/[...path].get.ts, base "/api/untheme"
  * export default createThemeHandler({
  *   list: (listing) => listEntries(entries, listing),
  *   get: (id) => storage.getItem(`themes:${id}`),
  * });
  * ```
  *
- * The provider binds the handler to wherever the themes are stored. Layers
- * are served as the provider returns them: the browser client proves each
- * one against the app's contract when it arrives.
+ * The provider connects the handler to the store of the themes. The handler
+ * serves each layer as the provider returns it.
  *
- * @param provider - The storage callbacks: `list` answers a normalized
- * listing with a page, `get` answers an id with a layer, or `null` /
- * `undefined` for a miss.
+ * @param provider - The storage callbacks. `list` answers a normalized
+ * listing with a page. `get` answers an id with a layer, or with `null` or
+ * `undefined` when no layer matches.
  * @returns The h3 event handler.
  */
 export const createThemeHandler = (provider: Provider): EventHandler => {

@@ -32,7 +32,7 @@ describe("merge", () => {
     const value = slot.$value;
 
     expect(value).toEqual({ colorSpace: "hsl", components: [0, 0, 0] });
-    /* The alpha carried by the base srgb value must not survive the rebind. */
+    /* The rebind replaces the whole value, including the alpha. */
     const carriesAlpha =
       typeof value === "object" &&
       value !== null &&

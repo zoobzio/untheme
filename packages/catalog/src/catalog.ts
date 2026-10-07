@@ -9,29 +9,25 @@ import {
 import { isPage, isQuery, toListing } from "./util";
 
 /**
- * Creates a {@link Catalog} from storage callbacks — the serving angle, and
- * the machine behind the consuming one: {@link defineClient} compiles its
- * transport config into a {@link Provider} and boots this same factory, so
- * every behavior the two angles share lives here. `list` validates the
- * query, normalizes it to a concrete listing, hands it to the source, and
- * proves the answer is a {@link Page}. `get` hands the id to the source,
- * treats `null` / `undefined` as a miss, and proves any other answer
- * against the contract before it surfaces. The schema is the only carrier
- * of `T`: the catalog's type is earned through those proofs, never
- * asserted.
+ * Creates a {@link Catalog} from storage callbacks. {@link defineClient}
+ * compiles its transport config into a {@link Provider} and calls this
+ * function. `list` validates the query, normalizes it to a concrete listing,
+ * passes it to the provider, and checks that the answer is a {@link Page}.
+ * `get` passes the id to the provider and treats `null` and `undefined` as a
+ * miss. `get` checks any other answer against the contract.
  *
- * @param schema - The contract the catalog's layers are proven against.
- * @param provider - The source callbacks answering listings and retrievals.
- * @returns A {@link Catalog} resolving through the callbacks.
+ * @param schema - The contract that the layers must match.
+ * @param provider - The callbacks that answer listings and retrievals.
+ * @returns A {@link Catalog} that resolves through the callbacks.
  */
 export const defineCatalog = <T extends Template>(
   schema: Schema<T>,
   provider: Provider,
 ): Catalog<T> => {
   /**
-   * The manifest window a query selects. Throws {@link MalformedQueryError}
-   * when the value is not a query, and {@link MalformedPageError} when the
-   * source's answer is not a page.
+   * Returns the page of entries that a query selects. Throws {@link
+   * MalformedQueryError} when the value is not a query. Throws {@link
+   * MalformedPageError} when the answer of the provider is not a page.
    */
   const list = async (query: Query = {}): Promise<Page> => {
     if (!isQuery(query)) {
@@ -47,9 +43,10 @@ export const defineCatalog = <T extends Template>(
   };
 
   /**
-   * One layer by id. A `null` / `undefined` answer is a miss and resolves
-   * `undefined`; any other answer is proven against the contract, throwing
-   * {@link MalformedLayerError} with the contract's issues when it fails.
+   * Returns one layer by id. A `null` or `undefined` answer is a miss and
+   * resolves `undefined`. The function checks any other answer against the
+   * contract. When the check fails, the function throws {@link
+   * MalformedLayerError} with the issues of the contract.
    */
   const get = async (id: string): Promise<Layer<T> | undefined> => {
     const value = await provider.get(id);

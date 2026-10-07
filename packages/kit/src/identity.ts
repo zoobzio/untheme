@@ -3,10 +3,9 @@ import type { Resolver } from "@terrazzo/parser";
 import { bridged } from "./contexts";
 
 /**
- * Identity for the base theme: explicit options win, then the resolver
- * document's own name — the id is its lowercase slug. A plain token document
- * carries no name (its synthetic resolver's name is Terrazzo's own), so there
- * the options are required.
+ * Returns the id and the name of the base theme. A name in the options wins over
+ * the name of the resolver document. The id is the lowercase slug of the name.
+ * A plain token document has no name of its own, so the options must give one.
  */
 export const identity = (
   options: { id?: string | undefined; name?: string | undefined },

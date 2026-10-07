@@ -5,8 +5,8 @@ import { record } from "objectively";
 import { LIMIT, SORT } from "./constant";
 
 /**
- * Whether a value is a whole non-negative count — the shape shared by
- * `limit`, `offset`, and `total`.
+ * Checks for a whole non-negative number. `limit`, `offset`, and `total` use
+ * it.
  */
 const isCount = (value: unknown): value is number => {
   if (typeof value !== "number") {
@@ -16,9 +16,8 @@ const isCount = (value: unknown): value is number => {
 };
 
 /**
- * Whether a value is a well-formed {@link Sort}: a sortable entry field, a
- * known direction, and nothing else. Strict about unknown keys for the same
- * reason as {@link isQuery} — a sort is an instruction.
+ * Checks for a {@link Sort}: an entry field and a direction. A key other than
+ * `field` and `direction` fails the check.
  */
 const isSort = (value: unknown): value is Sort => {
   if (!record(value)) {
@@ -36,11 +35,8 @@ const isSort = (value: unknown): value is Sort => {
 };
 
 /**
- * Whether a value is a well-formed {@link Query}: every present field of
- * the declared shape, and no fields beyond the model. Unknown keys are
- * rejected rather than ignored — a query is an instruction, and silently
- * dropping a filter the catalog does not understand would return unfiltered
- * results disguised as filtered ones.
+ * Checks for a {@link Query}. Each present field must have its declared shape.
+ * A key other than `search`, `sort`, `limit`, and `offset` fails the check.
  */
 export const isQuery = (value: unknown): value is Query => {
   if (!record(value)) {
@@ -69,9 +65,9 @@ export const isQuery = (value: unknown): value is Query => {
 };
 
 /**
- * Fills a query's gaps with the default ordering and window, yielding the
- * concrete {@link Listing} a source answers. `search` is carried only when
- * the query names one, so an unfiltered listing has no `search` member.
+ * Fills the gaps of a query with the default ordering and window. Returns the
+ * concrete {@link Listing}. `search` is present only when the query has a
+ * `search`.
  */
 export const toListing = (query: Query): Listing => {
   const listing: Listing = {
@@ -86,10 +82,8 @@ export const toListing = (query: Query): Listing => {
 };
 
 /**
- * Whether a value carries a well-formed {@link Entry}: a non-empty id and a
- * name. Fields beyond the model are tolerated — an entry is data, and a
- * source sending extra metadata loses nothing by having it ignored, unlike
- * the instruction fields {@link isQuery} is strict about.
+ * Checks for an {@link Entry}: a non-empty id and a name. Other fields pass the
+ * check.
  */
 const isEntry = (value: unknown): value is Entry => {
   if (!record(value)) {
@@ -102,9 +96,8 @@ const isEntry = (value: unknown): value is Entry => {
 };
 
 /**
- * Whether a value carries a well-formed {@link Page}: an array of entries
- * and the three paging counts. Structural only — coherence between the
- * counts and the entries is the producing catalog's responsibility.
+ * Checks for a {@link Page}: an array of entries and the counts `total`,
+ * `limit`, and `offset`.
  */
 export const isPage = (value: unknown): value is Page => {
   if (!record(value)) {

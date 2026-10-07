@@ -1,9 +1,8 @@
 /**
- * Raised when a syntax mapping binds a role to a token the contract does not
- * declare, or to a token whose type is not `color`. Carries every offending
- * binding in `problems`, so a whole broken mapping surfaces at once rather than
- * one failure at a time. A lookup/shape miss rather than a schema Issue, so it
- * extends the plain {@link Error}.
+ * The error that {@link defineShikiTheme} throws for an invalid syntax
+ * mapping. A mapping is invalid when it binds a role to a token that the
+ * contract does not declare, or to a token whose type is not `color`. The
+ * `problems` array lists every invalid binding.
  */
 export class SyntaxMappingError extends Error {
   readonly problems: string[];

@@ -9,14 +9,11 @@ import type {
 import { remap } from "objectively";
 
 /**
- * Rebuilds a modifiers structure leaf by leaf: every context of every modifier
- * mapped through the callback, each modifier keeping its own context keys. The
- * callback's `at` indexes any other modifiers structure at the leaf's own
- * coordinates, so a leaf can be combined with its counterpart elsewhere; a
- * sparse structure — a layer's or patch's partial modifier map — may hold
- * nothing there, so `at` yields the overrides or `undefined`. The
- * modifier/context pairing is carried generically here, checked once; callers
- * supply only the leaf operation.
+ * Makes a new modifiers structure. The function calls the callback for each
+ * context of each modifier. The result has the same modifier keys and context
+ * keys. The callback receives the function `at`. `at` reads the same modifier
+ * and context in another modifiers structure. `at` returns the overrides, or
+ * `undefined` when the other structure has no entry there.
  */
 export const traverse = <T extends Template, R>(
   modifiers: Modifiers<T>,

@@ -5,14 +5,14 @@ import { record } from "objectively";
 import { InvalidConfigError } from "./error";
 import { locate } from "./source";
 
-/** The `$ref` an entry of `resolutionOrder` names a top-level modifier by. */
+/** The `$ref` prefix of an entry in `resolutionOrder` that names a top-level modifier. */
 const POINTER = "#/modifiers/";
 
 /**
- * One modifier of a resolver document as its resolution order applies it:
- * the modifier object itself, where the order holds it, and — when the order
- * references it rather than declaring it inline — its key in the top-level
- * `modifiers` map.
+ * One modifier of a resolver document as the resolution order applies it.
+ * `modifier` is the modifier object. `at` is its index in the order. `key` is
+ * its key in the top-level `modifiers` map when the order references it, and
+ * `undefined` when the order declares it inline.
  */
 interface Declared {
   modifier: Record<string, unknown>;
@@ -21,10 +21,10 @@ interface Declared {
 }
 
 /**
- * Finds every modifier the resolution order applies, by name: one referenced
- * from the top-level `modifiers` map, and one declared inline in the order
- * itself, alike. A modifier the order never applies is not an axis and is not
- * found.
+ * Finds the modifiers that the resolution order applies, by name. This includes
+ * a modifier referenced from the top-level `modifiers` map and a modifier
+ * declared inline in the order. The function skips a modifier that the order
+ * applies to no axis.
  */
 const declared = (
   document: Record<string, unknown>,
@@ -57,7 +57,7 @@ const declared = (
   return found;
 };
 
-/** A name for an inline set that no set of the document already has. */
+/** Returns a name that no set of the document has. */
 const unused = (document: Record<string, unknown>, name: string): string => {
   const taken = new Set<string>();
   if (record(document.sets)) {
@@ -73,9 +73,10 @@ const unused = (document: Record<string, unknown>, name: string): string => {
 };
 
 /**
- * Applies one modifier's changes to its declaration: adds the config's own
- * contexts, keeps the listed ones in the listed order, and sets the default.
- * Returns the issues found; the modifier is left untouched when there are any.
+ * Applies the changes of one modifier to its declaration. The function adds the
+ * contexts of the config, keeps the listed contexts in the listed order, and
+ * sets the default. The function returns the issues that it finds. When there
+ * are issues, the function leaves the modifier as it was.
  */
 const change = (
   name: string,
@@ -137,25 +138,26 @@ const change = (
 };
 
 /**
- * Tailors a resolver document to a config's `modifiers` before it is parsed,
- * so everything downstream — the parse, the conversion, the proof — sees a
- * document that declares exactly what the build keeps:
+ * Tailors a resolver document to the `modifiers` of a config before the parse.
+ * The tailored document declares what the build keeps. The parse, the
+ * conversion, and the verification read it.
  *
- * - a modifier set to `false` is turned off: its default context's sources
- *   stay in the resolution order as a set, and the modifier is gone;
- * - `add` gives a modifier contexts of the config's own, each the token
- *   files it names;
- * - `contexts` keeps only the listed contexts, in the listed order — a
- *   context left out is never read;
- * - `default` names the context the modifier boots at. Without it the
- *   document's default boots when it is kept, else the first kept context.
+ * - A modifier set to `false` is turned off. The sources of its default context
+ *   stay in the resolution order as a set, and the modifier is removed.
+ * - `add` gives a modifier contexts of the config's own. Each context applies
+ *   the token files that it names.
+ * - `contexts` keeps the listed contexts, in the listed order. The build drops a
+ *   context that the list omits.
+ * - `default` names the context that the modifier boots at. When `default` is
+ *   absent, the default of the document boots if the config keeps it. Otherwise
+ *   the first kept context boots.
  *
  * @param src - The resolver document, as text.
- * @param changes - The config's `modifiers`.
+ * @param changes - The `modifiers` of the config.
  * @param base - The project root that added sources resolve against.
  * @returns The tailored document, as text.
- * @throws InvalidConfigError when the config names a modifier or a context
- * the document does not declare, or a default it does not keep.
+ * @throws InvalidConfigError when the config names a modifier or a context that
+ * is missing from the document, or a default that the config does not keep.
  */
 export const tailor = (
   src: string,

@@ -1,6 +1,6 @@
-/* demo.css — the untheme demo bar, axis pill controls, action buttons,
-   and the (concept) live token inspector. Demo chrome, distinct from the
-   product fiction: mono labels, segmented pills. Tokens only. */
+/* Styles the untheme demo bar, the axis pill controls, the action buttons, and
+   the concept token inspector. The demo chrome uses mono labels and segmented
+   pills. The rules use tokens. */
 
 .demo-bar {
   position: sticky;
@@ -20,7 +20,7 @@
   border-block-end: var(--border-thin);
 }
 
-/* row 1: note · theme select · action buttons */
+/* row 1: note, theme select, and action buttons */
 .demo-top {
   display: flex;
   flex-wrap: wrap;
@@ -46,7 +46,7 @@
   margin-inline-start: auto;
 }
 
-/* row 2: theme control + axis fieldsets share one tidy grid */
+/* row 2: the theme control and the axis fieldsets share one grid */
 .demo-axes {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
@@ -57,7 +57,7 @@
   border-color: var(--outline-muted);
 }
 
-/* ---------- control label (theme + axes share one cell shape) ---------- */
+/* ---------- control label, one cell shape for the theme and the axes ---------- */
 .axis-label {
   font: var(--type-label);
   font-family: var(--font-mono);
@@ -98,7 +98,7 @@
   outline-offset: 2px;
 }
 
-/* ---------- action buttons (shuffle · copy-as-CSS) — a matched pair ---------- */
+/* ---------- action buttons: shuffle and copy-as-CSS ---------- */
 .demo-button {
   display: inline-flex;
   align-items: center;
@@ -128,14 +128,14 @@
   font-size: 1.1em;
   line-height: 0;
 }
-/* transient confirmation state (JS toggles [data-copied]) */
+/* confirmation state. The script toggles [data-copied]. */
 .demo-button[data-copied="true"] {
   background-color: var(--success-container);
   color: var(--on-success-container);
   border-color: transparent;
 }
 
-/* ---------- axis controls (labelled selects, matched to the theme control) ---------- */
+/* ---------- axis controls: labeled selects ---------- */
 .axis {
   display: flex;
   flex-direction: column;
@@ -143,7 +143,7 @@
   min-inline-size: 0;
 }
 
-/* ---------- token inspector (CONCEPT — static mock, no wiring this round) ---------- */
+/* ---------- token inspector: concept, static mock ---------- */
 .token-inspector {
   position: fixed;
   inset-block-end: var(--space-5);

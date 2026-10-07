@@ -1,8 +1,9 @@
-/* mock.css — the Borealis product window (a fake app screenshot, entirely CSS).
-   Precise mono type, hairline borders, one-ramp chart, staggered bar growth,
-   dark-mode glow. Tokens only; raw values limited to layout geometry/transforms. */
+/* Styles the Borealis product window, a mock app screenshot made of CSS. The
+   window has mono type, hairline borders, a one-ramp chart, staggered bar
+   growth, and a dark-mode glow. Raw values set only layout geometry and
+   transforms. */
 
-/* reveals on load (reveal-mock keyframe + reduced-motion reset live in layout.css) */
+/* reveals on load. The reveal-mock keyframe and the reduced-motion reset are in layout.css. */
 .mock {
   position: relative;
   perspective: 1800px;
@@ -10,7 +11,7 @@
   animation-delay: calc(var(--delay-step) * 2);
 }
 
-/* dark-only ambient glow behind the window */
+/* ambient glow behind the window in dark mode */
 .mock-glow {
   position: absolute;
   inset: 8% 4%;
@@ -81,7 +82,7 @@
   white-space: nowrap;
 }
 
-/* ---------- body: nav + main ---------- */
+/* ---------- body: nav and main ---------- */
 .mock-body {
   display: grid;
   grid-template-columns: minmax(120px, 0.28fr) 1fr;
@@ -161,7 +162,7 @@
   color: var(--on-error-container);
 }
 
-/* ---------- chart (single primary ramp so it reads in monochrome themes) ---------- */
+/* ---------- chart, one primary ramp ---------- */
 .mock-chart {
   display: flex;
   align-items: flex-end;
@@ -184,7 +185,7 @@
 [data-color="dark"] .mock-bar {
   background: linear-gradient(to top, var(--primary-600), var(--primary-300));
 }
-/* vibrancy is a chart moment: saturate/desaturate on the same ramp (spectral use of the columns) */
+/* vibrancy saturates or desaturates the columns on the same ramp */
 [data-vibrancy="vivid"] .mock-bar {
   background: linear-gradient(
     to top,
@@ -257,7 +258,7 @@
 .mock-bar:nth-child(12) {
   animation-delay: calc(var(--delay-step) * 12);
 }
-/* motion: reduced — no growth, bars simply present (delay-step is 0 too) */
+/* motion: reduced stops the bar animation */
 [data-motion="reduced"] .mock-bar {
   animation: none;
 }

@@ -1,9 +1,9 @@
 import type { Context, Modifier, Overrides, Template } from "@untheme/schema";
 
 /**
- * The deviation between two themes, as produced by {@link diff}: a token
- * override map and per-modifier, per-context override maps, all present (empty
- * when nothing deviates) so consumers can inspect them without guards.
+ * The difference between two themes. {@link diff} returns it. It has a token
+ * override map and an override map for each context of each modifier. A map is
+ * empty when the themes have the same bindings.
  */
 export type Diff<T extends Template> = {
   tokens: Overrides<T>;
@@ -11,9 +11,8 @@ export type Diff<T extends Template> = {
 };
 
 /**
- * A partial overlay of a theme: any subset of identity, tokens, modifiers, and
- * order. Both a `Layer` (identity plus partial overrides) and a `Patch`
- * (anonymous overrides) fit this shape, so one merge serves them all.
+ * A partial overlay of a theme. It can have any of the identity, the tokens,
+ * the modifiers, and the order. A `Layer` and a `Patch` both have this shape.
  */
 export type Overlay<T extends Template> = {
   id?: string;

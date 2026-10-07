@@ -20,18 +20,16 @@ import {
 import { all, reference, referenceType, valued } from "./util";
 
 /**
- * Assembles the {@link Shape} rules for a template: for each token type, the
- * rule for its literal form and the rule for a value in that position. The
- * scalar literal rules come from `./scalar`; the composite literal rules are
- * built from `./composite`, each fed the value rules for the sub-values its
- * slots hold. The value rule for a type wraps its literal with a same-type
- * reference check, so a slot accepts an alias to a token of its type or a
- * structured value in place. Composite value rules are built in dependency
- * order — a composite whose slots reference another composite is built after
- * that one's value rule exists.
+ * Builds the {@link Shape} rules for a template. Each token type has a literal
+ * rule and a value rule. The scalar literal rules come from `./scalar`. The
+ * function builds the composite literal rules with `./composite`. Each
+ * composite rule receives the value rules for the sub-values in its slots.
+ * The value rule for a type accepts the literal form or a reference to a token
+ * of the same type. The function builds a composite value rule after the value
+ * rules of the composites in its slots.
  *
- * @param enums - The template's sets, supplying the token and type lookups a
- *   reference is checked against.
+ * @param enums - The sets of the template. The reference checks use the token
+ *   and type lookups.
  */
 export const defineShape = <T extends Template>(enums: Enum<T>): Shape => {
   const referenceOf = (type: Type): Rule =>

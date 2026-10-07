@@ -4,7 +4,8 @@ import { property } from "untheme/css";
 import type { FontStyle } from "./types";
 
 /**
- * Shiki carries a scope's font styles as a single space-joined string.
+ * Returns the font styles as the single space-separated string that Shiki
+ * expects.
  */
 export const style = (value: FontStyle | FontStyle[]): string => {
   if (Array.isArray(value)) {
@@ -15,9 +16,8 @@ export const style = (value: FontStyle | FontStyle[]): string => {
 };
 
 /**
- * A token's `var()` indirection, built from the same custom-property naming
- * the CSS renderer uses — so a scope colored here points at the exact property
- * the renderer emits.
+ * Returns a `var()` reference to the custom property of the token. The name of
+ * the property is the name that the CSS renderer emits.
  */
 export const reference = <T extends Template>(token: Token<T>): string => {
   return `var(${property(token)})`;

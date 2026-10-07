@@ -29,7 +29,7 @@ export type Mod = {
   mode: { light: object; dark: object };
 };
 
-/* Structured colors named once so assertions can compare against them. */
+/* Structured colors for assertions. */
 export const white: Color = { colorSpace: "srgb", components: [1, 1, 1] };
 export const ink: Color = {
   colorSpace: "oklch",
@@ -38,12 +38,12 @@ export const ink: Color = {
 };
 
 /**
- * A complete base theme exercising every token type: literal scalars, a hex
- * fallback, an hsl color with a `none` channel, whole-value references
- * (`color.accent`, `type.display`), composites whose slots are references
- * (`edge.card`, `move.fade`, `fade.hero`), a shadow list holding a reference
- * as a layer (`depth.stack`), and a `mode` axis whose default context is
- * empty and whose `dark` context carries overrides.
+ * A complete base theme with one token of each type. It has literal scalars, a
+ * hex fallback, an hsl color with a `none` channel, whole-value references
+ * (`color.accent`, `type.display`), composites with reference slots
+ * (`edge.card`, `move.fade`, `fade.hero`), a shadow list with a reference layer
+ * (`depth.stack`), and a `mode` axis. The default context of `mode` is empty.
+ * The `dark` context has overrides.
  */
 export const theme: Contract<Tok, Mod> = {
   id: "spectrum",

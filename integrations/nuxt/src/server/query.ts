@@ -5,10 +5,10 @@ import { createError, getQuery } from "h3";
 import { isQuery, toListing } from "untheme/catalog";
 
 /**
- * Reads the listing a request carries. The `q` search param holds a
- * JSON-encoded query — an absent param lists the first page under the
- * default window — validated and normalized to a concrete listing. Answers
- * 400 when the param is not JSON or not a query.
+ * Reads the listing of a request. The `q` search param holds a JSON query.
+ * The function validates the query and normalizes it to a listing. A request
+ * with no `q` param gets the first page of the default window. The function
+ * answers 400 when `q` is invalid JSON or an invalid query.
  *
  * @param event - The request.
  * @returns The normalized listing.

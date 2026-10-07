@@ -5,11 +5,10 @@ import type { Output } from "./types";
 import { readManifest, writeManifest } from "./manifest";
 
 /**
- * Writes an output's files under `<root>/<outDir>`. The directory may be
- * shared with authored source (`src/untheme`), so it is never cleared: the
- * kit's own files are overwritten in place, and the only files removed are
- * ones the previous write recorded in its manifest and this output no longer
- * produces. A file the kit did not write is never touched.
+ * Writes the files of an output under `<root>/<outDir>`. The kit overwrites its
+ * own files in place. The function removes a file when the manifest in the
+ * directory lists it and the output omits it. The directory can hold authored
+ * source, such as `src/untheme`. The function removes only listed files.
  *
  * @param output - The output to write.
  * @param root - The project root.

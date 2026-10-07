@@ -32,8 +32,7 @@ describe("construction", () => {
 
   it("rejects a theme whose value violates its declared type", () => {
     const config = makeConfig();
-    // A dimension object bound to a color token; Reflect skirts the compile-time
-    // contract so the runtime check is what rejects it.
+    // Reflect.set binds a dimension value to a color token.
     Reflect.set(config.theme.tokens["color.white"], "$value", {
       value: 4,
       unit: "px",
@@ -94,7 +93,7 @@ describe("tokens / get", () => {
       ...makeConfig(),
       input: { mode: "dark", contrast: "high" },
     });
-    // mode.dark sets fg "{color.white}"; contrast.high (later) overrides it
+    // mode.dark sets fg to "{color.white}". contrast.high sets fg to "{color.black}".
     expect(u.get("color.bg")).toBe("{color.black}");
     expect(u.get("color.fg")).toBe("{color.black}");
   });
@@ -310,7 +309,7 @@ describe("apply", () => {
       tokens: { "color.accent": "{color.white}" },
     });
     u.apply({ id: "l2", name: "L2", tokens: { "color.bg": "{color.accent}" } });
-    // l1's accent change is gone — l2 resolved against the baseline
+    // The accent change from l1 is not in the result.
     expect(u.get("color.accent")).toEqual(blue);
   });
 });
@@ -357,7 +356,6 @@ describe("Options middleware", () => {
         config: { input: () => ({ mode: "dark", contrast: "normal" }) },
       },
     });
-    // reads see dark regardless of the stored selection
     expect(u.get("color.bg")).toBe("{color.black}");
   });
 

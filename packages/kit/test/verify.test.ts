@@ -34,8 +34,8 @@ describe("verify", () => {
     const { parsed } = await load("resolver.json");
     const core = assemble(parsed, {});
 
-    /* Dropping listPermutations forces verify off the enumerated-permutation
-       path and onto the defaults-plus-single-context-deviation fallback. */
+    /* Removing listPermutations makes verify use the fallback of the defaults
+       plus every single-context deviation. */
     Reflect.deleteProperty(parsed.resolver ?? {}, "listPermutations");
     expect(parsed.resolver?.listPermutations).toBeUndefined();
 

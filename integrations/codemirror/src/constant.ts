@@ -3,8 +3,9 @@ import type { Tag } from "@lezer/highlight";
 import { tags as t } from "@lezer/highlight";
 
 /**
- * Intrinsic typography for the tags whose meaning is a text style, not a color.
- * Applied alongside a mapped color, and on their own when the tag is unmapped.
+ * The font style or font weight of the tags `emphasis`, `strong`, and
+ * `heading`. A mapped tag gets the style and the color. The tags `emphasis`
+ * and `strong` get the style when the map omits them.
  */
 export const STYLE: Record<
   string,
@@ -16,15 +17,13 @@ export const STYLE: Record<
 };
 
 /**
- * The highlight roles this integration ships — `@lezer/highlight`'s tag
- * vocabulary, keyed by Lezer's own names. That's CodeMirror's domain standard
- * for what a highlighter distinguishes, so we adopt it rather than invent. A
- * consumer's map binds each name to a token; anything here it omits is reached
- * through `options.tags` with a raw Lezer `Tag`.
+ * The highlight roles of this package. Each key is the name of a
+ * `@lezer/highlight` tag, and each value is that tag. The `map` argument binds
+ * each name to a token. The `options.tags` option adds rules for other Lezer
+ * tags.
  *
- * A few entries are modifier combinations Lezer expresses as functions rather
- * than plain tags — `function` is a name in function position, `definition` a
- * name being defined — surfaced here under a plain name.
+ * `function` is `t.function(t.variableName)`. `definition` is
+ * `t.definition(t.variableName)`.
  */
 export const TAGS = {
   keyword: t.keyword,

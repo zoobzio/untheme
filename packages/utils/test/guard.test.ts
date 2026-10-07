@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 import { isTemplate } from "../src/guard";
 import { theme } from "./fixture";
 
-/* A minimal record that satisfies every branch of the template shape. */
+/* A minimal record with the shape of a template. */
 const base = {
   id: "demo",
   name: "Demo",

@@ -1,25 +1,31 @@
 # shiki example
 
-Shows the two halves a [`@untheme/shiki`](../../integrations/shiki) theme needs:
-**carrier tokens** to hold the colors, and the **interchange** binding LSP
-semantic token types to them.
+A static page with a Shiki theme from [`@untheme/shiki`](../../integrations/shiki).
+The example has two parts. **Carrier tokens** hold the colors. The
+**interchange** binds LSP semantic token types to the carriers.
 
-The carriers come from the [aurora](../../presets/aurora) preset, widened in
-DTCG JSON. [`tokens/syntax.json`](./tokens/syntax.json) adds a `syntax-*` token
-group whose members reference aurora's tonal ramps, and
-[`tokens/syntax-dark.json`](./tokens/syntax-dark.json) rebinds them for the dark
-context — authored exactly like aurora's own roles, so the colors flip
-light↔dark through the same modifier axis as everything else.
-[`tokens/aurora-syntax.resolver.json`](./tokens/aurora-syntax.resolver.json)
-lists aurora's files from its package (`npm:/@untheme/aurora/...`) and adds
-these two: the syntax set after aurora's, and the dark file in the dark color
-context. [`untheme.config.ts`](./untheme.config.ts) points at that resolver,
-and `untheme build` writes the theme to `untheme/`.
+## Carrier tokens
 
-The interchange is the app's to own. [`src/generate.ts`](./src/generate.ts)
-maps each LSP role onto a carrier — many-to-one, reusing the `type` carrier for
-`namespace`/`class`/… and the `function` carrier for `method`, surfacing only
-the distinctions it wants:
+The carriers come from the [aurora](../../presets/aurora) preset, with extra DTCG
+JSON files.
+
+- [`tokens/syntax.json`](./tokens/syntax.json) adds a `syntax-*` token group.
+  The members reference the tonal ramps of aurora.
+- [`tokens/syntax-dark.json`](./tokens/syntax-dark.json) rebinds the group for
+  the dark context. The colors flip between light and dark through the same
+  modifier axis as the aurora roles.
+- [`tokens/aurora-syntax.resolver.json`](./tokens/aurora-syntax.resolver.json)
+  lists the aurora files from its package (`npm:/@untheme/aurora/...`). It adds
+  the syntax set after the aurora sets. It adds the dark file in the dark color
+  context.
+- [`untheme.config.ts`](./untheme.config.ts) points at the resolver.
+  `untheme build` writes the theme to `untheme/`.
+
+## Interchange
+
+[`src/generate.ts`](./src/generate.ts) maps each LSP role to a carrier. Several
+roles share a carrier. The `type` carrier serves `namespace` and `class`, and
+the `function` carrier serves `method`.
 
 ```ts
 const theme = defineShikiTheme(
@@ -31,7 +37,7 @@ const theme = defineShikiTheme(
     macro: "syntax-builtin",
     type: "syntax-type",
     namespace: "syntax-type",
-    // …
+    // more roles
   },
   { fg: "syntax-text", bg: "surface-container" },
 );
@@ -43,12 +49,12 @@ const theme = defineShikiTheme(
 pnpm generate
 ```
 
-Runs `untheme build`, then builds `.dist/index.html`: aurora's full cascade in a `<style>` block, a code
-sample highlighted by the generated theme, and a light/dark toggle. Flipping it
-flips a single `data-color` attribute — the highlighted code re-themes through
-the custom-property graph, with no re-highlight.
+The script runs `untheme build` and writes `.dist/index.html`. The page has the
+full aurora cascade in a `<style>` block, a code sample that the generated theme
+highlights, and a light/dark toggle. The toggle flips the `data-color`
+attribute. The custom-property graph re-themes the highlighted code.
 
-The script also prints the two-hop indirection it relies on:
+The script prints the two-hop path from scope to color:
 
 ```
   scope "keyword" -> var(--syntax-keyword)
@@ -56,6 +62,6 @@ The script also prints the two-hop indirection it relies on:
   dark   --syntax-keyword: var(--primary-400)
 ```
 
-A Shiki span reads `var(--syntax-keyword)`; the cascade resolves that to
+A Shiki span reads `var(--syntax-keyword)`. The cascade resolves it to
 `var(--primary-600)` under `:root` and to `var(--primary-400)` under
-`[data-color="dark"]`, and aurora's ramp defines the final color.
+`[data-color="dark"]`. The ramp of aurora defines the final color.

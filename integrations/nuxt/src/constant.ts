@@ -1,14 +1,13 @@
 /**
- * The filename of the static cascade template the module writes into the
- * build directory — the base bindings and every modifier context as plain
- * CSS, importable from app stylesheets as `#build/untheme.css`.
+ * The filename of the static cascade template. The module writes it to the
+ * build directory. The file holds the base bindings and each modifier context
+ * as CSS. App stylesheets import it as `#build/untheme.css`.
  */
 export const STYLESHEET = "untheme.css";
 
 /**
- * The build-directory folder the module writes the theme modules into — the
- * same `index` and `config` modules `untheme build` writes to its output
- * directory, importable in the app as `#build/untheme/index.mjs` and
- * `#build/untheme/config.mjs`.
+ * The build-directory folder that holds the theme modules. These are the same
+ * `index` and `config` modules that `untheme build` writes. The app imports
+ * them as `#build/untheme/index.mjs` and `#build/untheme/config.mjs`.
  */
 export const MODULES = "untheme";

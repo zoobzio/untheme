@@ -14,39 +14,29 @@ import { property } from "./property";
 import { emit, serialize } from "./serialize";
 
 /**
- * Creates a CSS {@link Renderer} over a {@link Source} — typically the core
- * service itself: `defineRenderer(untheme)`.
+ * Creates a CSS {@link Renderer} from a {@link Source}. Pass the core service,
+ * as in `defineRenderer(untheme)`.
  *
- * The source carries everything the renderer reads: the active flat bindings,
- * and the active theme — whose slots declare each token's type and whose
- * modifier contexts back the static sheet. Every read happens lazily at
- * render time, so a renderer inside a reactive scope re-renders when the
- * state it read changes, the same way the core service tracks through its
- * container. Input is trusted: the core service validates everything it
- * holds, so bindings arrive matching their declared types and serialization
- * re-proves nothing.
+ * The renderer reads the active flat bindings and the active theme from the
+ * source. The theme slots declare the type of each token. The theme modifier
+ * contexts give the static sheet. The renderer reads at render time. A renderer
+ * in a reactive scope renders again when the state that it read changes. The
+ * renderer assumes that each binding matches the declared type of its token.
  *
- * References always render as `var()` indirections — whole-value or nested in
- * a composite slot — so a rebind of the target cascades through the
- * custom-property graph instead of being baked into each dependent.
+ * A reference renders as a `var()` to the custom property of the target token.
+ * This applies to a whole-value reference and to a reference in a composite
+ * slot.
  *
- * @param source - The service (or matching container) rendering reads from.
- * @returns A {@link Renderer} bound to the source.
+ * @param source - The service, or a container with the same members.
+ * @returns A {@link Renderer} for the source.
  */
 export const defineRenderer = <T extends Template>(
   source: Source<T>,
 ): Renderer<T> => {
   /**
-   * The declarations for a set of bindings: every emission of every bound
-   * token, each keyed by the token's custom property name plus the emission's
-   * suffix. Loosely keyed, since a generic template's tokens, overrides, and
-   * bindings all erase to string keys; every caller hands it contract-keyed
-   * records. A binding that is itself a token name — the bare form a static set
-   * may carry — normalizes to that token's `{reference}`, so it serializes as a
-   * `var()` alias through the same path as an authored reference. The cast
-   * asserts the fold produced exactly the variable keys; safe because each
-   * token's `""`-suffixed emission lands its own variable name and only
-   * typography's sibling suffix adds another.
+   * Makes the declarations for a set of bindings. The function emits each token
+   * under its custom property name plus the suffix of each emission. A binding
+   * that is a token name becomes the `{reference}` of that token.
    */
   const declarations = (
     bindings: Partial<Record<string, Inputs[Type]>>,
@@ -70,7 +60,7 @@ export const defineRenderer = <T extends Template>(
   };
 
   /**
-   * A selector block over a set of declarations, one per line.
+   * Makes a selector block with one declaration on each line.
    */
   const block = (selector: string, decls: Record<string, string>): string => {
     const lines = entries(decls).map(([name, text]) => ` ${name}: ${text};`);
@@ -78,8 +68,8 @@ export const defineRenderer = <T extends Template>(
   };
 
   /**
-   * The attribute selector for a modifier context, both names escaped — the
-   * schema constrains neither.
+   * Makes the attribute selector for a modifier context. The function escapes
+   * both names.
    */
   const attribute = (modifier: string, context: string): string => {
     const name = modifier.replace(/[^a-zA-Z0-9_-]/g, (found) => `\\${found}`);
@@ -87,24 +77,18 @@ export const defineRenderer = <T extends Template>(
     return `[data-${name}="${value}"]`;
   };
 
-  /**
-   * The custom property name for a token.
-   */
   const prop = <K extends Token<T>>(token: K): Variable<K> => {
     return property(token);
   };
 
-  /**
-   * The var() accessor for a token's custom property.
-   */
   const indirect = <K extends Token<T>>(token: K): `var(${Variable<K>})` => {
     return `var(${property(token)})`;
   };
 
   /**
-   * One token's active binding as CSS text: its serialized value, or its
-   * `var()` indirection when the binding is a reference. A token outside the
-   * contract has no binding and resolves to empty text.
+   * Returns the active binding of a token as CSS text. The text is the
+   * serialized value, or a `var()` reference when the binding is a reference. A
+   * token outside the contract returns empty text.
    */
   const value = (token: Token<T>): string => {
     const slot = source.config.theme.tokens[token];
@@ -115,19 +99,17 @@ export const defineRenderer = <T extends Template>(
   };
 
   /**
-   * Every active declaration as data: the flat bindings folded into a record
-   * of custom property name to CSS text, directly spreadable into a style
-   * object. Given a static set of bindings, folds that snapshot instead of the
-   * source's live bindings.
+   * Returns each active declaration as a record of custom property name to CSS
+   * text. The record can spread into a style object. With a static set of
+   * bindings, the function uses that set.
    */
   const variables = (bindings?: Bindings<T>): Variables<Token<T>> => {
     return declarations(bindings ?? source.tokens());
   };
 
   /**
-   * A single `:root` block over the active declarations, or over a static set
-   * of bindings when one is passed. `""` when the set — live or given — holds
-   * no declarations.
+   * Returns a `:root` block for the active declarations, or for a static set of
+   * bindings. Returns `""` when there are no declarations.
    */
   const root = (bindings?: Bindings<T>): string => {
     const decls = variables(bindings);
@@ -138,13 +120,11 @@ export const defineRenderer = <T extends Template>(
   };
 
   /**
-   * The full static cascade: the base bindings under `:root`, then each
-   * modifier context's overrides under a `[data-<modifier>="<context>"]`
-   * block, in composition order. Selecting a context is then a data-attribute
-   * flip on the document root — the blocks share the root's specificity, so
-   * later blocks win, mirroring the service's composition order. A context
-   * without overrides emits no block: the base bindings already are the
-   * default context.
+   * Returns the base bindings under `:root`, then the overrides of each
+   * modifier context under a `[data-<modifier>="<context>"]` block. The blocks
+   * follow the composition order. A context with no overrides has no block. A
+   * data attribute on the document root selects a context. A later block
+   * overrides an earlier block.
    */
   const sheet = (): string => {
     const theme = source.config.theme;

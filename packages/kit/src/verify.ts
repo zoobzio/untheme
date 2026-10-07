@@ -9,13 +9,12 @@ import { axes } from "./contexts";
 import { literal } from "./convert";
 
 /**
- * Proves the translation faithful: Terrazzo's own resolution and untheme's
- * composition of the generated theme must agree on every token's final value,
- * at every reachable selection. A mismatch is a bug in this package, never in
- * the user's document, and aborts the build. When the resolver deems its
- * permutation space too large to enumerate, the proof falls back to the
- * defaults plus every single-context deviation — the same applications the
- * skeleton was read from.
+ * Checks that Terrazzo and untheme agree on the final value of every token. The
+ * check compares the resolution of Terrazzo with the untheme composition of the
+ * generated theme, at every reachable selection. A mismatch is a bug in the kit
+ * and aborts the build. When the resolver cannot enumerate its permutations, the
+ * check runs the defaults plus every single-context deviation. The skeleton was
+ * read from the same applications.
  */
 export const verify = (
   resolver: Resolver | undefined,
@@ -30,9 +29,8 @@ export const verify = (
   });
 
   /*
-   * Every selection to prove, most specific enumeration first: the resolver's
-   * own permutation list, else defaults plus single-context deviations, else
-   * (no resolver) just the base.
+   * The selections to check. The first is the input. Then come the permutations
+   * that the resolver lists. Otherwise, each single-context deviation follows.
    */
   const selections: Record<string, string>[] = [{ ...input }];
   if (resolver?.listPermutations) {
@@ -54,9 +52,9 @@ export const verify = (
     }
 
     /*
-     * Terrazzo's selection may carry modifiers the theme doesn't (the
-     * synthetic legacy-mode bridge); untheme's input holds exactly the
-     * theme's own axes, defaults filling any gap.
+     * The Terrazzo selection can hold modifiers that the theme has no axis for,
+     * such as the synthetic `tzMode` modifier. The untheme input holds the axes
+     * of the theme. The default fills a missing value.
      */
     const trimmed: Record<string, string> = {};
     for (const [axis, fallback] of entries(input)) {

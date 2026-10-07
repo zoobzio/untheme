@@ -14,13 +14,12 @@ export type Mod = {
   contrast: { normal: object; high: object };
 };
 
-/* A dimension used often enough to name once. */
 export const zero = { value: 0, unit: "px" } as const;
 
 /**
- * A complete base theme with structured `$value`s that exercise deep copying:
- * a color's components array, a layered shadow list, a dimension, plus alias
- * references. Two modifier axes carry bare-binding overrides.
+ * A complete base theme with structured `$value`s. It has a color with a
+ * components array, a shadow list, a dimension, and alias references. Two
+ * modifiers have bare bindings.
  */
 export const theme: Contract<Tok, Mod> = {
   id: "demo",

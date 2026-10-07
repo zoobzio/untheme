@@ -12,37 +12,37 @@ import type {
 } from "./constant";
 
 /**
- * A DTCG token type. A token declares one of these, and the type fixes the
- * shape its `$value` may take.
+ * A DTCG token type. A token declares one type. The type sets the shape of the
+ * `$value` of the token.
  */
 export type Type = (typeof TYPES)[number];
 
 /**
- * Reference availability per type. A `Refs` map assigns each type the string
- * form its slots accept for a reference. `Open` (authoring) admits any braced
- * name, its membership checked at runtime; `Literal` (dereferenced) admits none,
- * so a fully resolved value carries no references.
+ * The reference form for each type. A `Refs` map gives each type the string
+ * form that its slots accept as a reference. `Open` accepts any braced name.
+ * The runtime schema checks the name. `Literal` accepts no reference.
  */
 export type Refs = { [Y in Type]: string };
 
 /**
- * Authoring references: any braced string, one per type.
+ * The references in authored themes. Each type accepts any braced string.
  */
 export type Open = { [Y in Type]: `{${string}}` };
 
 /**
- * Dereferenced values: no references admitted at any type.
+ * The references in resolved values. No type accepts a reference.
  */
 export type Literal = { [Y in Type]: never };
 
 /**
- * A CSS Color Module color space a {@link Color} may name.
+ * A CSS Color Module color space that a {@link Color} can name.
  */
 export type ColorSpace = (typeof COLOR_SPACES)[number];
 
 /**
- * A structured color: a color space, its ordered components (each a number or
- * the `"none"` sentinel), an optional alpha, and an optional hex fallback.
+ * A structured color. A color has a color space and an ordered array of
+ * components. Each component is a number or `"none"`. A color can have an alpha
+ * and a hex value.
  */
 export type Color = {
   colorSpace: ColorSpace;
@@ -52,12 +52,12 @@ export type Color = {
 };
 
 /**
- * A unit a {@link Dimension} value may carry.
+ * A unit that a {@link Dimension} value can use.
  */
 export type DimensionUnit = (typeof DIMENSION_UNITS)[number];
 
 /**
- * A length with an absolute or root-relative unit.
+ * A length. The unit is absolute or relative to the root.
  */
 export type Dimension = {
   value: number;
@@ -65,7 +65,7 @@ export type Dimension = {
 };
 
 /**
- * A unit a {@link Duration} value may carry.
+ * A unit that a {@link Duration} value can use.
  */
 export type DurationUnit = (typeof DURATION_UNITS)[number];
 
@@ -75,17 +75,17 @@ export type DurationUnit = (typeof DURATION_UNITS)[number];
 export type Duration = { value: number; unit: DurationUnit };
 
 /**
- * A single family name or an ordered fallback stack.
+ * A family name or an ordered array of family names.
  */
 export type FontFamily = string | string[];
 
 /**
- * A named weight a {@link FontWeight} may use in place of a number.
+ * A named weight that a {@link FontWeight} can use in place of a number.
  */
 export type FontWeightKeyword = (typeof FONT_WEIGHTS)[number];
 
 /**
- * A numeric weight or one of the named weights.
+ * A number or a named weight.
  */
 export type FontWeight = number | FontWeightKeyword;
 
@@ -95,18 +95,19 @@ export type FontWeight = number | FontWeightKeyword;
 export type CubicBezier = [number, number, number, number];
 
 /**
- * A keyword form a {@link StrokeStyle} may take in place of the dash object.
+ * A keyword that a {@link StrokeStyle} can use in place of the dash object.
  */
 export type StrokeStyleKeyword = (typeof STROKE_STYLES)[number];
 
 /**
- * A line cap a {@link StrokeStyle} dash object may declare.
+ * A line cap that a {@link StrokeStyle} dash object can declare.
  */
 export type LineCap = (typeof LINE_CAPS)[number];
 
 /**
- * A stroke style: a keyword, or a dash object whose dash lengths may be
- * dimensions or references and whose caps are drawn with one of the line caps.
+ * A stroke style. A stroke style is a keyword or a dash object. The dash
+ * object has an array of dash lengths and a line cap. Each dash length is a
+ * dimension or a reference.
  */
 export type StrokeStyle<R extends Refs> =
   | StrokeStyleKeyword
@@ -116,7 +117,8 @@ export type StrokeStyle<R extends Refs> =
     };
 
 /**
- * A border: a color, a width, and a stroke style, each a value or reference.
+ * A border. A border has a color, a width, and a stroke style. Each is a value
+ * or a reference.
  */
 export type Border<R extends Refs> = {
   color: Color | R["color"];
@@ -125,7 +127,7 @@ export type Border<R extends Refs> = {
 };
 
 /**
- * A transition: a duration, a delay, and a timing function.
+ * A transition. A transition has a duration, a delay, and a timing function.
  */
 export type Transition<R extends Refs> = {
   duration: Duration | R["duration"];
@@ -134,7 +136,7 @@ export type Transition<R extends Refs> = {
 };
 
 /**
- * A single drop shadow: a color and four dimensions.
+ * A drop shadow. A drop shadow has a color and four dimensions.
  */
 export type Shadow<R extends Refs> = {
   color: Color | R["color"];
@@ -145,7 +147,7 @@ export type Shadow<R extends Refs> = {
 };
 
 /**
- * A gradient stop: a color and a position in the unit interval.
+ * A gradient stop. A gradient stop has a color and a position from 0 to 1.
  */
 export type GradientStop<R extends Refs> = {
   color: Color | R["color"];
@@ -153,7 +155,8 @@ export type GradientStop<R extends Refs> = {
 };
 
 /**
- * A typography set: family, size, weight, letter spacing, and line height.
+ * A typography set. A typography set has a family, a size, a weight, a letter
+ * spacing, and a line height.
  */
 export type Typography<R extends Refs> = {
   fontFamily: FontFamily | R["fontFamily"];
@@ -164,9 +167,9 @@ export type Typography<R extends Refs> = {
 };
 
 /**
- * The value shape for every type, parameterized by the reference availability.
- * Composite types thread `R` down to their sub-values so a slot admits a value
- * or a reference in the same position.
+ * The value shape for each type. The parameter `R` sets the reference form.
+ * Each composite type passes `R` to its sub-values. A slot accepts a value or a
+ * reference.
  */
 export type Values<R extends Refs> = {
   color: Color;
@@ -185,16 +188,15 @@ export type Values<R extends Refs> = {
 };
 
 /**
- * Every value shape collapsed to a single union. `fontFamily`'s bare `string`
- * arm is the reason {@link Bindable} strips `string` before adding its
- * reference form — an unstripped `string` would absorb it.
+ * The union of all value shapes. The `fontFamily` shape has a bare `string`
+ * arm. {@link Bindable} removes the `string` arm before it adds the reference
+ * form.
  */
 type AllValues = Values<Open>[Type];
 
 /**
- * A value union with its bare `string` arm removed: literal keyword arms
- * survive as suggestions, only the absorbing wide `string` goes. `fontFamily`
- * is the one type carrying a bare string arm.
+ * The literal keyword arms of a value union. The type removes the bare
+ * `string` arm. Only the `fontFamily` type has a bare `string` arm.
  */
 type WithoutBareString<V> = V extends string
   ? string extends V
@@ -203,10 +205,10 @@ type WithoutBareString<V> = V extends string
   : V;
 
 /**
- * The binding union over a value set: the set's own shapes with the bare
- * `string` arm stripped, a `{reference}` string, and — only where the set
- * itself admits bare strings (`fontFamily`) — the absorption-exempt escape
- * that lets plain family names through.
+ * The binding union for a value set. The union has the literal shapes of
+ * the set and a `{reference}` string. When the set has a bare `string` arm
+ * (`fontFamily`), the union also has `string & {}`, which accepts plain
+ * family names.
  */
 type Bindable<V> =
   | WithoutBareString<V>
@@ -214,26 +216,22 @@ type Bindable<V> =
   | (string extends V ? string & {} : never);
 
 /**
- * A token binding — the value type shared by every slot: any structured
- * value, a `{reference}` string, or — for `fontFamily`'s sake, whose values
- * are bare family names — any other string. Build time knows only that a
- * reference is a braced string; whether it names a real token of the right
- * type is a runtime-schema check. Deliberately token-independent: a
- * per-contract reference union at every value position was measured at ~6x
- * the whole contract's check time at preset scale, so the token union appears
- * only at override key positions, where it is bounded and cheap.
+ * A token binding. Every slot has this value type. A binding is a structured
+ * value, a `{reference}` string, or any other string for `fontFamily`. The
+ * type treats a reference as a braced string. The runtime schema checks that
+ * the reference names a token of the right type. The type is the same for all
+ * templates. The token union appears only at override key positions.
  */
 export type Binding = Bindable<AllValues>;
 
 /**
- * One authored token slot: a discriminated union with an arm per token type,
- * the declared `$type` narrowing `$value` to that type's own shape or a
- * `{reference}` string. The reference arm is the anonymous `` `{${string}}` ``
- * — build time knows a token is being referenced, not whether it exists;
- * membership and type-matching are runtime-schema checks. Where the type
- * itself admits bare strings (`fontFamily`), the absorption-exempt
- * `string & {}` escape stands in for the stripped arm. A structured value of
- * the wrong family remains a static error at the authoring site.
+ * An authored token slot. The type is a discriminated union with one arm for
+ * each token type. The declared `$type` narrows `$value` to the shape of that
+ * type or to a `{reference}` string. The reference arm is `` `{${string}}` ``.
+ * The runtime schema checks that the token exists and has the right type. The
+ * `fontFamily` arm uses `string & {}` to accept plain family names. A
+ * structured value of the wrong type is a static error where the author
+ * writes it.
  */
 export type Authored = {
   [Y in Type]: {
@@ -246,14 +244,12 @@ export type Authored = {
 }[Type];
 
 /**
- * A contract parameterized by its token union (`Tok`) and modifier structure
- * (`Mod`), for call sites that infer or widen a contract from a literal. `Tok`
- * is inferred from the `tokens` keys alone and surfaces at override key
- * positions — the one place the token union is worth its checking cost.
- * Token slots are {@link Authored}, so a slot's declared `$type` narrows its
- * `$value` statically; every arm remains assignable to the machine-side
- * {@link Definition}, so a contract flows into any `Theme` position
- * unchanged.
+ * A contract with the token union `Tok` and the modifier structure `Mod`. The
+ * compiler infers a contract from a literal. The compiler infers `Tok` from the
+ * keys of `tokens`. `Tok` appears at override key positions. Token slots are
+ * {@link Authored}, so the declared `$type` of a slot narrows its `$value`.
+ * Every arm is assignable to {@link Definition}. A contract is valid in any
+ * `Theme` position.
  */
 export type Contract<
   Tok extends string,
@@ -273,12 +269,11 @@ export type Contract<
 };
 
 /**
- * One token definition: a declared type, a bound value, and the inert
- * metadata members. Every definition shares one {@link Binding} regardless of
- * its declared type — a machine-built definition (a merged theme, a rebound
- * extension) carries a binding whose correlation with `$type` only the
- * runtime schema can rule on. The authoring counterpart, where the
- * correlation is statically knowable, is {@link Authored}.
+ * A token definition. A definition has a declared type, a bound value, and
+ * metadata members. Every definition uses {@link Binding} for the value, for
+ * all declared types. The runtime schema checks that the value matches
+ * `$type`. {@link Authored} is the type for authored definitions. The compiler
+ * checks `$value` against `$type` in an authored definition.
  */
 export type Definition = {
   $type: Type;
@@ -289,11 +284,11 @@ export type Definition = {
 };
 
 /**
- * A theme template: the contract that types and runtime validate against.
- * `tokens` is the complete base map, each entry a full definition. `modifiers`
- * map an axis name to its contexts, each carrying token overrides that rebind a
- * token's `$value` only — a context can never change a token's `$type`. `order`
- * fixes the precedence in which active contexts compose over the base.
+ * A theme template. The types and the runtime schema validate against the
+ * template. `tokens` is the complete base map. Each entry is a full
+ * definition. `modifiers` maps the name of an axis to its contexts. Each
+ * context has token overrides. An override sets the `$value` of a token. `order`
+ * sets the precedence of the active contexts over the base.
  */
 export type Template = {
   id: string;
@@ -307,17 +302,17 @@ export type Template = {
 };
 
 /**
- * Any token name defined by a template.
+ * The name of a token in a template.
  */
 export type Token<T extends Template> = keyof T["tokens"] & string;
 
 /**
- * Any modifier (axis) name defined by a template.
+ * The name of a modifier (axis) in a template.
  */
 export type Modifier<T extends Template> = keyof T["modifiers"] & string;
 
 /**
- * Any context name defined by a template's modifier `M`.
+ * The name of a context in the modifier `M` of a template.
  */
 export type Context<
   T extends Template,
@@ -325,38 +320,38 @@ export type Context<
 > = keyof T["modifiers"][M] & string;
 
 /**
- * A reference to another token in the contract, in curly-brace syntax
- * (`{token.name}`) — the form the spec uses for aliases and that survives into
- * CSS as `var(--token-name)`.
+ * A reference to a token in the contract. A reference uses curly braces, as in
+ * `{token.name}`. The specification uses this form for aliases. In CSS, a
+ * reference becomes `var(--token-name)`.
  */
 export type Reference<T extends Template> = `{${Token<T>}}`;
 
 /**
- * A partial set of token overrides — what a context, layer, or patch carries.
- * Each override rebinds a token's value; it never restates the token's type.
+ * A partial set of token overrides. A context, a layer, and a patch hold
+ * overrides. Each override sets the value of a token.
  */
 export type Overrides<T extends Template> = {
   [K in Token<T>]?: Binding;
 };
 
 /**
- * Every context of every modifier, each carrying its token overrides.
+ * The contexts of each modifier. Each context holds token overrides.
  */
 export type Modifiers<T extends Template> = {
   [M in Modifier<T>]: { [C in Context<T, M>]: Overrides<T> };
 };
 
 /**
- * The active context selected for each modifier.
+ * The active context for each modifier.
  */
 export type Input<T extends Template> = {
   [M in Modifier<T>]: Context<T, M>;
 };
 
 /**
- * A complete instantiation of a template: every token carries a full slot,
- * every modifier's contexts each rebind a subset of tokens, and `order` lists
- * the modifiers in composition precedence.
+ * A complete theme for a template. Every token has a full definition. Each
+ * context of each modifier overrides a subset of the tokens. `order` lists the
+ * modifiers by precedence.
  */
 export type Theme<T extends Template> = {
   id: string;
@@ -367,8 +362,9 @@ export type Theme<T extends Template> = {
 };
 
 /**
- * A partial overlay that carries identity: applying it changes which theme is
- * active. Anything present must belong to the contract; everything is optional.
+ * A partial overlay with an identity. When a caller applies a layer, the active
+ * theme changes. All members other than `id` and `name` are optional. Each
+ * member must belong to the contract.
  */
 export type Layer<T extends Template> = {
   id: string;
@@ -379,8 +375,8 @@ export type Layer<T extends Template> = {
 };
 
 /**
- * A partial overlay without identity: applying it changes values, not which
- * theme is active.
+ * A partial overlay with no identity. When a caller applies a patch, the values
+ * change and the active theme stays the same.
  */
 export type Patch<T extends Template> = {
   tokens?: Overrides<T>;
@@ -388,9 +384,9 @@ export type Patch<T extends Template> = {
 };
 
 /**
- * The closed set of failure kinds a rule can emit. Predicate atoms own one code
- * each; combinators emit the structural kinds (`unknown_key`, `missing_key`)
- * and the alternation kind (`no_match`).
+ * The failure codes of a rule. Each predicate atom returns one code. The
+ * combinators return the structural codes `unknown_key` and `missing_key` and
+ * the alternation code `no_match`.
  */
 export type Code =
   | "not_string"
@@ -415,9 +411,10 @@ export type Code =
   | "cycle";
 
 /**
- * A validation failure. `code` is a stable discriminant callers branch on,
- * `message` is human-readable, `path` is filled in by combinators as they
- * descend, and `expected`/`received` carry the contract and offending values.
+ * A validation failure. `code` identifies the failure. `message` is readable
+ * text. `path` holds the keys from the root to the failure, which the
+ * combinators add. `expected` holds the value that the contract requires.
+ * `received` holds the value that failed.
  */
 export type Issue = {
   code: Code;
@@ -428,17 +425,16 @@ export type Issue = {
 };
 
 /**
- * A type-agnostic validation rule: returns an {@link Issue} describing what is
- * wrong, or `undefined` when the value satisfies the rule.
+ * A validation rule. The rule returns an {@link Issue} for an invalid value.
+ * The rule returns `undefined` for a valid value.
  */
 export type Rule = (v: unknown) => Issue | undefined;
 
 /**
- * The validation vocabulary for a template: every kind mapped to the type a
- * value of that kind narrows to. Scalar kinds (`modifier`, `value`, `token`,
- * `reference`, `binding`, `definition`) sit alongside the composite kinds
- * (`overrides`, `tokens`, `modifiers`, `order`, `input`, `theme`, `layer`,
- * `patch`).
+ * The kinds of a template. Each kind maps to the type that a value of the kind
+ * narrows to. The scalar kinds are `modifier`, `value`, `token`, `reference`,
+ * `binding`, and `definition`. The composite kinds are `overrides`, `tokens`,
+ * `modifiers`, `order`, `input`, `theme`, `layer`, and `patch`.
  */
 export type Domain<T extends Template> = {
   modifier: Modifier<T>;
@@ -458,30 +454,30 @@ export type Domain<T extends Template> = {
 };
 
 /**
- * The name of a kind — a key of {@link Domain}.
+ * The name of a kind. A kind is a key of {@link Domain}.
  */
 export type Kind = keyof Domain<Template>;
 
 /**
- * A reserved member a token definition may carry.
+ * A reserved member of a token definition.
  */
 export type DefinitionKey = (typeof DEFINITION_KEYS)[number];
 
 /**
- * A member every token definition must carry.
+ * A member that every token definition must have.
  */
 export type RequiredDefinitionKey = (typeof REQUIRED_DEFINITION_KEYS)[number];
 
 /**
- * A member a complete theme object must carry.
+ * A member that a complete theme object must have.
  */
 export type ThemeKey = (typeof THEME_KEYS)[number];
 
 /**
- * Every set the schema consults, in one place. The contract members are read
- * off a template — its token names, its modifier axes, each axis's contexts,
- * and each token's declared type. The specification members are fixed by the
- * format itself and identical for every contract.
+ * The sets that the schema reads. The contract members come from the template.
+ * They are the token names, the modifier axes, the contexts of each axis, and
+ * the declared type of each token. The specification members are the same for
+ * all templates.
  */
 export type Enum<T extends Template> = {
   tokens: Set<Token<T>>;
@@ -501,59 +497,56 @@ export type Enum<T extends Template> = {
 };
 
 /**
- * The literal and value rules for each token type. `literal` guards a value's
- * structured form in place — a color object, a dimension, a shadow. `value`
- * accepts a reference to a token of that type or the literal, so a slot admits
- * an alias wherever it admits a value.
+ * The literal rule and the value rule for each token type. `literal` checks
+ * the structured form, such as a color object, a dimension, or a shadow.
+ * `value` accepts a reference to a token of that type or the literal.
  */
 export type Shape = {
   [Y in Type]: {
-    /* The structured form itself: a color object, a dimension, a shadow. */
+    /* The structured form, such as a color object, a dimension, or a shadow. */
     literal: Rule;
 
-    /* A reference to a token of this type, or the literal value in place. */
+    /* A reference to a token of this type, or the literal value. */
     value: Rule;
   };
 };
 
 /**
- * A list of {@link Rule}s per kind, composed from the atoms in `util`. A kind's
- * rules are a conjunction — a value satisfies the kind when every rule returns
- * no {@link Issue}.
+ * A list of {@link Rule}s for each kind. The lists use the atoms in `util`. A
+ * value is valid for a kind when every rule of the kind returns no
+ * {@link Issue}.
  */
 export type Rules = { [K in Kind]: Rule[] };
 
 /**
- * The validation core derived from a template: the sets read off the contract,
- * the value rules for each token type, and the rule lists for each kind. The
- * three build on each other in that order, and the check / assert / parse /
- * inspect families consume the template only through this bundle.
+ * The validation core of a template. The core has the sets from the contract,
+ * the rules for each token type, and the rule lists for each kind. Each part
+ * uses the part before it. The check, assert, parse, and inspect bundles read
+ * the template through the core.
  */
 export type Meta<T extends Template> = {
-  /* Every set the schema consults: contract and specification members. */
+  /* The sets of the contract members and the specification members. */
   enums: Enum<T>;
 
-  /* The literal and value rule for each token type. */
+  /* The literal rule and the value rule for each token type. */
   shape: Shape;
 
-  /* The rules per kind that the validator families run. */
+  /* The rules for each kind. */
   rules: Rules;
 };
 
 /**
- * Boolean type predicates per kind: `true` narrows the value to its kind type,
- * `false` says nothing more. Use when a yes/no answer is enough; reach for
- * {@link Assert} or {@link Parse} when you need the reasons.
+ * A boolean type predicate for each kind. A `true` result narrows the value to
+ * the type of the kind. Use {@link Assert} or {@link Parse} to get the issues.
  */
 export type Check<T extends Template> = {
   [K in Kind]: (v: unknown) => v is Domain<T>[K];
 };
 
 /**
- * Assertion functions per kind: return when the value satisfies the kind, or
- * throw a {@link SchemaError} carrying every {@link Issue} found. Spelled out
- * per kind rather than mapped, since `asserts` predicates cannot be produced by
- * a mapped type.
+ * An assertion function for each kind. The function returns when the value is
+ * valid for the kind. The function throws a {@link SchemaError} with every
+ * {@link Issue} when the value is not valid.
  */
 export type Assert<T extends Template> = {
   modifier: (v: unknown) => asserts v is Modifier<T>;
@@ -573,18 +566,18 @@ export type Assert<T extends Template> = {
 };
 
 /**
- * Parse functions per kind: return the value narrowed to its kind type, or let
- * the {@link SchemaError} from {@link Assert} propagate. The throwing analog of
- * {@link Check}, handy at trust boundaries
- * (`const theme = parse.theme(await res.json())`).
+ * A parse function for each kind. The function returns the value narrowed to
+ * the type of the kind. The {@link SchemaError} from {@link Assert} propagates
+ * to the caller. Use the functions at trust boundaries, as in
+ * `const theme = parse.theme(await res.json())`.
  */
 export type Parse<T extends Template> = {
   [K in Kind]: (v: unknown) => Domain<T>[K];
 };
 
 /**
- * The outcome of an {@link Inspect}: either the value narrowed to its kind
- * type, or the {@link Issue}s explaining why it failed.
+ * The outcome of an {@link Inspect}. A success result holds the value narrowed
+ * to the type of the kind. A failure result holds the {@link Issue}s.
  */
 export type Result<V> =
   | {
@@ -597,20 +590,19 @@ export type Result<V> =
     };
 
 /**
- * Inspect functions per kind: return a {@link Result} — success with the
- * narrowed value, or failure with the issues — rather than throwing. The
- * non-throwing analog of {@link Parse}.
+ * An inspect function for each kind. The function returns a {@link Result}. A
+ * success result holds the narrowed value. A failure result holds the issues.
  */
 export type Inspect<T extends Template> = {
   [K in Kind]: (v: unknown) => Result<Domain<T>[K]>;
 };
 
 /**
- * The bundle {@link defineSchema} returns for a template: the source
- * template, the {@link Meta} derived from it (the contract and specification
- * sets, the per-type {@link Shape} rules, and the {@link Rules} per kind),
- * and the {@link Check} / {@link Assert} / {@link Parse} / {@link Inspect}
- * families built from that core.
+ * The bundle that {@link defineSchema} returns for a template. The bundle has
+ * the base template and the {@link Meta} of the template. `meta` holds the
+ * sets, the {@link Shape} rules for each type, and the {@link Rules} for each
+ * kind. The bundle also has the {@link Check}, {@link Assert}, {@link Parse},
+ * and {@link Inspect} bundles.
  */
 export type Schema<T extends Template> = {
   base: T;

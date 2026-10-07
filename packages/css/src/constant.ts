@@ -1,9 +1,8 @@
 import type { FontWeightKeyword } from "@untheme/schema";
 
 /**
- * The numeric weight each named `fontWeight` keyword stands for. CSS
- * `font-weight` accepts no keyword beyond `normal` and `bold`, so named
- * weights are emitted through this table.
+ * The numeric weight of each named `fontWeight` keyword. The serializer emits
+ * named weights through this table.
  */
 export const FONT_WEIGHT_NUMBERS = {
   thin: 100,
@@ -18,9 +17,9 @@ export const FONT_WEIGHT_NUMBERS = {
 } as const satisfies Record<FontWeightKeyword, number>;
 
 /**
- * Names that are reserved words in a `font-family` slot: the CSS-wide
- * keywords plus `default`. A family so named matches the bare-ident form but
- * would change the declaration's meaning if emitted bare, so it is quoted.
+ * The names that are reserved words in a `font-family` slot. The set holds the
+ * CSS-wide keywords and `default`. The serializer quotes a family with one of
+ * these names.
  */
 export const RESERVED_FAMILY_NAMES = new Set([
   "inherit",

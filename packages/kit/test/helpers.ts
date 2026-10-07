@@ -9,10 +9,9 @@ import { readFile } from "node:fs/promises";
 export const FIXTURES = new URL("./fixtures/", import.meta.url);
 
 /**
- * A logger that reports only errors. The fixtures are spec-compliant, so
- * tests run with Terrazzo's default logger and any warning is a real signal;
- * reach for this only where a warning is the expected behavior under test
- * (the legacy-form normalization case) or where a hook demands a logger.
+ * A logger that reports only errors. Use it where a warning is expected, such as
+ * the normalization of string colors in the old form, or where a hook requires a
+ * logger.
  */
 export const quiet = () => new Logger({ level: "error" });
 
@@ -22,8 +21,8 @@ export const quiet = () => new Logger({ level: "error" });
 export const config = defineConfig({}, { cwd: FIXTURES });
 
 /**
- * Parses a fixture document the way generate() does: content loaded from
- * disk, references resolved through the parser's own loader.
+ * Parses a fixture document as `generate()` does. The function reads the content
+ * from disk, and the loader of the parser resolves references.
  */
 export const load = async (
   name: string,
@@ -38,9 +37,8 @@ export const load = async (
 };
 
 /**
- * Parses an in-memory document under a virtual filename, for error-path
- * fixtures and deliberate off-spec forms that don't warrant a file. Pass a
- * logger only when the parse is expected to warn.
+ * Parses an in-memory document under a virtual filename. Pass a logger when the
+ * parse is expected to warn.
  */
 export const inline = async (
   name: string,

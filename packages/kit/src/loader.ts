@@ -9,14 +9,14 @@ import { NPM } from "./constant";
 import { request } from "./source";
 
 /**
- * Resolves an `npm:/` URL to the file it names, through Node package
- * resolution from the project root: `npm:/@untheme/aurora/src/tokens/space.json`
- * is `@untheme/aurora/src/tokens/space.json` as the project would import it, so
- * the package must export the file. The URL's fragment (a JSON pointer) is
- * not part of the file.
+ * Resolves an `npm:/` URL to the file that it names. The function uses Node
+ * package resolution from the project root. `npm:/@untheme/aurora/src/tokens/space.json`
+ * resolves as the project would import
+ * `@untheme/aurora/src/tokens/space.json`. The package must export the file. The
+ * URL fragment, a JSON pointer, is separate from the file path.
  *
  * @param src - The `npm:/` URL.
- * @param root - The project root packages resolve from.
+ * @param root - The project root that packages resolve from.
  */
 export const installed = (src: URL, root: string): string => {
   const specifier = decodeURIComponent(src.pathname).replace(/^\/+/, "");
@@ -31,11 +31,11 @@ export const installed = (src: URL, root: string): string => {
 };
 
 /**
- * The loader of one build: the function every document is read through, and
- * the local files it has read so far.
+ * The loader of one build. It has the function that reads every document and the
+ * local files that the function has read.
  */
 export interface Loader {
-  /** Reads one document. Handed to the parser as its `req`. */
+  /** Reads one document. The kit hands it to the parser as `req`. */
   load: Req;
 
   /** The absolute path of every local file read, in read order. */
@@ -43,12 +43,12 @@ export interface Loader {
 }
 
 /**
- * Builds the loader every document of a build is read through. `npm:` URLs
- * resolve from the project's installed packages and read off disk; every
- * other URL goes to the caller's `req`, or to {@link request}. Each local
- * file read is recorded once in the loader's own `documents`.
+ * Makes the loader that reads every document of a build. `npm:` URLs resolve
+ * from the installed packages of the project and are read from disk. All other
+ * URLs go to the `req` of the caller, or to {@link request}. The loader records
+ * each local file once in `documents`.
  *
- * @param root - The project root `npm:` references resolve from.
+ * @param root - The project root that `npm:` references resolve from.
  * @param req - The caller's loader for `file:` and remote documents.
  */
 export const loader = (root: string, req?: Req): Loader => {

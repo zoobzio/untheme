@@ -2,14 +2,14 @@ import type { Contract } from "#build/untheme/config.mjs";
 import type { Layer } from "untheme";
 
 /**
- * Shared test fixtures: the valid base theme and initial selection from the
- * build stub, whose token shape matches the stub's `#build/untheme` unions.
+ * Shared test fixtures. These are the base theme and the initial selection
+ * of the build stub. The token shape matches the `#build/untheme` unions of
+ * the stub.
  */
 export { theme, input } from "../src/stubs/build/untheme/config.mjs";
 
 /**
- * A switchable catalog: layers inside the stub's contract, keyed by id the
- * way a theme provider serves them.
+ * A catalog of layers for the contract of the stub, keyed by id.
  */
 export const themes: Record<string, Layer<Contract>> = {
   bravo: {

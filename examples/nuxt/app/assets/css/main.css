@@ -1,10 +1,10 @@
 /*
  * The Borealis showcase stylesheet. Every color, size, radius, shadow, and
- * motion value references a token's custom property — the page restyles
- * itself when the selection changes, without a single rule changing.
+ * motion value references the custom property of a token. The page restyles
+ * itself when the selection changes.
  *
- * base + layout carry the shared foundation; every other import is the CSS
- * for one component, mirroring app/components/*.vue.
+ * base.css and layout.css hold the shared foundation. Each other import is
+ * the CSS for one component in app/components.
  */
 @import "./base.css";
 @import "./layout.css";

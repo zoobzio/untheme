@@ -7,19 +7,19 @@ import { clone } from "./clone";
 import { traverse } from "./traverse";
 
 /**
- * Merges overlays over a complete theme into a fresh theme, left to right:
- * later overlays win where they bind the same token, token by token and context
- * by context. Identity and order transfer from the last overlay that carries
- * them. No input is mutated; with no overlays the result is a plain copy.
+ * Merges overlays into a complete theme and returns a new theme. The function
+ * applies the overlays from left to right. A later overlay replaces an earlier
+ * binding of the same token or the same context. The identity and the order
+ * come from the last overlay that has them. With no overlays, the result is a
+ * copy of the theme.
  *
- * A token override rebinds a slot's `$value` and nothing else — the slot's
- * `$type`, description, and other metadata are preserved, and the incoming
- * binding replaces the old `$value` whole rather than merging into it. An
- * overlay key with no matching base slot is skipped: there is no `$type` to
- * inherit, so no definition can be fabricated for it.
+ * A token override replaces the `$value` of the slot. The slot keeps its
+ * `$type`, its description, and its other metadata. The new binding replaces
+ * the old `$value` as a whole. The function skips an overlay key that has no
+ * base slot.
  *
- * A `Layer` overlay adopts its identity (apply semantics); a `Patch` overlay
- * has none, so the prevailing identity is preserved (update semantics).
+ * A `Layer` overlay has an identity and sets the identity of the result. A
+ * `Patch` overlay has no identity, so the identity of the theme stays.
  */
 export const merge = <T extends Template>(
   theme: Theme<T>,

@@ -12,11 +12,11 @@ import config from "../untheme/config.mjs";
 import type { Contract } from "../untheme/config.mjs";
 
 /**
- * The interchange the app owns: each LSP semantic token type (the standard
- * vocabulary the shipped scopes route to) bound to one of the theme's carrier
- * tokens. Many-to-one on purpose — this theme reuses the `type` carrier for
- * `namespace`/`class`/…, the `function` carrier for `method`, and so on,
- * surfacing only the distinctions it wants. Roles left out render at `fg`.
+ * The interchange that the app owns. It binds each LSP semantic token type to
+ * one carrier token of the theme. The shipped scopes route to these types.
+ * Several types share a carrier. The `type` carrier serves `namespace` and
+ * `class`, and the `function` carrier serves `method`. Roles that the map
+ * omits render at `fg`.
  */
 const MAP: SyntaxMap<Contract> = {
   keyword: "syntax-keyword",
@@ -44,8 +44,8 @@ const MAP: SyntaxMap<Contract> = {
 };
 
 /**
- * A TypeScript snippet touching a spread of syntax roles — comment, keyword,
- * string and template, type, function, parameter, number, regex, operator.
+ * A TypeScript snippet with many syntax roles: comment, keyword, string,
+ * template, type, function, parameter, number, regex, and operator.
  */
 const SAMPLE = `// A themed greeter
 import { makeUntheme } from "untheme";
@@ -61,17 +61,17 @@ export function greet(name: string, mode: Mode = "light"): number {
 `;
 
 /*
- * Boot the built theme at its default selection and render over it. The
- * renderer's var() output is what the Shiki theme wraps every scope around.
+ * Boots the built theme at its default selection and renders over it. The
+ * Shiki theme wraps every scope around the var() output of the renderer.
  */
 const untheme = makeUntheme<Contract>(useUnthemeConfig(config));
 
 const renderer = defineRenderer(untheme);
 
 /*
- * The Shiki theme: one static object, every scope a var() into the carrier
- * token its LSP role maps to. `bg` themes the block behind the code and `fg`
- * the unclassified text, so the whole block flips light↔dark too.
+ * The Shiki theme, one static object. Each scope is a var() of the carrier
+ * token for its LSP role. `bg` styles the block behind the code and `fg`
+ * styles the unclassified text. The whole block flips between light and dark.
  */
 const theme = defineShikiTheme(untheme.schema, MAP, {
   name: "aurora-syntax",
@@ -82,10 +82,9 @@ const theme = defineShikiTheme(untheme.schema, MAP, {
 const highlighted = await codeToHtml(SAMPLE, { lang: "ts", theme });
 
 /*
- * The full cascade: aurora's ramps and roles under :root, plus the
- * [data-color="dark"] block that rebinds the syntax tokens. Dropped straight
- * into the page — flipping the attribute re-themes the code with no
- * re-highlight.
+ * The full cascade: the ramps and roles of aurora under :root, and the
+ * [data-color="dark"] block that rebinds the syntax tokens. A change to the
+ * data-color attribute re-themes the code.
  */
 const sheet = renderer.sheet();
 

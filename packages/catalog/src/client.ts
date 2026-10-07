@@ -6,30 +6,27 @@ import { FailedRequestError } from "./error";
 import { defineCatalog } from "./catalog";
 
 /**
- * Creates a {@link Catalog} from transport config — the consuming angle,
- * for an app reaching a catalog served elsewhere: its own server's mount
- * point, or a remote theme service. The config compiles into a
- * {@link Provider} and boots the same machine as the serving angle, so a
- * remote catalog behaves exactly like a local one: same proofs, same miss
- * and failure semantics.
+ * Creates a {@link Catalog} from transport config. Use it for a catalog that a
+ * server provides, such as the mount point of the app server or a remote theme
+ * service. The config compiles into a {@link Provider}, and the function calls
+ * {@link defineCatalog} with it. A remote catalog has the same checks, miss
+ * behavior, and failure behavior as a local catalog.
  *
- * @param schema - The contract the catalog's layers are proven against.
- * @param client - Where to make requests, and what to send with them.
- * @returns A {@link Catalog} resolving over the wire.
+ * @param schema - The contract that the layers must match.
+ * @param client - The base URL, headers, and fetch implementation for requests.
+ * @returns A {@link Catalog} that resolves over the network.
  */
 export const defineClient = <T extends Template>(
   schema: Schema<T>,
   client: Client,
 ): Catalog<T> => {
   /**
-   * Base URL for the target API.
+   * The route URL of the catalog.
    */
   const root = `${client.base.replace(/\/+$/, "")}/${ROUTE}`;
 
   /**
-   * Issues one GET through the configured transport. The implementations
-   * are method-called — an injected fetch on its config, the default on
-   * `globalThis` — so neither runs detached from the `this` it needs.
+   * Sends one GET request through the configured transport.
    */
   const request = async (url: string): Promise<Response> => {
     const init = {
@@ -42,8 +39,8 @@ export const defineClient = <T extends Template>(
   };
 
   /**
-   * Answers a listing from the wire. Any failure status is a failure —
-   * a catalog with no listing route is misconfigured, not empty.
+   * Answers a listing from the network. Any failure status throws {@link
+   * FailedRequestError}.
    */
   const list = async (listing: Listing): Promise<unknown> => {
     const url = `${root}?q=${encodeURIComponent(JSON.stringify(listing))}`;
@@ -56,8 +53,8 @@ export const defineClient = <T extends Template>(
   };
 
   /**
-   * Answers a retrieval from the wire: a 404 is a miss, any other failure
-   * status is a failure.
+   * Answers a retrieval from the network. A 404 is a miss and returns
+   * `undefined`. Any other failure status throws {@link FailedRequestError}.
    */
   const get = async (id: string): Promise<unknown> => {
     const url = `${root}/${encodeURIComponent(id)}`;

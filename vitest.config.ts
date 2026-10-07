@@ -1,10 +1,9 @@
 import { defineConfig } from "vitest/config";
 
 /**
- * Whole-repo entry point: each package carries its own vitest.config.ts, and
- * this config federates them as projects so a root `vitest` run (IDE, CI,
- * aggregated coverage) still covers everything. Day-to-day runs go through
- * `pnpm test`, which fans out to the packages in parallel.
+ * The root vitest config. Each package has its own `vitest.config.ts`. This
+ * config lists them as projects for a root `vitest` run. `pnpm test` runs the
+ * packages in parallel.
  */
 export default defineConfig({
   test: {

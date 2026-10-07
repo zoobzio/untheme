@@ -1,4 +1,3 @@
 #!/usr/bin/env node
-// The `untheme` command. A committed launcher rather than the built file
-// itself, so package managers can link the bin before the kit is built.
+// The `untheme` command. This file loads the built CLI.
 import "../.dist/cli.mjs";

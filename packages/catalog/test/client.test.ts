@@ -12,13 +12,13 @@ import { corrupt, entries, midnight, page, schema } from "./fixture";
 import type { T } from "./fixture";
 
 /**
- * One captured request: the URL asked for and the init it was asked with.
+ * One captured request with the URL and the init.
  */
 type Call = { url: string; init: RequestInit | undefined };
 
 /**
- * A transport double: answers every request with the given body and
- * status, recording each call for assertions on the wire shape.
+ * A transport double. It answers every request with the given body and status.
+ * It records each call.
  */
 const transport = (calls: Call[], body: unknown, status = 200) => {
   const fetch: typeof globalThis.fetch = async (input, init) => {

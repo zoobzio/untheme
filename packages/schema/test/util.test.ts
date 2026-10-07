@@ -33,7 +33,7 @@ import {
   valued,
 } from "../src/util";
 
-/* A rule that always passes, and one that always fails with a marker code. */
+/* A rule that passes and a rule that fails with a marker code. */
 const pass: Rule = () => undefined;
 const fail: Rule = (v) => ({ code: "no_match", message: "nope", received: v });
 

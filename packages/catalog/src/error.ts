@@ -3,10 +3,9 @@ import type { Issue } from "@untheme/schema";
 import { SchemaError } from "@untheme/schema";
 
 /**
- * Raised when a value handed to {@link Catalog.list} is not a {@link Query}.
- * Carries no {@link Issue}s — the query model is structural, not part of a
- * theme contract — so it extends the plain {@link Error} while carrying the
- * offending `value`.
+ * Thrown when the value passed to {@link Catalog.list} is not a {@link Query}.
+ * The error has no {@link Issue}s and extends {@link Error}. The `value`
+ * property holds the rejected value.
  */
 export class MalformedQueryError extends Error {
   readonly value: unknown;
@@ -19,10 +18,9 @@ export class MalformedQueryError extends Error {
 }
 
 /**
- * Raised when a source answers a listing with something that is not a
- * {@link Page} — a broken source, never a state a caller can reach through
- * its own input. Like {@link MalformedQueryError} it extends the plain
- * {@link Error}, carrying the offending `value`.
+ * Thrown when a provider answers a listing with a value that is not a {@link
+ * Page}. The error extends {@link Error}. The `value` property holds the
+ * rejected value.
  */
 export class MalformedPageError extends Error {
   readonly value: unknown;
@@ -35,11 +33,10 @@ export class MalformedPageError extends Error {
 }
 
 /**
- * Raised when a source answers a retrieval with a payload that fails the
- * contract — corruption, deliberately distinct from the miss that resolves
- * `undefined`, so a broken payload can never pass as an absent one. Extends
- * {@link SchemaError} with the contract's {@link Issue}s, and carries the
- * `id` the payload was retrieved under.
+ * Thrown when a provider answers a retrieval with a payload that fails the
+ * contract. A missing payload is a miss and resolves `undefined`. The error
+ * extends {@link SchemaError} with the {@link Issue}s of the contract. The `id`
+ * property holds the id of the payload.
  */
 export class MalformedLayerError extends SchemaError {
   readonly id: string;
@@ -52,10 +49,9 @@ export class MalformedLayerError extends SchemaError {
 }
 
 /**
- * Raised when the wire answers with a failure status. Carries the `url`
- * and `status` of the failed request. A 404 answering a retrieval is a
- * miss, not this error; a 404 answering a listing is this error — a
- * catalog with no listing route is misconfigured, not empty.
+ * Thrown when the network answers with a failure status. The `url` and `status`
+ * properties hold the URL and status of the request. A 404 on a retrieval is a
+ * miss. A 404 on a listing throws this error.
  */
 export class FailedRequestError extends Error {
   readonly url: string;

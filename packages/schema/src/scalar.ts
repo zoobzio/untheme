@@ -45,8 +45,8 @@ export const REQUIRED_DEFINITION_KEY_SET = new Set(REQUIRED_DEFINITION_KEYS);
 export const THEME_KEY_SET = new Set(THEME_KEYS);
 
 /**
- * A single color component: a finite number or the `"none"` sentinel that
- * stands in for a missing channel.
+ * Checks a color component. A component is a finite number or the `"none"`
+ * keyword for a missing channel.
  */
 export const component: Rule = (v) => {
   if (v === NONE) {
@@ -56,8 +56,8 @@ export const component: Rule = (v) => {
 };
 
 /**
- * A structured color: a known color space, its ordered components, an optional
- * alpha in the unit interval, and an optional hex fallback.
+ * Checks a structured color. A color has a known color space and an ordered
+ * array of components. A color can have an alpha from 0 to 1 and a hex value.
  */
 export const literalColor: Rule = all([
   mismatch("color", (v) => object(v) && "colorSpace" in v),
@@ -74,7 +74,8 @@ export const literalColor: Rule = all([
 ]);
 
 /**
- * A length: a numeric value carried by one of the known dimension units.
+ * Checks a dimension. A dimension has a numeric value and a known dimension
+ * unit.
  */
 export const literalDimension: Rule = all([
   mismatch("dimension", (v) => object(v) && "unit" in v),
@@ -89,7 +90,8 @@ export const literalDimension: Rule = all([
 ]);
 
 /**
- * A time span: a numeric value carried by one of the known duration units.
+ * Checks a duration. A duration has a numeric value and a known duration
+ * unit.
  */
 export const literalDuration: Rule = all([
   mismatch("duration", (v) => object(v) && "unit" in v),
@@ -104,8 +106,8 @@ export const literalDuration: Rule = all([
 ]);
 
 /**
- * A font family: a single non-empty name or an ordered fallback stack, each
- * name barred from carrying a CSS breakout sequence.
+ * Checks a font family. A font family is one name or an ordered array of
+ * names. Each name has text and contains no CSS breakout sequence.
  */
 export const literalFontFamily: Rule = (v) => {
   if (typeof v === "string") {
@@ -124,8 +126,8 @@ export const literalFontFamily: Rule = (v) => {
 };
 
 /**
- * A font weight: a number within the allowed range, or one of the named
- * weights in its place.
+ * Checks a font weight. A font weight is a number in the allowed range or a
+ * named weight.
  */
 export const literalFontWeight: Rule = (v) => {
   if (typeof v === "number") {
@@ -141,13 +143,13 @@ export const literalFontWeight: Rule = (v) => {
 };
 
 /**
- * A plain number.
+ * Checks a number.
  */
 export const literalNumber: Rule = numeric("Number");
 
 /**
- * A cubic Bézier easing curve: exactly four finite numbers, the two abscissae
- * (entries 0 and 2) confined to the unit interval.
+ * Checks a cubic Bézier easing curve. The curve is an array of four finite
+ * numbers. The numbers at index 0 and index 2 are from 0 to 1.
  */
 export const literalCubicBezier: Rule = (v) => {
   if (!Array.isArray(v)) {

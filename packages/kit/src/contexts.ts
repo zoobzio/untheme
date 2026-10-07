@@ -7,26 +7,24 @@ import { delta } from "@untheme/utils";
 import { binding, collisions, definition } from "./convert";
 
 /**
- * The collation Terrazzo alphabetizes by: natural, numeric-aware, en-US. One
- * collator for the build — the parser builds one per comparison and re-sorts
- * every group index on every resolution, which is why the kit runs it with
- * `alphabetize` off and orders each token set here instead.
+ * The collation that Terrazzo sorts by: natural, numeric-aware, en-US. The kit
+ * makes one collator for the build. The kit runs the parser with `alphabetize`
+ * off and orders each token set with this collator.
  */
 const collator = new Intl.Collator("en-us", { numeric: true });
 
 /**
- * A token set re-keyed in Terrazzo's alphabetical order, so the emitted
- * modules read exactly as a parse with `alphabetize` on would have written
- * them.
+ * Returns a token set with its keys in the alphabetical order of Terrazzo.
  */
 export const sorted = <T>(set: Record<string, T>): Record<string, T> =>
   Object.fromEntries(entries(set).sort(([a], [b]) => collator.compare(a, b)));
 
 /**
- * The pieces of a base theme read off a resolver document: the complete token
- * map at the all-defaults selection, each modifier's contexts as sparse
- * override maps, the composition order, and the boot selection. Untyped
- * beyond structure — the schema adjudicates validity after assembly.
+ * The pieces of a base theme that the kit reads from a resolver document.
+ * `tokens` is the complete token map at the all-defaults selection. `modifiers`
+ * holds the contexts of each modifier as sparse override maps. `order` is the
+ * composition order. `input` is the boot selection. The schema validates the
+ * pieces after assembly.
  */
 export interface Skeleton {
   tokens: Record<string, Record<string, unknown>>;
@@ -36,10 +34,8 @@ export interface Skeleton {
 }
 
 /**
- * Whether a modifier is Terrazzo's own legacy-mode bridge rather than an axis
- * the user authored: a document parsed without a resolver gets a synthetic
- * `tzMode` modifier whose only context is `"."`. It conveys nothing and must
- * not become an untheme axis.
+ * Whether a modifier is the synthetic `tzMode` modifier. Terrazzo adds it to a
+ * bare token document. Its only context is `"."`.
  */
 export const synthetic = (name: string, contexts: string[]): boolean => {
   if (name !== "tzMode") {
@@ -52,11 +48,12 @@ export const synthetic = (name: string, contexts: string[]): boolean => {
 };
 
 /**
- * The resolver's authored modifiers, in resolution order, with the synthetic
- * legacy bridge filtered out. Read off the normalized `resolutionOrder`, where
- * Terrazzo has inlined every modifier the order applies — one declared in the
- * top-level `modifiers` map and referenced by `$ref`, and one declared inline
- * in the order itself, alike. The top-level map alone misses the inline form.
+ * Returns the modifiers that the resolver authors, in resolution order. The
+ * function skips the synthetic `tzMode` modifier. The function reads the
+ * normalized `resolutionOrder`, where Terrazzo has inlined each modifier that
+ * the order applies. This includes a modifier declared in the top-level
+ * `modifiers` map and referenced with `$ref`, and a modifier declared inline in
+ * the order.
  */
 export const axes = (
   resolver: Resolver | undefined,
@@ -75,8 +72,9 @@ export const axes = (
 };
 
 /**
- * Whether the resolver is Terrazzo's synthetic stand-in for a plain token
- * document: it applies modifiers, and every one is the legacy bridge.
+ * Whether the resolver is the synthetic resolver that Terrazzo makes for a plain
+ * token document. Such a resolver applies modifiers, and all of them are the
+ * synthetic `tzMode` modifier.
  */
 export const bridged = (resolver: Resolver | undefined): boolean => {
   const modifiers = (resolver?.source.resolutionOrder ?? []).filter(
@@ -91,13 +89,14 @@ export const bridged = (resolver: Resolver | undefined): boolean => {
 };
 
 /**
- * Reads the base theme's pieces directly off the resolver document. The
- * all-defaults application is the base; each non-default context is applied
- * one modifier at a time and diffed against it, so a context carries exactly
- * what it changes. Default contexts stay empty — base tokens are the default
- * context. Sets in the resolution order fold into the base via `apply`; only
- * modifiers become axes. Without authored modifiers (a plain token document)
- * the tokens stand alone: no axes, no order, empty selection.
+ * Reads the pieces of the base theme from the resolver document. The base is the
+ * all-defaults application. The function applies each non-default context, one
+ * modifier at a time, and diffs it against the base. A context holds only what
+ * it changes. A default context is empty, and the base tokens are the tokens of
+ * the default context. Sets in the resolution order become part of the base
+ * through `apply`. Only modifiers become axes. A plain token document has no
+ * authored modifiers. For it, the function returns the tokens with no axes, no
+ * order, and an empty selection.
  */
 export const skeleton = (
   resolver: Resolver | undefined,

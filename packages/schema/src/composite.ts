@@ -6,10 +6,11 @@ import { object } from "objectively";
 import { all, list, member, mismatch, struct, valued } from "./util";
 
 /**
- * A stroke style: a keyword form, or a dash object whose dash lengths are
- * dimensions or references and whose caps name one of the line caps.
+ * Makes the rule for a stroke style. A stroke style is a keyword or a dash
+ * object. The dash object has an array of dash lengths and a line cap. Each
+ * dash length is a dimension or a reference.
  *
- * @param dimension - The value rule for a dimension, guarding each dash length.
+ * @param dimension - The value rule for a dimension, used for each dash length.
  */
 export const strokeStyleOf =
   (dimension: Rule): Rule =>
@@ -31,12 +32,12 @@ export const strokeStyleOf =
   };
 
 /**
- * A border: a color, a width, and a stroke style, each accepting a value or a
- * reference in its slot.
+ * Makes the rule for a border. A border has a color, a width, and a stroke
+ * style. Each slot accepts a value or a reference.
  *
- * @param color - The value rule for a color, guarding the color slot.
- * @param dimension - The value rule for a dimension, guarding the width slot.
- * @param strokeStyle - The value rule for a stroke style, guarding the style
+ * @param color - The value rule for a color, used for the color slot.
+ * @param dimension - The value rule for a dimension, used for the width slot.
+ * @param strokeStyle - The value rule for a stroke style, used for the style
  *   slot.
  */
 export const borderOf = (
@@ -58,12 +59,12 @@ export const borderOf = (
   ]);
 
 /**
- * A transition: a duration, a delay, and a timing function, each accepting a
- * value or a reference in its slot.
+ * Makes the rule for a transition. A transition has a duration, a delay, and a
+ * timing function. Each slot accepts a value or a reference.
  *
- * @param duration - The value rule for a duration, guarding the duration and
+ * @param duration - The value rule for a duration, used for the duration and
  *   delay slots.
- * @param cubicBezier - The value rule for a cubic Bézier curve, guarding the
+ * @param cubicBezier - The value rule for a cubic Bézier curve, used for the
  *   timing function slot.
  */
 export const transitionOf = (duration: Rule, cubicBezier: Rule): Rule =>
@@ -81,15 +82,15 @@ export const transitionOf = (duration: Rule, cubicBezier: Rule): Rule =>
   ]);
 
 /**
- * A shadow: a single drop-shadow object, or a list whose every element is a
- * shadow object or a reference. Each object's color and four dimensions accept
- * a value or a reference in its slot.
+ * Makes the rule for a shadow. A shadow is one shadow object or a list. Each
+ * element of the list is a shadow object or a reference. A shadow object has a
+ * color and four dimensions. Each slot accepts a value or a reference.
  *
- * @param color - The value rule for a color, guarding the color slot.
- * @param dimension - The value rule for a dimension, guarding the four
+ * @param color - The value rule for a color, used for the color slot.
+ * @param dimension - The value rule for a dimension, used for the four
  *   dimension slots.
- * @param reference - The value rule for a reference to a shadow token, accepted
- *   as a list element in place of an object.
+ * @param reference - The value rule for a reference to a shadow token. A list
+ *   element can use it in place of an object.
  */
 export const shadowOf = (
   color: Rule,
@@ -120,12 +121,13 @@ export const shadowOf = (
 };
 
 /**
- * A gradient: a list of stops, each stop a color and a position that accept a
- * value or a reference in its slot.
+ * Makes the rule for a gradient. A gradient is a list of stops. Each stop has
+ * a color and a position. Each slot accepts a value or a reference.
  *
- * @param color - The value rule for a color, guarding each stop's color slot.
- * @param number - The value rule for a number, guarding each stop's position
- *   slot.
+ * @param color - The value rule for a color, used for the color slot of each
+ *   stop.
+ * @param number - The value rule for a number, used for the position slot of
+ *   each stop.
  */
 export const gradientOf = (color: Rule, number: Rule): Rule => {
   const stop: Rule = all([
@@ -151,16 +153,17 @@ export const gradientOf = (color: Rule, number: Rule): Rule => {
 };
 
 /**
- * A typography set: family, size, weight, letter spacing, and line height,
- * each accepting a value or a reference in its slot.
+ * Makes the rule for a typography set. A typography set has a family, a size,
+ * a weight, a letter spacing, and a line height. Each slot accepts a value or
+ * a reference.
  *
- * @param fontFamily - The value rule for a font family, guarding the family
+ * @param fontFamily - The value rule for a font family, used for the family
  *   slot.
- * @param dimension - The value rule for a dimension, guarding the font size and
+ * @param dimension - The value rule for a dimension, used for the font size and
  *   letter spacing slots.
- * @param fontWeight - The value rule for a font weight, guarding the weight
+ * @param fontWeight - The value rule for a font weight, used for the weight
  *   slot.
- * @param number - The value rule for a number, guarding the line height slot.
+ * @param number - The value rule for a number, used for the line height slot.
  */
 export const typographyOf = (
   fontFamily: Rule,

@@ -6,7 +6,7 @@ import { OUT_DIR } from "./constant";
 import { InvalidConfigError } from "./error";
 import { inside, normalize } from "./path";
 
-/** One rule over a config: every issue it finds, none when the config passes. */
+/** One rule over a config. The rule returns the issues that it finds. */
 type Rule = (config: KitConfig) => string[];
 
 /** The source is a non-empty path or reference, or a URL. */
@@ -36,21 +36,21 @@ const identity: Rule = (config) => {
   return issues;
 };
 
-/** A non-empty string. */
+/** Whether a value is a non-empty string. */
 const named = (value: unknown): value is string => {
   return typeof value === "string" && value !== "";
 };
 
-/** A source designator: a non-empty string or a URL. */
+/** Whether a value is a source designator, a non-empty string or a URL. */
 const designator = (value: unknown): boolean => {
   return named(value) || value instanceof URL;
 };
 
 /**
- * Each modifier entry is `false` or an object. Its `add` maps context names
- * to a source or a list of them; its `contexts` lists at least one context —
- * every one a non-empty string, none twice; its `default` is one it keeps.
- * Whether the names exist is decided once the document is read.
+ * Checks each modifier entry. An entry is `false` or an object. `add` maps
+ * context names to a source or a list of sources. `contexts` lists at least one
+ * context, each a non-empty string and each once. `default` is one of the
+ * contexts. The build checks that the names exist after it reads the document.
  */
 const modifiers: Rule = (config) => {
   const { modifiers } = config;
@@ -125,11 +125,11 @@ const outDir: Rule = (config) => {
 };
 
 /**
- * Checks a config against every rule that can be decided without reading a
- * document, and reports all of the issues together.
+ * Checks a config against every rule that needs no document, and reports all
+ * issues together.
  *
  * @param config - The kit config.
- * @throws InvalidConfigError carrying every issue, when there is any.
+ * @throws InvalidConfigError with every issue, when there is any.
  */
 export const validate = (config: KitConfig): void => {
   const issues = [source, identity, modifiers, outDir].flatMap((rule) =>

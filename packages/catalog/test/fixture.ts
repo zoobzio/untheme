@@ -11,13 +11,12 @@ export type Mod = { mode: { light: object; dark: object } };
 
 export type T = Contract<Tok, Mod>;
 
-/* Structured colors named once so assertions can compare against them. */
+/* Structured colors for assertions. */
 export const white: Color = { colorSpace: "srgb", components: [1, 1, 1] };
 export const black: Color = { colorSpace: "srgb", components: [0, 0, 0] };
 
 /**
- * A minimal complete base theme: two color tokens and one modifier axis,
- * enough contract for the schema to prove layers against.
+ * A minimal complete base theme with two color tokens and one modifier axis.
  */
 export const theme: T = {
   id: "demo",
@@ -36,12 +35,12 @@ export const theme: T = {
 };
 
 /**
- * The validation bundle every catalog under test is constructed with.
+ * The validation bundle that each catalog under test uses.
  */
 export const schema = defineSchema(theme);
 
 /**
- * A valid layer of the contract, retrievable from the fixture sources.
+ * A valid layer of the contract. The fixture sources return it.
  */
 export const midnight: Layer<T> = {
   id: "midnight",
@@ -50,8 +49,8 @@ export const midnight: Layer<T> = {
 };
 
 /**
- * A payload that exists but steps outside the contract — an unknown token —
- * for exercising the corruption path.
+ * A payload with an unknown token. It is outside the contract. It tests the
+ * corruption path.
  */
 export const corrupt = {
   id: "corrupt",
@@ -60,10 +59,9 @@ export const corrupt = {
 };
 
 /**
- * An unsorted manifest exercising filtering, ordering, and windowing. Ids
- * and names deliberately order differently — the id `abyss` sorts first
- * while its name `The Abyss` sorts last — so sort-field tests can tell the
- * fields apart.
+ * An unsorted manifest for filtering, ordering, and windowing tests. The ids
+ * and names order differently. The id `abyss` sorts first and its name `The
+ * Abyss` sorts last. The sort tests use this to tell the fields apart.
  */
 export const entries: Entry[] = [
   { id: "nord", name: "Nord" },
@@ -73,9 +71,8 @@ export const entries: Entry[] = [
 ];
 
 /**
- * A minimal listing implementation over {@link entries} — name filter and
- * window, honest counts — standing in for whatever real lookup a source
- * binds its `list` callback to.
+ * A minimal listing implementation over {@link entries}. It filters by name,
+ * applies the window, and returns the counts.
  */
 export const answer = (listing: Listing): Page => {
   let matches = entries;
@@ -94,8 +91,8 @@ export const answer = (listing: Listing): Page => {
 };
 
 /**
- * A well-formed page of the whole manifest, for transports that only need
- * a valid body.
+ * A valid page of the whole manifest. Transports that need only a valid body
+ * use it.
  */
 export const page: Page = {
   entries,

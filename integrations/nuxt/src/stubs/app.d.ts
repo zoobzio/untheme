@@ -1,15 +1,15 @@
-// Typecheck-only stub for the Nuxt `#app` virtual module.
+// Type stub for the Nuxt `#app` virtual module.
 
 /**
- * Runtime hook signatures. Augmented by the untheme runtime via
+ * The runtime hook signatures. The untheme runtime adds to this interface with
  * `declare module "#app"`.
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- augmented by the runtime
 export interface RuntimeNuxtHooks {}
 
 /**
- * The Nuxt app instance. The `$untheme` service is added by the untheme
- * runtime via `declare module "#app"`.
+ * The Nuxt app instance. The untheme runtime adds the `$untheme` service with
+ * `declare module "#app"`.
  */
 export interface NuxtApp {
   callHook: <K extends keyof RuntimeNuxtHooks>(

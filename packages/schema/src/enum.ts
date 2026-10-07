@@ -15,9 +15,9 @@ import {
 } from "./scalar";
 
 /**
- * Materializes the {@link Enum} for a template: the specification members
- * are shared across contracts, and the contract members are derived from the
- * template's own keys.
+ * Builds the {@link Enum} for a template. The specification members are the
+ * same for all templates. The function reads the contract members from the
+ * keys of the template.
  *
  * @param base - The template whose keys define the contract.
  */

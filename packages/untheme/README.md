@@ -1,14 +1,14 @@
 # untheme
 
-The umbrella package for the untheme design token system.
+The umbrella package for the untheme design token system. The package gives access to the runtime service, the schema, the utils, the catalog, the config helpers, and the CSS renderer.
 
-Re-exports the core runtime, the token-contract schema, and the structural utils at the package root, and exposes the catalog, the config helpers, and the CSS renderer through subpath entry points. Install this single package to get everything most apps need at run time.
+## Install
 
 ```sh
 pnpm add untheme
 ```
 
-Themes are authored as DTCG JSON and built by [`@untheme/kit`](../kit), a build-time tool this package does not re-export.
+[`@untheme/kit`](../kit) builds a theme from DTCG JSON. Install the kit as a separate package.
 
 ## Entry points
 
@@ -16,12 +16,12 @@ Themes are authored as DTCG JSON and built by [`@untheme/kit`](../kit), a build-
 | ----------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `untheme`         | [`@untheme/core`](../core), [`@untheme/schema`](../schema), [`@untheme/utils`](../utils) | `makeUntheme`, `Untheme`, `Config`, `defineSchema`, `Schema`, `Contract`, `Theme`, `Layer`, `Patch`, `Input`, `SchemaError`, `clone`/`merge`/`diff`/`delta`/`traverse`, … |
 | `untheme/catalog` | [`@untheme/catalog`](../catalog)                                                         | `defineCatalog`, `defineClient`, `Catalog`, `Provider`, `Entry`, `Query`, `Page`, …                                                                                       |
-| `untheme/config`  | —                                                                                        | `UnthemeConfig`, `defineUnthemeConfig`, `useUnthemeConfig` — the built shape (`theme`/`input`) the kit emits and every integration consumes                               |
+| `untheme/config`  | -                                                                                        | `UnthemeConfig`, `defineUnthemeConfig`, `useUnthemeConfig`                                                                                                                |
 | `untheme/css`     | [`@untheme/css`](../css)                                                                 | `defineRenderer`, `Renderer`, `serialize`, `emit`, `property`, `Variables`, …                                                                                             |
 
 ## Usage
 
-`untheme build` writes the theme to `untheme/config.mjs`, with a declaration typing it against the theme's exact token and modifier unions. Seed a container from it and boot the service:
+`untheme build` writes the theme to `untheme/config.mjs`. A declaration file types the theme with its token names and modifier names. `useUnthemeConfig` makes a state container from the config. `makeUntheme` makes the service from the container.
 
 ```ts
 import { makeUntheme } from "untheme";
@@ -30,8 +30,7 @@ import { defineRenderer } from "untheme/css";
 
 import config, { type Contract } from "./untheme/config.mjs";
 
-// The container is { theme, input, override } — the caller-owned state the
-// service operates on. `input` selects one context per modifier.
+// The container is { theme, input, override }. `input` selects one context for each modifier.
 const ut = makeUntheme<Contract>(useUnthemeConfig(config));
 
 const renderer = defineRenderer(ut);
@@ -39,27 +38,27 @@ renderer.root();
 // :root { --primary: var(--violet); --violet: #b3c5ff; ... }
 ```
 
-`renderer.root()` builds a single `:root` block of custom properties from the active token bindings, wrapping any value that points at another token in `var()` automatically.
+`renderer.root()` returns one `:root` block of custom properties for the active token bindings. A value that points at another token becomes a `var()` reference.
 
-The service holds one active theme. Other themes are layers — an identity plus the bindings they change — that the caller supplies, typically from a catalog:
+The service has one active theme. Other themes are layers. A layer has an identity and the bindings that it changes. The caller supplies the layers, for example from a catalog.
 
 ```ts
 import { defineClient } from "untheme/catalog";
 
 const catalog = defineClient(ut.schema, { base: "/api/untheme" });
 
-const midnight = await catalog.get("midnight"); // proven against the contract
+const midnight = await catalog.get("midnight"); // checked against the contract
 if (midnight) {
-  ut.apply(midnight); // become that theme
+  ut.apply(midnight); // the active theme is now midnight
 }
 ```
 
 ## Related
 
-- [`@untheme/core`](../core) — the runtime theme service.
-- [`@untheme/schema`](../schema) — token contract types and runtime validation.
-- [`@untheme/utils`](../utils) — structural theme operations.
-- [`@untheme/css`](../css) — CSS custom-property renderer.
-- [`@untheme/catalog`](../catalog) — theme catalogs and the wire protocol.
-- [`@untheme/kit`](../kit) — builds the theme from DTCG JSON.
-- [`@untheme/nuxt`](../../integrations/nuxt) — Nuxt module for runtime theming.
+- [`@untheme/core`](../core): the runtime theme service.
+- [`@untheme/schema`](../schema): token contract types and runtime validation.
+- [`@untheme/utils`](../utils): structural theme operations.
+- [`@untheme/css`](../css): CSS custom property renderer.
+- [`@untheme/catalog`](../catalog): theme catalogs and the wire protocol.
+- [`@untheme/kit`](../kit): builds the theme from DTCG JSON.
+- [`@untheme/nuxt`](../../integrations/nuxt): Nuxt module for runtime theming.

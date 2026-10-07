@@ -1,9 +1,9 @@
 import type { Assert, Parse, Template } from "./types";
 
 /**
- * Builds the {@link Parse} bundle: each kind asserts the value and returns it
- * narrowed to the kind type, or lets the {@link SchemaError} from
- * {@link Assert} propagate.
+ * Builds the {@link Parse} bundle. Each kind asserts the value and returns it
+ * narrowed to the kind type. The {@link SchemaError} from {@link Assert}
+ * propagates to the caller.
  */
 export const defineParse = <T extends Template>(
   assert: Assert<T>,

@@ -1,6 +1,5 @@
 import type { AppUntheme, AppUnthemeContract, UnthemeNuxtApp } from "./types";
 
-// The core constructor, renamed: this module's own `makeUntheme` wraps it.
 import { makeUntheme as makeService } from "untheme";
 import { accessUntheme } from "./store";
 

@@ -1,13 +1,14 @@
 /**
- * Sequences that let a value escape its CSS declaration (statements, blocks,
- * comments, tag closers, escapes) or fetch a resource (`url()`).
+ * Matches the sequences that can end a CSS declaration or fetch a resource.
+ * The sequences are a semicolon, a brace, a backslash, a comment opener, a tag
+ * closer, and `url()`.
  */
 export const CSS_BREAKOUT = /[;{}\\]|\/\*|<\/|\burl\(/i;
 
 /**
- * The DTCG token types this schema recognizes. Every token declares one, and a
- * token's `$value` shape is fixed by it. This array is the single source of
- * truth: the `Type` union derives from it and the runtime rules iterate it.
+ * The DTCG token types that the schema recognizes. Every token declares one
+ * type. The type sets the shape of the `$value` of the token. The `Type` union
+ * and the runtime rules use this array.
  */
 export const TYPES = [
   "color",
@@ -26,8 +27,8 @@ export const TYPES = [
 ] as const;
 
 /**
- * The CSS Color Module color spaces a `color` value may name. Backs both the
- * `ColorSpace` union and the runtime membership check on `colorSpace`.
+ * The CSS Color Module color spaces that a `color` value can name. The
+ * `ColorSpace` union and the runtime check on `colorSpace` use this array.
  */
 export const COLOR_SPACES = [
   "srgb",
@@ -47,17 +48,17 @@ export const COLOR_SPACES = [
 ] as const;
 
 /**
- * The units a `dimension` value may carry.
+ * The units that a `dimension` value can use.
  */
 export const DIMENSION_UNITS = ["px", "rem"] as const;
 
 /**
- * The units a `duration` value may carry.
+ * The units that a `duration` value can use.
  */
 export const DURATION_UNITS = ["ms", "s"] as const;
 
 /**
- * The named weights a `fontWeight` value may use in place of a number.
+ * The named weights that a `fontWeight` value can use in place of a number.
  */
 export const FONT_WEIGHTS = [
   "thin",
@@ -72,7 +73,7 @@ export const FONT_WEIGHTS = [
 ] as const;
 
 /**
- * The keyword forms a `strokeStyle` value may take in place of the dash object.
+ * The keywords that a `strokeStyle` value can use in place of the dash object.
  */
 export const STROKE_STYLES = [
   "solid",
@@ -86,24 +87,24 @@ export const STROKE_STYLES = [
 ] as const;
 
 /**
- * The line caps a `strokeStyle` dash object may declare.
+ * The line caps that a `strokeStyle` dash object can declare.
  */
 export const LINE_CAPS = ["round", "butt", "square"] as const;
 
 /**
- * The token entry to indicate a keyword can also be `"none"` — the missing
- * component sentinel a `color`'s components array accepts alongside numbers.
+ * The `"none"` keyword. The components array of a `color` accepts it in place
+ * of a number, for a missing component.
  */
 export const NONE = "none";
 
 /**
- * The lowest and highest a numeric `fontWeight` may be.
+ * The lowest and highest value of a numeric `fontWeight`.
  */
 export const FONT_WEIGHT_MIN = 1;
 export const FONT_WEIGHT_MAX = 1000;
 
 /**
- * The reserved members a token definition may carry. Any other key is rejected.
+ * The reserved members of a token definition. A definition rejects any other key.
  */
 export const DEFINITION_KEYS = [
   "$type",
@@ -114,13 +115,13 @@ export const DEFINITION_KEYS = [
 ] as const;
 
 /**
- * The members every token definition must carry; the rest of
+ * The members that every token definition must have. The other members in
  * {@link DEFINITION_KEYS} are optional.
  */
 export const REQUIRED_DEFINITION_KEYS = ["$type", "$value"] as const;
 
 /**
- * The members a complete theme object must carry.
+ * The members that a complete theme object must have.
  */
 export const THEME_KEYS = [
   "id",

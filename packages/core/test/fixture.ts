@@ -17,17 +17,16 @@ export type Mod = {
   contrast: { normal: object; high: object };
 };
 
-/* Structured colors named once so assertions can compare against them. */
+/* The structured colors that the assertions compare against. */
 export const white: Color = { colorSpace: "srgb", components: [1, 1, 1] };
 export const black: Color = { colorSpace: "srgb", components: [0, 0, 0] };
 export const blue: Color = { colorSpace: "srgb", components: [0, 0.5, 1] };
 
 /**
- * A complete base theme exercising the service end to end: literal colors, a
- * dimension, alias chains (`color.bg` → `color.white`), a composite whose
- * sub-values are references (`border.thin`), a composite referencing one token
- * twice on sibling branches (`gradient.fade`), and two modifier axes carrying
- * bare-binding overrides.
+ * A complete base theme. It has literal colors, a dimension, and alias chains
+ * such as `color.bg` to `color.white`. The composite `border.thin` has
+ * references as sub-values. The composite `gradient.fade` references one token
+ * twice. Two modifiers have bare bindings.
  */
 export const theme: Contract<Tok, Mod> = {
   id: "demo",

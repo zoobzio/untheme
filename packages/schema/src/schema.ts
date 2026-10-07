@@ -7,22 +7,22 @@ import { defineParse } from "./parse";
 import { defineMeta } from "./meta";
 
 /**
- * Builds the runtime validation {@link Schema} for a template's token contract.
+ * Builds the runtime validation {@link Schema} for the token contract of a
+ * template.
  *
- * `meta` derives the validation core: the template's sets, the literal and
- * value rule for each token type, and the rules per kind. `check` runs those
- * rules as boolean type predicates; `assert` runs them too, collecting every
- * {@link Issue} and throwing a {@link SchemaError}; `parse` asserts and returns
- * the value narrowed; `inspect` captures the outcome as a {@link Result}
- * instead of throwing.
+ * `meta` holds the template's sets, the literal rule and value rule for each
+ * token type, and the rules for each kind. `check` runs the rules as boolean
+ * type predicates. `assert` runs the rules, collects every {@link Issue}, and
+ * throws a {@link SchemaError}. `parse` asserts the value and returns it
+ * narrowed. `inspect` returns the outcome as a {@link Result}.
  *
- * The base template is validated against the `theme` kind before the schema is
- * returned, so a malformed contract fails fast at construction.
+ * The function validates the base template against the `theme` kind before it
+ * returns the schema. An invalid template throws at construction.
  *
  * @param base - The template whose keys define the token contract.
- * @returns A schema of derived sets, per-type rules, and
- *   check/assert/parse/inspect bundles, all narrowed to the template's token,
- *   modifier, and context vocabularies.
+ * @returns A schema with the sets, the rules for each type, and the check,
+ *   assert, parse, and inspect bundles. The bundles use the token, modifier,
+ *   and context names of the template.
  */
 export const defineSchema = <const T extends Template>(base: T): Schema<T> => {
   const meta = defineMeta(base);

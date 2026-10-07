@@ -3,20 +3,18 @@ import type { Issue, Rule } from "./types";
 import { object, wrapped } from "objectively";
 
 /**
- * Whether a value is a reference in curly-brace syntax: a string wrapped in
- * `{` and `}`.
+ * Checks that a value is a reference. A reference is a string in `{` and `}`.
  */
 const isReference = wrapped("{", "}");
 
 /**
- * Type-agnostic rule builders. Each builder takes a name plus parameters and
- * returns a {@link Rule}; none of them know anything about a template or its
- * token unions. Predicate atoms each own a single failure code; combinators
- * compose other rules and attach `path` as they descend.
+ * Rule builders. Each builder takes a name and parameters and returns a
+ * {@link Rule}. Each predicate atom returns one failure code. Each combinator
+ * runs other rules and adds `path` to the issues from them.
  */
 
 /**
- * Prefixes a nested issue's path with the key it was found under.
+ * Adds the key to the start of the path of an issue.
  */
 export const nest = (key: string, issue: Issue): Issue => ({
   ...issue,
@@ -24,7 +22,8 @@ export const nest = (key: string, issue: Issue): Issue => ({
 });
 
 /**
- * The token name inside a `{name}` reference, or `undefined` when not one.
+ * Returns the token name in a `{name}` reference. Returns `undefined` when the
+ * value is not a reference.
  */
 export const target = (v: unknown): string | undefined => {
   if (isReference(v)) {
@@ -34,9 +33,9 @@ export const target = (v: unknown): string | undefined => {
 };
 
 /**
- * Every token a value references, gathered by walking the whole value: a
- * `{name}` reference contributes its name, arrays and objects contribute the
- * references nested in their entries, and everything else contributes none.
+ * Returns the name of each token that a value references. The function reads
+ * the name from a `{name}` reference. The function reads the references in the
+ * entries of an array or an object. All other values have no names.
  */
 export const collectRefs = (v: unknown): string[] => {
   const name = target(v);
@@ -55,7 +54,7 @@ export const collectRefs = (v: unknown): string[] => {
 /* ── predicate atoms ─────────────────────────────────────────────────── */
 
 /**
- * The value is a string.
+ * Rejects a value that is not a string.
  */
 export const text =
   (name: string): Rule =>
@@ -70,7 +69,7 @@ export const text =
   };
 
 /**
- * A string value is not empty once trimmed.
+ * Rejects a string that is empty after trim.
  */
 export const filled =
   (name: string): Rule =>
@@ -85,7 +84,7 @@ export const filled =
   };
 
 /**
- * A string value contains no sequence that escapes its CSS declaration.
+ * Rejects a string that matches the breakout pattern.
  */
 export const breakout =
   (name: string, pattern: RegExp): Rule =>
@@ -101,7 +100,8 @@ export const breakout =
   };
 
 /**
- * A string value is a hex color: `#` plus 3, 4, 6, or 8 hex digits.
+ * Rejects a string that is not a hex color. A hex color is `#` and 3, 4, 6, or 8
+ * hex digits.
  */
 export const hexColor =
   (name: string): Rule =>
@@ -119,7 +119,7 @@ export const hexColor =
   };
 
 /**
- * The value is a member of the allowed set.
+ * Rejects a value that is not a member of the set.
  */
 export const member =
   (name: string, set: Set<string>): Rule =>
@@ -135,7 +135,7 @@ export const member =
   };
 
 /**
- * The value is a finite number.
+ * Rejects a value that is not a finite number.
  */
 export const numeric =
   (name: string): Rule =>
@@ -150,7 +150,8 @@ export const numeric =
   };
 
 /**
- * A numeric value falls within the inclusive range.
+ * Rejects a number that is outside the range. The range includes `min` and
+ * `max`.
  */
 export const range =
   (name: string, min: number, max: number): Rule =>
@@ -166,7 +167,7 @@ export const range =
   };
 
 /**
- * The value is one the caller's predicate accepts for its declared type.
+ * Rejects a value when the predicate `ok` returns `false`.
  */
 export const mismatch =
   (name: string, ok: (v: unknown) => boolean): Rule =>
@@ -181,7 +182,7 @@ export const mismatch =
   };
 
 /**
- * The value is a member of the known type set.
+ * Rejects a value that is not a member of the set of token types.
  */
 export const known =
   (name: string, set: Set<string>): Rule =>
@@ -197,7 +198,7 @@ export const known =
   };
 
 /**
- * The value is a reference to a member of the set, in `{name}` form.
+ * Rejects a value that is not a `{name}` reference to a member of the set.
  */
 export const reference =
   (name: string, tokens: Set<string>): Rule =>
@@ -214,9 +215,9 @@ export const reference =
   };
 
 /**
- * A reference names a token whose declared type matches the one expected in
- * this position. Runs only once the value is known to reference an existing
- * token; a whole-value or sub-value slot uses it to reject cross-type aliases.
+ * Rejects a reference to a token of a type other than the expected type. The
+ * rule accepts a value that is not a reference. The rule accepts a reference
+ * to a token with no known type.
  */
 export const referenceType =
   (name: string, types: Record<string, string>, expected: string): Rule =>
@@ -237,7 +238,7 @@ export const referenceType =
   };
 
 /**
- * The value is a plain object.
+ * Rejects a value that is not a plain object.
  */
 export const container =
   (name: string): Rule =>
@@ -254,7 +255,7 @@ export const container =
 /* ── combinator atoms ────────────────────────────────────────────────── */
 
 /**
- * Runs the rules in order and returns the first issue any of them raises.
+ * Runs the rules in order and returns the first issue.
  */
 export const all =
   (rules: Rule[]): Rule =>
@@ -268,9 +269,8 @@ export const all =
   };
 
 /**
- * Dispatches by shape: a `{name}` string is validated as a reference, anything
- * else as a literal value. The form a slot takes — an alias to another token,
- * or a structured value in place.
+ * Checks a `{name}` string with the reference rule. The function checks all
+ * other values with the literal rule.
  */
 export const valued =
   (asReference: Rule, asLiteral: Rule): Rule =>
@@ -282,8 +282,8 @@ export const valued =
   };
 
 /**
- * The value satisfies at least one branch — every rule in that branch passes.
- * A value that matches no branch is rejected.
+ * Accepts a value when every rule of at least one branch passes. The rule
+ * rejects a value that matches no branch.
  */
 export const either =
   (name: string, branches: Rule[][]): Rule =>
@@ -301,7 +301,8 @@ export const either =
   };
 
 /**
- * Every key must belong to the allowed set; values are not inspected.
+ * Rejects an object that has a key outside the set. The rule checks the keys
+ * only.
  */
 export const subset =
   (name: string, set: Set<string>): Rule =>
@@ -323,7 +324,7 @@ export const subset =
   };
 
 /**
- * Every key in the required set must be present.
+ * Rejects an object that lacks a key of the set.
  */
 export const superset =
   (name: string, set: Set<string>): Rule =>
@@ -344,7 +345,7 @@ export const superset =
   };
 
 /**
- * An array's elements are distinct — no element appears twice.
+ * Rejects an array that has a duplicate element.
  */
 export const unique =
   (name: string): Rule =>
@@ -367,7 +368,7 @@ export const unique =
   };
 
 /**
- * An array lists every member of the required set.
+ * Rejects an array that lacks a member of the set.
  */
 export const exhaustive =
   (name: string, set: Set<string>): Rule =>
@@ -388,7 +389,8 @@ export const exhaustive =
   };
 
 /**
- * The value is an array whose every element satisfies the rules.
+ * Rejects a value that is not an array. The rule applies the rules to each
+ * element.
  */
 export const list =
   (name: string, rules: Rule[]): Rule =>
@@ -411,7 +413,7 @@ export const list =
   };
 
 /**
- * Applies a list of rules to every value; keys are not inspected.
+ * Applies the rules to each value of an object.
  */
 export const each =
   (rules: Rule[]): Rule =>
@@ -430,7 +432,8 @@ export const each =
   };
 
 /**
- * Applies a set of rules to every value, chosen per key by the picker.
+ * Applies the rules that `pick` returns for the key to each value of an
+ * object.
  */
 export const keyed =
   (pick: (key: string) => Rule[]): Rule =>
@@ -449,7 +452,7 @@ export const keyed =
   };
 
 /**
- * Applies a list of rules to every key; values are not inspected.
+ * Applies the rules to each key of an object.
  */
 export const keys =
   (name: string, rules: Rule[]): Rule =>
@@ -468,7 +471,8 @@ export const keys =
   };
 
 /**
- * Each named field validated by its own rules; unknown fields are rejected.
+ * Applies the rules of each named field to its value. The rule rejects a key
+ * that has no rules.
  */
 export const fields =
   (name: string, members: Record<string, Rule[]>): Rule =>
@@ -500,9 +504,8 @@ export const fields =
   };
 
 /**
- * A named object whose fields validate by their own rules and whose required
- * keys must all be present. Composes the field-shape and required-key atoms so
- * a structured value declares both in one place.
+ * Checks an object with the rules of each field. The rule rejects an object
+ * that lacks a required key.
  */
 export const struct = (
   name: string,
@@ -511,10 +514,10 @@ export const struct = (
 ): Rule => all([fields(name, members), superset(name, required)]);
 
 /**
- * The reference graph is acyclic. Each map entry contributes edges to the
- * tokens its value references, gathered by `edges`; a chain of edges that
- * returns to a token already on the current path is a cycle, which resolves to
- * nothing in CSS. Every entry is walked once.
+ * Rejects an object with a reference cycle. The function reads the edges of
+ * each entry with `edges`. An edge points to a token that the value of the
+ * entry references. A chain of edges that returns to a token on the current
+ * path is a cycle. The function visits each entry once.
  */
 export const acyclic =
   (

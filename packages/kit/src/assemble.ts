@@ -11,9 +11,8 @@ import { identity } from "./identity";
 import { verify } from "./verify";
 
 /**
- * Runs a schema validation and re-frames any failure so each issue points at
- * the offending token's source document instead of a path into the assembled
- * theme.
+ * Runs a schema validation. When it fails, the function throws an error that
+ * names the source document of the token for each issue.
  */
 export const reframe = <T>(tokens: TokenNormalizedSet, run: () => T): T => {
   try {
@@ -43,10 +42,10 @@ export const reframe = <T>(tokens: TokenNormalizedSet, run: () => T): T => {
 };
 
 /**
- * Assembles and validates the base theme from parsed sources: skeleton off
- * the resolver, structural narrowing through `isTemplate`, then untheme's
- * schema adjudicates every binding, and the round-trip verifier proves the
- * translation against Terrazzo's own resolution.
+ * Assembles and validates the base theme from parsed sources. The function reads
+ * the skeleton from the resolver and narrows it with `isTemplate`. The untheme
+ * schema validates every binding. The verifier compares the result with the
+ * Terrazzo resolution.
  */
 export const assemble = (
   parsed: { resolver: Resolver | undefined; tokens: TokenNormalizedSet },

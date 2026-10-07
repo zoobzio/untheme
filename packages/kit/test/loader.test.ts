@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { installed, loader } from "../src/loader";
 import { FIXTURES } from "./helpers";
 
-/** The kit package itself: a project root whose packages include aurora. */
+/** The kit package. It is a project root whose packages include aurora. */
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 
 describe("installed", () => {

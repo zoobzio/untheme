@@ -1,38 +1,39 @@
 /**
- * Regenerates the themes from scripts/seeds.json as DTCG JSON: each theme as
- * one token document, src/modifiers/theme/<id>.json, holding its name, its
- * description and its eight ramps,
- * and the contexts of the `theme` modifier in src/resolver.json — one per
- * theme, in seed order. Each seed contributes its hue and chroma;
- * every ramp shares one OKLCH lightness ladder across the eleven
- * Tailwind-style stops (50–950), with a chroma curve that peaks at the middle
- * and tapers toward both ends. The accent ramps additionally emit muted and
- * vivid chroma columns for the vibrancy axis; the neutral ramps are exempt.
- * Out of gamut colors reduce chroma until sRGB can hold them. Run with
- * `pnpm generate && pnpm format`.
+ * Generates the themes from `scripts/seeds.json` as DTCG JSON. The script
+ * writes one token document for each theme at `src/modifiers/theme/<id>.json`.
+ * The document holds the name, the description, and the eight ramps of the
+ * theme. The script also writes the contexts of the `theme` modifier in
+ * `src/resolver.json`, one for each theme, in seed order.
+ *
+ * Each seed gives a hue and a chroma. All ramps use one OKLCH lightness ladder
+ * across the eleven Tailwind-style stops, 50 to 950. The chroma curve peaks at
+ * the middle stops and tapers toward both ends. The accent ramps also have a
+ * muted column and a vivid column for the vibrancy modifier. When a color is
+ * outside the sRGB gamut, the script reduces its chroma until sRGB holds it.
+ *
+ * Run `pnpm generate && pnpm format`.
  */
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 
 const ROOT = new URL("../", import.meta.url);
 
-/**
- * The shared lightness ladder and chroma curve: per stop, the OKLCH
- * lightness every ramp lands on, and the multiplier applied to the seed's
- * chroma.
- */
-/**
- * The chroma columns: every ramp carries the balanced column; accent ramps
- * add muted and vivid columns at the same lightness ladder. The neutral
- * ramps stay single-column — muting a neutral is a theme, not an axis.
- */
+/** The ramps that have only the balanced column. */
 const NEUTRAL_RAMPS = new Set(["neutral", "neutral-variant"]);
 
+/**
+ * The chroma columns. Each column has a name suffix and a multiplier for the
+ * chroma of the seed. The accent ramps have all three columns.
+ */
 const COLUMNS = [
   { suffix: "", chroma: 1 },
   { suffix: "-muted", chroma: 0.45 },
   { suffix: "-vivid", chroma: 1.4 },
 ];
 
+/**
+ * The shared lightness ladder and chroma curve. Each stop has the OKLCH
+ * lightness of the stop and a multiplier for the chroma of the seed.
+ */
 const STOPS = {
   50: { lightness: 0.975, chroma: 0.22 },
   100: { lightness: 0.945, chroma: 0.38 },
@@ -63,10 +64,7 @@ const gamma = (channel) => {
   return 1.055 * channel ** (1 / 2.4) - 0.055;
 };
 
-/**
- * A hex color's OKLCH coordinates. Only hue and chroma are consumed — the
- * ladder supplies lightness — but all three come back for completeness.
- */
+/** Returns the OKLCH lightness, chroma, and hue of a hex color. */
 const oklch = (hex) => {
   const [r, g, b] = [1, 3, 5].map((at) => {
     return linear(Number.parseInt(hex.slice(at, at + 2), 16) / 255);
@@ -85,8 +83,8 @@ const oklch = (hex) => {
 };
 
 /**
- * OKLCH coordinates as sRGB channels in [0, 1], or null when the color
- * falls outside the sRGB gamut.
+ * Converts OKLCH coordinates to sRGB channels in the range 0 to 1. Returns
+ * `null` when the color is outside the sRGB gamut.
  */
 const srgb = ({ lightness, chroma, hue }) => {
   const a = chroma * Math.cos(hue);
@@ -106,8 +104,8 @@ const srgb = ({ lightness, chroma, hue }) => {
 };
 
 /**
- * The nearest in-gamut sRGB channels for the coordinates: chroma reduces —
- * lightness and hue hold — until sRGB can express the color.
+ * Returns sRGB channels for the coordinates. When the color is outside the
+ * gamut, the function reduces the chroma and keeps the lightness and the hue.
  */
 const fit = ({ lightness, chroma, hue }) => {
   const direct = srgb({ lightness, chroma, hue });
@@ -133,8 +131,8 @@ const fit = ({ lightness, chroma, hue }) => {
 /* ── emission ────────────────────────────────────────────────────────── */
 
 /**
- * A stop's structured color from its sRGB channels: five-decimal
- * components with the lowercase hex fallback.
+ * Makes a DTCG color value from sRGB channels. The value has components with
+ * five decimals and a lowercase hex string.
  */
 const color = (channels) => {
   const bytes = channels.map((channel) => Math.round(channel * 255));
@@ -144,8 +142,9 @@ const color = (channels) => {
 };
 
 /**
- * One ramp as a DTCG token document: the seed's hue and chroma carried
- * across the ladder in each of the ramp's columns, one color token per stop.
+ * Makes the tokens of one ramp. The function applies the hue and the chroma of
+ * the seed to the ladder in each column. It makes one color token for each
+ * stop.
  */
 const ramp = (name, seed) => {
   const { chroma, hue } = oklch(seed.toLowerCase());
@@ -179,8 +178,8 @@ const themes = JSON.parse(
 );
 
 /*
- * The themes: one document per theme, every ramp in it. The theme folder is
- * regenerated whole, so a theme removed from the seeds leaves no file behind.
+ * Writes one document for each theme. The document holds all eight ramps. The
+ * script removes the theme folder first, so each run writes the full set.
  */
 await rm(new URL("src/modifiers/theme/", ROOT), {
   recursive: true,
@@ -198,8 +197,8 @@ for (const [id, theme] of Object.entries(themes)) {
 }
 
 /*
- * The resolver document is authored; only the contexts of its `theme`
- * modifier are generated — one per theme, each the theme's own document.
+ * Replaces the contexts of the `theme` modifier in the resolver. Each context
+ * references the document of one theme.
  */
 const resolver = JSON.parse(
   await readFile(new URL("src/resolver.json", ROOT), "utf8"),

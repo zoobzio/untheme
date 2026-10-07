@@ -1,69 +1,113 @@
 # @untheme/catalog
 
-Theme distribution protocol for the untheme design token system.
+Lists and retrieves themes from a local or remote source.
 
-Defines the contract for where themes come from: a catalog is anything that can list its entries and hand over a layer by id. One wire shape serves every hop — a browser asking its own app server, that server asking a remote theme service — so the same code consumes a catalog wherever it lives.
+## Install
 
-## The model
+```sh
+pnpm add @untheme/catalog
+```
 
-The runtime service ([`@untheme/core`](../core)) holds one active theme and no collection; switching themes means handing `apply` a complete layer. This package owns everything before that handoff: discovering what themes exist, fetching one, and proving it against the app's contract on the way in.
+## Catalog
 
-A catalog has two operations:
+A catalog has two methods:
 
-- **list** — the manifest: entry metadata (id, name) for discovery, never full payloads.
-- **get** — one layer by id, as pure JSON.
+- `list(query?)` returns a `Page` of entries. An entry has an `id` and a `name`. A page has no payloads.
+- `get(id)` returns one layer by id, or `undefined` when the id is missing.
 
-Both facets of the package satisfy that same shape:
+The package makes a catalog in two ways. Both ways take a `Schema<T>` from [`@untheme/schema`](../schema). The catalog checks each layer against the schema.
 
-- **Provider** — the serving facet. Accepts callbacks that reach the actual storage (build-time JSON, a database, a remote service) and fronts them with validation. Framework handlers map routes onto it.
-- **Client** — the consuming facet. Accepts transport config — where to make requests, what authentication to use — and validates every response on the way in.
+- `defineCatalog(schema, provider)` makes a catalog from storage callbacks.
+- `defineClient(schema, client)` makes a catalog from transport config.
 
-Both are constructed with an instantiated `Schema<T>` from [`@untheme/schema`](../schema), which drives type inference and supplies the runtime proof: a layer is never typed as valid without having been checked. Because Provider and Client share one shape, a provider callback can delegate to a client — the app's provider serves its build-time themes and falls back to a remote catalog through the same interface it implements.
-
-## Querying
-
-Catalogs can grow beyond what a single response should carry, so `list` is query-shaped: a plain JSON-serializable query object (filter, sort, pagination) that crosses the wire unchanged, and a paged result. Every query is validated and normalized before a source sees it, so callbacks receive a concrete window — a `Listing` — and implement exactly the query model against their own storage: filter, order, cut the window, count the matches.
-
-## Usage
+Both return the same `Catalog` shape. A provider callback can call a client. An app can serve its own themes and use a remote catalog through one interface.
 
 ```ts
 import { defineCatalog, defineClient } from "@untheme/catalog";
 
-// the serving angle: callbacks over wherever the themes live
+// A catalog over the place where the themes are
 const local = defineCatalog(schema, {
   list: (listing) => store.list(listing),
   get: (id) => store.get(`themes/${id}`),
 });
 
-// the consuming angle: transport config over the wire protocol
+// A catalog over the network
 const remote = defineClient(schema, {
   base: "https://themes.example.dev",
   headers: { authorization: `Bearer ${token}` },
 });
 
-// same shape either way — and shapes matching is what lets catalogs chain
+// A catalog that uses the remote catalog when the local catalog has no layer
 const catalog = defineCatalog(schema, {
   list: (listing) => local.list(listing),
   get: async (id) => (await local.get(id)) ?? remote.get(id),
 });
 
 await catalog.list({ search: "nord", limit: 10 }); // a Page of entries
-await catalog.get("nord"); // a Layer, proven; undefined on a miss
+await catalog.get("nord"); // a Layer, or undefined on a miss
 ```
 
-`defineCatalog` is the one machine: `defineClient` compiles its transport config into the same callback shape and boots it, so both angles share every behavior. Queries are validated (`MalformedQueryError`) and normalized before any source sees them, listings are proven to be pages (`MalformedPageError`), and retrieved payloads are proven against the contract (`MalformedLayerError`) — a corrupt payload can never pass as a miss. On the wire, a failure status raises `FailedRequestError`; a 404 answering a retrieval is the one exception, resolving as a miss.
+## Provider
 
-## The wire protocol
+A `Provider` has two callbacks. Each callback returns raw data, directly or in a promise. The catalog checks each result.
 
-Two GET routes, hanging off a client's `base`:
+- `list(listing)` receives a `Listing` and returns a `Page`.
+- `get(id)` returns the stored payload for the id. `null` and `undefined` mean a miss.
 
-- `{base}/themes?q={json}` — the normalized listing, JSON-encoded in one parameter; answers a `Page`.
-- `{base}/themes/{id}` — one layer as pure JSON; answers 404 for a miss.
+## Client
 
-A serving handler decodes `q`, proves it with `isQuery`, fills its gaps with `toListing`, and hands it to its catalog — anything that speaks this shape can be consumed by `defineClient`, and anything built by `defineCatalog` can be served over it.
+A `Client` has these fields:
+
+- `base` is the URL that the routes extend.
+- `headers` are sent with every request. This field is optional.
+- `fetch` is the fetch implementation. The default is the global `fetch`. This field is optional.
+
+## Queries
+
+A `Query` is plain JSON data. All fields are optional.
+
+| Field    | Meaning                                                       |
+| -------- | ------------------------------------------------------------- |
+| `search` | Text to find in the entry name. The match ignores case.       |
+| `sort`   | A `Sort`: a `field` of `"id"` or `"name"`, and a `direction`. |
+| `limit`  | The maximum number of entries in the page.                    |
+| `offset` | The number of matches to skip.                                |
+
+The catalog validates the query and fills the gaps. A provider receives a `Listing`, a query with a complete window and ordering. A provider callback must filter, sort, cut the window, and count the matches.
+
+A `Page` has `entries`, `total`, `limit`, and `offset`. `total` counts all matches across all pages.
+
+## Errors
+
+- `MalformedQueryError` is thrown when the query passed to `list` is not a `Query`.
+- `MalformedPageError` is thrown when a provider answers a listing with a value that is not a `Page`.
+- `MalformedLayerError` is thrown when a payload fails the contract. It has the `issues` of the contract and the `id` of the payload.
+- `FailedRequestError` is thrown when the network answers with a failure status. It has the `url` and the `status`.
+
+Each of the first two errors has a `value` property that holds the rejected value.
+
+## Wire protocol
+
+`defineClient` sends two GET requests.
+
+- `{base}/themes?q={json}` sends the listing as JSON in one parameter. The response is a `Page`.
+- `{base}/themes/{id}` returns one layer as JSON. A 404 means a miss.
+
+A 404 on a listing throws `FailedRequestError`.
+
+A server handler decodes `q`, checks it with `isQuery`, fills it with `toListing`, and passes it to a catalog.
+
+## Helpers
+
+- `isQuery(value)` checks for a `Query`. A key other than `search`, `sort`, `limit`, and `offset` fails the check.
+- `isPage(value)` checks for a `Page`.
+- `toListing(query)` fills the gaps of a query and returns a `Listing`.
+- `LIMIT` is the default window size, 20.
+- `SORT` is the default ordering, `name` ascending.
+- `ROUTE` is the path segment `themes`.
 
 ## Related
 
-- [`@untheme/schema`](../schema) — token contract types and runtime guards.
-- [`@untheme/core`](../core) — the runtime theme service a catalog feeds.
-- [`untheme`](../untheme) — umbrella package re-exporting the public surface.
+- [`@untheme/schema`](../schema) defines the token contract types and guards.
+- [`@untheme/core`](../core) is the runtime theme service that a catalog feeds.
+- [`untheme`](../untheme) re-exports this package.

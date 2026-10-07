@@ -1,14 +1,14 @@
 import type { Entry, Listing, Page } from "untheme/catalog";
 
 /**
- * Answers a listing over entries held in memory: filters by name,
- * case-insensitively, orders by the listing's field and direction, and cuts
- * its window. `total` counts every match, not the page. For providers that
- * keep their whole manifest at hand.
+ * Answers a listing from entries in memory. The function filters the entries
+ * by name and ignores case. It orders the entries by the field and direction
+ * of the listing. It then cuts the window of the listing. `total` is the
+ * count of all matches.
  *
- * @param entries - Every entry the provider holds.
- * @param listing - The normalized listing the handler received.
- * @returns The page the listing selects.
+ * @param entries - All entries of the provider.
+ * @param listing - The normalized listing that the handler received.
+ * @returns The page that the listing selects.
  */
 export const listEntries = (entries: Entry[], listing: Listing): Page => {
   let matches = entries;

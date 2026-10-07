@@ -14,9 +14,8 @@ import { answer, corrupt, midnight, schema } from "./fixture";
 import type { T } from "./fixture";
 
 /**
- * A well-behaved in-memory source: listings through the reference
- * evaluator, retrievals from a record, synchronous throughout to prove the
- * catalog accepts bare values as well as promises.
+ * An in-memory source. It answers listings with `answer` and retrievals from a
+ * record. It returns bare values. The catalog accepts bare values and promises.
  */
 const source = {
   list: (listing: Listing) => answer(listing),

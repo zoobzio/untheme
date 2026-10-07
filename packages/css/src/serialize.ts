@@ -7,21 +7,17 @@ import { FONT_WEIGHT_NUMBERS, RESERVED_FAMILY_NAMES } from "./constant";
 import { indirection, property } from "./property";
 
 /**
- * Whether a value is a reference in curly-brace syntax: a string wrapped in
- * `{` and `}`.
+ * A reference is a string wrapped in `{` and `}`.
  */
 const isReference = wrapped("{", "}");
 
-/**
- * A single color channel: a finite number or the `none` sentinel.
- */
 const channel = (value: number | "none"): string => {
   return String(value);
 };
 
 /**
- * A channel in a percentage slot: `hsl()` and `hwb()` take their second and
- * third components as percentages.
+ * Serializes a channel as a percentage. `hsl()` and `hwb()` use percentages for
+ * the second and third components.
  */
 const percentage = (value: number | "none"): string => {
   if (value === "none") {
@@ -31,9 +27,10 @@ const percentage = (value: number | "none"): string => {
 };
 
 /**
- * A structured color: the hex fallback when present, else the color space's
- * own function — `hsl()`/`hwb()` with percentage components, the lab/lch
- * family by name, and everything else through `color()`.
+ * Serializes a structured color. The function returns the hex fallback when
+ * present. Otherwise the function returns the function of the color space.
+ * `hsl` and `hwb` use percentage components. `lab`, `lch`, `oklab`, and `oklch`
+ * use their own names. All other spaces use `color()`.
  */
 const color = (value: Inputs["color"]): string => {
   if (isReference(value)) {
@@ -69,9 +66,8 @@ const color = (value: Inputs["color"]): string => {
 };
 
 /**
- * A length or time span: the value with its unit appended. Serves both the
- * `dimension` and `duration` types, whose shapes are identical, and every
- * dimension slot nested in a composite value.
+ * Serializes a value and its unit. The function serves the `dimension` and
+ * `duration` types and each dimension slot in a composite value.
  */
 const measure = (value: Inputs["dimension"] | Inputs["duration"]): string => {
   if (isReference(value)) {
@@ -81,9 +77,9 @@ const measure = (value: Inputs["dimension"] | Inputs["duration"]): string => {
 };
 
 /**
- * A family name: bare when it is a plain ident and not a reserved word,
- * quoted otherwise — with quotes and backslashes escaped — so any name stays
- * one name.
+ * Serializes a family name. The function returns a plain ident bare. The
+ * function quotes any other name and any reserved word, and escapes quotes and
+ * backslashes.
  */
 const familyName = (value: string): string => {
   if (
@@ -96,7 +92,7 @@ const familyName = (value: string): string => {
 };
 
 /**
- * A font family: a single name or an ordered fallback stack joined by commas.
+ * Serializes one name or an ordered fallback stack joined by commas.
  */
 const fontFamily = (value: Inputs["fontFamily"]): string => {
   if (isReference(value)) {
@@ -109,8 +105,8 @@ const fontFamily = (value: Inputs["fontFamily"]): string => {
 };
 
 /**
- * A font weight: numbers pass through, named weights emit their numeric
- * equivalent, since CSS accepts no keyword beyond `normal` and `bold`.
+ * Serializes a font weight. A number stays a number. A named weight becomes its
+ * numeric value.
  */
 const fontWeight = (value: Inputs["fontWeight"]): string => {
   if (isReference(value)) {
@@ -122,9 +118,6 @@ const fontWeight = (value: Inputs["fontWeight"]): string => {
   return String(FONT_WEIGHT_NUMBERS[value]);
 };
 
-/**
- * A plain number.
- */
 const number = (value: Inputs["number"]): string => {
   if (isReference(value)) {
     return indirection(value);
@@ -132,9 +125,6 @@ const number = (value: Inputs["number"]): string => {
   return String(value);
 };
 
-/**
- * A cubic Bézier easing curve.
- */
 const cubicBezier = (value: Inputs["cubicBezier"]): string => {
   if (isReference(value)) {
     return indirection(value);
@@ -143,9 +133,8 @@ const cubicBezier = (value: Inputs["cubicBezier"]): string => {
 };
 
 /**
- * A stroke style: the keywords are all valid `border-style` values and pass
- * through. The dash object has no CSS equivalent, so it falls back to
- * `dashed` — the nearest rendering CSS can express.
+ * Serializes a stroke style. A keyword passes through. A dash object becomes
+ * `dashed`.
  */
 const strokeStyle = (value: Inputs["strokeStyle"]): string => {
   if (isReference(value)) {
@@ -158,7 +147,7 @@ const strokeStyle = (value: Inputs["strokeStyle"]): string => {
 };
 
 /**
- * A border, as the `border` shorthand: width, style, color.
+ * Serializes a border as the `border` shorthand with width, style, and color.
  */
 const border = (value: Inputs["border"]): string => {
   if (isReference(value)) {
@@ -168,8 +157,8 @@ const border = (value: Inputs["border"]): string => {
 };
 
 /**
- * A transition, as the `transition` shorthand: duration, timing function,
- * delay. The property slot is absent, so the declaration applies to `all`.
+ * Serializes a transition as the `transition` shorthand with duration, timing
+ * function, and delay. The declaration applies to `all` properties.
  */
 const transition = (value: Inputs["transition"]): string => {
   if (isReference(value)) {
@@ -179,7 +168,7 @@ const transition = (value: Inputs["transition"]): string => {
 };
 
 /**
- * A single drop shadow: offsets, blur, spread, color.
+ * Serializes one shadow with offsets, blur, spread, and color.
  */
 const shadowLayer = (value: Shadow<Open> | `{${string}}`): string => {
   if (isReference(value)) {
@@ -195,7 +184,7 @@ const shadowLayer = (value: Shadow<Open> | `{${string}}`): string => {
 };
 
 /**
- * A shadow: one layer, or a comma-joined stack of layers.
+ * Serializes one layer or a comma-joined stack of layers.
  */
 const shadow = (value: Inputs["shadow"]): string => {
   if (isReference(value)) {
@@ -208,10 +197,8 @@ const shadow = (value: Inputs["shadow"]): string => {
 };
 
 /**
- * A gradient stop position: the unit interval scaled to a percentage. A
- * referenced position scales through `calc()` — the target is a number token
- * whose custom property holds a unitless value, which no position slot
- * accepts bare.
+ * Serializes a gradient stop position as a percentage. A reference becomes
+ * `calc()` with the `var()` times `100%`.
  */
 const position = (value: number | `{${string}}`): string => {
   if (isReference(value)) {
@@ -221,8 +208,8 @@ const position = (value: number | `{${string}}`): string => {
 };
 
 /**
- * A gradient, as `linear-gradient()` over its stops in the default direction —
- * directly usable in an image slot.
+ * Serializes a gradient as `linear-gradient()` over its stops in the default
+ * direction.
  */
 const gradient = (value: Inputs["gradient"]): string => {
   if (isReference(value)) {
@@ -235,9 +222,9 @@ const gradient = (value: Inputs["gradient"]): string => {
 };
 
 /**
- * A typography set, as the `font` shorthand: weight, size over line height,
- * family. Letter spacing cannot join the shorthand; it rides as the sibling
- * declaration the `siblings` table contributes.
+ * Serializes a typography set as the `font` shorthand with weight, size over
+ * line height, and family. Letter spacing is a sibling declaration. See
+ * `siblings`.
  */
 const typography = (value: Inputs["typography"]): string => {
   if (isReference(value)) {
@@ -247,9 +234,9 @@ const typography = (value: Inputs["typography"]): string => {
 };
 
 /**
- * The letter-spacing slot of a typography set, for the sibling declaration. A
- * whole-value reference points at the target's own sibling property, so the
- * indirection stays pair-wise.
+ * Serializes the letter spacing of a typography set for the sibling
+ * declaration. A whole-value reference points to the `-letter-spacing` property
+ * of the target.
  */
 const letterSpacing = (value: Inputs["typography"]): string => {
   if (isReference(value)) {
@@ -258,9 +245,6 @@ const letterSpacing = (value: Inputs["typography"]): string => {
   return measure(value.letterSpacing);
 };
 
-/**
- * The serializer for each token type.
- */
 const serializers: { [Y in Type]: (value: Inputs[Y]) => string } = {
   color,
   dimension: measure,
@@ -278,17 +262,15 @@ const serializers: { [Y in Type]: (value: Inputs[Y]) => string } = {
 };
 
 /**
- * A type that emits no sibling declarations.
+ * The sibling function for a type with no sibling declarations.
  */
 const none = () => {
   return {};
 };
 
 /**
- * The sibling declarations each token type contributes alongside its own
- * property, keyed by the suffix appended to the property name. Only
- * typography carries one: the `font` shorthand cannot hold letter spacing,
- * so it emits under `<name>-letter-spacing`.
+ * The sibling declarations of each token type, keyed by the suffix of the
+ * property name. Only typography has a sibling, `<name>-letter-spacing`.
  */
 const siblings: {
   [Y in Type]: (value: Inputs[Y]) => Partial<Record<`-${string}`, string>>;
@@ -311,10 +293,10 @@ const siblings: {
 };
 
 /**
- * Serializes a token's bound value to its CSS text by declared type. A
- * whole-value `{token}` reference emits as `var()`; references nested inside
- * composite values emit as `var()` in place. Input is trusted — a binding
- * that passed schema validation matches its declared type's shape.
+ * Serializes the bound value of a token to CSS text by its declared type. A
+ * whole-value reference emits as `var()`. A reference in a composite value
+ * emits as `var()` in place. The function assumes that the value matches the
+ * shape of its declared type.
  */
 export const serialize = <Y extends Type>(
   type: Y,
@@ -324,9 +306,9 @@ export const serialize = <Y extends Type>(
 };
 
 /**
- * Every declaration a token's bound value emits, keyed by the suffix appended
- * to the token's custom property name: the value's own serialization under
- * `""`, and the type's sibling declarations under their dashed suffixes.
+ * Returns each declaration that the bound value of a token emits, keyed by the
+ * suffix of the custom property name. The key `""` holds the serialization of
+ * the value. The sibling declarations of the type follow under their suffixes.
  */
 export const emit = <Y extends Type>(
   type: Y,

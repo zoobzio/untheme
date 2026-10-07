@@ -1,13 +1,10 @@
 /**
- * The semantic token types this integration ships as its role vocabulary — the
- * LSP `SemanticTokenTypes` enumeration verbatim (LSP 3.17). The scope packs we
- * export route every TextMate scope to one of these, and a consumer's map binds
- * each to a token. Adopting the standard keeps the vocabulary derived rather
- * than invented; a user reaches anything the standard omits (punctuation,
- * markup, …) through their own scope rules, whose `role` is open.
- *
- * The value is the single source of truth — `SemanticType` is derived from it —
- * so this module holds no types and depends on nothing.
+ * The role vocabulary of this package. The array lists the LSP
+ * `SemanticTokenTypes` of LSP 3.17. The scope rules in `BASIC_SCOPES` route
+ * each TextMate scope to one of these roles. The `map` argument binds each
+ * role to a token. A user adds other roles with their own scope rules, and the
+ * `role` of a scope rule can be any string. `SemanticType` is the union of
+ * these values.
  */
 export const SEMANTIC_TYPES = [
   "namespace",
@@ -36,8 +33,7 @@ export const SEMANTIC_TYPES = [
 ] as const;
 
 /**
- * The semantic-token roles Shiki colors when a grammar emits semantic tokens,
- * keyed by Shiki's semantic token name. Values are `SemanticType`s.
+ * Maps the name of each semantic token that Shiki colors to a `SemanticType`.
  */
 export const SEMANTIC = {
   customLiteral: "function",

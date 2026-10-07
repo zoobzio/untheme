@@ -1,16 +1,14 @@
 import type { ScopeRule } from "./types";
 
 /**
- * The universal scope set, routing the TextMate scopes grammars emit by
- * convention to LSP semantic token types. Language-neutral, so it classifies
- * any grammar off the base, and always applied — `defineShikiTheme` layers it
- * under whatever `options.scopes` adds. TextMate matches by prefix, so these
- * base rules already reach a language's `.rust`/`.go`/… scopes; a rule you add
- * only overrides where a language deviates.
+ * The scope rules that route common TextMate scopes to LSP semantic token
+ * types. `defineShikiTheme` always applies these rules, and `options.scopes`
+ * adds rules after them. TextMate matches a scope by prefix, so a rule for
+ * `keyword` also matches a scope such as `keyword.control.rust`.
  *
- * Strict LSP: scopes with no semantic token type (punctuation, markup, plain
- * delimiters) are left out and render at the default foreground — reach them
- * with your own rules, whose `role` is open.
+ * The rules cover only scopes that have an LSP semantic token type, and
+ * markup scopes that set a font style. Other scopes render in the default
+ * foreground color.
  */
 export const BASIC_SCOPES: ScopeRule[] = [
   // Comments
@@ -69,9 +67,7 @@ export const BASIC_SCOPES: ScopeRule[] = [
     ],
     role: "type",
   },
-  // Primitive type names some grammars scope under storage.type (C `int`, Go
-  // `int`) — the declaration-keyword `storage.type` above stays a keyword, this
-  // more-specific selector wins for the built-in type names.
+  // Primitive type names, such as `int` in C and Go
   {
     scope: [
       "storage.type.built-in",
@@ -114,7 +110,7 @@ export const BASIC_SCOPES: ScopeRule[] = [
   { scope: "entity.name.tag", role: "keyword" },
   { scope: "entity.other.attribute-name", role: "property" },
 
-  // Style-only markup (no semantic role, pure typography)
+  // Font styles
   { scope: ["markup.italic", "emphasis"], fontStyle: "italic" },
   { scope: ["markup.bold", "strong"], fontStyle: "bold" },
   { scope: "markup.underline", fontStyle: "underline" },

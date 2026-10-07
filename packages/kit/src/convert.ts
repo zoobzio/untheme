@@ -5,17 +5,17 @@ import { REJECTED_TYPES } from "./constant";
 import { braced, cite, isReference, walk } from "./util";
 
 /**
- * Whether a value is a token definition: a non-array object carrying a
- * `$value` member.
+ * Whether a value is a token definition, an object that is not an array and has
+ * a `$value` member.
  */
 const isDefinition = has("$value");
 
 /**
- * The authored binding for a token. A whole-token alias is reconstructed from
- * the metadata Terrazzo keeps after resolution — the raw authored value
- * first, the final alias target as fallback — so the emitted config keeps
- * references live instead of baking in resolved literals. Everything else is
- * the structurally converted value with partial aliases restored in place.
+ * Returns the authored binding of a token. For a whole-token alias, the function
+ * makes the alias from the metadata that Terrazzo keeps after resolution. It
+ * reads the raw authored value first and the final alias target second. The
+ * emitted config keeps references live. For all other tokens, the function
+ * returns the converted value with partial aliases restored in place.
  */
 export const binding = (token: Source): unknown => {
   if (REJECTED_TYPES.has(token.$type)) {
@@ -34,9 +34,8 @@ export const binding = (token: Source): unknown => {
 };
 
 /**
- * The full definition slot for a token: declared type, converted binding, and
- * the spec metadata carried through when present. Terrazzo's `$extends` and
- * its internal bookkeeping members do not survive.
+ * Returns the full definition slot of a token. The slot has the declared type,
+ * the converted binding, and the spec metadata when present.
  */
 export const definition = (token: Source): Record<string, unknown> => {
   const slot: Record<string, unknown> = {
@@ -56,18 +55,17 @@ export const definition = (token: Source): Record<string, unknown> => {
 };
 
 /**
- * The fully resolved literal for a token — no alias reconstruction, just the
- * structural conversion of Terrazzo's dereferenced value. The round-trip
- * verifier compares this against untheme's own resolution.
+ * Returns the fully resolved literal of a token, converted from the dereferenced
+ * Terrazzo value. The verifier compares it with the untheme resolution.
  */
 export const literal = (token: Source): unknown => {
   return walk(token.$value, undefined, token);
 };
 
 /**
- * Rejects token names that would collide as CSS custom properties: the CSS
- * renderer rewrites every dot to a dash, so `a.b` and `a-b` would both render
- * as `--a-b` and silently shadow each other.
+ * Throws when two token names become the same CSS custom property. The CSS
+ * renderer replaces every dot with a dash. The names `a.b` and `a-b` both render
+ * as `--a-b`.
  */
 export const collisions = (ids: string[]): void => {
   const seen = new Map<string, string>();

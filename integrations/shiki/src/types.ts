@@ -3,22 +3,21 @@ import type { Template, Token } from "untheme";
 import type { SEMANTIC_TYPES } from "./constant";
 
 /**
- * A role in the shipped vocabulary: one LSP `SemanticTokenType`, derived from
- * {@link SEMANTIC_TYPES} so the value stays the single source of truth.
+ * A role in the shipped vocabulary. The type is one LSP `SemanticTokenType`
+ * from {@link SEMANTIC_TYPES}.
  */
 export type SemanticType = (typeof SEMANTIC_TYPES)[number];
 
 /**
- * A font style a scope can carry on its own, independent of color. Shiki
- * accepts these space-joined in a single `fontStyle` string.
+ * A font style that a scope rule can set.
  */
 export type FontStyle = "italic" | "bold" | "underline" | "strikethrough";
 
 /**
- * One entry in a scope map: the TextMate scope(s) it covers, the role its
- * tokens resolve through (absent for style-only scopes like `emphasis`), and
- * any font style. `R` is the role vocabulary — `SemanticType` for the packs we
- * ship, but open, so a user's own rules can name any role their map declares.
+ * A rule that sets the color and font style of TextMate scopes. `scope` is one
+ * scope or an array of scopes. `role` selects the token from the map. A rule
+ * for a style-only scope, such as `emphasis`, has no `role`. `R` is the type
+ * of the role. The default is `SemanticType`.
  */
 export type ScopeRule<R extends string = SemanticType> = {
   scope: string | string[];
@@ -27,11 +26,10 @@ export type ScopeRule<R extends string = SemanticType> = {
 };
 
 /**
- * The interchange the user supplies: each role bound to a token in their
- * contract. The LSP roles autocomplete and are optional — an unmapped role
- * leaves its scopes at the default foreground — and the map stays open, so a
- * user pairs custom scope rules with custom roles. Every value is a real
- * `Token<T>`, checked against the contract.
+ * A map from roles to tokens in the contract. Each `SemanticType` key is
+ * optional. A scope with an unmapped role renders in the default foreground
+ * color. The map also accepts any other string as a key, for use with custom
+ * scope rules. `defineShikiTheme` checks each value against the contract.
  */
 export type SyntaxMap<T extends Template> = {
   [role in SemanticType]?: Token<T>;
@@ -40,13 +38,11 @@ export type SyntaxMap<T extends Template> = {
 };
 
 /**
- * Extra knobs on the generated theme. `scopes` are extra rules layered over the
- * always-applied universal set — add only what you want beyond it; a rule that
- * names a base scope overrides it, and a rule's `role` is open, so it can reach
- * anything TextMate distinguishes that the strict-LSP base leaves out. `fg` /
- * `bg` set the theme's top-level foreground and background — the `<pre>`/`<code>`
- * colors Shiki stamps on a whole block. `name` and `type` carry through to the
- * registration Shiki files the theme under.
+ * The options of `defineShikiTheme`. `scopes` adds rules after `BASIC_SCOPES`.
+ * A rule that names a base scope replaces the base rule. The `role` of such a
+ * rule can be any key of the map. `fg` and `bg` are the tokens for the
+ * foreground and background colors of the whole code block. `name` and `type`
+ * set the name and the type of the Shiki theme.
  */
 export type ShikiOptions<T extends Template> = {
   name?: string;

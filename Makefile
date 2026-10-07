@@ -1,10 +1,10 @@
 # untheme monorepo orchestration.
 #
-# Thin wrappers over the pnpm workspace scripts (package.json stays the source
-# of truth) plus a few targets that span the whole repo: cleaning build output
-# and example caches, and the aggregate gates run in CI.
+# The targets run the pnpm workspace scripts. Some targets act on the whole
+# repo. These targets clean build output and example caches, and run the
+# aggregate checks for CI.
 
-# Show this help by default.
+# The default target shows this help.
 .DEFAULT_GOAL := help
 
 .PHONY: help install stub build prepare typecheck test lint format inspect clean check verify ci
@@ -17,16 +17,16 @@ help: ## List available targets
 install: ## Install workspace dependencies
 	pnpm install
 
-stub: ## Link packages to source for dev (jiti stubs, preserves live types)
+stub: ## Link the packages to their source for development
 	pnpm stub
 
 build: ## Build every package to its .dist
 	pnpm build
 
-prepare: ## Run workspace prepare hooks (nuxt prepare); needs build first
+prepare: ## Run the workspace prepare hooks. Run build first
 	pnpm -r prepare
 
-typecheck: ## Type-check every package and example
+typecheck: ## Check the types of every package and example
 	pnpm typecheck
 
 test: ## Run the test suite
@@ -38,16 +38,16 @@ lint: ## Lint with oxlint
 format: ## Format the repo with oxfmt
 	pnpm format
 
-inspect: ## Check formatting without writing (oxfmt --check)
+inspect: ## Check the formatting with oxfmt
 	pnpm inspect
 
-clean: ## Remove build output and example caches (.dist, .coverage, .nuxt, untheme/)
+clean: ## Remove the build output and the example caches
 	rm -rf .coverage
 	find packages integrations -maxdepth 2 -name .dist -type d -prune -exec rm -rf {} +
 	find examples -maxdepth 2 \( -name .nuxt -o -name .output -o -name untheme \) -type d -prune -exec rm -rf {} +
 
-check: lint typecheck test ## Run lint/typecheck/test against existing build output
+check: lint typecheck test ## Run lint, typecheck, and test on the existing build output
 
-verify: clean install build typecheck test ## Full cold rebuild and verification
+verify: clean install build typecheck test ## Clean, install, build, typecheck, and test
 
-ci: build prepare typecheck test lint inspect ## Cold CI gate: build first, then every check (examples included)
+ci: build prepare typecheck test lint inspect ## Build, prepare, typecheck, test, lint, and inspect

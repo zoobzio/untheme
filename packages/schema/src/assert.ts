@@ -23,10 +23,9 @@ import type {
 import { SchemaError } from "./error";
 
 /**
- * Builds the {@link Assert} bundle: each kind runs every rule, collects all the
- * {@link Issue}s, and throws a {@link SchemaError} if any were found. Unlike a
- * {@link Check}, it reports every failure in one pass rather than stopping at
- * the first.
+ * Builds the {@link Assert} bundle. Each kind runs every rule and collects all
+ * the {@link Issue}s. The kind throws a {@link SchemaError} when it finds an
+ * issue. The error holds every issue from the pass.
  */
 export const defineAssert = <T extends Template>({
   rules,

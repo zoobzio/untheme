@@ -1,18 +1,16 @@
 import { manifest } from "#build/untheme/manifest.mjs";
 
 /**
- * State and actions for the interactive demo: the manifest of modifier axes —
- * the theme among them, each with its named contexts — and `shuffle` to
- * randomize the whole selection. Selection
- * changes run through a view-transition cross-fade where the browser
- * supports it.
+ * Returns the state and actions for the interactive demo. `manifest` lists the
+ * modifier axes, including the theme, each with its named contexts. `shuffle`
+ * selects a random context for each axis. A selection change runs as a
+ * view-transition cross-fade where the browser supports it.
  */
 export const useDemo = () => {
   const untheme = useUntheme();
 
   const axes = untheme.modifiers();
 
-  /* Selection changes cross-fade where the browser supports it. */
   const transition = (change: () => void) => {
     if (typeof document !== "undefined" && "startViewTransition" in document) {
       document.startViewTransition(change);
@@ -29,8 +27,8 @@ export const useDemo = () => {
     return found;
   };
 
-  /* A random context per axis, applied as one selection — validated through
-   the schema, which also narrows it to the contract. */
+  /* Picks a random context for each axis and applies the result as one
+   selection. The schema validates the selection. */
   const shuffle = () => {
     const random: Record<string, string> = {};
     for (const axis of axes) {

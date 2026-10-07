@@ -22,22 +22,24 @@ import { MODULES, STYLESHEET } from "./constant";
 import { closest, loadTheme } from "./theme";
 
 /**
- * Nuxt module for untheme.
+ * The Nuxt module for untheme. The theme is DTCG JSON built by `@untheme/kit`.
+ * The module builds the `untheme.config.ts` of the app, or it takes the
+ * `theme` and `input` from the options. When more than one Nuxt layer sets
+ * `untheme`, the module uses the value of the closest layer as a whole.
  *
- * Its theme is always DTCG JSON built by `@untheme/kit`: either the app's own
- * `untheme.config.ts`, built here, or the `theme` and `input` a kit build
- * elsewhere already generated, passed in. When more than one Nuxt layer sets
- * `untheme`, the closest layer's value is used whole. At build time the module
- * validates the base theme and initial selection; writes the kit's `index`
- * and `config` modules — the `Token` union, the `Mod` axis structure, the
- * theme and the selection — as build templates under `untheme/`; renders the static
- * cascade to the `untheme.css` template, linked into the app CSS unless
- * `css: false` opts out; and registers the runtime plugin and the
- * `useUntheme` and `useUnthemeRenderer` auto-imports.
+ * At build time the module does these steps.
  *
- * It registers no server routes. An app that serves a theme catalog mounts
- * one itself, in a server route file of its choosing, with
- * `createThemeHandler` from `@untheme/nuxt/server`.
+ * - It validates the base theme and the initial selection.
+ * - It writes the `index` and `config` modules of the kit as build templates
+ *   under `untheme/`. The modules hold the `Token` union, the `Mod` axis
+ *   structure, the theme, and the selection.
+ * - It renders the static cascade to the `untheme.css` template. The module
+ *   links the template into the app CSS unless `css` is `false`.
+ * - It registers the runtime plugin and the `useUntheme` and
+ *   `useUnthemeRenderer` auto-imports.
+ *
+ * An app that serves a theme catalog mounts `createThemeHandler` from
+ * `@untheme/nuxt/server` in a server route file.
  */
 export default defineNuxtModule<NuxtUnthemeConfig>({
   meta: {
@@ -55,12 +57,10 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
     schema.assert.input(input);
 
     /*
-     * The theme modules, exactly as `untheme build` writes them: `index`
-     * carries the `Token` union, the `Mod` structure and the guards, `config`
-     * the base theme and boot selection, `manifest` each modifier and context
-     * with its name and description. One generator — the kit's — serves
-     * the CLI and this module, so an app importing `#build/untheme/*` and a
-     * package importing a kit build see the same modules.
+     * The theme modules are the same modules that `untheme build` writes.
+     * `index` holds the `Token` union, the `Mod` structure, and the guards.
+     * `config` holds the base theme and the boot selection. `manifest` holds
+     * the name and description of each modifier and context.
      */
     for (const file of emit({ theme, input, ...(manifest && { manifest }) })) {
       addTemplate({
@@ -71,18 +71,10 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
     }
 
     /*
-     * The static cascade as a real stylesheet in the build directory: the
-     * base bindings under `:root`, then each modifier context as a
-     * data-attribute block — `defineRenderer(...).sheet()` over the resolved
-     * theme. Written to disk so editors index the custom properties and user
-     * CSS can `@import "#build/untheme.css"`, and linked into the app CSS
-     * unless `css: false` opts out. The renderer's source is a static
-     * container over the validated theme: `sheet()` reads only the theme,
-     * and the bindings accessor folds the base values so the other renderer
-     * reads stay coherent. The whole cascade sits in the `untheme` cascade
-     * layer, so the unlayered block the runtime plugin injects — carrying
-     * live overrides and swapped themes — wins every equal-specificity
-     * conflict regardless of where this stylesheet lands in the head.
+     * The static cascade holds the base bindings under `:root`. Each modifier
+     * context follows as a data-attribute block. The cascade sits in the
+     * `untheme` cascade layer. The unlayered block that the runtime plugin
+     * injects wins over the layer.
      */
     const renderer = defineRenderer({
       config: { theme },

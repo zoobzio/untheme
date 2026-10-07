@@ -6,8 +6,7 @@ export default defineBuildConfig({
     "src/config",
     "src/constant",
     { input: "src/server/index", name: "server" },
-    // The runtime is shipped unbundled: Nuxt resolves these files by path and
-    // compiles them in the app, where the #app/#imports/#build virtuals exist.
+    // The runtime files ship unbundled. Nuxt compiles them in the app.
     { input: "src/runtime/", outDir: ".dist/runtime", builder: "mkdist" },
   ],
   outDir: ".dist",

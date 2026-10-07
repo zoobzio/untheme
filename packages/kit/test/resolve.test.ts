@@ -10,7 +10,7 @@ import { InvalidConfigError } from "../src/error";
 import { resolveKit } from "../src/resolve";
 import { FIXTURES } from "./helpers";
 
-/** The fixtures directory as a path — the project root the tests build in. */
+/** The fixtures directory as a path. The tests build in it as the project root. */
 const ROOT = fileURLToPath(FIXTURES);
 
 describe("resolveKit", () => {
@@ -342,7 +342,7 @@ describe("resolveKit", () => {
         modifiers: {
           color: { contexts: [] },
           density: { contexts: ["compact"], default: "default" },
-          // @ts-expect-error — a bare list is not a modifier entry.
+          // @ts-expect-error A bare list is not a modifier entry.
           text: ["sm"],
           motion: { contexts: ["a", "a"], default: "" },
           radius: { add: { soft: "", hard: [] } },

@@ -4,12 +4,11 @@ import { defineNuxtConfig } from "nuxt/config";
 /**
  * The aurora showcase.
  *
- * The theme wiring lives in `untheme.config.ts`, which points at aurora's
- * DTCG JSON: the module finds it and builds it through `@untheme/kit`, so
- * no `untheme` options are needed here. The module flattens the active
- * selection's tokens into `--token` CSS variables on every render, and
- * mirrors the selection as `data-<modifier>` attributes on the document
- * root.
+ * `untheme.config.ts` holds the theme wiring and points at the DTCG JSON of
+ * aurora. The module finds it and builds it through `@untheme/kit`. On every
+ * render, the module flattens the tokens of the active selection into
+ * `--token` CSS variables. The module also sets the selection as
+ * `data-<modifier>` attributes on the document root.
  */
 const src = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -20,11 +19,10 @@ export default defineNuxtConfig({
   imports: {
     dirs: ["constants", "types"],
   },
-  // The runtime plugin pulls untheme into the app bundle, where Vite must
-  // compile real ESM — not a `unbuild --stub` jiti shim. Aliasing the libs to
-  // their TypeScript source lets Vite transpile them directly, so the example
-  // works whether the workspace is stubbed (`pnpm dev`) or fully built.
-  // Anchored regexes keep `untheme` from also matching its subpaths.
+  // The runtime plugin bundles untheme into the app. The aliases point the
+  // libraries at their TypeScript source, and Vite compiles that source. The
+  // aliases work with a stubbed workspace (`pnpm dev`) and a built workspace.
+  // Each regex is anchored to match one package path.
   vite: {
     resolve: {
       alias: [

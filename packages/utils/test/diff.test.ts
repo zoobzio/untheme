@@ -16,7 +16,7 @@ describe("diff", () => {
   });
 
   it("ignores equal-but-not-identical values", () => {
-    /* Rebind color.bg to a fresh object equal to the original value. */
+    /* Rebinds color.bg to a new object with the same value. */
     const edited = merge(theme, {
       tokens: { "color.bg": { colorSpace: "srgb", components: [1, 1, 1] } },
     });
@@ -37,7 +37,7 @@ describe("diff", () => {
     expect(result.tokens).toEqual({
       "color.bg": { colorSpace: "hsl", components: [0, 0, 0] },
     });
-    /* The emitted value is the binding, not the whole slot. */
+    /* The result holds the binding of the slot. */
     expect(result.tokens["color.bg"]).not.toHaveProperty("$type");
   });
 
@@ -88,8 +88,8 @@ describe("diff", () => {
   });
 
   it("cannot express a dropped override, so the round-trip keeps it", () => {
-    /* `to` empties the dark context; the patch has no way to say "remove",
-       so restoring over `from` leaves the original dark overrides standing. */
+    /* `stripped` has an empty dark context. A patch holds added and changed
+       bindings only. The restored theme keeps the original dark bindings. */
     const stripped = clone(theme);
     stripped.modifiers.mode.dark = {};
     const result = diff(theme, stripped);

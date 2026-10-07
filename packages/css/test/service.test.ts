@@ -11,8 +11,7 @@ import { defineRenderer } from "../src/service";
 import { theme } from "./fixture";
 
 /**
- * A renderer over the fixture's base bindings through plain accessors — no
- * core service involved, proving the source contract stands on its own.
+ * A renderer over the base bindings of the fixture, through plain accessors.
  */
 const make = () => {
   return defineRenderer({
@@ -214,9 +213,11 @@ describe("defineRenderer", () => {
   });
 
   describe("escaping", () => {
-    /* Names the schema admits but CSS text must not take at face value: a
-       family carrying a quote, a family named by a reserved word, and a
-       modifier axis and context carrying quotes. */
+    /*
+     * Names that the schema admits and CSS text must escape. A family has a
+     * quote, a family has a reserved word as its name, and a modifier axis and
+     * context have quotes.
+     */
     type OddTok = "font.brand" | "font.reserved";
     type OddMod = { 'mo"de': { plain: object; 'dar"k': object } };
     const odd: Contract<OddTok, OddMod> = {

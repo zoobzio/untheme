@@ -12,18 +12,18 @@ import { defineSchema } from "@untheme/schema";
 import { resolveKit } from "../src/resolve";
 
 /**
- * Aurora is the kit's fixture: it ships only DTCG JSON, so building it here
- * proves the structure — a valid contract, references that resolve, every
- * context proven against Terrazzo. The checks below cover what a build cannot
- * detect: the channel tokens ("channels") the color, vibrancy and contrast
- * axes route through, and how those three axes resolve their collisions.
+ * Aurora is the fixture of the kit. It has only DTCG JSON. A build of it checks
+ * the structure: a valid contract, references that resolve, and every context
+ * verified against Terrazzo. The checks below cover what a build cannot detect:
+ * the channel tokens ("channels") that the color, vibrancy, and contrast axes
+ * route through, and how those three axes resolve their collisions.
  */
 type Aurora = Contract<
   string,
   Record<string, Record<string, Record<string, never>>>
 >;
 
-/** The kit package — a project root whose packages include aurora. */
+/** The kit package. It is a project root whose packages include aurora. */
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 
 /** Aurora's resolver document, as a config source. */
@@ -32,9 +32,9 @@ const SOURCE = "npm:/@untheme/aurora/src/resolver.json";
 let kit: Kit;
 
 /**
- * Aurora's authored dark color context, as written. The build drops an
- * override equal to the base value (`outline-medium-contrast` steps to the
- * same stop in both modes), so the dark context is checked at its source.
+ * Aurora's authored dark color context, as written. The build drops an override
+ * that equals the base value. For example, `outline-medium-contrast` steps to
+ * the same stop in both modes. The test checks the dark context at its source.
  */
 let authored: { color: { dark: Record<string, unknown> } };
 
@@ -259,7 +259,6 @@ describe("the theme axis", () => {
     const themes = Object.keys(modifiers().theme ?? {});
     expect(themes).toHaveLength(31);
 
-    /* The token names of a theme file — its root metadata aside. */
     const names = (file: Record<string, unknown>) =>
       Object.keys(file).filter((key) => !key.startsWith("$"));
 
@@ -377,7 +376,6 @@ describe("a narrowed aurora build", () => {
       Object.keys(kit.theme.tokens),
     );
 
-    /* The base is nord's palette now; everything but the ramps is as before. */
     const ut = boot({ theme: "nord" });
     for (const [token, slot] of Object.entries(narrowed.theme.tokens)) {
       if (/-\d+$/.test(token)) {

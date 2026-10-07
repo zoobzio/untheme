@@ -1,7 +1,6 @@
-/* atmosphere.css — Atmosphere.vue: the page-level ambient colour field.
-   Blurred token-coloured orbs plus a dot grid. Every modifier axis drives
-   one facet of the field, so the atmosphere restyles itself with the theme.
-   Tokens only (raw values limited to layout geometry, opacity, transforms). */
+/* Styles `Atmosphere.vue`, the ambient color field of the page. The field has
+   blurred orbs and a dot grid. Each modifier axis changes one facet of the
+   field. Raw values set only layout geometry, opacity, and transforms. */
 
 .page-atmos {
   position: fixed;
@@ -12,20 +11,19 @@
 }
 .page-orb {
   position: absolute;
-  /* text scales the whole field; each orb keeps its own relative size */
+  /* text scales the field and each orb keeps its relative size */
   inline-size: calc(var(--orb-size, 28vw) * var(--orb-scale));
   block-size: calc(var(--orb-size, 28vw) * var(--orb-scale));
-  /* density clusters the field: scale each orb's offset from the viewport centre */
+  /* density scales the offset of each orb from the viewport center */
   inset-block-start: calc(50vh + (var(--orb-y, 0px) - 50vh) * var(--orb-gap));
   inset-inline-start: calc(50vw + (var(--orb-x, 0px) - 50vw) * var(--orb-gap));
-  /* radius shapes the silhouette (rect → rounded rect → circle) */
+  /* radius sets the silhouette of the orb, from rectangle to circle */
   border-radius: var(--orb-round);
-  /* orbs stay softly diffuse; contrast pulls the aurora back, not the orbs */
   filter: blur(var(--blur-lg));
   opacity: 0.22;
   will-change: transform;
 }
-/* colour by accent family (loop assigns p / t / s round-robin) */
+/* each orb takes an accent family. The loop assigns p, t, and s in turn. */
 .page-orb-p {
   background-color: color-mix(in srgb, var(--primary) 60%, transparent);
 }
@@ -35,11 +33,11 @@
 .page-orb-s {
   background-color: color-mix(in srgb, var(--secondary) 55%, transparent);
 }
-/* colour governs the field's overall brightness */
+/* color sets the brightness of the field */
 [data-color="dark"] .page-orb {
   opacity: 0.3;
 }
-/* vibrancy governs the field's colour presence */
+/* vibrancy sets the color presence of the field */
 [data-vibrancy="muted"] .page-orb {
   opacity: 0.12;
 }
@@ -50,10 +48,10 @@
   opacity: 0.46;
 }
 
-/* ---------- axis → orb mapping ----------
-   Each modifier drives one facet of the field. :root carries the default
-   context's value; non-default contexts override below. These are private
-   multipliers (novel names), not tokens. */
+/* ---------- axis to orb mapping ----------
+   Each modifier axis sets one facet of the field. :root holds the value for
+   the default context. The rules below override it for other contexts. These
+   custom properties are multipliers and are not tokens. */
 :root {
   --orb-scale: 1; /* text: overall size */
   --orb-gap: 1; /* density: clustering */
@@ -62,11 +60,11 @@
   --orb-round: 14%; /* radius: silhouette (rounded rect) */
   --grid-ink: 55%; /* contrast: grid presence */
   --grid-travel: 8vh; /* motion: grid drift */
-  /* radius: grid cell shape — rounded square by default */
+  /* radius: grid cell shape. The default is a rounded square. */
   --grid-dot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Crect x='11.7' y='11.7' width='2.6' height='2.6' rx='0.8' fill='%23000'/%3E%3C/svg%3E");
 }
 
-/* text — orbs scale with the type ramp, keeping their relative spread */
+/* text: orbs scale with the type ramp and keep their relative spread */
 [data-text="sm"] {
   --orb-scale: 0.82;
 }
@@ -74,7 +72,7 @@
   --orb-scale: 1.25;
 }
 
-/* density — clusters the field toward centre and narrows each orb's drift */
+/* density: clusters the field toward the center and narrows the drift */
 [data-density="compact"] {
   --orb-gap: 0.68;
   --orb-spread: 0.6;
@@ -84,7 +82,7 @@
   --orb-spread: 1.45;
 }
 
-/* motion — scroll-travel distance + grid drift (reduced stills it entirely below) */
+/* motion: sets the scroll-travel distance and the grid drift */
 [data-motion="expressive"] {
   --orb-motion: 1.9;
   --grid-travel: 16vh;
@@ -94,7 +92,7 @@
   --grid-travel: 0vh;
 }
 
-/* contrast — firms up the grid texture (the aurora, not the orbs, pulls back) */
+/* contrast: raises the ink of the grid */
 [data-contrast="medium"] {
   --grid-ink: 66%;
 }
@@ -102,7 +100,7 @@
   --grid-ink: 78%;
 }
 
-/* radius — silhouette echoes the UI's corner language (orbs + grid dots) */
+/* radius: sets the corner shape of the orbs and the grid dots */
 [data-radius="sharp"] {
   --orb-round: 0%;
   --grid-dot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Crect x='11.7' y='11.7' width='2.6' height='2.6' fill='%23000'/%3E%3C/svg%3E");
@@ -113,11 +111,11 @@
 }
 
 /* ---------- aurora curtains: the lead ambient effect ----------
-   Light ribbons hung from the top of the page, each swaying on its own time
-   loop. Blur (depth), presence + saturation (vibrancy), sway + tempo (motion),
-   brightness (color), legibility pull-back (contrast) and cap shape (radius,
-   via --shape-full) are all axis-driven — one effect that reads the whole
-   variant system live. Private multipliers (novel names), not tokens. */
+   Light ribbons hang from the top of the page. Each ribbon sways on its own
+   time loop. Depth sets the blur. Vibrancy sets the presence and saturation.
+   Motion sets the sway and the tempo. Color sets the brightness. Contrast
+   sets the dimming. Radius sets the cap shape through --shape-full. These
+   custom properties are multipliers and are not tokens. */
 :root {
   --aurora-blur: var(--blur-lg); /* depth: diffusion */
   --aurora-opacity: 0.42; /* color + vibrancy: presence */
@@ -144,7 +142,7 @@
   inset-inline-start: var(--band-x);
   inline-size: var(--band-w);
   block-size: var(--band-h, 84vh);
-  /* radius morphs the ribbon caps: sharp ≈ shafts, round ≈ soft plumes */
+  /* radius sets the cap shape of the ribbon: sharp gives shafts, round gives plumes */
   border-radius: var(--shape-full) var(--shape-full) 42% 42% / 55% 55%
     var(--shape-full) var(--shape-full);
   filter: blur(var(--aurora-blur));
@@ -198,9 +196,9 @@
   }
 }
 
-/* aurora axis wiring — colour sets brightness, vibrancy sets presence +
-   saturation, contrast dials the field back so text keeps its footing,
-   depth sets diffusion, motion sets sway width + shimmer tempo. */
+/* aurora axis wiring. Color sets the brightness. Vibrancy sets the presence
+   and the saturation. Contrast dims the field. Depth sets the diffusion.
+   Motion sets the sway width and the shimmer tempo. */
 [data-color="light"] {
   --aurora-opacity: 0.4;
 }
@@ -243,9 +241,9 @@
   animation: none;
 }
 
-/* full-page dot grid: a quiet texture over the aurora. The ink colour is a
-   token (masked into cells) so it tracks the theme; the mask carries both the
-   cell shape (radius) and the fade-out toward the footer. */
+/* full-page dot grid over the aurora. The ink color is a token that the mask
+   cuts into cells. The mask sets the cell shape from radius and the fade
+   toward the footer. */
 .page-grid {
   position: absolute;
   inset: 0;
@@ -279,7 +277,7 @@
   opacity: 0.55;
 }
 
-/* foreground rides above the ambient field */
+/* the foreground sits above the ambient field */
 .masthead,
 main,
 .footer {
@@ -287,12 +285,13 @@ main,
   z-index: 1;
 }
 
-/* every orb rides the same scroll-aligned track, but each carries its own
-   size / start / travel / drift (inline, loop-generated like the chart bars).
-   Orbs rest at their authored position at the top of the scroll and ride down
-   the full length of their travel as you scroll, with a subtle L/R wander that
-   peaks at mid-scroll. Travel scales with motion (--orb-motion), the L/R wander
-   with density (--orb-spread). No scroll timeline => orbs rest at their start. */
+/* Every orb follows the same scroll-aligned track. Each orb has its own size,
+   start, travel, and drift as inline values from the loop. At the top of the
+   scroll, each orb sits at its start position. As the page scrolls, each orb
+   moves down its full travel and drifts left and right, with the most drift at
+   mid-scroll. Motion (--orb-motion) scales the travel. Density (--orb-spread)
+   scales the drift. Where scroll timelines are unsupported, orbs stay at their
+   start. */
 @keyframes orb-fall {
   0% {
     transform: translate3d(0, 0, 0);
@@ -312,8 +311,8 @@ main,
     );
   }
 }
-/* the dot grid tracks straight down/up with scroll (the dot layer of the mask
-   slides; the fade layer stays put and hides it near the footer) */
+/* the dot grid follows the scroll. The dot layer of the mask slides and the
+   fade layer stays in place to hide the dots near the footer. */
 @keyframes grid-scroll {
   to {
     -webkit-mask-position:
@@ -334,7 +333,7 @@ main,
     animation-timeline: scroll(root);
   }
 }
-/* motion: reduced — the field rests, regardless of depth */
+/* motion: reduced stops the field at every depth */
 [data-motion="reduced"] .page-orb,
 [data-motion="reduced"] .page-grid {
   animation: none;

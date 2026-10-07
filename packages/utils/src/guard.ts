@@ -3,10 +3,9 @@ import type { Template } from "@untheme/schema";
 import { object, record } from "objectively";
 
 /**
- * Whether a value has the structural shape of a {@link Template}: a record
- * carrying string `id` and `name`, indexable `tokens` and `modifiers`, and an
- * `order` array. A shape test only — whether the members satisfy any contract
- * is the schema's concern.
+ * Returns `true` when a value has the shape of a {@link Template}. A template
+ * is a record with a string `id`, a string `name`, an object `tokens`, a
+ * record `modifiers`, and an array `order`.
  */
 export const isTemplate = (v: unknown): v is Template => {
   return (

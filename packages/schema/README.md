@@ -1,17 +1,34 @@
 # @untheme/schema
 
-Types and runtime validation for untheme's token contract. Validation is built on the guards in [`objectively`](https://www.npmjs.com/package/objectively).
+Types and runtime validation for the untheme token contract. The validation
+uses the guards of [`objectively`](https://www.npmjs.com/package/objectively).
 
-A **template** declares the contract: which **tokens** exist, which **modifiers** (axes like `color`) exist and what **contexts** (options like `light`/`dark`) each carries, and the **order** modifiers compose in. `defineSchema` derives a validation bundle from a template, narrowed to its vocabulary. Use it to validate untrusted theme objects at runtime (e.g. JSON loaded from disk) — anything that passes is contract-bound and safe to render.
+## Install
+
+```sh
+pnpm add @untheme/schema
+```
 
 ## The contract
 
-- **tokens** — the base map: every token name to its **binding**.
-- **binding** — a token's value: a literal CSS **value** (`"#0090ff"`, `"3px"`), or a **reference** to another token in curly-brace form (`"{accent}"`), which survives into CSS as `var(--accent)`.
-- **modifiers** — axes of mutually exclusive **contexts**, each context carrying a partial set of token overrides (e.g. a `color` modifier with `light` and `dark` contexts).
-- **order** — the precedence in which active contexts compose over the base.
+A **template** declares the contract. It names the **tokens**, the
+**modifiers**, the **contexts** of each modifier, and the **order** of the
+modifiers. A modifier is an axis, such as `color`. A context is an option of a
+modifier, such as `light` or `dark`.
 
-## Usage
+- **tokens** is the base map. It maps each token name to its **binding**.
+- A **binding** is a literal CSS **value**, such as `"#0090ff"` or `"3px"`. A
+  binding can also be a **reference** to another token, such as `"{accent}"`.
+  A reference renders in CSS as `var(--accent)`.
+- **modifiers** are axes of exclusive **contexts**. Each context holds a
+  partial set of token overrides.
+- **order** is the sequence in which the active contexts compose over the base.
+
+## defineSchema
+
+`defineSchema(template)` returns a `Schema<T>`. The schema validates untrusted
+data against the vocabulary of the template. Data that passes is bound to the
+contract.
 
 ```ts
 import { defineSchema } from "@untheme/schema";
@@ -20,75 +37,109 @@ const schema = defineSchema(template);
 
 const candidate = await res.json();
 
-// boolean predicate — narrows on `true`
+// Returns a boolean. The type of the value narrows on `true`.
 if (!schema.check.theme(candidate)) throw new Error("not a valid theme");
 
-// throws a SchemaError listing every issue
+// Throws a SchemaError that lists every issue.
 schema.assert.theme(candidate);
 
-// throws, or returns the value narrowed — handy at trust boundaries
+// Throws on an invalid value. Returns the value with its narrowed type.
 const theme = schema.parse.theme(candidate);
 
-// non-throwing — returns { success, data } | { success, issues }
+// Returns { success: true, data } or { success: false, issues }.
 const result = schema.inspect.theme(candidate);
 ```
 
+The function checks the template against the `theme` kind. An invalid template
+throws when you call `defineSchema`.
+
+The `Schema<T>` has these members:
+
+- `base` is the template.
+- `meta` is the validation core. It has `enums`, the sets of the contract and
+  the specification. It has `shape`, the literal rule and the value rule of
+  each token type. It has `rules`, the rule list of each kind.
+- `check` has one boolean predicate for each kind.
+- `assert` has one assertion for each kind. A failed assertion throws a
+  `SchemaError` that holds every `Issue`.
+- `parse` asserts a value and returns it with the type of its kind.
+- `inspect` returns a `Result` for each kind.
+
 ## Kinds
 
-The bundle validates one **kind** at a time. Scalars:
+Each member of `check`, `assert`, `parse`, and `inspect` validates one **kind**.
 
-- `value` — a literal value matching one of the declared token type shapes.
-- `token` — a token name.
-- `reference` — a `{token}` reference to a known token.
-- `binding` — a reference or a value.
-- `definition` — a full token definition: `$type` and `$value` required, `$description` / `$deprecated` / `$extensions` optional, `$value` checked against the shape the declared `$type` requires.
-- `modifier` — a modifier (axis) name.
+The scalar kinds are:
 
-Composites:
+- `value` is a literal that matches a shape of a token type.
+- `token` is a token name.
+- `reference` is a `{token}` reference to a known token.
+- `binding` is a reference or a value.
+- `definition` is a full token definition. It requires `$type` and `$value`.
+  It accepts `$description`, `$deprecated`, and `$extensions`. The `$value`
+  must match the shape of the declared `$type`.
+- `modifier` is a modifier name.
 
-- `overrides` — a partial token map (what a context, layer, or patch carries).
-- `tokens` — the complete base map: every token present, each value a binding, no reference cycles.
-- `modifiers` — every modifier with its full set of contexts, each a valid overrides map.
-- `order` — an array of modifier names.
-- `input` — a selection of one context per modifier (`{ color: "dark" }`).
-- `theme` — a complete template: tokens, modifiers, and order all present and valid.
-- `layer` — a partial overlay carrying identity (`id`, `name`); anything present must belong to the contract.
-- `patch` — a partial, anonymous overlay (no identity).
+The composite kinds are:
+
+- `overrides` is a partial token map. A context, a layer, or a patch holds it.
+- `tokens` is the complete base map. Each token is present and each value is a
+  binding. The references form no cycle.
+- `modifiers` holds every modifier with its full set of contexts. Each context
+  is a valid overrides map.
+- `order` is an array of modifier names.
+- `input` selects one context for each modifier, such as `{ color: "dark" }`.
+- `theme` is a complete template. It holds valid tokens, modifiers, and order.
+- `layer` is a partial overlay with an identity, `id` and `name`. Each part
+  that is present must belong to the contract.
+- `patch` is a partial overlay with no identity.
 
 ## Value validation
 
-`value` validates **shape, not vocabulary**: a literal passes if it matches at least one of the 13 DTCG type shapes (`color`, `dimension`, `duration`, `fontFamily`, `fontWeight`, `number`, `cubicBezier`, `strokeStyle`, `border`, `transition`, `shadow`, `gradient`, `typography`) — a color object, a dimension, a stroke style, and so on.
+The `value` kind checks the shape of a literal. A literal passes when it
+matches at least one of the 13 DTCG type shapes. The types are `color`,
+`dimension`, `duration`, `fontFamily`, `fontWeight`, `number`, `cubicBezier`,
+`strokeStyle`, `border`, `transition`, `shadow`, `gradient`, and `typography`.
 
-Token names and font-family strings get extra scrutiny on top of their shape: both reject breakout sequences — `;`, `{`, `}`, backslash escapes, `/*`, `</`, and `url(` in any casing — so a name or family string can't escape whatever it's interpolated into. Because `{` and `}` are rejected there, a `{token}` reference is never mistaken for a token name or a font-family string.
+The schema rejects a token name or a font-family string that contains one of
+these sequences:
 
-## The bundle
+- `;`, `{`, `}`, or a backslash
+- `/*` or `</`
+- `url(` in any letter case
 
-`defineSchema(template)` returns a `Schema<T>`:
-
-- `base` — the source template.
-- `meta` — the derived validation core: `enums` (the contract and specification sets), `shape` (the literal and value rule for each token type), and `rules` (the rule list for each kind).
-- `check` — boolean type predicates per kind; `true` narrows the value.
-- `assert` — throwing assertions per kind; on failure throws a `SchemaError` carrying every `Issue` found (not just the first).
-- `parse` — asserts and returns the value narrowed to its kind type.
-- `inspect` — the non-throwing analog of `parse`: returns a `Result` (`{ success: true, data }` | `{ success: false, issues }`).
-
-The base template is validated against the `theme` kind at construction, so a malformed contract fails fast.
+A `{token}` reference matches the `reference` kind. A token name and a
+font-family string reject the `{` and `}` characters.
 
 ## Types
 
-- `Template` — the contract; its keys define tokens, modifiers, and contexts.
-- `Token<T>` / `Modifier<T>` / `Context<T, M>` — names derived from a template.
-- `Binding<T>` / `Reference<T>` / `Values<R>` — a token's value; a `{token}` reference; the value shape for every DTCG type, parameterized by reference availability (`Open` admits a `{token}` string per type, `Literal` admits none).
-- `Overrides<T>` / `Modifiers<T>` / `Input<T>` — a partial token map; the full modifier structure; a per-modifier context selection.
-- `Theme<T>` / `Layer<T>` / `Patch<T>` — the candidate shapes the kinds narrow to.
-- `Contract<Tok, Mod>` — a template parameterized by its token union and modifier structure, for inference; the type [`@untheme/kit`](../kit)'s generated declarations name a built theme by.
-- `Domain<T>` — every kind mapped to the type it narrows to; `Kind` is its key.
-- `Schema<T>` — the bundle `defineSchema` returns; `Check<T>` / `Assert<T>` / `Parse<T>` / `Inspect<T>` are its per-kind families, and `Rules` is the unparameterized rule-list shape behind them.
-- `Result<V>` — an `inspect` outcome.
-- `Issue` / `Code` / `Rule` — a validation failure, its stable discriminant, and a type-agnostic rule.
-- `SchemaError` — the error `assert` and `parse` throw, carrying the concrete `Issue`s.
+- `Template` is the contract. Its keys define the tokens, the modifiers, and
+  the contexts.
+- `Token<T>`, `Modifier<T>`, and `Context<T, M>` are names from a template.
+- `Binding<T>` is the value of a token. `Reference<T>` is a `{token}`
+  reference. `Values<R>` is the value shape of each DTCG type. The parameter
+  `R` is `Open` or `Literal`. `Open` admits a `{token}` string for each type.
+  `Literal` admits no reference.
+- `Overrides<T>` is a partial token map. `Modifiers<T>` is the full modifier
+  structure. `Input<T>` is a selection of one context for each modifier.
+- `Theme<T>`, `Layer<T>`, and `Patch<T>` are the shapes that the kinds narrow
+  to.
+- `Contract<Tok, Mod>` is a template with a token union and a modifier
+  structure as parameters. The declarations that
+  [`@untheme/kit`](../kit) generates use it to name a built theme.
+- `Domain<T>` maps each kind to the type that the kind narrows to. `Kind` is
+  the union of its keys.
+- `Schema<T>` is the bundle that `defineSchema` returns. `Check<T>`,
+  `Assert<T>`, `Parse<T>`, and `Inspect<T>` are its families of functions.
+  `Rules` is the shape of the rule lists.
+- `Result<V>` is the outcome of `inspect`.
+- `Issue` is a validation failure. `Code` is the discriminant of an issue.
+  `Rule` is a function that checks a value and returns an issue.
+- `SchemaError` is the error that `assert` and `parse` throw. It holds the
+  `Issue` list.
 
 ## Related
 
-- [`@untheme/core`](../core) — the runtime theme service built on this schema.
-- [`untheme`](../untheme) — umbrella package re-exporting core and schema.
+- [`@untheme/core`](../core) is the runtime theme service that uses this
+  schema.
+- [`untheme`](../untheme) re-exports core and schema.

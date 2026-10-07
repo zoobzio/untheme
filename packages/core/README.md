@@ -1,12 +1,24 @@
 # @untheme/core
 
-Runtime theme service for the untheme design token system.
+The runtime theme service of untheme. The service reads, resolves, and changes tokens in a state container that the caller owns.
 
-Provides the service that reads, resolves, and mutates tokens over a caller-owned state container. The token contract and its runtime guards live in [`@untheme/schema`](../schema); most apps depend on both transitively through the [`untheme`](../untheme) umbrella package.
+[`@untheme/schema`](../schema) has the token contract and the runtime guards. The [`untheme`](../untheme) package re-exports `@untheme/core` and `@untheme/schema`.
+
+## Install
+
+```sh
+pnpm add @untheme/core
+```
 
 ## The token model
 
-A theme is a flat map of tokens, each holding a `$type` and `$value`. On top of the base tokens, the contract declares any number of **modifiers** — independent axes like color scheme or density — each offering named **contexts** that override tokens for that axis. An **input** selects one context per modifier. Reading a token composes three layers in order: the base `$value`, then the selected context of each modifier (in the contract's `order`), then the user override last.
+A theme is a flat map of tokens. Each token has a `$type` and a `$value`. A contract can declare **modifiers**. A modifier is an independent axis, such as color scheme or density. Each modifier has named **contexts** that override tokens. An **input** selects one context for each modifier.
+
+A read of a token has three layers in this order:
+
+1. The base `$value`.
+2. The selected context of each modifier, in the `order` of the contract.
+3. The user override.
 
 ## Usage
 
@@ -20,69 +32,69 @@ const ut = makeUntheme<Contract>({
   override: {},
 });
 
-ut.resolve("primary"); // follow the alias chain to a raw value
-ut.set("background", "blue"); // write to the override layer
-ut.swap("color", "light"); // switch the color modifier's context
+ut.resolve("primary"); // follows the alias chain to a raw value
+ut.set("background", "blue"); // writes to the override
+ut.swap("color", "light"); // selects the light context of the color modifier
 
-ut.dirty(); // true — the override holds edits
-ut.reset(); // clears the override
+ut.dirty(); // true when the override has an entry
+ut.reset(); // removes all entries from the override
 
-ut.apply(midnight); // become another theme: the layer over the baseline
-ut.create(draftLayer); // validate a runtime-built layer against the contract
+ut.apply(midnight); // makes the active theme from the layer and the baseline
+ut.create(draftLayer); // checks a layer from outside against the contract
 ```
 
-The service holds no theme collection: it knows one active theme at a time, and `apply` switches between complete layers the caller supplies. Where alternative themes live — statically imported, lazy-loaded, fetched from an API — is the caller's concern, which keeps every theme except the active one out of the running state.
+The service has one active theme. `apply` changes the active theme to a complete layer that the caller supplies. The caller decides where the layers come from. A layer can come from an import, a lazy load, or an API.
 
-The theme comes from [`@untheme/kit`](../kit), which builds it from DTCG JSON: its `config` module exports the base `theme`, the boot `input`, and the `Contract` type that names the theme's tokens and modifiers. `useUnthemeConfig(config)` from `untheme/config` turns that into a fresh container — `makeUntheme<Contract>(useUnthemeConfig(config))`. The type argument is what makes token names, modifiers, and contexts autocomplete; without it the service runs over the root `Template`.
+[`@untheme/kit`](../kit) builds the theme from DTCG JSON. Its `config` module exports the base `theme`, the starting `input`, and the `Contract` type. The `Contract` type names the tokens and the modifiers. `useUnthemeConfig(config)` from `untheme/config` makes a state container from the config. Use it as `makeUntheme<Contract>(useUnthemeConfig(config))`. The `Contract` type gives autocomplete for token names, modifiers, and contexts. The default type argument is the root `Template` type.
 
 ## The state container
 
-The service is pure behavior: every read and write goes through `config`, the caller-owned container holding the active `theme`, the `input` (one selected context per modifier), and the `override` layer that `set` populates. Pass a plain object for inert state (tests, node), or a reactive proxy (Vue) to have every service read and write tracked — reactivity threads through property access on the container, never through the service itself.
+The service reads and writes the `config` container. The container has the active `theme`, the `input`, and the `override` that `set` writes. The caller can pass a plain object for tests and Node. The caller can pass a reactive proxy, for example in Vue, to track each read and write.
 
 ## The service
 
-`makeUntheme<T>(config, options?)` returns an `Untheme<T>`. The theme is validated against its own contract up front, and `options` can intercept each read and write of the container (`get`/`set` middleware per field):
+`makeUntheme<T>(config, options?)` returns an `Untheme<T>`. The function checks the theme against its own contract. `options` has `get` and `set` middleware for each field of the container.
 
-- `config` — the caller-owned container: `theme`, `input`, `override`.
-- `schema` — guard vocabulary for the theme's token contract, from [`defineSchema`](../schema).
-- `modifiers()` — the modifier axes the contract declares, in composition order.
-- `contexts(modifier)` — the context names a modifier offers.
-- `tokens(input?)` — the flat token map for a selection (default: the active one): every token's effective binding, override included, without touching `config.input`.
-- `get(token)` — a token's effective binding (alias name or raw value), unresolved.
-- `resolve(token)` — a token's fully dereferenced value: a whole-value reference is followed to its target, and references nested inside composite values resolve in place too. Throws `CircularAliasError` on a looping chain.
-- `swap(modifier, context)` — selects a context for a modifier.
-- `set(token, value)` — writes a token into the user override layer; validated against the token's declared type. A write outside the contract — an unknown token, or a value invalid for that token's type — is a silent no-op.
-- `delta()` — the drift from the baseline as a re-appliable patch: the active theme with the override baked in, diffed against the baseline.
-- `dirty()` — whether the user override holds any edits.
-- `reset()` — clears the user override.
-- `update(patch)` — merges a patch into the active theme; identity and the override are unchanged. Throws `InvalidPatchError` outside the contract.
-- `apply(layer)` — becomes that theme: the layer resolved against the baseline, and clears the override. Throws `InvalidLayerError` outside the contract.
-- `create(layer)` — validates a layer against the contract and returns it unchanged; the active theme is untouched. Throws `InvalidLayerError` outside the contract.
-- `extract(id, name)` — snapshots the active theme, including unsaved edits, as a detached theme under a new identity.
+- `config`: the state container with `theme`, `input`, and `override`.
+- `schema`: the guards for the token contract, from [`defineSchema`](../schema).
+- `modifiers()`: returns the modifiers of the contract in composition order.
+- `contexts(modifier)`: returns the context names of a modifier.
+- `tokens(input?)`: returns the flat token map for a selection. The default selection is the active one. Each token has its binding with the override. `config.input` stays the same.
+- `get(token)`: returns the binding of a token as an alias name or a raw value.
+- `resolve(token)`: returns the value of a token with no references. The function follows a reference that is the whole value. It also replaces references in composite values. Throws `CircularAliasError` when the references form a loop.
+- `swap(modifier, context)`: selects a context for a modifier.
+- `set(token, value)`: writes a token to the user override. The function checks the value against the type of the token. If the token is unknown, or the value is not valid for the type, the function does nothing.
+- `delta()`: returns the difference between the baseline and the active theme with the override in its tokens. The result is a patch.
+- `dirty()`: returns `true` when the user override has an entry.
+- `reset()`: removes all entries from the user override.
+- `update(patch)`: merges a patch into the active theme. The identity and the override stay the same. Throws `InvalidPatchError` when the patch violates the contract.
+- `apply(layer)`: makes the active theme from the layer and the baseline, and clears the override. Throws `InvalidLayerError` when the layer violates the contract.
+- `create(layer)`: checks a layer against the contract and returns the layer. The active theme stays the same. Throws `InvalidLayerError` when the layer violates the contract.
+- `extract(id, name)`: returns a copy of the active theme with a new identity. The copy has the unsaved edits of the override.
 
 ## Baselines
 
-The service keeps exactly one baseline: a snapshot of the theme it was constructed with, captured once at creation. `apply` resolves layers against this baseline, so every theme adopted this way carries the full token set, and `delta()` diffs the active theme against it. `dirty()` and `reset()` work directly on the user override — `dirty()` is true whenever the override holds any keys, `reset()` clears it — so edits made since the last `apply` are detectable and revertible.
+The baseline is a copy of the theme from the time of construction. `apply` resolves layers against the baseline. Each adopted theme has the full token set. `delta()` compares the active theme with the baseline. `dirty()` reports the user override and `reset()` clears it. Use them to find and revert the edits since the last `apply`.
 
 ## Errors
 
-Every boundary throws a semantic error rather than a bare `Error`, in two families.
+Each error has a name that tells which check failed. There are two groups.
 
-**Contract violations** — subclasses of [`SchemaError`](../schema), carrying the underlying `issues` so callers can react to each failure:
+**Contract violations** extend [`SchemaError`](../schema). Each error has the `issues` list.
 
-- `InvalidThemeError` — the baseline theme handed to `makeUntheme` violates its own contract.
-- `InvalidLayerError` — a layer handed to `apply` or `create` steps outside the contract.
-- `InvalidPatchError` — a patch handed to `update` steps outside the contract.
+- `InvalidThemeError`: the base theme that `makeUntheme` receives violates its own contract.
+- `InvalidLayerError`: a layer that `apply` or `create` receives violates the contract.
+- `InvalidPatchError`: a patch that `update` receives violates the contract.
 
-**Resolution failures** — subclasses of plain `Error`, carrying the offending lookup:
+**Resolution failures** extend `Error`. Each error holds the failed lookup.
 
-- `UnknownModifierError` — `contexts` was handed a name the contract declares no `modifier` under.
-- `CircularAliasError` — `resolve` hit an alias `chain` that loops back on itself; detected by tracking visited tokens, so the stack never overflows.
+- `UnknownModifierError`: `contexts` receives a name that is not a modifier of the contract. The `modifier` property holds the name.
+- `CircularAliasError`: `resolve` finds an alias chain that returns to a token in the chain. The `chain` property holds the token names.
 
-`set` is the deliberate exception: as the hot-path interactive write it validates with the same guards but treats invalid writes as silent no-ops rather than throwing.
+`set` checks a write with the same guards. It ignores a write that is not valid.
 
 ## Related
 
-- [`@untheme/schema`](../schema) — token contract types and runtime guards.
-- [`@untheme/kit`](../kit) — builds the theme from DTCG JSON.
-- [`untheme`](../untheme) — umbrella package re-exporting core and schema.
+- [`@untheme/schema`](../schema): token contract types and runtime guards.
+- [`@untheme/kit`](../kit): builds the theme from DTCG JSON.
+- [`untheme`](../untheme): the umbrella package that re-exports core and schema.

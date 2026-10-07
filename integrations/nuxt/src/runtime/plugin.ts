@@ -7,18 +7,19 @@ import { defineRenderer } from "untheme/css";
 import { makeUntheme } from "./client";
 
 /**
- * Nuxt plugin that builds the untheme service over an SSR-serializable,
- * reactive {@link AppUnthemeConfig} container and provides it as `$untheme`, alongside
- * a CSS renderer bound to the same service as `$unthemeRenderer`.
+ * The Nuxt plugin for untheme. The plugin makes the untheme service over a
+ * reactive {@link AppUnthemeConfig} container and provides it as `$untheme`.
+ * The plugin also provides a CSS renderer for the same service as
+ * `$unthemeRenderer`.
  *
- * The container is held in {@link useState} so the active selection and theme
- * survive the server→client transfer; the service mutates it in place and Vue
- * tracks every read and write. The active token set is injected as CSS custom
- * properties — the renderer reads the service inside a computed, so the block
- * re-renders when the selection, theme, or override changes. The selected
- * context of each modifier is mirrored onto the document root as a
- * `data-<modifier>` attribute, a hook for user stylesheets to target
- * (`[data-color="dark"] .card { … }`); the tokens resolve on their own.
+ * The plugin keeps the container in {@link useState}. The active selection
+ * and theme go from the server to the client. The service changes the
+ * container in place, and Vue tracks each read and write. The plugin injects
+ * the active token set as CSS custom properties. The block renders again when
+ * the selection, theme, or override changes. The plugin also sets the selected
+ * context of each modifier on the document root as a `data-<modifier>`
+ * attribute. User stylesheets can select on the attribute, as in
+ * `[data-color="dark"] .card { }`.
  */
 export default defineNuxtPlugin({
   name: "untheme",

@@ -6,14 +6,12 @@ import { delta } from "./delta";
 import { traverse } from "./traverse";
 
 /**
- * Computes the patch that turns `from` into `to`: every binding `to` holds that
- * deviates from `from`, token by token and context by context. At the token
- * level the bound `$value` is compared and emitted — a token's metadata cannot
- * drift through the patch pipeline, so only the binding is carried. Identity and
- * order are not compared. Empty maps mean the themes bind identically; applying
- * the result to `from` via `merge` restores every binding `to` carries. A
- * binding `from` holds that `to` dropped is not restored — a patch can add and
- * override, never remove.
+ * Makes the patch that turns `from` into `to`. The patch holds each binding of
+ * `to` that differs from `from`, for each token and for each context. For a
+ * token, the function compares and returns the `$value`. The function ignores
+ * the identity and the order. Empty maps mean that the themes have the same
+ * bindings. `merge` applies the patch to `from`. The patch holds added and
+ * changed bindings only.
  */
 export const diff = <T extends Template>(
   from: Theme<T>,

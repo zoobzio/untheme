@@ -1,7 +1,6 @@
-/* layout.css — cross-cutting page rules that no single component owns:
-   the shared section rhythm, the global heading, the depth axis, and the
-   shared entrance keyframes / motion resets. Component-specific styling
-   lives in that component's own file. */
+/* Styles the page rules that no single component owns: the shared section
+   rhythm, the global heading, the depth axis, and the shared entrance
+   keyframes and motion resets. */
 
 /* ---------- shared section rhythm ---------- */
 .hero,
@@ -29,9 +28,9 @@ main h2 {
   margin-block-end: var(--space-7);
 }
 
-/* ---------- depth axis: keep hierarchy legible when shadows flatten ---------- */
-/* under flat, elevation collapses to a hairline ring — firm card outlines so
-   separation is carried by structure, not shadow */
+/* ---------- depth axis: card outlines when shadows flatten ---------- */
+/* under flat depth, elevation becomes a hairline ring. Card outlines separate
+   the cards. */
 [data-depth="flat"] .feature,
 [data-depth="flat"] .quote,
 [data-depth="flat"] .tier,
@@ -40,7 +39,7 @@ main h2 {
   border-color: var(--outline);
 }
 
-/* ---------- shared entrance keyframes + cross-component motion ---------- */
+/* ---------- shared entrance keyframes and cross-component motion ---------- */
 @keyframes reveal-up {
   from {
     opacity: 0;
@@ -62,8 +61,8 @@ main h2 {
   }
 }
 
-/* section content reveals as it scrolls into view (progressive enhancement:
-   where scroll timelines are unsupported it simply plays once on load) */
+/* section content reveals as it scrolls into view. Where scroll timelines are
+   unsupported, the reveal plays once on load. */
 @supports (animation-timeline: view()) {
   .feature,
   .quote,

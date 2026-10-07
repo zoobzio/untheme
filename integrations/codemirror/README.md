@@ -1,25 +1,26 @@
 # @untheme/codemirror
 
-Builds a [CodeMirror 6](https://codemirror.net) theme from an untheme contract,
-so an editor rides the same live-reference cascade as the rest of your tokens.
+Makes a [CodeMirror 6](https://codemirror.net) theme from an untheme contract.
+Each color in the theme is a `var()` reference to a token.
 
-`defineCodeMirrorTheme(schema, map, options?)` returns the extensions to drop
-into an editor — a `syntaxHighlighting` extension over the language's tags plus
-an `EditorView.theme` for the chrome. Every color is the `var()` indirection to
-a token, so the editor re-themes when a modifier context or theme layer rebinds
-those tokens — no reconfigure, no re-parse.
+## Install
 
-## The vocabulary is `@lezer/highlight`
+```sh
+pnpm add @untheme/codemirror
+```
 
-CodeMirror highlights via Lezer, whose `tags` are its standard vocabulary for
-what a highlighter distinguishes (`keyword`, `typeName`, `variableName`,
-`function`, `string`, …). We adopt it rather than invent one, and — unlike a
-TextMate integration — there's no scope layer to collapse: Lezer tags _are_ the
-semantic vocabulary, so you map tags to tokens directly.
+## `defineCodeMirrorTheme`
 
-**You** own the interchange: a `map` from tag names to tokens in your contract.
-Names autocomplete and are optional; an unmapped tag renders at the editor
-foreground.
+`defineCodeMirrorTheme(schema, map, options?)` returns an array of two
+extensions. One extension is a `syntaxHighlighting` extension for the tags.
+The other extension is an `EditorView.theme` for the editor chrome. Each color
+is a `var()` reference to a token. The editor changes color when a modifier
+context or theme layer rebinds the tokens.
+
+`schema` is `untheme.schema`. `map` binds `@lezer/highlight` tag names to
+tokens in your contract, for example `keyword`, `typeName`, `variableName`,
+`function`, and `string`. Each name is optional. A tag with no mapped token
+renders in the editor foreground color.
 
 ```ts
 import { EditorView } from "@codemirror/view";
@@ -29,7 +30,7 @@ import { useUnthemeConfig } from "untheme/config";
 import { defineCodeMirrorTheme } from "@untheme/codemirror";
 import config, { type Contract } from "./untheme/config.mjs";
 
-// The theme `untheme build` wrote from your DTCG JSON, carrying code-* tokens.
+// The theme that `untheme build` wrote, with code-* tokens
 const untheme = makeUntheme<Contract>(useUnthemeConfig(config));
 
 const theme = defineCodeMirrorTheme(
@@ -57,38 +58,40 @@ new EditorView({
 });
 ```
 
-`schema` is `untheme.schema`; it anchors the token type and re-proves the map
-at build time — every bound token (map, chrome, and escape-hatch) must exist in
-the contract and be a `color`, or a `SyntaxMappingError` reports every fault at
-once. The editor's spans and chrome carry `var(--code-keyword)` etc.; emit the
-matching custom properties with `defineRenderer(untheme).sheet()`, and a
-`data-*` context flip re-colors the editor.
+> - Each token in `map`, in the chrome options, and in `options.tags` must
+>   exist in the contract and must have the type `color`.
+> - `defineCodeMirrorTheme` throws a `SyntaxMappingError` that lists every
+>   invalid binding in `problems`.
+> - The editor styles use values such as `var(--code-keyword)`. Emit the
+>   matching custom properties with `defineRenderer(untheme).sheet()`.
 
 ## Options
 
-`defineCodeMirrorTheme(schema, map, options)` accepts:
+`defineCodeMirrorTheme(schema, map, options)` accepts these options:
 
-- Chrome bindings — `background`, `foreground`, `caret`, `selection`,
-  `gutterBackground`, `gutterForeground`, `activeLine` — each colors a piece of
-  the editor UI from a token; omit one to leave that surface transparent.
-- `dark` — flags the theme for CodeMirror's own light/dark handling (default
-  `true`); cosmetic, since colors come from custom properties.
-- `tags` — extra rules keyed by a raw Lezer `Tag`, for anything the shipped
-  `TAGS` vocabulary doesn't name: `[{ tag: tags.docComment, token: "…" }]`.
+- `background`, `foreground`, `caret`, `selection`, `gutterBackground`,
+  `gutterForeground`, `activeLine`: tokens for the colors of the editor. A part
+  with no token keeps the CodeMirror default.
+- `dark`: the CodeMirror dark mode flag. The default is `true`.
+- `tags`: an array of `TagRule` for tags outside `TAGS`, for
+  example `[{ tag: tags.docComment, token: "code-doc" }]`.
 
-## Types
+## Exports
 
-- `TagName` — one shipped Lezer tag name; the role vocabulary, derived from the
-  exported `TAGS` registry.
-- `TagMap<T>` — the interchange: `tag name → Token<T>`, optional per name.
-- `TagRule<T>` — an escape-hatch rule over a raw Lezer `Tag`.
-- `CodeMirrorOptions<T>` / `SyntaxMappingError` — the options above, and the
-  error thrown when the runtime re-proof finds a missing or non-color token.
+- `defineCodeMirrorTheme`: makes the theme.
+- `SyntaxMappingError`: the error that `defineCodeMirrorTheme` throws.
+  `problems` lists each invalid binding.
+- `TAGS`: maps tag names to `@lezer/highlight` tags.
+- `TagName`: the union of the keys of `TAGS`.
+- `TagMap<T>`: the type of `map`. It maps tag names to `Token<T>`.
+- `TagRule<T>`: the type of one rule in `options.tags`. It has a raw Lezer
+  `Tag`, and an optional token, `fontStyle`, `fontWeight`, and
+  `textDecoration`.
+- `CodeMirrorOptions<T>`: the type of `options`.
 
 ## Related
 
-- [`untheme`](../../packages/untheme) — the umbrella package this depends on.
-- [`@untheme/css`](../../packages/css) — the renderer whose `var()` naming this
-  reuses.
-- [`@untheme/shiki`](../shiki) — the parallel integration for static
-  highlighting; both target your tokens, on their own domain's standard.
+- [`untheme`](../../packages/untheme): the main package.
+- [`@untheme/css`](../../packages/css): the renderer that emits the custom
+  properties.
+- [`@untheme/shiki`](../shiki): the same integration for Shiki.

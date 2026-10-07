@@ -1,8 +1,8 @@
 import type { Check, Domain, Kind, Meta, Rule, Template } from "./types";
 
 /**
- * Builds the {@link Check} bundle: one boolean type predicate per kind. A kind
- * passes when every rule in its list returns no issue.
+ * Builds the {@link Check} bundle. Each kind is a boolean type predicate. A
+ * kind returns `true` when every rule in its list returns no issue.
  */
 export const defineCheck = <T extends Template>({
   rules,

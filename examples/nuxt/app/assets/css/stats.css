@@ -1,4 +1,4 @@
-/* stats.css — Stats.vue: the metric row (definition list). */
+/* Styles `Stats.vue`: the metric row, a definition list. */
 
 .stats dl {
   display: grid;

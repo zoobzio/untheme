@@ -10,16 +10,12 @@ import type { Manifest } from "@untheme/kit";
 import { FILENAME, loadConfig, resolveKit } from "@untheme/kit";
 
 /**
- * The options the module runs on. Nuxt merges layer configs with an
- * array-concatenating defu before any module runs, which corrupts
- * array-valued bindings (color components, shadow lists, gradient stops,
- * `cubicBezier` tuples) and duplicates `order`. Each layer's own config
- * survives on `nuxt.options._layers`, so when more than one layer sets
- * `untheme` the closest layer's value is taken whole, never merged. A single
- * author keeps the merged options, inline module options included.
+ * Returns the options that the module uses. When more than one Nuxt layer
+ * sets `untheme`, the function returns the value of the closest layer as a
+ * whole. Otherwise the function returns the merged options.
  *
  * @param options - The merged module options.
- * @param nuxt - The Nuxt instance, for its layers.
+ * @param nuxt - The Nuxt instance. The function reads its layers.
  */
 export const closest = (
   options: NuxtUnthemeConfig,
@@ -38,16 +34,18 @@ export const closest = (
 };
 
 /**
- * Loads the theme the module serves. With a `theme`, it is the base theme and
- * selection a kit build elsewhere generated, taken as passed. Without one, the
- * app's own kit config is built here through `@untheme/kit` — nothing is
- * written to disk — and the config and every JSON document it read join
- * Nuxt's watch list, so editing either restarts dev and builds again. A theme
- * built here also carries the manifest the kit read off its documents; one
- * passed in does not, and the emitted manifest falls back to titled ids.
+ * Loads the theme that the module serves. When the options have a `theme`,
+ * the function returns that theme and its `input`. Otherwise the function
+ * builds the kit config of the app with `@untheme/kit`. The function adds the
+ * config file and each JSON document that the kit read to the watch list of
+ * Nuxt. A change to one of these files restarts the dev server. A theme built
+ * here also has the manifest that the kit read from its documents. When the
+ * options have no manifest, the emitted manifest uses the titled ids.
  *
- * @param options - The module's configuration.
- * @param nuxt - The Nuxt instance, for the project root and the watch list.
+ * @param options - The configuration of the module.
+ * @param nuxt - The Nuxt instance. The function reads the project root and
+ * the watch list.
+ * @throws When the options have only one of `theme` and `input`.
  */
 export const loadTheme = async (
   options: NuxtUnthemeConfig,

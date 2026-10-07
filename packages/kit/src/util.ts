@@ -3,14 +3,13 @@ import type { Source } from "./types";
 import { record, wrapped } from "objectively";
 
 /**
- * Whether a value is a reference in curly-brace syntax: a string wrapped in
- * `{` and `}`.
+ * Whether a value is a reference in curly-brace syntax. This is a string that
+ * starts with `{` and ends with `}`.
  */
 export const isReference = wrapped("{", "}");
 
 /**
- * A token named with its origin document, for error messages that point at
- * the user's JSON rather than this package's internals.
+ * Names a token with its origin document, for an error message.
  */
 export const cite = (token: Source): string => {
   if (token.source?.filename) {
@@ -27,12 +26,11 @@ export const braced = (id: string): `{${string}}` => {
 };
 
 /**
- * Converts one node of a normalized value structurally, restoring partial
- * aliases from the parallel `partialAliasOf` branch. Terrazzo's `null` color
- * components become the schema's `"none"` sentinel; a shadow's `inset` member
- * is dropped when false and rejected when true, since untheme's shadow shape
- * carries no inset. Everything else passes through for the schema to
- * adjudicate.
+ * Converts one node of a normalized value. The function restores partial aliases
+ * from the parallel `partialAliasOf` branch. A `null` color component of
+ * Terrazzo becomes the schema value `"none"`. The function drops the `inset`
+ * member of a shadow when it is false and throws when it is true. The function
+ * returns all other values unchanged.
  */
 export const walk = (
   node: unknown,

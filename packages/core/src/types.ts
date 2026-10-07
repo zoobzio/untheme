@@ -17,15 +17,14 @@ import type {
 import type { Diff } from "@untheme/utils";
 
 /**
- * The caller-owned live state an {@link Untheme} service reads and writes: the
- * active theme definition, the active selection (one context per modifier), and
- * the user override layer that `set` populates. Pass a plain object for inert
- * state, or a reactive proxy to have reads and writes tracked.
+ * The state that an {@link Untheme} service reads and writes. The state has
+ * the active theme, the active selection with one context for each modifier,
+ * and the user override that `set` writes. The caller can pass a plain object
+ * or a reactive proxy.
  *
- * `theme` reads as the caller's own contract type but writes accept any
- * complete {@link Theme} of that contract: `update` and `apply` store merged
- * themes, which satisfy the contract without being the caller's exact type. A
- * plain `{ theme, input, override }` object satisfies both sides.
+ * A read of `theme` has the type `T`. A write of `theme` accepts any complete
+ * {@link Theme} of the contract. A plain `{ theme, input, override }` object
+ * satisfies both types.
  */
 export type Config<T extends Template> = {
   get theme(): T;
@@ -35,10 +34,9 @@ export type Config<T extends Template> = {
 };
 
 /**
- * Read/write middleware over the state container. Each slot intercepts the
- * matching `config` field and transforms the value as it passes through — the
- * integration's hook for instrumenting state without the service knowing
- * about it. Omit a slot to pass the value through untouched.
+ * The middleware for reads and writes of the state container. Each slot
+ * receives the value of the matching `config` field and returns the value that
+ * the service uses. A missing slot passes the value on.
  */
 export type Options<T extends Template> = {
   get?: {
@@ -58,56 +56,56 @@ export type Options<T extends Template> = {
 };
 
 /**
- * A runtime theme service over a contract. Reads resolve the active selection
- * with the user override on top; `set` writes the override; switching a context
- * or applying a definition change updates the active state in `config`.
+ * The runtime theme service for a contract. A read gives the active selection
+ * with the user override on top. `set` writes the override. `swap`, `update`,
+ * and `apply` change the active state in `config`.
  */
 export interface Untheme<T extends Template> {
   /**
-   * The caller-owned live state — the single place state is read or written raw.
+   * The state container of the service.
    */
   config: Config<T>;
 
   /**
-   * The validation bundle for the contract.
+   * The validation functions for the contract.
    */
   schema: Schema<T>;
 
   /**
-   * The modifiers (axes) the contract declares, in composition order.
+   * Returns the modifiers of the contract in composition order.
    */
   modifiers: () => Modifier<T>[];
 
   /**
-   * The context names a modifier offers. Throws `UnknownModifierError` when
-   * the contract declares no modifier under the name.
+   * Returns the context names of a modifier. Throws `UnknownModifierError`
+   * when the contract has no modifier with that name.
    */
   contexts: (modifier: Modifier<T>) => string[];
 
   /**
-   * The flat token map for a selection (default: the active one), each token
-   * bound to its `$value`, with the user override applied on top. Does not
-   * change the active state.
+   * Returns the flat token map for a selection. The default selection is the
+   * active one. The map binds each token to its `$value` and adds the user
+   * override. The active state stays the same.
    */
   tokens: (input?: Input<T>) => { [K in Token<T>]: Binding };
 
   /**
-   * A token's effective binding: the override if set, else the composed value.
+   * Returns the binding of a token. The result is the override when the token
+   * has one. Otherwise the result is the value from the active selection.
    */
   get: (token: Token<T>) => Binding;
 
   /**
-   * A token's fully dereferenced value: whole-value references are followed to
-   * their target and references nested inside composite values resolve in
-   * place, so the result carries no references at any depth. Throws
-   * `CircularAliasError` on a reference loop.
+   * Returns the value of a token with no references at any depth. The function
+   * follows a reference that is the whole value. It also replaces references
+   * in composite values. Throws `CircularAliasError` when references form a
+   * loop.
    */
   resolve: (token: Token<T>) => Values<Open>[Type];
 
   /**
-   * Selects a context for a modifier — the cheap runtime swap. Throws
-   * `InvalidThemeError` when the context names no declared context of the
-   * modifier.
+   * Selects a context for a modifier. Throws `InvalidThemeError` when the
+   * context is not a context of the modifier.
    */
   swap: <M extends Modifier<T>, C extends Context<T, M>>(
     modifier: M,
@@ -115,52 +113,53 @@ export interface Untheme<T extends Template> {
   ) => void;
 
   /**
-   * Writes a token into the user override layer. A write outside the contract —
-   * an unknown token, or a value invalid for that token's declared type — is a
-   * silent no-op. The override holds a detached copy of the value.
+   * Writes a token to the user override. If the token is unknown, or the value
+   * is not valid for the type of the token, the function does nothing. The
+   * override holds a copy of the value.
    */
   set: (token: Token<T>, value: Binding) => void;
 
   /**
-   * The effective drift from the baseline as a re-appliable patch: the active
-   * theme with the user override baked in, diffed against the theme the service
-   * was built on. Token and context bindings that match the baseline drop out;
-   * what remains is everything `set` / `update` / `apply` changed. Identity is
-   * not compared. Feeding the result back through `update` reproduces the drift.
+   * Returns the difference between the baseline and the active theme with the
+   * user override in its tokens. The baseline is the theme that the service
+   * received. The result is a patch with each binding that `set`, `update`, or
+   * `apply` changed. The function ignores the identity. `update` applies the
+   * result.
    */
   delta: () => Diff<T>;
 
   /**
-   * Whether the user override holds any edits.
+   * Returns `true` when the user override has an entry.
    */
   dirty: () => boolean;
 
   /**
-   * Clears the user override.
+   * Removes all entries from the user override.
    */
   reset: () => void;
 
   /**
-   * Merges a patch into the active theme; identity and the override are
-   * unchanged.
+   * Merges a patch into the active theme. The identity and the override stay
+   * the same.
    */
   update: (patch: Patch<T>) => void;
 
   /**
-   * Becomes the layer resolved against the baseline, and clears the override.
+   * Makes the active theme from a layer and the baseline, and clears the
+   * override.
    */
   apply: (layer: Layer<T>) => void;
 
   /**
-   * Validates a layer against the contract and returns it unchanged; the
-   * active theme is not touched.
+   * Checks a layer against the contract and returns the layer. The active theme
+   * stays the same.
    */
   create: (layer: Layer<T>) => Layer<T>;
 
   /**
-   * Snapshots the active theme and override as a detached theme; not
-   * registered. Throws `InvalidThemeError` when the identity leaves the
-   * snapshot invalid.
+   * Returns a copy of the active theme with the override in its tokens.
+   * Throws `InvalidThemeError` when the `id` and `name` make the theme
+   * invalid.
    */
   extract: (id: string, name: string) => Theme<T>;
 }
