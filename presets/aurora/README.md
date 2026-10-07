@@ -1,10 +1,12 @@
 # @untheme/aurora
 
-A preset for untheme. The package contains only DTCG token files in JSON. It
-has one resolver document, the token files that the resolver lists, and one
-folder for each modifier with one file for each context. The tokens are eight tonal color ramps, a set of semantic color roles,
-and the system scales for type, shape, space, elevation, and motion. The
-package has nine modifiers and thirty-one themes.
+A preset for untheme. The package has DTCG token files in JSON and a build of
+them. The JSON has one resolver document, the token files that the resolver
+lists, and one folder for each modifier with one file for each context. The
+build has the modules that `untheme build` writes from the resolver, ready for
+`makeUntheme`. The tokens are eight tonal color ramps, a set of semantic color
+roles, and the system scales for type, shape, space, elevation, and motion.
+The package has nine modifiers and thirty-one themes.
 
 ## Install
 
@@ -163,8 +165,43 @@ The package exports every file, so Node package resolution finds each one:
 
 ## Usage
 
-Set the `source` of an [`@untheme/kit`](../../packages/kit) config to the
-resolver document with an `npm:/` reference.
+The package exports the modules that `untheme build` writes from its own
+resolver document. The modules hold the whole preset, with every modifier at
+its default and all thirty-one themes.
+
+| Export                     | Holds                                                                                                               |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `@untheme/aurora`          | the `Token`, `Modifier`, `Mod`, and `Context` types, the token list, the modifier list, `isToken`, and `isModifier` |
+| `@untheme/aurora/config`   | the base theme, the boot selection, and the `Contract` type                                                         |
+| `@untheme/aurora/manifest` | the id, the name, and the description of each modifier and each context                                             |
+
+Import the config and boot a service. The base theme starts at the default of
+each modifier, which is `aurora`, `light`, `balanced`, `default`, `md`,
+`default`, `default`, `default`, and `default`.
+
+```ts
+import { makeUntheme } from "untheme";
+import { useUnthemeConfig } from "untheme/config";
+
+import config, { type Contract } from "@untheme/aurora/config";
+
+const ut = makeUntheme<Contract>(useUnthemeConfig(config));
+
+ut.swap("theme", "nord"); // the nord palette under the same roles
+ut.swap("color", "dark");
+ut.swap("vibrancy", "vivid"); // vivid accents on the dark scheme
+ut.swap("contrast", "high"); // high contrast wins over vibrancy
+```
+
+The [Nuxt module](../../integrations/nuxt) takes the same config as its
+options, as `untheme: { ...config }`. The modules hold only data. The package
+has `untheme` as an optional peer dependency, for the types of the modules.
+
+### Building the preset yourself
+
+To take part of the preset or to add tokens, build the JSON with the kit. Set
+the `source` of an [`@untheme/kit`](../../packages/kit) config to the resolver
+document with an `npm:/` reference.
 
 ```ts
 // untheme.config.ts
@@ -175,24 +212,9 @@ export default defineConfig({
 });
 ```
 
-`untheme build` makes the base theme. The [Nuxt module](../../integrations/nuxt)
-runs the same build. The base theme starts at the default of each modifier,
-which is `aurora`, `light`, `balanced`, `default`, `md`, `default`, `default`,
-`default`, and `default`.
-
-```ts
-import { makeUntheme } from "untheme";
-import { useUnthemeConfig } from "untheme/config";
-
-import config, { type Contract } from "./untheme/config.mjs";
-
-const ut = makeUntheme<Contract>(useUnthemeConfig(config));
-
-ut.swap("theme", "nord"); // the nord palette under the same roles
-ut.swap("color", "dark");
-ut.swap("vibrancy", "vivid"); // vivid accents on the dark scheme
-ut.swap("contrast", "high"); // high contrast wins over vibrancy
-```
+`untheme build` writes the same three modules into `untheme/`. The Nuxt module
+runs the same build. The service boots from `./untheme/config.mjs` in the same
+way as above.
 
 ### Taking part of the preset
 
@@ -277,8 +299,13 @@ shifts toward the temperature of the theme. Each theme file starts with the
 name and the description from the seeds. The script rewrites the theme folder
 in full, so each run removes the file of a theme that left the seeds.
 
-The test suite of [`@untheme/kit`](../../packages/kit) builds Aurora, checks
-every context, and checks the contrast channels and the vibrancy channels.
+## Building
+
+The modules under `.dist/` are a kit build of `src/`. `untheme.config.ts`
+points at the resolver document, and `pnpm build` runs `untheme build`. The
+test suite in `test/` builds the documents, checks every context, checks the
+contrast channels and the vibrancy channels, and compares the exported modules
+with that build. A `.dist/` that is older than `src/` fails the suite.
 
 ## Related
 

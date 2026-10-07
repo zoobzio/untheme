@@ -98,7 +98,15 @@ The [aurora](./presets/aurora) preset is the reference theme. It has nine
 modifier axes and eight tonal ramps, as DTCG JSON. The `theme` axis has 31
 contexts, one for each theme.
 
-Point a config at the resolver of the preset with an `npm:/` reference:
+The package also has a kit build of the JSON. Import the config module to boot
+the whole preset with no kit of your own:
+
+```ts
+import config, { type Contract } from "@untheme/aurora/config";
+```
+
+To take part of the preset, point a config at the resolver of the preset with
+an `npm:/` reference:
 
 ```ts
 source: "npm:/@untheme/aurora/src/resolver.json";

@@ -1,0 +1,11 @@
+{
+  "name": "Acme",
+  "version": "2025.10",
+  "sets": {
+    "base": {
+      "sources": [{ "$ref": "./tokens.json" }]
+    }
+  },
+  "modifiers": {},
+  "resolutionOrder": [{ "$ref": "#/sets/base" }]
+}
