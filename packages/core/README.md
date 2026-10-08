@@ -48,7 +48,7 @@ The kit also builds the base theme. Its `config` module exports the base `theme`
 
 The service reads and writes the `config` container. The container holds what changed from the base theme: the `patch` and the `input`. The base theme is not in the container. A container with an empty patch is the base theme at the selection. The caller can pass a plain object for tests and Node. The caller can pass a reactive proxy, for example in Vue, to track each read and write.
 
-The service replaces each member of the container as a whole. It merges the base theme and the patch once for each patch object. Change the patch with `apply` or `update`.
+The service replaces each member of the container as a whole. Change the patch with `apply` or `update`.
 
 ## The service
 

@@ -65,8 +65,8 @@ export interface Untheme<T extends Template> {
   schema: Schema<T>;
 
   /**
-   * Returns the active theme: the base theme with the patch merged in. The
-   * service keeps the merged theme until the patch object changes.
+   * Returns the active theme: the base theme with the patch merged in. Each
+   * call returns a new object.
    */
   theme: () => T;
 

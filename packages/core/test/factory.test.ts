@@ -205,18 +205,6 @@ describe("theme", () => {
     expect(u.schema.base.tokens["color.bg"].$value).toBe("{color.white}");
   });
 
-  it("merges once per patch object", () => {
-    const u = boot();
-    u.apply({
-      id: "alt",
-      name: "Alt",
-      tokens: { "color.bg": "{color.black}" },
-    });
-    expect(u.theme()).toBe(u.theme());
-    u.update({ tokens: { "color.fg": "{color.white}" } });
-    expect(u.theme().tokens["color.fg"].$value).toBe("{color.white}");
-  });
-
   it("follows a patch that the container receives from outside", () => {
     const config = makeConfig();
     const u = boot(config);

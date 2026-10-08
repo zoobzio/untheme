@@ -34,8 +34,7 @@ import {
  * the `options` middleware.
  *
  * A read gives the base tokens, then the patch, then the selected context of
- * each modifier in `order`. The service merges the base theme and the patch
- * once for each patch object.
+ * each modifier in `order`.
  *
  * @param base - The base theme. The service copies it and checks the copy
  * against its own contract.
@@ -98,55 +97,66 @@ export const makeUntheme = <T extends Theme<T>>(
   reframe(InvalidThemeError, () => schema.assert.input(proxy.input));
 
   /**
-   * The last merge of the base theme and the patch.
+   * Returns the active theme: the base theme with the patch merged in. Each
+   * call returns a new object.
    */
-  let merged: { patch: Patch<T>; theme: T } | undefined;
+  const theme = (): T => merge<T>(schema.base, proxy.patch);
 
   /**
-   * Returns the active theme: the base theme with the patch merged in. The
-   * function merges once for each patch object.
+   * Returns the composition order: the order of the patch when it has one,
+   * else the order of the base theme.
    */
-  const theme = (): T => {
-    const patch = proxy.patch;
-    if (merged === undefined || merged.patch !== patch) {
-      merged = { patch, theme: merge<T>(schema.base, patch) };
-    }
-    return merged.theme;
-  };
+  const order = (): Modifier<T>[] => proxy.patch.order ?? schema.base.order;
 
   /**
    * Returns the flat token map for a selection. The default selection is the
-   * active one. The map binds each token to its `$value`, then adds the
-   * selected context of each modifier in `order`.
+   * active one. The map binds each token to its base `$value`, then adds the
+   * patch tokens, then adds the selected context of each modifier in `order`.
+   * At each context, the patch overrides come after the base overrides. The
+   * function reads the base theme and the patch as they are. It does not
+   * merge them.
    */
   const tokens = (
     input: Input<T> = proxy.input,
   ): { [K in Token<T>]: Binding } => {
-    const active = theme();
-    const flat = map(active.tokens, (slot) => slot.$value);
-    for (const modifier of active.order) {
-      Object.assign(flat, active.modifiers[modifier]?.[input[modifier]]);
+    const base = schema.base;
+    const patch = proxy.patch;
+    const flat = map(base.tokens, (slot) => slot.$value);
+    Object.assign(flat, patch.tokens);
+    for (const modifier of order()) {
+      const context = input[modifier];
+      Object.assign(
+        flat,
+        base.modifiers[modifier]?.[context],
+        patch.modifiers?.[modifier]?.[context],
+      );
     }
     return flat;
   };
 
   /**
    * Returns the binding of a token for the active selection. The function
-   * checks the selected context of each modifier in reverse `order`. Then it
+   * checks the selected context of each modifier in reverse `order`, in the
+   * patch and then in the base theme. Then it checks the patch tokens. Then it
    * checks the base slot. The first layer that binds the token gives the
-   * result. This order gives the same result as {@link tokens}.
+   * result. This order gives the same result as {@link tokens}. The function
+   * does not merge the base theme and the patch.
    */
   const get = (token: Token<T>): Binding => {
-    const active = theme();
+    const base = schema.base;
+    const patch = proxy.patch;
     const input = proxy.input;
-    for (const modifier of [...active.order].reverse()) {
-      const bound = active.modifiers[modifier]?.[input[modifier]]?.[token];
+    for (const modifier of [...order()].reverse()) {
+      const context = input[modifier];
+      const bound =
+        patch.modifiers?.[modifier]?.[context]?.[token] ??
+        base.modifiers[modifier]?.[context]?.[token];
       if (bound !== undefined) {
         return bound;
       }
     }
 
-    return active.tokens[token].$value;
+    return patch.tokens?.[token] ?? base.tokens[token].$value;
   };
 
   /**
@@ -195,14 +205,16 @@ export const makeUntheme = <T extends Theme<T>>(
   /**
    * Returns the modifiers of the contract in composition order.
    */
-  const modifiers = () => theme().order;
+  const modifiers = () => [...order()];
 
   /**
-   * Returns the context names of a modifier. Throws {@link UnknownModifierError}
-   * when the contract has no modifier with that name.
+   * Returns the context names of a modifier. The names come from the base
+   * theme, because a patch cannot add a context. Throws
+   * {@link UnknownModifierError} when the contract has no modifier with that
+   * name.
    */
   const contexts = (modifier: Modifier<T>): string[] => {
-    const axis = theme().modifiers[modifier];
+    const axis = schema.base.modifiers[modifier];
     if (!axis) {
       throw new UnknownModifierError(modifier);
     }
