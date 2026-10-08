@@ -44,7 +44,8 @@ export default defineConfig({
     depth: false,
   },
 
-  // Optional. Token documents to build as layers, by id. See Layers.
+  // Optional. Token documents to build as layers, by id, or a local
+  // directory of them. See Layers.
   layers: {
     nord: "npm:/@untheme/aurora/src/themes/nord.json",
     brand: "./tokens/brand.json",
@@ -145,6 +146,21 @@ export default defineConfig({
 });
 ```
 
+The `layers` option can also name a local directory, as a path or a `file:`
+URL. Each `.json` file in the directory is one layer, and its file name without
+the extension is the id. The build takes the files in name order and ignores
+every other file. Aurora builds its themes this way. The directory joins the
+`documents` of the build, so a dev server rebuilds when a file is added. Only a
+local directory can be listed: a package or a remote directory is an object of
+layer ids, as above.
+
+```ts
+export default defineConfig({
+  source: "./src/resolver.json",
+  layers: "./src/themes", // themes/nord.json is the layer `nord`
+});
+```
+
 A layer is a partial theme with an identity. It rebinds tokens that the base
 theme defines. It does not add tokens. The runtime takes a layer with `apply`
 and makes the active theme from the base theme and the layer.
@@ -175,7 +191,7 @@ The name of a layer is the `name` under the `io.zoobz.untheme` key of
 `$extensions` at the root of the last document that has one, or the titled id.
 The description is the `$description` at the root of the last document that
 has one. The `layers` module lists each layer with its id, name, and
-description, in the order of the config.
+description, in the order of the config, or in name order for a directory.
 
 A layer rebinds the base. A selected context rebinds on top of the base. When
 a layer and a context both bind a token, the context wins while it is
@@ -383,8 +399,9 @@ as the `untheme` option.
 - `build()` runs the pipeline of the CLI.
 - `resolveKit(config, options)` returns `{ theme, input, manifest, layers,
 outDir, documents }`. The `documents` value lists each local file that the
-  build read, the documents of the layers among them. Each item of `layers`
-  has the `layer` and its `entry`.
+  build read, the documents of the layers among them, and the layers directory
+  when the config names one. Each item of `layers` has the `layer` and its
+  `entry`.
 - `emit({ theme, input, manifest, layers })` turns a built theme and selection
   into the modules. The Nuxt module uses `emit`. If `manifest` is absent,
   `emit` makes one from the theme, and each name is the id in title case. If

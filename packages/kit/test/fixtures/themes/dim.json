@@ -1,0 +1,8 @@
+{
+  "color": {
+    "$type": "color",
+    "primary": {
+      "default": { "$value": "{color.primary.50}" }
+    }
+  }
+}

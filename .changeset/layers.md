@@ -12,7 +12,9 @@ Themes are layers. The kit builds them, the service applies them, and the
 contract does not carry them.
 
 **Kit.** A config can declare `layers`. Each layer is a DTCG token document
-or a list of them, in the same source forms as `add`. The build normalizes
+or a list of them, in the same source forms as `add`. `layers` can instead
+name a local directory: each `.json` file in it is one layer, and the file
+name is the id. The directory joins the watched documents. The build normalizes
 each document with Terrazzo, converts it to a `Layer`, and checks it against
 the built contract with the schema. The build fails with the file and the
 token when a layer is not applicable. The build writes `layers/<id>.json` for
@@ -22,7 +24,8 @@ as it is.
 
 **Aurora.** The `theme` modifier is gone. The ramps of the aurora palette are
 a base set of the resolver. The thirty-one palettes are layers under
-`src/themes/`, built to `.dist/layers/`. The package exports
+`src/themes/`, built to `.dist/layers/`. The config points `layers` at that
+directory and reads no other file. The package exports
 `@untheme/aurora/layers` and `@untheme/aurora/layers/<id>.json`. The built
 config shrinks from 725 KB to 55 KB of JSON. The preset has eight modifiers.
 

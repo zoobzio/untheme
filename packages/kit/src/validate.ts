@@ -114,16 +114,42 @@ const modifiers: Rule = (config) => {
 };
 
 /**
- * Checks the layers. The member is an object of layer ids. Each id is a
- * non-empty string. Each value is a source or a non-empty list of sources.
+ * Whether a designator names a local path: a non-empty string with no scheme
+ * other than `file:`, or a `file:` URL. A one-letter scheme is a Windows drive.
+ */
+const local = (value: string | URL): boolean => {
+  if (value instanceof URL) {
+    return value.protocol === "file:";
+  }
+  if (value.trim() === "") {
+    return false;
+  }
+  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(value)?.[1];
+  return scheme === undefined || scheme.length === 1 || scheme === "file";
+};
+
+/**
+ * Checks the layers. The member is a local directory or an object of layer ids.
+ * A directory is a path or a `file:` URL. In an object, each id is a non-empty
+ * string, and each value is a source or a non-empty list of sources.
  */
 const layers: Rule = (config) => {
   const { layers } = config;
   if (layers === undefined) {
     return [];
   }
+  if (typeof layers === "string" || layers instanceof URL) {
+    if (local(layers)) {
+      return [];
+    }
+    return [
+      "layers must be a path to a local directory when it is not an object of layer ids",
+    ];
+  }
   if (!record(layers)) {
-    return ["layers must be an object of layer ids"];
+    return [
+      "layers must be a path to a local directory, or an object of layer ids",
+    ];
   }
   const issues: string[] = [];
   for (const [id, source] of Object.entries(layers)) {

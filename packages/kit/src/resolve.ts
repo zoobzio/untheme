@@ -21,7 +21,8 @@ import { validate } from "./validate";
  * theme has the tokens, the modifier contexts, and the order. It validates both
  * with the untheme schema and verifies the result against the Terrazzo
  * resolution. Then it builds each layer of the config and checks it against the
- * contract. This is the only step that reads documents. {@link generate} turns
+ * contract. A `layers` directory is listed here. This is the only step that
+ * reads documents. {@link generate} turns
  * the result into files.
  *
  * @param config - The kit config.
@@ -29,6 +30,7 @@ import { validate } from "./validate";
  * @throws InvalidConfigError when the config breaks a rule. The function throws
  * before it reads a document.
  * @throws InvalidLayerError when a layer violates the contract.
+ * @throws Error when the layers directory is not local or cannot be listed.
  */
 export const resolveKit = async (
   config: KitConfig,
@@ -39,7 +41,8 @@ export const resolveKit = async (
   const base = directory(root);
   const url = locate(config.source, base);
 
-  const { load, documents } = loader(root, options.req);
+  const files = loader(root, options.req);
+  const { load, documents } = files;
   let src = await load(url, base);
   if (config.modifiers && Object.keys(config.modifiers).length > 0) {
     src = tailor(src, config.modifiers, base);
@@ -53,10 +56,10 @@ export const resolveKit = async (
 
   const { theme, input, manifest } = assemble(parsed, config);
   const layers = await buildLayers(
-    config.layers ?? {},
+    config.layers,
     theme,
     base,
-    load,
+    files,
     options.logger,
   );
   return {

@@ -1,6 +1,10 @@
 import type { Logger } from "@terrazzo/parser";
 import type { Layer, Schema, Template, Theme } from "@untheme/schema";
+import type { Loader } from "./loader";
 import type { BuiltLayer, KitConfig, Req } from "./types";
+
+import { readdir } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 
 import { defineConfig, parse } from "@terrazzo/parser";
 import { SchemaError, defineSchema } from "@untheme/schema";
@@ -114,29 +118,95 @@ const check = (
   return issues;
 };
 
+/** The extension of a layer document in a layers directory. */
+const EXTENSION = ".json";
+
 /**
- * Builds the layers of a config against a base theme. The function reads the
- * sources of each layer through `load`. It checks each layer against the
- * contract of the theme and reports every issue of every layer together. The
- * result keeps the order of the config.
+ * Lists the layer documents of a local directory. Each `.json` file is one
+ * layer. The id is the file name without the extension. The result is in name
+ * order. The directory must be a `file:` URL that exists.
+ *
+ * @param directory - The directory, as a URL with a trailing slash.
+ * @throws Error when the directory is not local or cannot be listed.
+ */
+const list = async (directory: URL): Promise<Record<string, URL>> => {
+  if (directory.protocol !== "file:") {
+    throw new Error(
+      `@untheme/kit: layers must be a local directory — cannot list ${directory.href}`,
+    );
+  }
+  const path = fileURLToPath(directory);
+  let entries: string[];
+  try {
+    entries = await readdir(path);
+  } catch (error) {
+    throw new Error(`@untheme/kit: cannot list the layers in ${path}`, {
+      cause: error,
+    });
+  }
+  const names = entries.filter((name) => name.endsWith(EXTENSION)).sort();
+  return Object.fromEntries(
+    names.map((name) => [
+      name.slice(0, -EXTENSION.length),
+      new URL(name, directory),
+    ]),
+  );
+};
+
+/**
+ * Expands the `layers` of a config to the sources of each layer, by id. An
+ * object is returned as it is. A path or URL names a directory: the function
+ * lists it with {@link list} and records the directory in `documents`, so a
+ * watcher sees a new file.
+ */
+const expand = async (
+  layers: KitConfig["layers"],
+  base: URL,
+  documents: string[],
+): Promise<Record<string, string | URL | (string | URL)[]>> => {
+  if (layers === undefined) {
+    return {};
+  }
+  if (typeof layers !== "string" && !(layers instanceof URL)) {
+    return layers;
+  }
+  const located = locate(layers, base);
+  const directory = new URL(`${located.href.replace(/\/+$/, "")}/`);
+  const sources = await list(directory);
+  const path = fileURLToPath(directory).replace(/[\\/]+$/, "");
+  if (!documents.includes(path)) {
+    documents.push(path);
+  }
+  return sources;
+};
+
+/**
+ * Builds the layers of a config against a base theme. A `layers` directory is
+ * listed first, and each `.json` file in it is one layer. The function reads
+ * the sources of each layer through the loader. It checks each layer against
+ * the contract of the theme and reports every issue of every layer together.
+ * The result keeps the order of the config, or the name order of the directory.
  *
  * @param layers - The `layers` of the config.
  * @param theme - The base theme that the layers apply to.
  * @param base - The project root that relative sources resolve against.
- * @param load - The loader of the build.
+ * @param loader - The loader of the build. The directory joins its documents.
  * @param logger - The Terrazzo logger of the build.
  * @throws InvalidLayerError when a layer violates the contract.
+ * @throws Error when the layers directory is not local or cannot be listed.
  */
 export const buildLayers = async (
-  layers: NonNullable<KitConfig["layers"]>,
+  layers: KitConfig["layers"],
   theme: Theme<Template>,
   base: URL,
-  load: Req,
+  loader: Loader,
   logger?: Logger,
 ): Promise<BuiltLayer[]> => {
+  const { load, documents } = loader;
+  const sources = await expand(layers, base, documents);
   const built: BuiltLayer[] = [];
   const issues: string[] = [];
-  for (const [id, source] of Object.entries(layers)) {
+  for (const [id, source] of Object.entries(sources)) {
     const { layer, types } = await build(
       id,
       [source].flat(),

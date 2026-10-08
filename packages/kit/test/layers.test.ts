@@ -213,6 +213,105 @@ describe("layers", () => {
     });
   });
 
+  it("builds every JSON file of a directory as a layer, in name order", async () => {
+    const kit = await resolveKit(
+      { source: "./resolver.json", layers: "./themes" },
+      { cwd: ROOT },
+    );
+    expect(kit.layers.map((built) => built.entry)).toEqual([
+      {
+        id: "cool",
+        name: "Cool",
+        description: "A cooler primary over the fixture.",
+      },
+      { id: "dim", name: "Dim" },
+    ]);
+    expect(kit.layers[0]?.layer.tokens?.["size.md"]).toBe("{size.sm}");
+  });
+
+  it("takes the directory as a file URL, with or without a trailing slash", async () => {
+    for (const layers of [
+      new URL("themes", FIXTURES),
+      new URL("themes/", FIXTURES),
+      "./themes/",
+    ]) {
+      const kit = await resolveKit(
+        { source: "./resolver.json", layers },
+        { cwd: ROOT },
+      );
+      expect(kit.layers.map((built) => built.entry.id)).toEqual([
+        "cool",
+        "dim",
+      ]);
+    }
+  });
+
+  it("records the directory and its documents for the watch list", async () => {
+    const kit = await resolveKit(
+      { source: "./resolver.json", layers: "./themes" },
+      { cwd: ROOT },
+    );
+    expect(kit.documents).toContain(fileURLToPath(new URL("themes", FIXTURES)));
+    expect(kit.documents).toContain(
+      fileURLToPath(new URL("themes/cool.json", FIXTURES)),
+    );
+    expect(kit.documents).toContain(
+      fileURLToPath(new URL("themes/dim.json", FIXTURES)),
+    );
+  });
+
+  it("rejects a remote or empty layers directory before reading anything", async () => {
+    const req = async (): Promise<string> => {
+      throw new Error("read");
+    };
+    for (const layers of [
+      "",
+      "https://example.com/themes",
+      "npm:/@untheme/aurora/src/themes",
+      new URL("npm:/@untheme/aurora/src/themes"),
+    ]) {
+      const failure = resolveKit(
+        { source: "./resolver.json", layers },
+        { req },
+      );
+      await expect(failure).rejects.toBeInstanceOf(InvalidConfigError);
+      await expect(failure).rejects.toMatchObject({
+        issues: [
+          "layers must be a path to a local directory when it is not an object of layer ids",
+        ],
+      });
+    }
+  });
+
+  it("rejects a layers member that is neither a directory nor an object", async () => {
+    const failure = resolveKit(
+      { source: "./resolver.json", layers: 7 as unknown as string },
+      { cwd: ROOT },
+    );
+    await expect(failure).rejects.toMatchObject({
+      issues: [
+        "layers must be a path to a local directory, or an object of layer ids",
+      ],
+    });
+  });
+
+  it("fails with the path when the layers directory cannot be listed", async () => {
+    await expect(
+      resolveKit(
+        { source: "./resolver.json", layers: "./missing" },
+        { cwd: ROOT },
+      ),
+    ).rejects.toThrow(
+      `@untheme/kit: cannot list the layers in ${fileURLToPath(new URL("missing", FIXTURES))}`,
+    );
+    await expect(
+      resolveKit(
+        { source: "./resolver.json", layers: "./layer.json" },
+        { cwd: ROOT },
+      ),
+    ).rejects.toThrow("@untheme/kit: cannot list the layers in ");
+  });
+
   it("emits one JSON file for each layer and a typed list of the layers", async () => {
     const output = await generate(
       {

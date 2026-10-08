@@ -53,14 +53,21 @@ export interface KitConfig {
   modifiers?: Record<string, ModifierConfig | false>;
 
   /**
-   * The layers of the build, by layer id. A layer is a token document that
-   * rebinds tokens of the base theme. The build checks each layer against the
-   * contract and writes it as `layers/<id>.json`, ready for `apply`. Each
-   * value is a token file or a list of token files. In a list, a later file
-   * wins. A file is a path relative to the project root, an absolute URL, or
-   * an `npm:/` reference, like `source`.
+   * The layers of the build. A layer is a token document that rebinds tokens of
+   * the base theme. The build checks each layer against the contract and writes
+   * it as `layers/<id>.json`, ready for `apply`.
+   *
+   * A path or a `file:` URL names a local directory. Each `.json` file in the
+   * directory is one layer, and its basename is the id. The build takes the
+   * files in name order. The build does not list a package or a remote
+   * directory.
+   *
+   * An object names the layers by layer id. Each value is a token file or a
+   * list of token files. In a list, a later file wins. A file is a path
+   * relative to the project root, an absolute URL, or an `npm:/` reference,
+   * like `source`.
    */
-  layers?: Record<string, string | URL | (string | URL)[]>;
+  layers?: string | URL | Record<string, string | URL | (string | URL)[]>;
 
   /**
    * The base theme's id. Defaults to the slug of its name.
@@ -198,7 +205,8 @@ export interface Kit extends Core {
 
   /**
    * The absolute path of each local document that the build read, with the
-   * resolver first. A dev server watches these paths to rebuild on change.
+   * resolver first, and of the layers directory when the config names one. A
+   * dev server watches these paths to rebuild on change.
    */
   documents: string[];
 }

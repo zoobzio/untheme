@@ -38,7 +38,10 @@ export interface Loader {
   /** Reads one document. The kit hands it to the parser as `req`. */
   load: Req;
 
-  /** The absolute path of every local file read, in read order. */
+  /**
+   * The absolute path of every local file read, in read order. The layer
+   * builder adds the layers directory when the config names one.
+   */
   documents: string[];
 }
 

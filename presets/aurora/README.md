@@ -143,8 +143,8 @@ src/
 - **A theme file** starts with its `$description` and its display name in
   `$extensions["io.zoobz.untheme"].name`. Then it holds the eight ramps. An
   accent ramp has three columns of eleven stops, which are base, muted, and
-  vivid. A neutral ramp has one column. `untheme.config.ts` lists each theme
-  file as a layer.
+  vivid. A neutral ramp has one column. `untheme.config.ts` points `layers` at
+  the folder, so each theme file is a layer and its file name is the id.
 - **A context file** starts with its `$description` and its display name in
   the same way. Then it holds the tokens that its context rebinds. The default
   context of every modifier holds only the name and the description.
@@ -339,8 +339,9 @@ in full, so each run removes the file of a theme that left the seeds.
 ## Building
 
 The modules and the layer files under `.dist/` are a kit build of `src/`.
-`untheme.config.ts` points at the resolver document and lists each theme as a
-layer, and `pnpm build` runs `untheme build`. The test suite in `test/` builds
+`untheme.config.ts` points at the resolver document and at `src/themes/` as the
+layers directory, and `pnpm build` runs `untheme build`. A new theme file is a
+new layer: no list to update. The test suite in `test/` builds
 the documents, checks every context, checks every theme against the contract,
 checks the contrast channels and the vibrancy channels, and compares the
 exported modules and layer files with that build. A `.dist/` that is older than

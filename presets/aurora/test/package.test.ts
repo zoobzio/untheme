@@ -1,6 +1,7 @@
 import type { Kit } from "@untheme/kit";
 import type { Layer } from "untheme";
 
+import { statSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
@@ -136,7 +137,10 @@ describe("the package exports", () => {
   const require = createRequire(`${ROOT}package.json`);
 
   it("expose every DTCG document for an npm reference", () => {
-    for (const path of kit.documents) {
+    // The layers directory is in the list for the watcher. It is not a document.
+    const documents = kit.documents.filter((path) => statSync(path).isFile());
+    expect(documents.length).toBe(kit.documents.length - 1);
+    for (const path of documents) {
       const specifier = `@untheme/aurora/src/${path
         .slice(`${ROOT}src/`.length)
         .replace(/\\/g, "/")}`;
