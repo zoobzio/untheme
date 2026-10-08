@@ -65,7 +65,11 @@ describe("layers", () => {
       { source: "./resolver.json", layers: { cool: "./layer.json" } },
       { cwd: ROOT },
     );
-    const ut = makeUntheme(kit.theme, { input: kit.input, override: {} });
+    const ut = makeUntheme(kit.theme, {
+      patch: {},
+      input: kit.input,
+      override: {},
+    });
     expect(ut.resolve("color.primary.default")).toMatchObject({
       hex: "#1d4ed8",
     });

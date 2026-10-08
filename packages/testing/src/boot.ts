@@ -22,7 +22,7 @@ export const bootUntheme = <T extends Theme<T>>(
 ): Untheme<T> => {
   return makeUntheme<T>(
     theme,
-    { input: mockInput(theme, selection), override: {} },
+    { patch: {}, input: mockInput(theme, selection), override: {} },
     options,
   );
 };

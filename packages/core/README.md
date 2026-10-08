@@ -17,7 +17,7 @@ A theme is a flat map of tokens. Each token has a `$type` and a `$value`. A cont
 A read of a token has four layers in this order:
 
 1. The base `$value`.
-2. The applied layer, when there is one.
+2. The patch: an applied layer, merged updates, or both.
 3. The selected context of each modifier, in the `order` of the contract.
 4. The user override.
 
@@ -44,23 +44,23 @@ ut.create(draftLayer); // checks a layer from outside against the contract
 ut.theme(); // the active theme
 ```
 
-The service has one base theme and one applied layer. `apply` stores a layer that the caller supplies. The caller decides where the layers come from. A layer can come from an import, a lazy load, or an API. [`@untheme/kit`](../kit) builds layers from DTCG JSON.
+The service has one base theme and one patch. `apply` stores a layer that the caller supplies as the patch. The caller decides where the layers come from. A layer can come from an import, a lazy load, or an API. [`@untheme/kit`](../kit) builds layers from DTCG JSON.
 
 The kit also builds the base theme. Its `config` module exports the base `theme`, the starting `input`, and the `Contract` type. The `Contract` type names the tokens and the modifiers. `useUnthemeConfig(config)` from `untheme/config` makes a state container from the config. Use it as `makeUntheme<Contract>(config.theme, useUnthemeConfig(config))`. The `Contract` type gives autocomplete for token names, modifiers, and contexts. The default type argument is the root `Template` type.
 
 ## The state container
 
-The service reads and writes the `config` container. The container holds what changed from the base theme: the applied `layer`, the `input`, and the `override` that `set` writes. The base theme is not in the container. A container with no layer and an empty override is the base theme at the selection. The caller can pass a plain object for tests and Node. The caller can pass a reactive proxy, for example in Vue, to track each read and write.
+The service reads and writes the `config` container. The container holds what changed from the base theme: the `patch`, the `input`, and the `override` that `set` writes. The base theme is not in the container. A container with an empty patch and an empty override is the base theme at the selection. The caller can pass a plain object for tests and Node. The caller can pass a reactive proxy, for example in Vue, to track each read and write.
 
-The service replaces each member of the container as a whole. It merges the base theme and the layer once for each layer object. Change the layer with `apply` or `update`.
+The service replaces each member of the container as a whole. It merges the base theme and the patch once for each patch object. Change the patch with `apply` or `update`.
 
 ## The service
 
 `makeUntheme<T>(theme, config, options?)` returns an `Untheme<T>`. The function copies the base theme and checks it against its own contract. `options` has `get` and `set` middleware for each field of the container.
 
-- `config`: the state container with `layer`, `input`, and `override`.
+- `config`: the state container with `patch`, `input`, and `override`.
 - `schema`: the guards for the token contract, from [`defineSchema`](../schema). `schema.base` is the base theme.
-- `theme()`: returns the active theme. With no layer, this is the base theme. With a layer, this is the base theme with the layer merged in.
+- `theme()`: returns the active theme: the base theme with the patch merged in.
 - `modifiers()`: returns the modifiers of the contract in composition order.
 - `contexts(modifier)`: returns the context names of a modifier.
 - `tokens(input?)`: returns the flat token map for a selection. The default selection is the active one. Each token has its binding with the override. `config.input` stays the same.
@@ -71,8 +71,8 @@ The service replaces each member of the container as a whole. It merges the base
 - `delta()`: returns the difference between the baseline and the active theme with the override in its tokens. The result is a patch.
 - `dirty()`: returns `true` when the user override has an entry.
 - `reset()`: removes all entries from the user override.
-- `update(patch)`: merges a patch into the applied layer. With no layer, the patch becomes a layer with the identity of the base theme. The override stays the same. Throws `InvalidPatchError` when the patch violates the contract.
-- `apply(layer)`: stores a copy of the layer and clears the override. Throws `InvalidLayerError` when the layer violates the contract.
+- `update(patch)`: merges a patch into the stored patch. An identity or an order in the patch replaces the stored one. The override stays the same. Throws `InvalidPatchError` when the patch violates the contract.
+- `apply(layer)`: stores a copy of the layer as the patch and clears the override. Throws `InvalidLayerError` when the layer violates the contract.
 - `create(layer)`: checks a layer against the contract and returns the layer. The active theme stays the same. Throws `InvalidLayerError` when the layer violates the contract.
 - `extract(id, name)`: returns a copy of the active theme with a new identity. The copy has the unsaved edits of the override.
 
@@ -80,7 +80,7 @@ The service replaces each member of the container as a whole. It merges the base
 
 The base theme is the baseline. `apply` stores a layer, and the active theme is the baseline with the layer merged in. Each active theme has the full token set. `delta()` compares the active theme with the baseline. `dirty()` reports the user override and `reset()` clears it. Use them to find and revert the edits since the last `apply`.
 
-A layer with the identity of the base theme is an edit of the base theme. `update` makes one when no layer is applied. `extract(id, name)` gives the active theme with the override as a theme with a new identity.
+`extract(id, name)` gives the active theme with the override as a theme with a new identity.
 
 ## Errors
 

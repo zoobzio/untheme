@@ -152,7 +152,7 @@ describe("useThemes", () => {
     const { active, select } = useThemes();
     await select("ink");
     expect(active.value).toBe("ink");
-    expect(untheme.config.layer).toEqual(layers[1]);
+    expect(untheme.config.patch).toEqual(layers[1]);
     expect(untheme.resolve("surface")).toEqual(untheme.resolve("black"));
   });
 
@@ -160,7 +160,7 @@ describe("useThemes", () => {
     const { active, select } = useThemes();
     await select("ghost");
     expect(active.value).toBe("fixture");
-    expect(untheme.config.layer).toBeUndefined();
+    expect(untheme.config.patch).toEqual({});
   });
 
   it("checks each layer against the contract on the way in", async () => {

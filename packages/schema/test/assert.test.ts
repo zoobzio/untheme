@@ -100,6 +100,6 @@ describe("defineAssert", () => {
     expect(() => assert.order(["ghost"])).toThrow(SchemaError);
     expect(() => assert.input({ mode: "dark" })).toThrow(SchemaError);
     expect(() => assert.layer({ tokens: {} })).toThrow(SchemaError);
-    expect(() => assert.patch({ id: "p" })).toThrow(SchemaError);
+    expect(() => assert.patch({ ghost: "p" })).toThrow(SchemaError);
   });
 });

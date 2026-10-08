@@ -23,9 +23,8 @@ describe("accessUntheme", () => {
   it("seeds state with a detached copy of the build selection and nothing else", () => {
     const store = accessUntheme();
 
-    expect(store.config.value).toEqual({ input, override: {} });
+    expect(store.config.value).toEqual({ patch: {}, input, override: {} });
     expect(store.config.value.input).not.toBe(input);
-    expect(store.config.value.layer).toBeUndefined();
   });
 
   it("keeps writes into the seeded state away from the build module", () => {

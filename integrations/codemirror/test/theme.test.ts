@@ -31,7 +31,7 @@ const tokens: Record<string, ColorDef | NumberDef> = {
 const schema = () => {
   const untheme = makeUntheme<Contract<string, Record<never, never>>>(
     { id: "t", name: "T", tokens, modifiers: {}, order: [] },
-    { input: {}, override: {} },
+    { patch: {}, input: {}, override: {} },
   );
 
   return untheme.schema;

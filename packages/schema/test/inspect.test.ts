@@ -78,6 +78,6 @@ describe("defineInspect", () => {
     expect(inspect.overrides({ ghost: color }).success).toBe(false);
     expect(inspect.order(["ghost"]).success).toBe(false);
     expect(inspect.layer({ tokens: {} }).success).toBe(false);
-    expect(inspect.patch({ id: "p" }).success).toBe(false);
+    expect(inspect.patch({ ghost: "p" }).success).toBe(false);
   });
 });

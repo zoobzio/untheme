@@ -18,13 +18,14 @@ import type { Diff } from "@untheme/utils";
 
 /**
  * The state that an {@link Untheme} service reads and writes. The state has
- * the applied layer, the selection with one context for each modifier, and
- * the user override. The base theme is not in the state. The container can be
- * a plain object or a reactive proxy. The service replaces each member as a
- * whole.
+ * the patch over the base theme, the selection with one context for each
+ * modifier, and the user override. The base theme is not in the state. The
+ * patch can be a layer that `apply` stored or the bindings that `update`
+ * merged. An empty patch is the base theme. The container can be a plain
+ * object or a reactive proxy. The service replaces each member as a whole.
  */
 export type Config<T extends Template> = {
-  layer?: Layer<T> | undefined;
+  patch: Patch<T>;
   input: Input<T>;
   override: Overrides<T>;
 };
@@ -37,14 +38,14 @@ export type Config<T extends Template> = {
 export type Options<T extends Template> = {
   get?: {
     config?: {
-      layer?: (layer: Layer<T> | undefined) => Layer<T> | undefined;
+      patch?: (patch: Patch<T>) => Patch<T>;
       input?: (input: Input<T>) => Input<T>;
       override?: (override: Overrides<T>) => Overrides<T>;
     };
   };
   set?: {
     config?: {
-      layer?: (layer: Layer<T>) => Layer<T>;
+      patch?: (patch: Patch<T>) => Patch<T>;
       input?: (input: Input<T>) => Input<T>;
       override?: (override: Overrides<T>) => Overrides<T>;
     };
@@ -69,9 +70,8 @@ export interface Untheme<T extends Template> {
   schema: Schema<T>;
 
   /**
-   * Returns the active theme. With no layer applied, the result is the base
-   * theme. With a layer applied, the result is the base theme with the layer
-   * merged in. The service keeps the merged theme until the layer changes.
+   * Returns the active theme: the base theme with the patch merged in. The
+   * service keeps the merged theme until the patch object changes.
    */
   theme: () => T;
 
@@ -142,14 +142,13 @@ export interface Untheme<T extends Template> {
   reset: () => void;
 
   /**
-   * Merges a patch into the applied layer. With no layer applied, the patch
-   * becomes a layer with the identity of the base theme. The override stays
-   * the same.
+   * Merges a patch into the stored patch. An identity or an order of the
+   * patch replaces the stored one. The override stays the same.
    */
   update: (patch: Patch<T>) => void;
 
   /**
-   * Stores a layer as the applied layer and clears the override. The active
+   * Stores a copy of a layer as the patch and clears the override. The active
    * theme becomes the base theme with the layer merged in.
    */
   apply: (layer: Layer<T>) => void;

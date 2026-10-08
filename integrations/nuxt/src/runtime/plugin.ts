@@ -12,11 +12,11 @@ import { makeUntheme } from "./client";
  * The plugin also provides a CSS renderer for the same service as
  * `$unthemeRenderer`.
  *
- * The plugin keeps the container in {@link useState}. The layer, the
+ * The plugin keeps the container in {@link useState}. The patch, the
  * selection, and the override go from the server to the client. The base
  * theme is the build module. Vue tracks each read and write of the container.
  * The plugin injects the active token set as CSS custom properties. The block
- * renders again when the layer, the selection, or the override changes. The
+ * renders again when the patch, the selection, or the override changes. The
  * plugin also sets the selected context of each modifier on the document root
  * as a `data-<modifier>` attribute.
  */

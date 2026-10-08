@@ -14,12 +14,13 @@ export { buildTheme };
 
 /**
  * Returns the state and the cookies that the plugin and the composable share.
- * The state holds the applied layer, the selection, and the user override. It
- * starts with a copy of the selection of the build module, an empty override,
- * and no layer.
+ * The state holds the patch, the selection, and the user override. It starts
+ * with an empty patch, a copy of the selection of the build module, and an
+ * empty override.
  */
 export const accessUntheme = () => {
   const config = useState<AppUnthemeConfig>("untheme:config", () => ({
+    patch: {},
     input: copy(buildInput),
     override: {},
   }));

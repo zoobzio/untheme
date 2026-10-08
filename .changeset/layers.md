@@ -28,13 +28,18 @@ config shrinks from 725 KB to 55 KB of JSON. The preset has eight modifiers.
 
 **Core.** `makeUntheme(theme, config, options?)` takes the base theme and
 the state container as separate arguments. The container holds what changed:
-the applied `layer`, the `input`, and the `override`. The base theme is not
-in the container. The service derives the active theme from the base and the
-layer and exposes it as `theme()`. With no layer, `theme()` is the base
-theme. `apply` stores a copy of the layer. `update` folds a patch into the
-applied layer, or makes a layer with the identity of the base theme. The
-middleware slots are `layer`, `input`, and `override`. `useUnthemeConfig`
-returns `{ input, override }`.
+the `patch`, the `input`, and the `override`. The base theme is not in the
+container. The service derives the active theme from the base and the patch
+and exposes it as `theme()`. An empty patch gives the base theme. `apply`
+stores a copy of the layer as the patch and clears the override. `update`
+merges a patch into the stored patch. The middleware slots are `patch`,
+`input`, and `override`. `useUnthemeConfig` returns `{ patch, input,
+override }`.
+
+**Schema.** A `Patch` can carry an optional `id`, `name`, and `order`. A
+`Layer` is a `Patch` with a required identity. `merge` in `@untheme/utils`
+takes patches and returns a theme of the type it received; the `Overlay`
+type is gone.
 
 **CSS.** A renderer `Source` has `theme()` in place of `config.theme`. The
 core service is still a `Source`.
@@ -42,9 +47,9 @@ core service is still a `Source`.
 **Testing.** `bootUntheme` passes the theme as the base of the service.
 
 **Nuxt.** The state in `useState` is the container: the selection, the
-override, and the applied layer. The theme travels in the module only. The
+override, and the patch. The theme travels in the module only. The
 module writes `#build/untheme.css` and no longer links it into the app CSS;
 the runtime `<style>` block is the CSS of the active state. The `css` option
-is gone. The `untheme:theme` hook is now `untheme:layer` and receives the
-applied layer. The example serves the aurora layers from a server route and
+is gone. The `untheme:theme` hook is now `untheme:patch` and receives the
+stored patch. The example serves the aurora layers from a server route and
 applies them from a picker.

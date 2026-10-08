@@ -1,5 +1,4 @@
-import type { Template, Theme } from "@untheme/schema";
-import type { Overlay } from "./types";
+import type { Patch, Template } from "@untheme/schema";
 
 import { copy, map } from "objectively";
 
@@ -7,7 +6,8 @@ import { clone } from "./clone";
 import { traverse } from "./traverse";
 
 /**
- * Merges overlays into a complete theme and returns a new theme. The function
+ * Merges overlays into a complete theme and returns a new theme of the same
+ * type. The function
  * applies the overlays from left to right. A later overlay replaces an earlier
  * binding of the same token or the same context. The identity and the order
  * come from the last overlay that has them. With no overlays, the result is a
@@ -18,15 +18,17 @@ import { traverse } from "./traverse";
  * the old `$value` as a whole. The function skips an overlay key that has no
  * base slot.
  *
- * A `Layer` overlay has an identity and sets the identity of the result. A
- * `Patch` overlay has no identity, so the identity of the theme stays.
+ * An overlay with an identity sets the identity of the result. An overlay with
+ * no identity leaves the identity of the theme as it is. A `Layer` is a patch
+ * with an identity.
  */
 export const merge = <T extends Template>(
-  theme: Theme<T>,
-  ...overlays: Overlay<T>[]
-): Theme<T> => {
-  return overlays.reduce<Theme<T>>(
+  theme: T,
+  ...overlays: Patch<T>[]
+): T => {
+  return overlays.reduce<T>(
     (acc, overlay) => ({
+      ...acc,
       id: overlay.id ?? acc.id,
       name: overlay.name ?? acc.name,
       tokens: map(acc.tokens, (slot, token) => {

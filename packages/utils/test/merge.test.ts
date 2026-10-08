@@ -1,3 +1,5 @@
+import type { Template } from "@untheme/schema";
+
 import { describe, it, expect } from "vitest";
 
 import { merge } from "../src/merge";
@@ -42,7 +44,9 @@ describe("merge", () => {
   });
 
   it("skips overlay keys with no base slot", () => {
-    const result = merge(theme, { tokens: { "color.ghost": "{color.fg}" } });
+    const result = merge<Template>(theme, {
+      tokens: { "color.ghost": "{color.fg}" },
+    });
     expect("color.ghost" in result.tokens).toBe(false);
   });
 
@@ -81,8 +85,10 @@ describe("merge", () => {
     const result = merge(theme, {
       modifiers: { mode: { light: { "color.bg": "{color.accent}" } } },
     });
-    expect(result.modifiers.mode?.light?.["color.bg"]).toBe("{color.accent}");
-    expect(result.modifiers.mode?.dark).toEqual(theme.modifiers.mode.dark);
+    expect(result.modifiers.mode.light).toMatchObject({
+      "color.bg": "{color.accent}",
+    });
+    expect(result.modifiers.mode.dark).toEqual(theme.modifiers.mode.dark);
     expect(result.modifiers.contrast).toEqual(theme.modifiers.contrast);
   });
 

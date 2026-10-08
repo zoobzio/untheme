@@ -111,7 +111,7 @@ describe("mockConfig", () => {
     const container = useUnthemeConfig(mockConfig(theme));
     expect(container.input).toEqual({ color: "light", density: "default" });
     expect(container.override).toEqual({});
-    expect(container.layer).toBeUndefined();
+    expect(container.patch).toEqual({});
   });
 });
 

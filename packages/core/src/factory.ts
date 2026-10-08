@@ -15,7 +15,7 @@ import type {
 import type { Diff } from "@untheme/utils";
 import type { Config, Options, Untheme } from "./types";
 
-import { copy, entries, map, record } from "objectively";
+import { copy, map, record } from "objectively";
 import { defineSchema } from "@untheme/schema";
 import { clone, diff, merge } from "@untheme/utils";
 import {
@@ -28,59 +28,14 @@ import {
 } from "./error";
 
 /**
- * Merges a patch into a layer and returns a new layer. The identity of the
- * layer stays. A token of the patch replaces the same token of the layer. A
- * context override of the patch replaces the same override of the layer. The
- * result holds copies of the values of the patch.
- */
-const fold = <T extends Theme<T>>(
-  layer: Layer<T>,
-  patch: Patch<T>,
-): Layer<T> => {
-  const next: Layer<T> = { id: layer.id, name: layer.name };
-  if (layer.tokens || patch.tokens) {
-    next.tokens = { ...layer.tokens, ...copy(patch.tokens ?? {}) };
-  }
-  if (layer.modifiers || patch.modifiers) {
-    const modifiers: Record<string, Record<string, unknown>> = {};
-    const own: Record<string, unknown> = layer.modifiers ?? {};
-    for (const [modifier, contexts] of entries(own)) {
-      modifiers[modifier] = record(contexts) ? { ...contexts } : {};
-    }
-    const added: Record<string, unknown> = patch.modifiers ?? {};
-    for (const [modifier, contexts] of entries(added)) {
-      const axis = (modifiers[modifier] ??= {});
-      if (!record(contexts)) {
-        continue;
-      }
-      for (const [context, overrides] of entries(contexts)) {
-        if (!record(overrides)) {
-          continue;
-        }
-        const current = axis[context];
-        axis[context] = {
-          ...(record(current) ? current : {}),
-          ...copy(overrides),
-        };
-      }
-    }
-    next.modifiers = modifiers as Layer<T>["modifiers"];
-  }
-  if (layer.order) {
-    next.order = copy(layer.order);
-  }
-  return next;
-};
-
-/**
  * Makes an {@link Untheme} service over a base theme and a state container.
  * The base theme is the contract and the baseline. The container holds the
- * applied layer, the selection, and the user override. The service reads and
- * writes the container through the `options` middleware.
+ * patch, the selection, and the user override. The service reads and writes
+ * the container through the `options` middleware.
  *
- * A read gives the base tokens, then the applied layer, then the selected
- * context of each modifier in `order`, then the user override. The service
- * merges the base theme and the layer once for each layer object.
+ * A read gives the base tokens, then the patch, then the selected context of
+ * each modifier in `order`, then the user override. The service merges the
+ * base theme and the patch once for each patch object.
  *
  * @param base - The base theme. The service copies it and checks the copy
  * against its own contract.
@@ -100,20 +55,20 @@ export const makeUntheme = <T extends Theme<T>>(
    * matching `options.set` middleware and stores the result in the container.
    */
   const proxy: Config<T> = {
-    get layer() {
-      const through = options.get?.config?.layer;
+    get patch() {
+      const through = options.get?.config?.patch;
       if (through) {
-        return through(config.layer);
+        return through(config.patch);
       }
-      return config.layer;
+      return config.patch;
     },
-    set layer(value) {
-      const through = options.set?.config?.layer;
-      if (through && value !== undefined) {
-        config.layer = through(value);
+    set patch(value) {
+      const through = options.set?.config?.patch;
+      if (through) {
+        config.patch = through(value);
         return;
       }
-      config.layer = value;
+      config.patch = value;
     },
     get input() {
       const through = options.get?.config?.input;
@@ -158,22 +113,18 @@ export const makeUntheme = <T extends Theme<T>>(
   reframe(InvalidThemeError, () => schema.assert.input(proxy.input));
 
   /**
-   * The last merge of the base theme and a layer.
+   * The last merge of the base theme and the patch.
    */
-  let merged: { layer: Layer<T>; theme: T } | undefined;
+  let merged: { patch: Patch<T>; theme: T } | undefined;
 
   /**
-   * Returns the active theme. With no layer, the result is the base theme.
-   * With a layer, the result is the base theme with the layer merged in. The
-   * function merges once for each layer object.
+   * Returns the active theme: the base theme with the patch merged in. The
+   * function merges once for each patch object.
    */
   const theme = (): T => {
-    const layer = proxy.layer;
-    if (layer === undefined) {
-      return schema.base;
-    }
-    if (merged === undefined || merged.layer !== layer) {
-      merged = { layer, theme: merge<T>(schema.base, layer) as T };
+    const patch = proxy.patch;
+    if (merged === undefined || merged.patch !== patch) {
+      merged = { patch, theme: merge<T>(schema.base, patch) };
     }
     return merged.theme;
   };
@@ -308,28 +259,26 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * Merges the bindings of a patch into the applied layer. With no layer, the
-   * patch becomes a layer with the identity of the base theme. The override
-   * stays the same. Throws {@link InvalidPatchError} when the patch violates
-   * the contract.
+   * Merges a patch into the stored patch. The new stored patch is the
+   * difference between the base theme and the active theme with the patch
+   * merged in. An identity or an order of the patch replaces the stored one.
+   * The override stays the same. Throws {@link InvalidPatchError} when the
+   * patch violates the contract.
    */
   const update = (patch: Patch<T>) => {
     reframe(InvalidPatchError, () => schema.assert.patch(patch));
-    const current = proxy.layer ?? {
-      id: schema.base.id,
-      name: schema.base.name,
-    };
-    proxy.layer = fold<T>(current, patch);
+    const next = merge<T>(theme(), patch);
+    proxy.patch = { ...proxy.patch, ...patch, ...diff<T>(schema.base, next) };
   };
 
   /**
-   * Stores a copy of a layer as the applied layer and clears the user
-   * override. Throws {@link InvalidLayerError} when the layer violates the
-   * contract.
+   * Stores a copy of a layer as the patch and clears the user override. The
+   * active theme becomes the base theme with the layer merged in. Throws
+   * {@link InvalidLayerError} when the layer violates the contract.
    */
   const apply = (layer: Layer<T>) => {
     reframe(InvalidLayerError, () => schema.assert.layer(layer));
-    proxy.layer = copy(layer);
+    proxy.patch = copy(layer);
     proxy.override = {};
   };
 

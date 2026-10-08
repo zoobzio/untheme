@@ -70,6 +70,6 @@ describe("defineCheck", () => {
     expect(check.layer({ tokens: {} })).toBe(false);
 
     expect(check.patch({})).toBe(true);
-    expect(check.patch({ id: "p" })).toBe(false);
+    expect(check.patch({ ghost: "p" })).toBe(false);
   });
 });

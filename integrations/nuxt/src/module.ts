@@ -105,6 +105,7 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
         "AppUnthemeContract",
         "AppUnthemeTheme",
         "AppUnthemeThemeLayer",
+        "AppUnthemePatch",
         "AppUnthemeInput",
         "AppUnthemeConfig",
         "AppUntheme",

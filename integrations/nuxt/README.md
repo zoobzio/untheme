@@ -63,7 +63,7 @@ At build time the module validates the theme and the boot selection with `define
 
 The `untheme/` modules are the same modules that `untheme build` writes. A kit config with `layers` also writes `#build/untheme/layers.mjs` and one `#build/untheme/layers/<id>.json` for each layer.
 
-The module also registers the runtime plugin and these auto-imports: `useUntheme()`, `useUnthemeRenderer()`, and `accessUntheme()`. It registers these type imports from the generated contract: `AppUnthemeContract`, `AppUnthemeTheme`, `AppUnthemeThemeLayer`, `AppUnthemeInput`, `AppUnthemeConfig`, and `AppUntheme`.
+The module also registers the runtime plugin and these auto-imports: `useUntheme()`, `useUnthemeRenderer()`, and `accessUntheme()`. It registers these type imports from the generated contract: `AppUnthemeContract`, `AppUnthemeTheme`, `AppUnthemeThemeLayer`, `AppUnthemePatch`, `AppUnthemeInput`, `AppUnthemeConfig`, and `AppUntheme`.
 
 ## `useUntheme()`
 
@@ -81,7 +81,7 @@ const ut = useUntheme();
 
 `useUnthemeRenderer()` returns the [CSS renderer](../../packages/css) for the same service. Use it to get the custom property of a token with `var("primary")`, to read a live value, or to emit a static set.
 
-`accessUntheme()` returns the state that the service uses. This is the reactive `config` container from `useState`, with the `layer`, the `input`, and the `override`, and the `input` and `key` cookie refs. Most components need only `useUntheme()`.
+`accessUntheme()` returns the state that the service uses. This is the reactive `config` container from `useState`, with the `patch`, the `input`, and the `override`, and the `input` and `key` cookie refs. Most components need only `useUntheme()`.
 
 ## Serving themes
 
@@ -154,7 +154,7 @@ The app applies a theme with the catalog client. `useUntheme().theme().id` is th
 
 ## CSS
 
-The runtime plugin injects one reactive `<style>` tag. The tag holds a `:root` block with one CSS custom property for each active token. The plugin makes the block with [`defineRenderer(untheme).root()`](../../packages/css) from `untheme/css`. The block is the result of the base theme, the applied layer, the selection, and the override. The block renders again when one of them changes.
+The runtime plugin injects one reactive `<style>` tag. The tag holds a `:root` block with one CSS custom property for each active token. The plugin makes the block with [`defineRenderer(untheme).root()`](../../packages/css) from `untheme/css`. The block is the result of the base theme, the patch, the selection, and the override. The block renders again when one of them changes.
 
 The plugin also sets the selected context of each modifier on `<html>` as a `data-<modifier>` attribute, such as `data-color="dark"`. Your stylesheets can select on the attribute.
 
@@ -178,9 +178,9 @@ The module writes the file again when the theme changes.
 
 ## Cookies and SSR
 
-The module saves the selection and the id of the applied layer to two cookies, `untheme-input` and `untheme-key`. `swap` writes the input cookie. `apply` and `update` write the key cookie. On the server, the module reads the input cookie before it renders. It checks the stored input with `schema.check.input`. When the input matches the contract, the module uses it. Otherwise the module clears the cookie. The module does not restore the layer from the key cookie. The app decides when to fetch and apply a layer.
+The module saves the selection and the id of the patch to two cookies, `untheme-input` and `untheme-key`. `swap` writes the input cookie. `apply` and `update` write the key cookie. A patch with no id clears it. On the server, the module reads the input cookie before it renders. It checks the stored input with `schema.check.input`. When the input matches the contract, the module uses it. Otherwise the module clears the cookie. The module does not restore the layer from the key cookie. The app decides when to fetch and apply a layer.
 
-The state in `useState` holds the layer, the selection, and the override. The base theme is the build module and does not travel in the payload.
+The state in `useState` holds the patch, the selection, and the override. The base theme is the build module and does not travel in the payload.
 
 ## Hooks
 
@@ -190,7 +190,7 @@ The service calls three Nuxt hooks.
 | --------------- | -------------------------------------------- | --------------------- |
 | `untheme:ready` | The plugin finishes the setup of the service | the `Untheme` service |
 | `untheme:input` | The selection changes with `swap`            | the new `input`       |
-| `untheme:layer` | The layer changes with `apply` or `update`   | the stored layer      |
+| `untheme:patch` | The patch changes with `apply` or `update`   | the stored patch      |
 
 ## Related
 

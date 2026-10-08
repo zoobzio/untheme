@@ -5,9 +5,9 @@ import { accessUntheme, buildTheme } from "./store";
 
 /**
  * Makes the untheme service over the shared state. The base theme is the
- * build module. The state holds the layer, the selection, and the override.
- * A write of the layer saves its id to the key cookie and calls the
- * `untheme:layer` hook. A write of the selection saves it to the input
+ * build module. The state holds the patch, the selection, and the override.
+ * A write of the patch saves its id, or `null` when it has none, to the key
+ * cookie and calls the `untheme:patch` hook. A write of the selection saves it to the input
  * cookie and calls the `untheme:input` hook. On the server, the function
  * restores the selection from the input cookie before the first render.
  */
@@ -17,10 +17,10 @@ export const makeUntheme = (nuxtApp: UnthemeNuxtApp): AppUntheme => {
   const service = makeService<AppUnthemeContract>(buildTheme, config.value, {
     set: {
       config: {
-        layer: (layer) => {
-          cookies.key.value = layer.id;
-          nuxtApp.callHook("untheme:layer", layer);
-          return layer;
+        patch: (patch) => {
+          cookies.key.value = patch.id ?? null;
+          nuxtApp.callHook("untheme:patch", patch);
+          return patch;
         },
         input: (input) => {
           cookies.input.value = input;

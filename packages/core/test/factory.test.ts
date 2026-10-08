@@ -1,4 +1,4 @@
-import type { Contract, Input, Layer, Overrides } from "@untheme/schema";
+import type { Contract, Input, Overrides, Patch } from "@untheme/schema";
 import type { Mod, Tok } from "./fixture";
 
 import { describe, it, expect } from "vitest";
@@ -16,10 +16,11 @@ import { black, blue, theme, white } from "./fixture";
 type T = Contract<Tok, Mod>;
 
 const makeConfig = (): {
-  layer?: Layer<T>;
+  patch: Patch<T>;
   input: Input<T>;
   override: Overrides<T>;
 } => ({
+  patch: {},
   input: { mode: "light", contrast: "normal" },
   override: {},
 });
@@ -235,10 +236,10 @@ describe("resolve", () => {
 });
 
 describe("theme", () => {
-  it("is the base theme itself while no layer is applied", () => {
+  it("equals the base theme while the patch is empty", () => {
     const u = boot();
-    expect(u.config.layer).toBeUndefined();
-    expect(u.theme()).toBe(u.schema.base);
+    expect(u.config.patch).toEqual({});
+    expect(u.theme()).toEqual(u.schema.base);
   });
 
   it("is the base theme with the layer merged in once a layer is applied", () => {
@@ -256,7 +257,7 @@ describe("theme", () => {
     expect(u.schema.base.tokens["color.bg"].$value).toBe("{color.white}");
   });
 
-  it("merges once per layer object", () => {
+  it("merges once per patch object", () => {
     const u = boot();
     u.apply({
       id: "alt",
@@ -268,10 +269,10 @@ describe("theme", () => {
     expect(u.theme().tokens["color.fg"].$value).toBe("{color.white}");
   });
 
-  it("follows a layer that the container receives from outside", () => {
+  it("follows a patch that the container receives from outside", () => {
     const config = makeConfig();
     const u = boot(config);
-    config.layer = { id: "ext", name: "Ext", tokens: { "color.bg": blue } };
+    config.patch = { id: "ext", name: "Ext", tokens: { "color.bg": blue } };
     expect(u.theme().id).toBe("ext");
     expect(u.get("color.bg")).toBe("{color.white}");
     u.swap("contrast", "high");
@@ -291,17 +292,23 @@ describe("update", () => {
     expect(u.get("color.accent")).toBe("{color.white}");
   });
 
-  it("becomes a layer with the identity of the base when none is applied", () => {
+  it("stores the bindings with no identity when none is applied", () => {
     const u = boot();
     u.update({ tokens: { "color.bg": "{color.black}" } });
-    expect(u.config.layer).toEqual({
-      id: "demo",
-      name: "Demo",
-      tokens: { "color.bg": "{color.black}" },
-    });
+    expect(u.config.patch.id).toBeUndefined();
+    expect(u.config.patch.tokens).toEqual({ "color.bg": "{color.black}" });
+    expect(u.theme().id).toBe("demo");
   });
 
-  it("folds into the applied layer and keeps its identity", () => {
+  it("takes an identity and an order from the patch", () => {
+    const u = boot();
+    u.update({ id: "p", name: "P", order: ["contrast", "mode"] });
+    expect(u.theme().id).toBe("p");
+    expect(u.theme().name).toBe("P");
+    expect(u.modifiers()).toEqual(["contrast", "mode"]);
+  });
+
+  it("merges into the applied layer and keeps its identity", () => {
     const u = boot();
     u.apply({
       id: "alt",
@@ -316,7 +323,7 @@ describe("update", () => {
         contrast: { high: { "color.bg": "{color.black}" } },
       },
     });
-    expect(u.config.layer).toEqual({
+    expect(u.config.patch).toMatchObject({
       id: "alt",
       name: "Alt",
       tokens: { "color.bg": "{color.black}", "color.fg": "{color.white}" },
@@ -410,8 +417,8 @@ describe("apply", () => {
       tokens: { "color.accent": structuredClone(white) },
     };
     u.apply(layer);
-    expect(config.layer).toEqual(layer);
-    expect(config.layer).not.toBe(layer);
+    expect(config.patch).toEqual(layer);
+    expect(config.patch).not.toBe(layer);
     Reflect.set(layer.tokens["color.accent"], "components", "garbage");
     expect(u.resolve("color.accent")).toEqual(white);
   });
@@ -420,7 +427,7 @@ describe("apply", () => {
     const u = boot();
     const bad = { id: "bad", name: "Bad", tokens: { ghost: black } };
     expect(() => u.apply(bad as never)).toThrow(InvalidLayerError);
-    expect(u.config.layer).toBeUndefined();
+    expect(u.config.patch).toEqual({});
   });
 
   it("resolves each apply against the baseline, not the prior theme", () => {
@@ -498,14 +505,14 @@ describe("Options middleware", () => {
     expect(writes[0]).toEqual({ "color.bg": blue });
   });
 
-  it("intercepts reads of the layer", () => {
+  it("intercepts reads of the patch", () => {
     const u = boot(makeConfig(), {
       get: {
-        config: { layer: () => ({ id: "seen", name: "Seen" }) },
+        config: { patch: () => ({ id: "seen", name: "Seen" }) },
       },
     });
     expect(u.theme().name).toBe("Seen");
-    expect(u.config.layer?.id).toBe("seen");
+    expect(u.config.patch.id).toBe("seen");
   });
 
   it("intercepts reads of the override", () => {
@@ -518,12 +525,12 @@ describe("Options middleware", () => {
     expect(u.dirty()).toBe(true);
   });
 
-  it("intercepts writes of the layer", () => {
+  it("intercepts writes of the patch", () => {
     const writes: unknown[] = [];
     const u = boot(makeConfig(), {
       set: {
         config: {
-          layer: (value) => {
+          patch: (value) => {
             writes.push(value.id);
             return value;
           },

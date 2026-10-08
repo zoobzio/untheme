@@ -416,9 +416,16 @@ describe("patch", () => {
     ).toBeUndefined();
   });
 
-  it("rejects an identity key, since a patch has none", () => {
-    expect(first(rules.patch, { id: "p" })?.code).toBe("unknown_key");
-    expect(first(rules.patch, { name: "P" })?.code).toBe("unknown_key");
+  it("accepts an optional identity and order", () => {
+    expect(
+      first(rules.patch, { id: "p", name: "P", order: ["contrast", "mode"] }),
+    ).toBeUndefined();
+    expect(first(rules.patch, { id: "" })?.code).toBe("empty");
+    expect(first(rules.patch, { order: ["ghost"] })?.code).toBe("not_member");
+  });
+
+  it("rejects an unknown key", () => {
+    expect(first(rules.patch, { ghost: "p" })?.code).toBe("unknown_key");
   });
 
   it("rejects a bad binding", () => {
