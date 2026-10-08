@@ -42,7 +42,7 @@ ut.theme(); // the active theme
 
 The service has one base theme and one patch. `apply` stores a layer that the caller supplies as the patch. The caller decides where the layers come from. A layer can come from an import, a lazy load, or an API. [`@untheme/kit`](../kit) builds layers from DTCG JSON.
 
-The kit also builds the base theme. Its `config` module exports the base `theme`, the starting `input`, and the `Contract` type. The `Contract` type names the tokens and the modifiers. `useUnthemeConfig(config)` from `untheme/config` makes a state container from the config. Use it as `makeUntheme<Contract>(config.theme, useUnthemeConfig(config))`. The `Contract` type gives autocomplete for token names, modifiers, and contexts. The default type argument is the root `Template` type.
+The kit also builds the base theme. Its `config` module exports the base `theme`, the starting `input`, and the `Contract` type. The `Contract` type names the tokens and the modifiers. Use it as `makeUntheme<Contract>(config.theme, { patch: {}, input: config.input })`. The `Contract` type gives autocomplete for token names, modifiers, and contexts. The default type argument is the root `Template` type.
 
 ## The state container
 

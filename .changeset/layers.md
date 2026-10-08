@@ -32,8 +32,7 @@ the `patch` and the `input`. The base theme is not in the container. The
 service derives the active theme from the base and the patch and exposes it
 as `theme()`. An empty patch gives the base theme. `apply` stores a copy of
 the layer as the patch. `update` merges a patch into the stored patch. The
-middleware slots are `patch` and `input`. `useUnthemeConfig` returns
-`{ patch, input }`.
+middleware slots are `patch` and `input`.
 
 **Schema.** A `Patch` can carry an optional `id`, `name`, and `order`. A
 `Layer` is a `Patch` with a required identity. `merge` in `@untheme/utils`

@@ -1,6 +1,4 @@
 import type { Input, Template } from "@untheme/schema";
-import type { Config } from "@untheme/core";
-import { copy } from "objectively";
 
 /**
  * The untheme configuration of an application. It has the base theme with the
@@ -31,22 +29,3 @@ export interface UnthemeConfig<T extends Template> {
 export const defineUnthemeConfig = <T extends Template>(
   config: UnthemeConfig<T>,
 ) => config;
-
-/**
- * Makes a state container from a configuration. The container has an empty
- * patch and a copy of the starting selection. Pass the theme of the
- * configuration as the base of the service:
- * `makeUntheme(config.theme, useUnthemeConfig(config))`. Each call makes a
- * new container.
- *
- * @param config - The untheme configuration.
- * @returns A {@link Config} container for `makeUntheme`.
- */
-export const useUnthemeConfig = <T extends Template>(
-  config: UnthemeConfig<T>,
-): Config<T> => {
-  return {
-    patch: {},
-    input: copy(config.input),
-  };
-};

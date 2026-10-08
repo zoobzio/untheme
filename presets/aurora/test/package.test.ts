@@ -7,7 +7,6 @@ import { pathToFileURL } from "node:url";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { makeUntheme } from "untheme";
-import { useUnthemeConfig } from "untheme/config";
 
 import { resolveKit } from "@untheme/kit";
 import { resolveAll } from "@untheme/testing";
@@ -76,18 +75,18 @@ describe("the built modules", () => {
 
 describe("a consumer of the config module", () => {
   it("boots a service with no kit of its own", () => {
-    const ut = makeUntheme<Contract>(config.theme, useUnthemeConfig(config));
+    const ut = makeUntheme<Contract>(config.theme, { patch: {}, input: config.input });
     expect(ut.get("primary")).toBe("{primary-600}");
     expect(ut.resolve("primary")).toEqual(ut.resolve("primary-600"));
   });
 
   it("resolves every token at the boot selection", () => {
-    const ut = makeUntheme<Contract>(config.theme, useUnthemeConfig(config));
+    const ut = makeUntheme<Contract>(config.theme, { patch: {}, input: config.input });
     expect(Object.keys(resolveAll(ut))).toEqual([...tokens]);
   });
 
   it("swaps every axis the preset declares", () => {
-    const ut = makeUntheme<Contract>(config.theme, useUnthemeConfig(config));
+    const ut = makeUntheme<Contract>(config.theme, { patch: {}, input: config.input });
     ut.swap("color", "dark");
     expect(ut.resolve("on-surface")).toEqual(ut.resolve("neutral-200"));
     ut.swap("contrast", "high");
@@ -95,7 +94,7 @@ describe("a consumer of the config module", () => {
   });
 
   it("applies a theme from its layer file as it is", async () => {
-    const ut = makeUntheme<Contract>(config.theme, useUnthemeConfig(config));
+    const ut = makeUntheme<Contract>(config.theme, { patch: {}, input: config.input });
     const before = ut.resolve("primary");
     const nord = await layer("nord");
     ut.apply(nord);
@@ -107,7 +106,7 @@ describe("a consumer of the config module", () => {
   });
 
   it("leaves the exported config untouched", async () => {
-    const ut = makeUntheme<Contract>(config.theme, useUnthemeConfig(config));
+    const ut = makeUntheme<Contract>(config.theme, { patch: {}, input: config.input });
     ut.apply(await layer("dracula"));
     ut.update({ tokens: { primary: "{primary-50}" } });
     expect(input.color).toBe("light");

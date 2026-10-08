@@ -26,12 +26,11 @@ renders in the editor foreground color.
 import { EditorView } from "@codemirror/view";
 import { javascript } from "@codemirror/lang-javascript";
 import { makeUntheme } from "untheme";
-import { useUnthemeConfig } from "untheme/config";
 import { defineCodeMirrorTheme } from "@untheme/codemirror";
 import config, { type Contract } from "./untheme/config.mjs";
 
 // The theme that `untheme build` wrote, with code-* tokens
-const untheme = makeUntheme<Contract>(config.theme, useUnthemeConfig(config));
+const untheme = makeUntheme<Contract>(config.theme, { patch: {}, input: config.input });
 
 const theme = defineCodeMirrorTheme(
   untheme.schema,

@@ -5,7 +5,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { computed, reactive, ref } from "vue";
 
 import { makeUntheme } from "untheme";
-import { useUnthemeConfig } from "untheme/config";
 import { mockCatalog } from "@untheme/testing";
 
 import { modules, theme } from "./fixtures";
@@ -58,7 +57,7 @@ let untheme: Untheme<typeof theme>;
 beforeEach(() => {
   untheme = makeUntheme<typeof theme>(
     theme,
-    reactive(useUnthemeConfig(modules.config)),
+    reactive({ patch: {}, input: modules.config.input }),
   );
   vi.stubGlobal("useUntheme", () => untheme);
   vi.stubGlobal("useDemo", useDemo);

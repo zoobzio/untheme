@@ -63,8 +63,8 @@ const index = (core: Core): OutputFile[] => {
 
 /**
  * Makes the `./config` entry. It has the base theme, the boot selection, and the
- * `{ theme, input }` config that `useUnthemeConfig` seeds a runtime container
- * from. The declarations use the token and modifier unions.
+ * `{ theme, input }` config as the default export. The declarations use the
+ * token and modifier unions.
  */
 const config = (core: Core): OutputFile[] =>
   pair(
@@ -159,8 +159,8 @@ const layers = (core: Core): OutputFile[] => {
  *
  * - `index` has the `Token`, `Modifier`, `Mod`, and `Context` types, the token
  *   and modifier lists, `isToken`, and `isModifier`.
- * - `config` has the base theme, the boot selection, and `{ theme, input }` for
- *   `useUnthemeConfig`.
+ * - `config` has the base theme, the boot selection, and `{ theme, input }` as
+ *   the default export.
  * - `manifest` has each modifier and context with its id, name, and description.
  * - `layers/<id>.json` is one layer, and `layers` lists the layers.
  *

@@ -293,7 +293,7 @@ starts.
 | File               | Contents                                                                                                  |
 | ------------------ | --------------------------------------------------------------------------------------------------------- |
 | `index.mjs`        | `type Token`, `type Modifier`, `type Mod`, `type Context`, `tokens`, `modifiers`, `isToken`, `isModifier` |
-| `config.mjs`       | `theme`, `input`, and `{ theme, input }` as the default export. `useUnthemeConfig` takes this value.      |
+| `config.mjs`       | `theme`, `input`, and `{ theme, input }` as the default export.                                           |
 | `manifest.mjs`     | `manifest`, a list of the modifiers and their contexts. Each entry has an id, a name, and a description.  |
 | `layers.mjs`       | `layers`, a list of the layers. Each entry has an id, a name, and a description. `type LayerId`.          |
 | `layers/<id>.json` | One layer, as `apply` takes it: `id`, `name`, and `tokens`.                                               |
@@ -308,13 +308,12 @@ At runtime, [`@untheme/css`](../css) renders CSS from the active theme.
 
 ```ts
 import { makeUntheme } from "untheme";
-import { useUnthemeConfig } from "untheme/config";
 import { defineRenderer } from "untheme/css";
 
 import config, { type Contract } from "./untheme/config.mjs";
 import { isToken } from "./untheme/index.mjs";
 
-const untheme = makeUntheme<Contract>(config.theme, useUnthemeConfig(config));
+const untheme = makeUntheme<Contract>(config.theme, { patch: {}, input: config.input });
 const renderer = defineRenderer(untheme);
 ```
 

@@ -202,12 +202,11 @@ each modifier, which is `light`, `balanced`, `default`, `md`, `default`,
 
 ```ts
 import { makeUntheme } from "untheme";
-import { useUnthemeConfig } from "untheme/config";
 
 import config, { type Contract } from "@untheme/aurora/config";
 import nord from "@untheme/aurora/layers/nord.json" with { type: "json" };
 
-const ut = makeUntheme<Contract>(config.theme, useUnthemeConfig(config));
+const ut = makeUntheme<Contract>(config.theme, { patch: {}, input: config.input });
 
 ut.apply(nord); // the nord palette under the same roles
 ut.swap("color", "dark");

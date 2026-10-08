@@ -16,23 +16,22 @@ pnpm add untheme
 | ----------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `untheme`         | [`@untheme/core`](../core), [`@untheme/schema`](../schema), [`@untheme/utils`](../utils) | `makeUntheme`, `Untheme`, `Config`, `defineSchema`, `Schema`, `Contract`, `Theme`, `Layer`, `Patch`, `Input`, `SchemaError`, `clone`/`merge`/`diff`/`delta`/`traverse`, … |
 | `untheme/catalog` | [`@untheme/catalog`](../catalog)                                                         | `defineCatalog`, `defineClient`, `Catalog`, `Provider`, `Entry`, `Query`, `Page`, …                                                                                       |
-| `untheme/config`  | -                                                                                        | `UnthemeConfig`, `defineUnthemeConfig`, `useUnthemeConfig`                                                                                                                |
+| `untheme/config`  | -                                                                                        | `UnthemeConfig`, `defineUnthemeConfig`                                                                                                                                     |
 | `untheme/css`     | [`@untheme/css`](../css)                                                                 | `defineRenderer`, `Renderer`, `serialize`, `emit`, `property`, `Variables`, …                                                                                             |
 
 ## Usage
 
-`untheme build` writes the theme to `untheme/config.mjs`. A declaration file types the theme with its token names and modifier names. `useUnthemeConfig` makes a state container from the config. `makeUntheme` makes the service from the theme and the container.
+`untheme build` writes the theme to `untheme/config.mjs`. A declaration file types the theme with its token names and modifier names. `makeUntheme` makes the service from the theme and a container with an empty patch and the starting input.
 
 ```ts
 import { makeUntheme } from "untheme";
-import { useUnthemeConfig } from "untheme/config";
 import { defineRenderer } from "untheme/css";
 
 import config, { type Contract } from "./untheme/config.mjs";
 
 // The container is { patch, input }. `input` selects one context for each modifier.
 // The theme of the config is the base theme of the service.
-const ut = makeUntheme<Contract>(config.theme, useUnthemeConfig(config));
+const ut = makeUntheme<Contract>(config.theme, { patch: {}, input: config.input });
 
 const renderer = defineRenderer(ut);
 renderer.root();
