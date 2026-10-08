@@ -4,7 +4,7 @@ import { defineNuxtPlugin } from "#app";
 import { useHead } from "#imports";
 import { computed } from "vue";
 import { defineRenderer } from "untheme/css";
-import { makeUntheme } from "./client";
+import { makeNuxtUntheme } from "./client";
 
 /**
  * The Nuxt plugin for untheme. The plugin makes the untheme service over a
@@ -23,7 +23,7 @@ import { makeUntheme } from "./client";
 export default defineNuxtPlugin({
   name: "untheme",
   setup: async (nuxtApp) => {
-    const untheme = makeUntheme(nuxtApp);
+    const untheme = makeNuxtUntheme(nuxtApp);
     const unthemeRenderer = defineRenderer(untheme);
 
     const htmlAttrs: Record<string, ComputedRef<string>> = {};

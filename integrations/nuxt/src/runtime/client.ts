@@ -1,7 +1,8 @@
 import type { AppUntheme, AppUnthemeContract, UnthemeNuxtApp } from "./types";
 
-import { makeUntheme as makeService } from "untheme";
-import { accessUntheme, buildTheme } from "./store";
+import { makeUntheme } from "untheme";
+import { theme as buildTheme } from "#build/untheme/config.mjs";
+import { accessUntheme } from "./store";
 
 /**
  * Makes the untheme service over the shared state. The base theme is the
@@ -11,10 +12,10 @@ import { accessUntheme, buildTheme } from "./store";
  * cookie and calls the `untheme:input` hook. On the server, the function
  * restores the selection from the input cookie before the first render.
  */
-export const makeUntheme = (nuxtApp: UnthemeNuxtApp): AppUntheme => {
+export const makeNuxtUntheme = (nuxtApp: UnthemeNuxtApp): AppUntheme => {
   const { config, cookies } = accessUntheme();
 
-  const service = makeService<AppUnthemeContract>(buildTheme, config.value, {
+  const service = makeUntheme<AppUnthemeContract>(buildTheme, config.value, {
     set: {
       config: {
         patch: (patch) => {

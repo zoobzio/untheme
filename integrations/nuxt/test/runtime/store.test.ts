@@ -12,7 +12,7 @@ vi.mock("#imports", () => ({
   useCookie: (key: string) => (cookies[key] ??= reactive({ value: null })),
 }));
 
-import { accessUntheme, buildTheme } from "../../src/runtime/store";
+import { accessUntheme } from "../../src/runtime/store";
 
 describe("accessUntheme", () => {
   beforeEach(() => {
@@ -32,9 +32,5 @@ describe("accessUntheme", () => {
     store.config.value.input.color = "dark";
 
     expect(input.color).toBe("light");
-  });
-
-  it("exposes the build theme as the base, by reference", () => {
-    expect(buildTheme).toBe(theme);
   });
 });

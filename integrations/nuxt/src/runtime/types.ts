@@ -49,7 +49,7 @@ export interface UnthemeHooks {
 }
 
 /**
- * The part of `nuxtApp` that `makeUntheme` uses. It has the `callHook` method.
+ * The part of `nuxtApp` that `makeNuxtUntheme` uses. It has the `callHook` method.
  */
 export interface UnthemeNuxtApp {
   callHook<H extends keyof UnthemeHooks>(

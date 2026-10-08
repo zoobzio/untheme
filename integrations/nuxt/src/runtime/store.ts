@@ -2,15 +2,7 @@ import type { AppUnthemeConfig, AppUnthemeInput } from "./types";
 
 import { copy } from "objectively";
 import { useCookie, useState } from "#imports";
-import {
-  theme as buildTheme,
-  input as buildInput,
-} from "#build/untheme/config.mjs";
-
-/**
- * The base theme of the app, as the build module exports it.
- */
-export { buildTheme };
+import { input as buildInput } from "#build/untheme/config.mjs";
 
 /**
  * Returns the state and the cookies that the plugin and the composable share.

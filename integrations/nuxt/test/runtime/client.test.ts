@@ -21,16 +21,16 @@ vi.mock("#imports", () => ({
   useCookie: (key: string) => (cookies[key] ??= reactive({ value: null })),
 }));
 
-import { makeUntheme } from "../../src/runtime/client";
+import { makeNuxtUntheme } from "../../src/runtime/client";
 
-const make = () => makeUntheme(nuxtApp as never);
+const make = () => makeNuxtUntheme(nuxtApp as never);
 
 const bravo = themes.bravo;
 if (bravo === undefined) {
   throw new Error("expected the bravo theme fixture");
 }
 
-describe("makeUntheme", () => {
+describe("makeNuxtUntheme", () => {
   beforeEach(() => {
     states = {};
     cookies = {};
