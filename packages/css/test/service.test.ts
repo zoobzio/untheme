@@ -15,7 +15,7 @@ import { theme } from "./fixture";
  */
 const make = () => {
   return defineRenderer({
-    config: { theme },
+    theme: () => theme,
     tokens: () => map(theme.tokens, (slot) => slot.$value),
   });
 };
@@ -199,7 +199,7 @@ describe("defineRenderer", () => {
       order: [],
     };
     const renderer = defineRenderer({
-      config: { theme: empty },
+      theme: () => empty,
       tokens: () => ({}),
     });
 
@@ -233,7 +233,7 @@ describe("defineRenderer", () => {
       order: ['mo"de'],
     };
     const renderer = defineRenderer({
-      config: { theme: odd },
+      theme: () => odd,
       tokens: () => map(odd.tokens, (slot) => slot.$value),
     });
 
@@ -256,7 +256,7 @@ describe("defineRenderer", () => {
     it("reads the accessors on every call, so a rebind re-renders", () => {
       const bindings = map(theme.tokens, (slot) => slot.$value);
       const renderer = defineRenderer({
-        config: { theme },
+        theme: () => theme,
         tokens: () => bindings,
       });
 

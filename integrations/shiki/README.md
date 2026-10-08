@@ -24,13 +24,15 @@ color. Two roles can use the same token.
 
 ```ts
 import { makeUntheme } from "untheme";
-import { useUnthemeConfig } from "untheme/config";
 import { defineShikiTheme } from "@untheme/shiki";
 import { codeToHtml } from "shiki";
 import config, { type Contract } from "./untheme/config.mjs";
 
 // The theme that `untheme build` wrote, with code-* tokens
-const untheme = makeUntheme<Contract>(useUnthemeConfig(config));
+const untheme = makeUntheme<Contract>(config.theme, {
+  patch: {},
+  input: config.input,
+});
 
 // Bind roles to tokens
 const theme = defineShikiTheme(untheme.schema, {

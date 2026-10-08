@@ -45,6 +45,5 @@ describe("star-export composition", () => {
 
   it("exposes the canonical config helpers under their subpath", () => {
     expect(configSubpath).toHaveProperty("defineUnthemeConfig");
-    expect(configSubpath).toHaveProperty("useUnthemeConfig");
   });
 });

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref, reactive, nextTick, type Ref } from "vue";
 import type { AppUnthemeConfig } from "../../src/runtime/types";
-import { theme, input } from "../fixtures";
+import { theme, themes, input } from "../fixtures";
 
 interface HeadInput {
   htmlAttrs: Record<string, { value: string }>;
@@ -107,6 +107,34 @@ describe("untheme plugin", () => {
         "--primary: var(--blue);",
       );
       config.value.input.color = "dark";
+      await nextTick();
+      expect(headCalls[0]?.style.value[0]?.innerHTML).toContain(
+        "--primary: var(--indigo);",
+      );
+    });
+
+    it("re-renders the token CSS with the bindings of an applied layer", async () => {
+      const provide = await setup();
+      const charlie = themes.charlie;
+      if (charlie === undefined) {
+        throw new Error("expected the charlie theme fixture");
+      }
+      expect(headCalls[0]?.style.value[0]?.innerHTML).toContain(
+        "--surface: var(--white);",
+      );
+      (provide.untheme as { apply: (layer: unknown) => void }).apply(charlie);
+      await nextTick();
+      const css = headCalls[0]?.style.value[0]?.innerHTML;
+      expect(css).toContain("--surface: var(--black);");
+      expect(css).toContain("--on-surface: var(--white);");
+      expect(css).toContain("--white: #ffffff;");
+    });
+
+    it("re-renders the token CSS with a patch", async () => {
+      const provide = await setup();
+      (provide.untheme as { update: (patch: unknown) => void }).update({
+        tokens: { primary: "{indigo}" },
+      });
       await nextTick();
       expect(headCalls[0]?.style.value[0]?.innerHTML).toContain(
         "--primary: var(--indigo);",

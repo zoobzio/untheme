@@ -41,7 +41,7 @@ export const defineRenderer = <T extends Template>(
   const declarations = (
     bindings: Partial<Record<string, Inputs[Type]>>,
   ): Variables<Token<T>> => {
-    const slots = source.config.theme.tokens;
+    const slots = source.theme().tokens;
     const acc: Record<string, string> = {};
     for (const [token, binding] of entries(bindings)) {
       const slot = slots[token];
@@ -91,7 +91,7 @@ export const defineRenderer = <T extends Template>(
    * token outside the contract returns empty text.
    */
   const value = (token: Token<T>): string => {
-    const slot = source.config.theme.tokens[token];
+    const slot = source.theme().tokens[token];
     if (slot === undefined) {
       return "";
     }
@@ -127,7 +127,7 @@ export const defineRenderer = <T extends Template>(
    * overrides an earlier block.
    */
   const sheet = (): string => {
-    const theme = source.config.theme;
+    const theme = source.theme();
     const base = declarations(map(theme.tokens, (slot) => slot.$value));
     if (Object.keys(base).length === 0) {
       return "";

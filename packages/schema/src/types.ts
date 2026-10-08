@@ -362,25 +362,26 @@ export type Theme<T extends Template> = {
 };
 
 /**
- * A partial overlay with an identity. When a caller applies a layer, the active
- * theme changes. All members other than `id` and `name` are optional. Each
- * member must belong to the contract.
+ * A partial overlay of a theme. All members are optional. Each member must
+ * belong to the contract. A token binding replaces the `$value` of the slot. A
+ * context override replaces the same binding of the context. An identity or an
+ * order replaces the one of the theme.
  */
-export type Layer<T extends Template> = {
-  id: string;
-  name: string;
+export type Patch<T extends Template> = {
+  id?: string;
+  name?: string;
   tokens?: Overrides<T>;
   modifiers?: { [M in Modifier<T>]?: { [C in Context<T, M>]?: Overrides<T> } };
   order?: Modifier<T>[];
 };
 
 /**
- * A partial overlay with no identity. When a caller applies a patch, the values
- * change and the active theme stays the same.
+ * A {@link Patch} with an identity. A layer is a theme that a caller applies as
+ * a whole.
  */
-export type Patch<T extends Template> = {
-  tokens?: Overrides<T>;
-  modifiers?: { [M in Modifier<T>]?: { [C in Context<T, M>]?: Overrides<T> } };
+export type Layer<T extends Template> = Patch<T> & {
+  id: string;
+  name: string;
 };
 
 /**

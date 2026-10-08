@@ -5,7 +5,6 @@ import { pathToFileURL } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { emit } from "@untheme/kit";
-import { useUnthemeConfig } from "untheme/config";
 
 import { mockKit } from "../src/kit";
 import { mockConfig, mockIndex, mockModules } from "../src/modules";
@@ -105,13 +104,6 @@ describe("mockConfig", () => {
     expect(emitted.config.theme).toEqual(config.theme);
     expect(emitted.config.input).toEqual(config.input);
     expect(emitted.config.default).toEqual(config.default);
-  });
-
-  it("seeds a container through useUnthemeConfig", () => {
-    const container = useUnthemeConfig(mockConfig(theme));
-    expect(container.theme).toEqual(theme);
-    expect(container.theme).not.toBe(theme);
-    expect(container.override).toEqual({});
   });
 });
 

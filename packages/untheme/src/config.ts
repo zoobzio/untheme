@@ -1,7 +1,4 @@
 import type { Input, Template } from "@untheme/schema";
-import type { Config } from "@untheme/core";
-import { copy } from "objectively";
-import { clone } from "@untheme/utils";
 
 /**
  * The untheme configuration of an application. It has the base theme with the
@@ -32,21 +29,3 @@ export interface UnthemeConfig<T extends Template> {
 export const defineUnthemeConfig = <T extends Template>(
   config: UnthemeConfig<T>,
 ) => config;
-
-/**
- * Makes a state container from a configuration. The container has a copy of
- * the theme as the active theme, a copy of the starting selection, and an
- * empty override. Each call makes a new container.
- *
- * @param config - The untheme configuration.
- * @returns A {@link Config} container for `makeUntheme`.
- */
-export const useUnthemeConfig = <T extends Template>(
-  config: UnthemeConfig<T>,
-): Config<T> => {
-  return {
-    theme: clone(config.theme),
-    input: copy(config.input),
-    override: {},
-  };
-};

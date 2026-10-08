@@ -62,7 +62,6 @@ const snapshot = clone(theme);
 
 ## Types
 
-- `Overlay<T>`: the argument type of `merge`. It can have any of the identity, the tokens, the modifiers, and the order. A `Layer` and a `Patch` from [`@untheme/schema`](../schema) both have this shape.
 - `Diff<T>`: the result type of `diff`. It has a token override map and an override map for each context. A map is empty when the themes have the same bindings.
 
 ## Related

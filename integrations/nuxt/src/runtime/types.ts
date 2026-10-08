@@ -1,5 +1,5 @@
 import type { Contract } from "#build/untheme/config.mjs";
-import type { Config, Input, Layer, Theme, Untheme } from "untheme";
+import type { Config, Input, Layer, Patch, Theme, Untheme } from "untheme";
 import type { Renderer } from "untheme/css";
 
 /**
@@ -14,9 +14,14 @@ export type AppUnthemeContract = Contract;
 export type AppUnthemeTheme = Theme<AppUnthemeContract>;
 
 /**
- * A partial overlay with an identity. `apply` takes a layer at runtime.
+ * A layer of the contract. `apply` takes one.
  */
 export type AppUnthemeThemeLayer = Layer<AppUnthemeContract>;
+
+/**
+ * A patch of the contract. `update` takes one, and the state holds one.
+ */
+export type AppUnthemePatch = Patch<AppUnthemeContract>;
 
 /**
  * The active selection. It has one context for each modifier.
@@ -24,7 +29,7 @@ export type AppUnthemeThemeLayer = Layer<AppUnthemeContract>;
 export type AppUnthemeInput = Input<AppUnthemeContract>;
 
 /**
- * The state container that the service reads and changes.
+ * The state container of the service. It holds the patch and the selection.
  */
 export type AppUnthemeConfig = Config<AppUnthemeContract>;
 
@@ -40,11 +45,11 @@ export type AppUntheme = Untheme<AppUnthemeContract>;
 export interface UnthemeHooks {
   "untheme:ready": (service: AppUntheme) => void;
   "untheme:input": (input: AppUnthemeInput) => void;
-  "untheme:theme": (theme: AppUnthemeTheme) => void;
+  "untheme:patch": (patch: AppUnthemePatch) => void;
 }
 
 /**
- * The part of `nuxtApp` that `makeUntheme` uses. It has the `callHook` method.
+ * The part of `nuxtApp` that `makeNuxtUntheme` uses. It has the `callHook` method.
  */
 export interface UnthemeNuxtApp {
   callHook<H extends keyof UnthemeHooks>(

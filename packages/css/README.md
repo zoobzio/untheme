@@ -10,13 +10,13 @@ pnpm add @untheme/css
 
 ## defineRenderer
 
-`defineRenderer(source)` returns a `Renderer` for a `Source`. A `Source` has `config.theme`, the active theme, and `tokens()`, the active flat bindings. The core service is a `Source`, so pass it directly.
+`defineRenderer(source)` returns a `Renderer` for a `Source`. A `Source` has `theme()`, the active theme, and `tokens()`, the active flat bindings. The core service is a `Source`, so pass it directly.
 
 ```ts
 import { makeUntheme } from "@untheme/core";
 import { defineRenderer } from "@untheme/css";
 
-const untheme = makeUntheme<Contract>(config);
+const untheme = makeUntheme<Contract>(theme, { patch: {}, input });
 const renderer = defineRenderer(untheme);
 
 renderer.root();

@@ -249,7 +249,13 @@ export const defineRules = <T extends Template>(
     ],
     patch: [
       container("Patch"),
-      fields("Patch", { tokens: overrides, modifiers: partialModifiers }),
+      fields("Patch", {
+        id,
+        name,
+        tokens: overrides,
+        modifiers: partialModifiers,
+        order,
+      }),
     ],
   };
 };

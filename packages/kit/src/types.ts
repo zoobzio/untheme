@@ -1,5 +1,5 @@
 import type { Logger } from "@terrazzo/parser";
-import type { Input, Template, Theme } from "@untheme/schema";
+import type { Input, Layer, Template, Theme } from "@untheme/schema";
 
 /**
  * What a config changes about one modifier of the resolver document. Each member
@@ -51,6 +51,16 @@ export interface KitConfig {
    * document for every other modifier.
    */
   modifiers?: Record<string, ModifierConfig | false>;
+
+  /**
+   * The layers of the build, by layer id. A layer is a token document that
+   * rebinds tokens of the base theme. The build checks each layer against the
+   * contract and writes it as `layers/<id>.json`, ready for `apply`. Each
+   * value is a token file or a list of token files. In a list, a later file
+   * wins. A file is a path relative to the project root, an absolute URL, or
+   * an `npm:/` reference, like `source`.
+   */
+  layers?: Record<string, string | URL | (string | URL)[]>;
 
   /**
    * The base theme's id. Defaults to the slug of its name.
@@ -131,6 +141,19 @@ export interface Entry {
 export type Manifest = (Entry & { contexts: Entry[] })[];
 
 /**
+ * One built layer. `layer` is the layer as `apply` takes it: an id, a name, and
+ * the bindings of the tokens that the documents of the layer define. `entry`
+ * has the id, the name, and the description of the layer for an interface.
+ */
+export interface BuiltLayer {
+  /** The id, the name, and the description of the layer. */
+  entry: Entry;
+
+  /** The layer, checked against the contract of the base theme. */
+  layer: Layer<Template>;
+}
+
+/**
  * The validated base of a build. It has the base theme that the kit reads from
  * the DTCG documents, the boot selection, and the manifest. The kit narrows the
  * theme with the untheme schema and verifies it against the Terrazzo resolution.
@@ -149,6 +172,12 @@ export interface Core {
    * manifest from the theme. Each name is the titled id.
    */
   manifest?: Manifest;
+
+  /**
+   * The layers of the build, in the order of the config. A consumer that has no
+   * layers can omit it. The emitters then write an empty layer list.
+   */
+  layers?: BuiltLayer[];
 }
 
 /**
@@ -160,6 +189,9 @@ export interface Core {
 export interface Kit extends Core {
   /** The modifiers and their contexts, with names and descriptions. */
   manifest: Manifest;
+
+  /** The layers of the build, in the order of the config. */
+  layers: BuiltLayer[];
 
   /** The output directory, normalized and relative to the project root. */
   outDir: string;

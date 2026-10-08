@@ -92,7 +92,7 @@ The composite kinds are:
 - `theme` is a complete template. It holds valid tokens, modifiers, and order.
 - `layer` is a partial overlay with an identity, `id` and `name`. Each part
   that is present must belong to the contract.
-- `patch` is a partial overlay with no identity.
+- `patch` is a partial overlay. The identity and the order are optional.
 
 ## Value validation
 

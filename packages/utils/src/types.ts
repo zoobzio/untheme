@@ -9,15 +9,3 @@ export type Diff<T extends Template> = {
   tokens: Overrides<T>;
   modifiers: { [M in Modifier<T>]: { [C in Context<T, M>]: Overrides<T> } };
 };
-
-/**
- * A partial overlay of a theme. It can have any of the identity, the tokens,
- * the modifiers, and the order. A `Layer` and a `Patch` both have this shape.
- */
-export type Overlay<T extends Template> = {
-  id?: string;
-  name?: string;
-  tokens?: Overrides<T>;
-  modifiers?: { [M in Modifier<T>]?: { [C in Context<T, M>]?: Overrides<T> } };
-  order?: NoInfer<Modifier<T>>[];
-};

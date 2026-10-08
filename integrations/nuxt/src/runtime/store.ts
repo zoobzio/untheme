@@ -1,23 +1,18 @@
 import type { AppUnthemeConfig, AppUnthemeInput } from "./types";
 
 import { copy } from "objectively";
-import { clone } from "untheme";
 import { useCookie, useState } from "#imports";
-import {
-  theme as buildTheme,
-  input as buildInput,
-} from "#build/untheme/config.mjs";
+import { input as buildInput } from "#build/untheme/config.mjs";
 
 /**
  * Returns the state and the cookies that the plugin and the composable share.
- * The state is a copy of the theme and the input of the build module. Each
- * request has its own state.
+ * The state holds the patch and the selection. It starts with an empty patch
+ * and a copy of the selection of the build module.
  */
 export const accessUntheme = () => {
   const config = useState<AppUnthemeConfig>("untheme:config", () => ({
-    theme: clone(buildTheme),
+    patch: {},
     input: copy(buildInput),
-    override: {},
   }));
 
   const input = useCookie<AppUnthemeInput | null>("untheme-input");

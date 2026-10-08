@@ -1,5 +1,4 @@
 import { makeUntheme } from "untheme";
-import { useUnthemeConfig } from "untheme/config";
 import { defineRenderer } from "untheme/css";
 import { defineCodeMirrorTheme } from "@untheme/codemirror";
 import { EditorView, lineNumbers } from "@codemirror/view";
@@ -16,7 +15,10 @@ import { CHROME, MAP } from "./theme";
  * the whole cascade as custom properties: ramps, roles, and the syntax-*
  * carriers.
  */
-const untheme = makeUntheme<Contract>(useUnthemeConfig(config));
+const untheme = makeUntheme<Contract>(config.theme, {
+  patch: {},
+  input: config.input,
+});
 
 const renderer = defineRenderer(untheme);
 

@@ -1,16 +1,18 @@
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineNuxtConfig } from "nuxt/config";
 
 /**
- * The aurora showcase.
- *
- * `untheme.config.ts` holds the theme wiring and points at the DTCG JSON of
- * aurora. The module finds it and builds it through `@untheme/kit`. On every
- * render, the module flattens the tokens of the active selection into
- * `--token` CSS variables. The module also sets the selection as
- * `data-<modifier>` attributes on the document root.
+ * The aurora showcase. `untheme.config.ts` points at the resolver document of
+ * aurora, and the module builds it with `@untheme/kit`. The `layers/`
+ * directory of the aurora build is the `themes` server asset of Nitro. The
+ * route in `server/api/untheme/` reads the layer files from it.
  */
 const src = (path: string) => fileURLToPath(new URL(path, import.meta.url));
+
+const aurora = dirname(
+  fileURLToPath(import.meta.resolve("@untheme/aurora/package.json")),
+);
 
 export default defineNuxtConfig({
   compatibilityDate: "2026-07-01",
@@ -18,6 +20,9 @@ export default defineNuxtConfig({
   css: ["~/assets/css/main.css"],
   imports: {
     dirs: ["constants", "types"],
+  },
+  nitro: {
+    serverAssets: [{ baseName: "themes", dir: join(aurora, ".dist/layers") }],
   },
   // The runtime plugin bundles untheme into the app. The aliases point the
   // libraries at their TypeScript source, and Vite compiles that source. The

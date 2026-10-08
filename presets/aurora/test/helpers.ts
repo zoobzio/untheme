@@ -4,7 +4,9 @@ import type { Template, Theme, Untheme } from "untheme";
 
 import { fileURLToPath } from "node:url";
 
-import { resolveKit } from "@untheme/kit";
+import { join } from "node:path";
+
+import { loadConfig, resolveKit } from "@untheme/kit";
 import { bootUntheme } from "@untheme/testing";
 
 /** This package, as the project root of a build. */
@@ -14,11 +16,12 @@ export const ROOT = fileURLToPath(new URL("..", import.meta.url));
 export const SRC = new URL("../src/", import.meta.url);
 
 /**
- * Builds the preset from its own resolver document, as `untheme build` does
- * for `.dist/`. Each test file runs one build.
+ * Builds the preset from its own config, as `untheme build` does for `.dist/`.
+ * The build has the contract and every theme as a layer. Each test file runs
+ * one build.
  */
-export const build = (): Promise<Kit> =>
-  resolveKit({ source: "./src/resolver.json" }, { cwd: ROOT });
+export const build = async (): Promise<Kit> =>
+  resolveKit(await loadConfig(join(ROOT, "untheme.config.ts")), { cwd: ROOT });
 
 /**
  * Boots a service over a built theme. The service starts at the boot selection

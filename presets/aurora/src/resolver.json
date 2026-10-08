@@ -1,8 +1,16 @@
 {
   "name": "Aurora",
-  "description": "The reference untheme preset: a semantic vocabulary over generated tonal ramps, with the palette itself as a modifier.",
+  "description": "The reference untheme preset: a semantic vocabulary over generated tonal ramps, with each palette as a layer.",
   "version": "2025.10",
   "sets": {
+    "ramps": {
+      "description": "The eight tonal ramps of the aurora palette. A theme is a layer that rebinds them.",
+      "sources": [
+        {
+          "$ref": "./themes/aurora.json"
+        }
+      ]
+    },
     "roles": {
       "description": "The semantic color roles and their contrast and vibrancy channels, one file per color.",
       "sources": [
@@ -101,172 +109,6 @@
     }
   },
   "modifiers": {
-    "theme": {
-      "description": "The palette: each context is one theme's eight tonal ramps.",
-      "$extensions": {
-        "io.zoobz.untheme": {
-          "name": "Theme"
-        }
-      },
-      "contexts": {
-        "abyss": [
-          {
-            "$ref": "./modifiers/theme/abyss.json"
-          }
-        ],
-        "aurora": [
-          {
-            "$ref": "./modifiers/theme/aurora.json"
-          }
-        ],
-        "ayu": [
-          {
-            "$ref": "./modifiers/theme/ayu.json"
-          }
-        ],
-        "catppuccin": [
-          {
-            "$ref": "./modifiers/theme/catppuccin.json"
-          }
-        ],
-        "cyberdream": [
-          {
-            "$ref": "./modifiers/theme/cyberdream.json"
-          }
-        ],
-        "dracula": [
-          {
-            "$ref": "./modifiers/theme/dracula.json"
-          }
-        ],
-        "dune": [
-          {
-            "$ref": "./modifiers/theme/dune.json"
-          }
-        ],
-        "ember": [
-          {
-            "$ref": "./modifiers/theme/ember.json"
-          }
-        ],
-        "everforest": [
-          {
-            "$ref": "./modifiers/theme/everforest.json"
-          }
-        ],
-        "flexoki": [
-          {
-            "$ref": "./modifiers/theme/flexoki.json"
-          }
-        ],
-        "github": [
-          {
-            "$ref": "./modifiers/theme/github.json"
-          }
-        ],
-        "glacier": [
-          {
-            "$ref": "./modifiers/theme/glacier.json"
-          }
-        ],
-        "graphite": [
-          {
-            "$ref": "./modifiers/theme/graphite.json"
-          }
-        ],
-        "gruvbox": [
-          {
-            "$ref": "./modifiers/theme/gruvbox.json"
-          }
-        ],
-        "horizon": [
-          {
-            "$ref": "./modifiers/theme/horizon.json"
-          }
-        ],
-        "kanagawa": [
-          {
-            "$ref": "./modifiers/theme/kanagawa.json"
-          }
-        ],
-        "manuscript": [
-          {
-            "$ref": "./modifiers/theme/manuscript.json"
-          }
-        ],
-        "monokai": [
-          {
-            "$ref": "./modifiers/theme/monokai.json"
-          }
-        ],
-        "moss": [
-          {
-            "$ref": "./modifiers/theme/moss.json"
-          }
-        ],
-        "night_owl": [
-          {
-            "$ref": "./modifiers/theme/night_owl.json"
-          }
-        ],
-        "nord": [
-          {
-            "$ref": "./modifiers/theme/nord.json"
-          }
-        ],
-        "one_dark": [
-          {
-            "$ref": "./modifiers/theme/one_dark.json"
-          }
-        ],
-        "oxocarbon": [
-          {
-            "$ref": "./modifiers/theme/oxocarbon.json"
-          }
-        ],
-        "palenight": [
-          {
-            "$ref": "./modifiers/theme/palenight.json"
-          }
-        ],
-        "phosphor": [
-          {
-            "$ref": "./modifiers/theme/phosphor.json"
-          }
-        ],
-        "rose_pine": [
-          {
-            "$ref": "./modifiers/theme/rose_pine.json"
-          }
-        ],
-        "sakura": [
-          {
-            "$ref": "./modifiers/theme/sakura.json"
-          }
-        ],
-        "solarized": [
-          {
-            "$ref": "./modifiers/theme/solarized.json"
-          }
-        ],
-        "synthwave": [
-          {
-            "$ref": "./modifiers/theme/synthwave.json"
-          }
-        ],
-        "tokyo_night": [
-          {
-            "$ref": "./modifiers/theme/tokyo_night.json"
-          }
-        ],
-        "vesper": [
-          {
-            "$ref": "./modifiers/theme/vesper.json"
-          }
-        ]
-      },
-      "default": "aurora"
-    },
     "color": {
       "description": "The scheme: light or dark surfaces, with every role and channel rebound to match.",
       "$extensions": {
@@ -473,6 +315,9 @@
   },
   "resolutionOrder": [
     {
+      "$ref": "#/sets/ramps"
+    },
+    {
       "$ref": "#/sets/roles"
     },
     {
@@ -504,9 +349,6 @@
     },
     {
       "$ref": "#/sets/gradient"
-    },
-    {
-      "$ref": "#/modifiers/theme"
     },
     {
       "$ref": "#/modifiers/color"

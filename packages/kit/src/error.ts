@@ -46,3 +46,22 @@ export class InvalidConfigError extends Error {
     this.issues = issues;
   }
 }
+
+/**
+ * Thrown when a layer of the config violates the contract of the base theme.
+ * Examples are a token that the base lacks, a `$type` other than the type of
+ * the token in the contract, a reference to a token that the base lacks, and a
+ * value outside the shape of the type. `issues` holds every issue of every
+ * layer. Each issue names the layer and the token. The kit checks the layers
+ * after it builds the base theme.
+ */
+export class InvalidLayerError extends Error {
+  readonly issues: string[];
+
+  constructor(issues: string[]) {
+    const lines = issues.map((issue) => `  ${issue}`).join("\n");
+    super(`@untheme/kit: the layers violate the contract —\n${lines}`);
+    this.name = "InvalidLayerError";
+    this.issues = issues;
+  }
+}

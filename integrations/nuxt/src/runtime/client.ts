@@ -1,18 +1,27 @@
 import type { AppUntheme, AppUnthemeContract, UnthemeNuxtApp } from "./types";
 
-import { makeUntheme as makeService } from "untheme";
+import { makeUntheme } from "untheme";
+import { theme as buildTheme } from "#build/untheme/config.mjs";
 import { accessUntheme } from "./store";
 
-export const makeUntheme = (nuxtApp: UnthemeNuxtApp): AppUntheme => {
+/**
+ * Makes the untheme service over the shared state. The base theme is the
+ * build module. The state holds the patch and the selection.
+ * A write of the patch saves its id, or `null` when it has none, to the key
+ * cookie and calls the `untheme:patch` hook. A write of the selection saves it to the input
+ * cookie and calls the `untheme:input` hook. On the server, the function
+ * restores the selection from the input cookie before the first render.
+ */
+export const makeNuxtUntheme = (nuxtApp: UnthemeNuxtApp): AppUntheme => {
   const { config, cookies } = accessUntheme();
 
-  const service = makeService<AppUnthemeContract>(config.value, {
+  const service = makeUntheme<AppUnthemeContract>(buildTheme, config.value, {
     set: {
       config: {
-        theme: (theme) => {
-          cookies.key.value = theme.id;
-          nuxtApp.callHook("untheme:theme", theme);
-          return theme;
+        patch: (patch) => {
+          cookies.key.value = patch.id ?? null;
+          nuxtApp.callHook("untheme:patch", patch);
+          return patch;
         },
         input: (input) => {
           cookies.input.value = input;
@@ -30,18 +39,6 @@ export const makeUntheme = (nuxtApp: UnthemeNuxtApp): AppUntheme => {
       cookies.input.value = null;
     }
   }
-
-  /**
-   * TODO implement cookies 
-  if (import.meta.server && cookies.key.value) {
-    const layer = themes.value[cookies.key.value];
-    if (service.schema.check.layer(layer)) {
-      service.apply(layer);
-    } else {
-      cookies.key.value = null;
-    }
-  }
-  */
 
   return service;
 };

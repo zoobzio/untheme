@@ -313,9 +313,6 @@ importers:
       '@untheme/utils':
         specifier: workspace:*
         version: link:../utils
-      objectively:
-        specifier: ^0.1.2
-        version: 0.1.2
 
   packages/utils:
     dependencies:

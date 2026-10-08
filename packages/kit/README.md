@@ -4,16 +4,19 @@ The kit reads DTCG JSON documents and writes modules for the untheme runtime.
 The input is a resolver document and the token files that it references. An
 `untheme.config.ts` file points at the resolver document.
 
-The kit writes three kinds of module:
+The kit writes four kinds of output:
 
 - **Keys:** the `Token` union, the modifier and context types, the token and
   modifier lists, and the `isToken` and `isModifier` guards.
 - **Contract:** the base theme and the boot selection for `makeUntheme`.
 - **Manifest:** the name and description of each modifier and context.
+- **Layers:** one JSON file for each layer of the config, ready for `apply`,
+  and a list of the layers.
 
 The kit converts the documents to an untheme theme and validates the theme with
 the untheme schema. Then the kit compares the theme with the resolution of
-[`@terrazzo/parser`](https://terrazzo.app).
+[`@terrazzo/parser`](https://terrazzo.app). Then the kit checks each layer
+against the contract of the theme.
 
 ## Install
 
@@ -38,8 +41,13 @@ export default defineConfig({
 
   // Optional. Selects the modifiers and contexts to build. See Modifiers.
   modifiers: {
-    theme: { contexts: ["nord", "dracula"] },
     depth: false,
+  },
+
+  // Optional. Token documents to build as layers, by id. See Layers.
+  layers: {
+    nord: "npm:/@untheme/aurora/src/themes/nord.json",
+    brand: "./tokens/brand.json",
   },
 
   // Optional. The output directory, relative to the project root.
@@ -53,8 +61,9 @@ export default defineConfig({
 - **Boot selection.** Each modifier boots at the `default` context that the
   resolver document declares. The `modifiers` option can name another context.
   Each modifier needs a default context.
-- **Themes.** A palette is a modifier, for example the `theme` modifier of
-  aurora. The other palettes are contexts of the one base theme.
+- **Layers.** A layer is a token document that rebinds tokens of the base
+  theme. A palette is a layer, for example each theme of aurora. The runtime
+  applies a layer with `apply`. See Layers.
 
 The kit checks the config before it reads a document. The kit reports all
 problems together.
@@ -75,10 +84,10 @@ document declares it.
 export default defineConfig({
   source: "npm:/@untheme/aurora/src/resolver.json",
   modifiers: {
-    theme: {
-      add: { brand: "./tokens/brand.json" },
-      contexts: ["brand", "nord", "dracula"],
-      default: "brand",
+    color: {
+      add: { dim: "./tokens/dim.json" },
+      contexts: ["light", "dim", "dark"],
+      default: "dim",
     },
     motion: { contexts: ["default", "reduced"] },
     depth: false,
@@ -113,11 +122,75 @@ The kit reports all config errors together.
 
 ```
 @untheme/kit: the config is invalid —
-  modifiers.theme.contexts: "nrod" is not a context of "theme" (abyss, aurora, ...)
-  modifiers.shadow: the source declares no modifier "shadow" (theme, color, ...)
+  modifiers.motion.contexts: "reduce" is not a context of "motion" (default, reduced, expressive)
+  modifiers.shadow: the source declares no modifier "shadow" (color, vibrancy, ...)
 ```
 
 To add tokens, write a resolver document. See Composition.
+
+## Layers
+
+The `layers` option names token documents to build as layers. The key is the
+id of the layer. The value is a token file or a list of token files. In a list,
+a later file wins. A file is a path, a URL, or an `npm:/` reference, as for
+`source`.
+
+```ts
+export default defineConfig({
+  source: "npm:/@untheme/aurora/src/resolver.json",
+  layers: {
+    nord: "npm:/@untheme/aurora/src/themes/nord.json",
+    brand: ["./tokens/brand.json", "./tokens/brand-accents.json"],
+  },
+});
+```
+
+A layer is a partial theme with an identity. It rebinds tokens that the base
+theme defines. It does not add tokens. The runtime takes a layer with `apply`
+and makes the active theme from the base theme and the layer.
+
+The kit builds a layer in four steps:
+
+1. Terrazzo parses the documents of the layer with aliases unresolved. It
+   flattens the groups and normalizes the values. A reference stays a `{name}`
+   string. The parse reads no document of the base theme.
+2. The kit converts each token to its binding.
+3. The kit checks the layer against the contract of the base theme. Every
+   token must be a token of the base. The `$type` of a token must be the type
+   of the token in the contract. A reference must name a token of the base. A
+   value must have the shape of its type.
+4. The kit writes the layer as `layers/<id>.json`.
+
+The build fails with an `InvalidLayerError` when a layer breaks a rule. The
+error names the layer and the token for each issue, and reports all issues of
+all layers together.
+
+```
+@untheme/kit: the layers violate the contract —
+  layers.brand: tokens.primary-50 declares type "dimension", the contract has "color"
+  layers.brand: tokens.accent: Overrides contains an unknown key 'accent'.
+```
+
+The name of a layer is the `name` under the `io.zoobz.untheme` key of
+`$extensions` at the root of the last document that has one, or the titled id.
+The description is the `$description` at the root of the last document that
+has one. The `layers` module lists each layer with its id, name, and
+description, in the order of the config.
+
+A layer rebinds the base. A selected context rebinds on top of the base. When
+a layer and a context both bind a token, the context wins while it is
+selected.
+
+```ts
+import nord from "./untheme/layers/nord.json" with { type: "json" };
+import { layers } from "./untheme/layers.mjs";
+
+untheme.apply(nord); // the active theme is the base with nord merged in
+layers; // [{ id: "nord", name: "Nord", description: "..." }, ...]
+```
+
+A server can send a layer file as it is. `defineClient` from `untheme/catalog`
+reads it and checks it again against the contract of the app.
 
 ## Sources
 
@@ -217,12 +290,14 @@ starts.
 
 ## What it emits
 
-| File            | Contents                                                                                                  |
-| --------------- | --------------------------------------------------------------------------------------------------------- |
-| `index.mjs`     | `type Token`, `type Modifier`, `type Mod`, `type Context`, `tokens`, `modifiers`, `isToken`, `isModifier` |
-| `config.mjs`    | `theme`, `input`, and `{ theme, input }` as the default export. `useUnthemeConfig` takes this value.      |
-| `manifest.mjs`  | `manifest`, a list of the modifiers and their contexts. Each entry has an id, a name, and a description.  |
-| `.untheme.json` | The record of the written files.                                                                          |
+| File               | Contents                                                                                                  |
+| ------------------ | --------------------------------------------------------------------------------------------------------- |
+| `index.mjs`        | `type Token`, `type Modifier`, `type Mod`, `type Context`, `tokens`, `modifiers`, `isToken`, `isModifier` |
+| `config.mjs`       | `theme`, `input`, and `{ theme, input }` as the default export.                                           |
+| `manifest.mjs`     | `manifest`, a list of the modifiers and their contexts. Each entry has an id, a name, and a description.  |
+| `layers.mjs`       | `layers`, a list of the layers. Each entry has an id, a name, and a description. `type LayerId`.          |
+| `layers/<id>.json` | One layer, as `apply` takes it: `id`, `name`, and `tokens`.                                               |
+| `.untheme.json`    | The record of the written files.                                                                          |
 
 Each module has a `.d.mts` file beside it. The declarations use explicit
 unions. `config.d.mts` exports `type Contract`, which is the untheme type
@@ -233,13 +308,15 @@ At runtime, [`@untheme/css`](../css) renders CSS from the active theme.
 
 ```ts
 import { makeUntheme } from "untheme";
-import { useUnthemeConfig } from "untheme/config";
 import { defineRenderer } from "untheme/css";
 
 import config, { type Contract } from "./untheme/config.mjs";
 import { isToken } from "./untheme/index.mjs";
 
-const untheme = makeUntheme<Contract>(useUnthemeConfig(config));
+const untheme = makeUntheme<Contract>(config.theme, {
+  patch: {},
+  input: config.input,
+});
 const renderer = defineRenderer(untheme);
 ```
 
@@ -254,12 +331,12 @@ import { manifest } from "./untheme/manifest.mjs";
 
 // [
 //   {
-//     id: "theme",
-//     name: "Theme",
-//     description: "The palette: each context is one theme's eight tonal ramps.",
+//     id: "color",
+//     name: "Color scheme",
+//     description: "The scheme: light or dark surfaces, with every role and channel rebound to match.",
 //     contexts: [
-//       { id: "nord", name: "Nord", description: "Arctic blues on polar grays, from Nord" },
-//       { id: "night_owl", name: "Night Owl", description: "..." },
+//       { id: "light", name: "Light", description: "Dark text on light surfaces." },
+//       { id: "dark", name: "Dark", description: "Light text on dark surfaces." },
 //     ],
 //   },
 //   ...
@@ -304,12 +381,14 @@ as the `untheme` option.
   returns `{ outDir, files }` and writes no files.
 - `writeOutput` writes the files that `generate` returns.
 - `build()` runs the pipeline of the CLI.
-- `resolveKit(config, options)` returns `{ theme, input, manifest, outDir,
-documents }`. The `documents` value lists each local file that the build
-  read.
-- `emit({ theme, input, manifest })` turns a built theme and selection into
-  the modules. The Nuxt module uses `emit`. If `manifest` is absent, `emit`
-  makes one from the theme, and each name is the id in title case.
+- `resolveKit(config, options)` returns `{ theme, input, manifest, layers,
+outDir, documents }`. The `documents` value lists each local file that the
+  build read, the documents of the layers among them. Each item of `layers`
+  has the `layer` and its `entry`.
+- `emit({ theme, input, manifest, layers })` turns a built theme and selection
+  into the modules. The Nuxt module uses `emit`. If `manifest` is absent,
+  `emit` makes one from the theme, and each name is the id in title case. If
+  `layers` is absent, the layer list is empty.
 - `describe(theme)` returns that manifest.
 
 The `cwd` option is the project root. The kit resolves paths and `npm:/`
@@ -326,5 +405,9 @@ The kit throws these errors:
 - `MissingConfigError` when `build()` finds no config file.
 - `MalformedConfigError` when the default export of the file is a value other than
   a config object.
+
+- `InvalidLayerError` when a layer violates the contract of the base theme.
+  The error has the problems in `issues`. The kit checks the layers after it
+  builds the base theme.
 
 `MissingConfigError` and `MalformedConfigError` have the `path` of the file.

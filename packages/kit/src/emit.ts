@@ -63,8 +63,8 @@ const index = (core: Core): OutputFile[] => {
 
 /**
  * Makes the `./config` entry. It has the base theme, the boot selection, and the
- * `{ theme, input }` config that `useUnthemeConfig` seeds a runtime container
- * from. The declarations use the token and modifier unions.
+ * `{ theme, input }` config as the default export. The declarations use the
+ * token and modifier unions.
  */
 const config = (core: Core): OutputFile[] =>
   pair(
@@ -118,13 +118,51 @@ const manifest = (core: Core): OutputFile[] =>
   );
 
 /**
+ * Makes the layer files. Each layer is one JSON file under `layers/`, as `apply`
+ * takes it. The `./layers` entry lists each layer with its id, name, and
+ * description, and declares the `LayerId` union. The list is empty when the
+ * build has no layers.
+ */
+const layers = (core: Core): OutputFile[] => {
+  const built = core.layers ?? [];
+  const files: OutputFile[] = built.map(({ layer }) => ({
+    path: `layers/${layer.id}.json`,
+    contents: `${json(layer)}\n`,
+  }));
+  const entries = built.map(({ entry }) => entry);
+  return [
+    ...files,
+    ...pair(
+      "layers",
+      [
+        banner(core.theme.id),
+        `export const layers = ${json(entries)};`,
+        "export default layers;",
+      ],
+      [
+        banner(core.theme.id),
+        `export type LayerId =${union(entries.map((entry) => entry.id))};`,
+        "export interface LayerEntry {",
+        "  readonly id: LayerId;",
+        "  readonly name: string;",
+        "  readonly description?: string;",
+        "}",
+        "export declare const layers: readonly LayerEntry[];",
+        "export default layers;",
+      ],
+    ),
+  ];
+};
+
+/**
  * Emits every file of a build.
  *
  * - `index` has the `Token`, `Modifier`, `Mod`, and `Context` types, the token
  *   and modifier lists, `isToken`, and `isModifier`.
- * - `config` has the base theme, the boot selection, and `{ theme, input }` for
- *   `useUnthemeConfig`.
+ * - `config` has the base theme, the boot selection, and `{ theme, input }` as
+ *   the default export.
  * - `manifest` has each modifier and context with its id, name, and description.
+ * - `layers/<id>.json` is one layer, and `layers` lists the layers.
  *
  * Each module is an `.mjs` file with a `.d.mts` file beside it. The runtime
  * renders CSS from the active theme.
@@ -133,9 +171,9 @@ const manifest = (core: Core): OutputFile[] =>
  * selection, such as a framework module, can emit the same modules that the CLI
  * writes.
  *
- * @param core - The base theme, the boot selection, and the manifest when the
- * consumer has one.
+ * @param core - The base theme, the boot selection, and the manifest and the
+ * layers when the consumer has them.
  */
 export const emit = (core: Core): OutputFile[] => {
-  return [...index(core), ...config(core), ...manifest(core)];
+  return [...index(core), ...config(core), ...manifest(core), ...layers(core)];
 };

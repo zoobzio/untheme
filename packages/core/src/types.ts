@@ -5,7 +5,6 @@ import type {
   Layer,
   Modifier,
   Open,
-  Overrides,
   Patch,
   Schema,
   Template,
@@ -18,19 +17,15 @@ import type { Diff } from "@untheme/utils";
 
 /**
  * The state that an {@link Untheme} service reads and writes. The state has
- * the active theme, the active selection with one context for each modifier,
- * and the user override that `set` writes. The caller can pass a plain object
- * or a reactive proxy.
- *
- * A read of `theme` has the type `T`. A write of `theme` accepts any complete
- * {@link Theme} of the contract. A plain `{ theme, input, override }` object
- * satisfies both types.
+ * the patch over the base theme and the selection with one context for each
+ * modifier. The base theme is not in the state. The patch can be a layer that
+ * `apply` stored or the bindings that `update` merged. An empty patch is the
+ * base theme. The container can be a plain object or a reactive proxy. The
+ * service replaces each member as a whole.
  */
 export type Config<T extends Template> = {
-  get theme(): T;
-  set theme(value: Theme<T>);
+  patch: Patch<T>;
   input: Input<T>;
-  override: Overrides<T>;
 };
 
 /**
@@ -41,24 +36,21 @@ export type Config<T extends Template> = {
 export type Options<T extends Template> = {
   get?: {
     config?: {
-      theme?: (theme: T) => T;
+      patch?: (patch: Patch<T>) => Patch<T>;
       input?: (input: Input<T>) => Input<T>;
-      override?: (override: Overrides<T>) => Overrides<T>;
     };
   };
   set?: {
     config?: {
-      theme?: (theme: Theme<T>) => Theme<T>;
+      patch?: (patch: Patch<T>) => Patch<T>;
       input?: (input: Input<T>) => Input<T>;
-      override?: (override: Overrides<T>) => Overrides<T>;
     };
   };
 };
 
 /**
- * The runtime theme service for a contract. A read gives the active selection
- * with the user override on top. `set` writes the override. `swap`, `update`,
- * and `apply` change the active state in `config`.
+ * The runtime theme service for a contract. A read gives the active selection.
+ * `swap`, `update`, and `apply` change the active state in `config`.
  */
 export interface Untheme<T extends Template> {
   /**
@@ -67,9 +59,16 @@ export interface Untheme<T extends Template> {
   config: Config<T>;
 
   /**
-   * The validation functions for the contract.
+   * The validation functions for the contract. `schema.base` is the base
+   * theme.
    */
   schema: Schema<T>;
+
+  /**
+   * Returns the active theme: the base theme with the patch merged in. Each
+   * call returns a new object.
+   */
+  theme: () => T;
 
   /**
    * Returns the modifiers of the contract in composition order.
@@ -84,14 +83,13 @@ export interface Untheme<T extends Template> {
 
   /**
    * Returns the flat token map for a selection. The default selection is the
-   * active one. The map binds each token to its `$value` and adds the user
-   * override. The active state stays the same.
+   * active one. The map binds each token to its `$value`, then adds the
+   * selected context of each modifier. The active state stays the same.
    */
   tokens: (input?: Input<T>) => { [K in Token<T>]: Binding };
 
   /**
-   * Returns the binding of a token. The result is the override when the token
-   * has one. Otherwise the result is the value from the active selection.
+   * Returns the binding of a token for the active selection.
    */
   get: (token: Token<T>) => Binding;
 
@@ -113,40 +111,21 @@ export interface Untheme<T extends Template> {
   ) => void;
 
   /**
-   * Writes a token to the user override. If the token is unknown, or the value
-   * is not valid for the type of the token, the function does nothing. The
-   * override holds a copy of the value.
-   */
-  set: (token: Token<T>, value: Binding) => void;
-
-  /**
-   * Returns the difference between the baseline and the active theme with the
-   * user override in its tokens. The baseline is the theme that the service
-   * received. The result is a patch with each binding that `set`, `update`, or
-   * `apply` changed. The function ignores the identity. `update` applies the
-   * result.
+   * Returns the difference between the base theme and the active theme. The
+   * result is a patch with each binding that `update` or `apply` changed. The
+   * function ignores the identity. `update` applies the result.
    */
   delta: () => Diff<T>;
 
   /**
-   * Returns `true` when the user override has an entry.
-   */
-  dirty: () => boolean;
-
-  /**
-   * Removes all entries from the user override.
-   */
-  reset: () => void;
-
-  /**
-   * Merges a patch into the active theme. The identity and the override stay
-   * the same.
+   * Merges a patch into the stored patch. An identity or an order of the
+   * patch replaces the stored one.
    */
   update: (patch: Patch<T>) => void;
 
   /**
-   * Makes the active theme from a layer and the baseline, and clears the
-   * override.
+   * Stores a copy of a layer as the patch. The active theme becomes the base
+   * theme with the layer merged in.
    */
   apply: (layer: Layer<T>) => void;
 
@@ -157,9 +136,8 @@ export interface Untheme<T extends Template> {
   create: (layer: Layer<T>) => Layer<T>;
 
   /**
-   * Returns a copy of the active theme with the override in its tokens.
-   * Throws `InvalidThemeError` when the `id` and `name` make the theme
-   * invalid.
+   * Returns a copy of the active theme with a new `id` and `name`. Throws
+   * `InvalidThemeError` when the `id` and `name` make the theme invalid.
    */
   extract: (id: string, name: string) => Theme<T>;
 }

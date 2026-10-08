@@ -6,7 +6,7 @@
     "colors": {
       "sources": [
         {
-          "$ref": "npm:/@untheme/aurora/src/modifiers/theme/aurora.json"
+          "$ref": "npm:/@untheme/aurora/src/themes/aurora.json"
         }
       ]
     },

@@ -42,7 +42,6 @@
     "@untheme/core": "workspace:*",
     "@untheme/css": "workspace:*",
     "@untheme/schema": "workspace:*",
-    "@untheme/utils": "workspace:*",
-    "objectively": "^0.1.2"
+    "@untheme/utils": "workspace:*"
   }
 }

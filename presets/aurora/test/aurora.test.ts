@@ -5,17 +5,16 @@ import { relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { beforeAll, describe, expect, it } from "vitest";
 
+import { defineSchema } from "untheme";
 import { proveTheme } from "@untheme/testing";
 
 import { SRC, build, boot as bootKit } from "./helpers";
 
 /**
- * The documents of the preset, built by the kit. A build checks the
- * structure: a valid contract, references that resolve, and every context
- * verified against Terrazzo. The checks below cover what a build cannot
- * detect: the channel tokens ("channels") that the color, vibrancy, and
- * contrast axes route through, and how those three axes resolve their
- * collisions.
+ * The build of the preset. The build checks the contract, the references,
+ * each context against Terrazzo, and each theme against the contract. The
+ * tests check the channel tokens of the color, vibrancy, and contrast axes,
+ * the collisions of those axes, and the tokens that a theme rebinds.
  */
 let kit: Kit;
 
@@ -48,7 +47,6 @@ describe("the aurora build", () => {
     expect(kit.theme.name).toBe("Aurora");
     expect(Object.keys(kit.theme.tokens)).toHaveLength(392);
     expect(kit.input).toEqual({
-      theme: "aurora",
       color: "light",
       vibrancy: "balanced",
       contrast: "default",
@@ -64,22 +62,18 @@ describe("the aurora build", () => {
     expect(() => proveTheme(kit.theme)).not.toThrow();
   });
 
-  it("reads the resolver, every theme file, and every shared file", () => {
+  it("reads the resolver, every shared file, every context, and every theme", () => {
     const src = fileURLToPath(SRC);
     const files = kit.documents.map((path) =>
       relative(src, path).replace(/\\/g, "/"),
     );
     expect(files[0]).toBe("resolver.json");
-    expect(files.filter((file) => file.startsWith("modifiers/theme/"))).toEqual(
-      Object.keys(modifiers().theme ?? {}).map(
-        (id) => `modifiers/theme/${id}.json`,
-      ),
-    );
+    expect(files[1]).toBe("themes/aurora.json");
     expect(files.filter((file) => file.startsWith("tokens/"))).toHaveLength(17);
+    expect(files.filter((file) => file.startsWith("themes/")).sort()).toEqual(
+      kit.layers.map((built) => `themes/${built.entry.id}.json`).sort(),
+    );
     for (const modifier of kit.theme.order) {
-      if (modifier === "theme") {
-        continue;
-      }
       expect(
         files
           .filter((file) => file.startsWith(`modifiers/${modifier}/`))
@@ -222,44 +216,66 @@ describe("the contrast axis", () => {
   });
 });
 
-describe("the theme axis", () => {
-  it("resolves first, so every other axis reads the active palette", () => {
-    expect(kit.theme.order[0]).toBe("theme");
+describe("the themes", () => {
+  /** The built layer with an id. */
+  const layer = (id: string) => {
+    const built = kit.layers.find((item) => item.entry.id === id);
+    if (built === undefined) {
+      throw new Error(`no layer "${id}"`);
+    }
+    return built.layer;
+  };
+
+  it("are the thirty-one layers of the build, aurora among them", () => {
+    expect(kit.layers.map((built) => built.entry.id)).toHaveLength(31);
+    expect(kit.layers.map((built) => built.entry.id)).toContain("aurora");
+    expect(kit.layers.map((built) => built.entry.id)).toContain("nord");
   });
 
-  it("carries every theme as a context of the same ramps", async () => {
-    const themes = Object.keys(modifiers().theme ?? {});
-    expect(themes).toHaveLength(31);
-
+  it("each hold the same 220 ramp stops, and nothing else", async () => {
     const names = (file: Record<string, unknown>) =>
       Object.keys(file).filter((key) => !key.startsWith("$"));
 
-    const ramps = names(await read("modifiers/theme/aurora.json"));
+    const ramps = names(await read("themes/aurora.json"));
     expect(ramps).toHaveLength(220);
-    for (const id of themes) {
-      expect(names(await read(`modifiers/theme/${id}.json`))).toEqual(ramps);
-    }
-  });
-
-  it("rebinds only ramp stops, and nothing at the default", () => {
-    expect(modifiers().theme?.aurora).toEqual({});
-    for (const [id, context] of Object.entries(modifiers().theme ?? {})) {
-      if (id === "aurora") {
-        continue;
-      }
-      expect(Object.keys(context).length).toBeGreaterThan(0);
-      for (const token of Object.keys(context)) {
+    for (const { entry, layer } of kit.layers) {
+      expect(names(await read(`themes/${entry.id}.json`))).toEqual(ramps);
+      const tokens = Object.keys(layer.tokens ?? {});
+      expect(tokens).toHaveLength(220);
+      for (const token of tokens) {
         expect(token).toMatch(/-\d+$/);
       }
     }
   });
 
-  it("swaps the palette under the roles, in either mode", async () => {
-    const nord = await read("modifiers/theme/nord.json");
+  it("each pass the layer check of the contract", () => {
+    const schema = defineSchema(kit.theme);
+    for (const { layer } of kit.layers) {
+      expect(schema.check.layer(layer)).toBe(true);
+    }
+  });
+
+  it("start at the aurora palette, which is the base", () => {
+    const ut = boot();
+    const before = Object.fromEntries(
+      Object.keys(layer("aurora").tokens ?? {}).map((token) => [
+        token,
+        ut.resolve(token),
+      ]),
+    );
+    ut.apply(layer("aurora"));
+    for (const [token, value] of Object.entries(before)) {
+      expect(ut.resolve(token)).toEqual(value);
+    }
+    expect(ut.theme().id).toBe("aurora");
+  });
+
+  it("swap the palette under the roles, in either mode", async () => {
+    const nord = await read("themes/nord.json");
     const ut = boot();
     expect(ut.get("primary")).toBe("{primary-600}");
     const before = ut.resolve("primary");
-    ut.swap("theme", "nord");
+    ut.apply(layer("nord"));
     expect(ut.get("primary")).toBe("{primary-600}");
     expect(ut.resolve("primary")).not.toEqual(before);
     expect(ut.resolve("primary")).toMatchObject({
@@ -269,6 +285,20 @@ describe("the theme axis", () => {
     expect(ut.resolve("on-surface")).toEqual(ut.resolve("neutral-200"));
     expect(ut.resolve("neutral-200")).toMatchObject({
       hex: nord["neutral-200"].$value.hex,
+    });
+  });
+
+  it("are named and described from their own file", () => {
+    for (const { entry } of kit.layers) {
+      expect(entry.name).not.toBe("");
+      expect(entry.description).toBeTypeOf("string");
+    }
+    expect(
+      kit.layers.find((built) => built.entry.id === "catppuccin")?.entry,
+    ).toEqual({
+      id: "catppuccin",
+      name: "Catppuccin Mocha",
+      description: "Soothing lavender and blue pastels, from Catppuccin Mocha",
     });
   });
 });
@@ -307,22 +337,6 @@ describe("the aurora manifest", () => {
       id: "default",
       name: "Comfortable",
       description: "The spacing scale as designed.",
-    });
-  });
-
-  it("names and describes every theme from its own file", () => {
-    const [theme] = kit.manifest;
-    expect(theme?.name).toBe("Theme");
-    expect(theme?.contexts).toHaveLength(31);
-    for (const context of theme?.contexts ?? []) {
-      expect(context.description).toBeTypeOf("string");
-    }
-    expect(
-      theme?.contexts.find((context) => context.id === "catppuccin"),
-    ).toEqual({
-      id: "catppuccin",
-      name: "Catppuccin Mocha",
-      description: "Soothing lavender and blue pastels, from Catppuccin Mocha",
     });
   });
 });
