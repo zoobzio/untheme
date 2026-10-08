@@ -76,7 +76,10 @@ import { makeUntheme } from "untheme";
 
 import config, { type Contract } from "./untheme/config.mjs";
 
-const untheme = makeUntheme<Contract>(config.theme, { patch: {}, input: config.input });
+const untheme = makeUntheme<Contract>(config.theme, {
+  patch: {},
+  input: config.input,
+});
 
 untheme.resolve("primary"); // the blue-600 color object
 untheme.swap("color", "dark"); // primary follows {blue-200}

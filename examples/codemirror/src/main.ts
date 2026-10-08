@@ -15,7 +15,10 @@ import { CHROME, MAP } from "./theme";
  * the whole cascade as custom properties: ramps, roles, and the syntax-*
  * carriers.
  */
-const untheme = makeUntheme<Contract>(config.theme, { patch: {}, input: config.input });
+const untheme = makeUntheme<Contract>(config.theme, {
+  patch: {},
+  input: config.input,
+});
 
 const renderer = defineRenderer(untheme);
 

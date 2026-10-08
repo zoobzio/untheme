@@ -171,7 +171,9 @@ describe("resolve", () => {
     const u = boot();
     u.swap("mode", "dark");
     expect(u.resolve("color.bg")).toEqual(black);
-    u.update({ modifiers: { mode: { dark: { "color.bg": "{color.accent}" } } } });
+    u.update({
+      modifiers: { mode: { dark: { "color.bg": "{color.accent}" } } },
+    });
     expect(u.resolve("color.bg")).toEqual(blue);
   });
 

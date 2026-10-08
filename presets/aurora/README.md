@@ -206,7 +206,10 @@ import { makeUntheme } from "untheme";
 import config, { type Contract } from "@untheme/aurora/config";
 import nord from "@untheme/aurora/layers/nord.json" with { type: "json" };
 
-const ut = makeUntheme<Contract>(config.theme, { patch: {}, input: config.input });
+const ut = makeUntheme<Contract>(config.theme, {
+  patch: {},
+  input: config.input,
+});
 
 ut.apply(nord); // the nord palette under the same roles
 ut.swap("color", "dark");

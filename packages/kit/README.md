@@ -313,7 +313,10 @@ import { defineRenderer } from "untheme/css";
 import config, { type Contract } from "./untheme/config.mjs";
 import { isToken } from "./untheme/index.mjs";
 
-const untheme = makeUntheme<Contract>(config.theme, { patch: {}, input: config.input });
+const untheme = makeUntheme<Contract>(config.theme, {
+  patch: {},
+  input: config.input,
+});
 const renderer = defineRenderer(untheme);
 ```
 

@@ -105,7 +105,6 @@ describe("mockConfig", () => {
     expect(emitted.config.input).toEqual(config.input);
     expect(emitted.config.default).toEqual(config.default);
   });
-
 });
 
 describe("mockModules", () => {

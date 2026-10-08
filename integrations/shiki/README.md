@@ -29,7 +29,10 @@ import { codeToHtml } from "shiki";
 import config, { type Contract } from "./untheme/config.mjs";
 
 // The theme that `untheme build` wrote, with code-* tokens
-const untheme = makeUntheme<Contract>(config.theme, { patch: {}, input: config.input });
+const untheme = makeUntheme<Contract>(config.theme, {
+  patch: {},
+  input: config.input,
+});
 
 // Bind roles to tokens
 const theme = defineShikiTheme(untheme.schema, {
