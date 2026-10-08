@@ -22,6 +22,11 @@
       "types": "./.dist/manifest.d.mts",
       "import": "./.dist/manifest.mjs"
     },
+    "./layers": {
+      "types": "./.dist/layers.d.mts",
+      "import": "./.dist/layers.mjs"
+    },
+    "./layers/*": "./.dist/layers/*",
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },

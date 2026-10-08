@@ -20,7 +20,7 @@ afterAll(async () => {
 });
 
 describe("generate", () => {
-  it("emits the index, config and manifest modules with declarations", async () => {
+  it("emits the index, config, manifest and layers modules with declarations", async () => {
     const output = await generate({ source: "./resolver.json" }, { cwd: ROOT });
     expect(output.outDir).toBe("untheme");
     expect(output.files.map((file) => file.path)).toEqual([
@@ -30,6 +30,8 @@ describe("generate", () => {
       "config.d.mts",
       "manifest.mjs",
       "manifest.d.mts",
+      "layers.mjs",
+      "layers.d.mts",
     ]);
     for (const file of output.files) {
       expect(
@@ -113,6 +115,19 @@ describe("generate", () => {
     )!.contents;
     expect(declarations).toContain(
       "export declare const manifest: readonly ModifierEntry[];",
+    );
+  });
+
+  it("emits an empty layer list and a never union without layers", async () => {
+    const output = await generate({ source: "./resolver.json" }, { cwd: ROOT });
+    const module = output.files.find((file) => file.path === "layers.mjs")!;
+    expect(module.contents).toContain("export const layers = [];");
+    const declarations = output.files.find(
+      (file) => file.path === "layers.d.mts",
+    )!.contents;
+    expect(declarations).toContain("export type LayerId = never;");
+    expect(declarations).toContain(
+      "export declare const layers: readonly LayerEntry[];",
     );
   });
 

@@ -2,6 +2,8 @@ import type { Contract } from "@untheme/schema";
 
 import { describe, it, expect } from "vitest";
 
+import { makeUntheme } from "@untheme/core";
+
 import {
   defineUnthemeConfig,
   useUnthemeConfig,
@@ -37,25 +39,27 @@ describe("defineUnthemeConfig", () => {
 });
 
 describe("useUnthemeConfig", () => {
-  it("seeds a container with the theme, the selection, and an empty override", () => {
+  it("seeds a container with the selection, an empty override, and no layer", () => {
     const seeded = useUnthemeConfig(config);
-    expect(seeded.theme).toEqual(config.theme);
-    expect(seeded.input).toEqual(config.input);
-    expect(seeded.override).toEqual({});
+    expect(seeded).toEqual({ input: config.input, override: {} });
+    expect(seeded.layer).toBeUndefined();
   });
 
   it("holds nothing by reference, so the authored config stays detached", () => {
     const seeded = useUnthemeConfig(config);
-    expect(seeded.theme).not.toBe(config.theme);
-    expect(seeded.theme.tokens.primary).not.toBe(config.theme.tokens.primary);
     expect(seeded.input).not.toBe(config.input);
   });
 
   it("seeds an independent container per call", () => {
     const first = useUnthemeConfig(config);
     const second = useUnthemeConfig(config);
-    expect(first.theme).not.toBe(second.theme);
     expect(first.input).not.toBe(second.input);
     expect(first.override).not.toBe(second.override);
+  });
+
+  it("boots a service beside the theme of the config", () => {
+    const ut = makeUntheme(config.theme, useUnthemeConfig(config));
+    expect(ut.theme()).toBe(ut.schema.base);
+    expect(ut.get("primary")).toEqual(config.theme.tokens.primary.$value);
   });
 });

@@ -32,7 +32,7 @@ export function greet(name: string, mode: Mode = "light"): number {
  * Boots the built theme at its default selection and renders over it. The
  * Shiki theme wraps every scope around the var() output of the renderer.
  */
-const untheme = makeUntheme<Contract>(useUnthemeConfig(config));
+const untheme = makeUntheme<Contract>(config.theme, useUnthemeConfig(config));
 
 const renderer = defineRenderer(untheme);
 

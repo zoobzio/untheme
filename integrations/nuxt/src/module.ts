@@ -1,8 +1,6 @@
 import type { Schema, Template, Theme } from "untheme";
 import type { NuxtUnthemeConfig } from "./config";
 
-import { join } from "node:path";
-
 import { defineSchema } from "untheme";
 import { defineRenderer } from "untheme/css";
 
@@ -34,7 +32,8 @@ import { closest, loadTheme } from "./theme";
  *   under `untheme/`. The modules hold the `Token` union, the `Mod` axis
  *   structure, the theme, and the selection.
  * - It renders the static cascade to the `untheme.css` template. The module
- *   links the template into the app CSS unless `css` is `false`.
+ *   writes the file for editors and does not link it. The runtime plugin
+ *   renders the active tokens.
  * - It registers the runtime plugin and the `useUntheme` and
  *   `useUnthemeRenderer` auto-imports.
  *
@@ -73,11 +72,12 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
     /*
      * The static cascade holds the base bindings under `:root`. Each modifier
      * context follows as a data-attribute block. The cascade sits in the
-     * `untheme` cascade layer. The unlayered block that the runtime plugin
-     * injects wins over the layer.
+     * `untheme` cascade layer. The module writes the file and does not link
+     * it. An editor indexes it for completion. An app can import it. The
+     * unlayered block that the runtime plugin injects wins over the layer.
      */
     const renderer = defineRenderer({
-      config: { theme },
+      theme: () => theme,
       tokens: () => map(theme.tokens, (slot) => slot.$value),
     });
 
@@ -86,11 +86,6 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
       write: true,
       getContents: () => `@layer untheme {\n${renderer.sheet()}\n}`,
     });
-
-    if (config.css !== false) {
-      nuxt.options.css ||= [];
-      nuxt.options.css.unshift(join(nuxt.options.buildDir, STYLESHEET));
-    }
 
     addPlugin({
       src: resolver.resolve("./runtime/plugin"),

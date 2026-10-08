@@ -1,9 +1,9 @@
 /**
  * Generates the themes from `scripts/seeds.json` as DTCG JSON. The script
- * writes one token document for each theme at `src/modifiers/theme/<id>.json`.
- * The document holds the name, the description, and the eight ramps of the
- * theme. The script also writes the contexts of the `theme` modifier in
- * `src/resolver.json`, one for each theme, in seed order.
+ * writes one token document for each theme at `src/themes/<id>.json`. The
+ * document holds the name, the description, and the eight ramps of the theme.
+ * Each document is a layer of the kit config. The `aurora` document is also
+ * the `ramps` set of the resolver. The script does not change the resolver.
  *
  * Each seed gives a hue and a chroma. All ramps use one OKLCH lightness ladder
  * across the eleven Tailwind-style stops, 50 to 950. The chroma curve peaks at
@@ -181,10 +181,7 @@ const themes = JSON.parse(
  * Writes one document for each theme. The document holds all eight ramps. The
  * script removes the theme folder first, so each run writes the full set.
  */
-await rm(new URL("src/modifiers/theme/", ROOT), {
-  recursive: true,
-  force: true,
-});
+await rm(new URL("src/themes/", ROOT), { recursive: true, force: true });
 for (const [id, theme] of Object.entries(themes)) {
   const document = {
     $description: theme.description,
@@ -193,22 +190,7 @@ for (const [id, theme] of Object.entries(themes)) {
   for (const [name, seed] of Object.entries(theme.seeds)) {
     Object.assign(document, ramp(name, seed));
   }
-  await write(`src/modifiers/theme/${id}.json`, document);
+  await write(`src/themes/${id}.json`, document);
 }
-
-/*
- * Replaces the contexts of the `theme` modifier in the resolver. Each context
- * references the document of one theme.
- */
-const resolver = JSON.parse(
-  await readFile(new URL("src/resolver.json", ROOT), "utf8"),
-);
-resolver.modifiers.theme.contexts = Object.fromEntries(
-  Object.keys(themes).map((id) => [
-    id,
-    [{ $ref: `./modifiers/theme/${id}.json` }],
-  ]),
-);
-await write("src/resolver.json", resolver);
 
 console.log(`generated ${Object.keys(themes).length} themes`);

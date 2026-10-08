@@ -50,7 +50,7 @@ export const reframe = <T>(tokens: TokenNormalizedSet, run: () => T): T => {
 export const assemble = (
   parsed: { resolver: Resolver | undefined; tokens: TokenNormalizedSet },
   options: Pick<KitConfig, "id" | "name">,
-): Required<Core> => {
+): Required<Omit<Core, "layers">> => {
   const pieces = skeleton(parsed.resolver, parsed.tokens);
   const { id, name } = identity(options, parsed.resolver);
   const base: unknown = {

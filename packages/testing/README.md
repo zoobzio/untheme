@@ -69,9 +69,9 @@ fail in the test that uses the theme.
 - `mockTheme(spec)` builds a complete theme from a terse spec.
 - `mockInput(theme, selection?)` returns a boot selection. Each modifier is at
   its first context, unless the selection pins another.
-- `bootUntheme(theme, selection?, options?)` boots a service over a fresh
-  container with a detached clone of the theme. Every call is independent.
-  The swaps and edits of one test do not reach another test.
+- `bootUntheme(theme, selection?, options?)` boots a service over the theme
+  with a fresh container. Every call is independent. The swaps and edits of
+  one test do not reach another test.
 - `mockManifest(theme, prose?)` returns the manifest that the kit emits.
   Every name is the titled id unless `prose` sets another.
 - `mockModules(theme, options?)` returns the `index`, `config`, and

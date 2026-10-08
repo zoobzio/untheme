@@ -6,7 +6,7 @@
 | [`@untheme/catalog`](./catalog) | `packages/catalog` | Defines theme catalogs, providers, and clients with `defineCatalog`.                         |
 | [`@untheme/core`](./core)       | `packages/core`    | Makes the runtime theme service with `makeUntheme`.                                          |
 | [`@untheme/css`](./css)         | `packages/css`     | Renders a theme as CSS custom properties with `defineRenderer`.                              |
-| [`@untheme/kit`](./kit)         | `packages/kit`     | Builds DTCG JSON into the contract and config modules with `untheme build`.                  |
+| [`@untheme/kit`](./kit)         | `packages/kit`     | Builds DTCG JSON into the contract, the config, and the layers with `untheme build`.         |
 | [`@untheme/schema`](./schema)   | `packages/schema`  | Defines the token contract types and the runtime validation with `defineSchema`.             |
 | [`@untheme/testing`](./testing) | `packages/testing` | Mocks themes, services, and build output for tests with `mockTheme`.                         |
 | [`@untheme/utils`](./utils)     | `packages/utils`   | Copies, merges, and compares themes with `clone`, `merge`, and `diff`.                       |

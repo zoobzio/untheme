@@ -21,6 +21,7 @@ const { manifest, shuffle } = useDemo();
       </div>
     </div>
     <div class="demo-axes">
+      <Themes />
       <Controls
         v-for="modifier in manifest"
         :key="modifier.id"

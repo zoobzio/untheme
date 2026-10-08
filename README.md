@@ -9,9 +9,10 @@ framework integrations, and examples.
 A theme has a contract and values. The contract lists the tokens, their types,
 and their references. The values fill the contract.
 
-Modifier axes rebind tokens for a context, such as light or dark. A theme layer
-rebinds tokens for a whole theme. A role refers to a ramp with a `var()`
-reference. A change of context or theme updates the custom properties in CSS.
+Modifier axes rebind tokens for a context, such as light or dark. A layer
+rebinds tokens for a whole theme. The service applies one layer at a time. A
+role refers to a ramp with a `var()` reference. A change of context or layer
+updates the custom properties in CSS.
 
 The types contain the contract. Token names, axes, and contexts autocomplete in
 the editor. A wrong name fails to compile. A schema that the build derives from
@@ -64,11 +65,11 @@ untheme build
 
 The build reads the documents with `@terrazzo/parser`. It converts them to an
 untheme theme and validates the theme. It checks the theme against the
-resolution of Terrazzo. It writes two modules with declarations into
-`untheme/`. `index.mjs` exports the `Token` union, the modifier and context
-types, and the guards. `config.mjs` exports the base theme and the boot
-selection, which is the `default` context of each modifier. The runtime
-packages read the built config:
+resolution of Terrazzo. It writes modules with declarations into `untheme/`.
+`index.mjs` exports the `Token` union, the modifier and context types, and the
+guards. `config.mjs` exports the base theme and the boot selection, which is
+the `default` context of each modifier. The runtime packages read the built
+config:
 
 ```ts
 import { makeUntheme } from "untheme";
@@ -76,10 +77,21 @@ import { useUnthemeConfig } from "untheme/config";
 
 import config, { type Contract } from "./untheme/config.mjs";
 
-const untheme = makeUntheme<Contract>(useUnthemeConfig(config));
+const untheme = makeUntheme<Contract>(config.theme, useUnthemeConfig(config));
 
 untheme.resolve("primary"); // the blue-600 color object
 untheme.swap("color", "dark"); // primary now follows {blue-200}
+```
+
+A config can also declare `layers`. Each layer is a DTCG token document that
+rebinds tokens of the contract. The build checks each layer against the
+contract and writes it to `untheme/layers/<id>.json`. The service applies the
+JSON as it is:
+
+```ts
+import nord from "./untheme/layers/nord.json" with { type: "json" };
+
+untheme.apply(nord); // the ramps of nord under the same roles
 ```
 
 The CSS renderer keeps the reference graph:
@@ -94,15 +106,17 @@ renderer.root(); // :root block over the active bindings
 renderer.sheet(); // static cascade: base + per-context attribute blocks
 ```
 
-The [aurora](./presets/aurora) preset is the reference theme. It has nine
-modifier axes and eight tonal ramps, as DTCG JSON. The `theme` axis has 31
-contexts, one for each theme.
+The [aurora](./presets/aurora) preset is the reference theme. It has eight
+modifier axes and eight tonal ramps, as DTCG JSON. It has 31 themes as layers,
+one document for each palette.
 
 The package also has a kit build of the JSON. Import the config module to boot
-the whole preset with no kit of your own:
+the preset with no kit of your own, and a layer to change the palette:
 
 ```ts
 import config, { type Contract } from "@untheme/aurora/config";
+import { layers } from "@untheme/aurora/layers"; // id, name, description
+import nord from "@untheme/aurora/layers/nord.json" with { type: "json" };
 ```
 
 To take part of the preset, point a config at the resolver of the preset with
@@ -112,9 +126,9 @@ an `npm:/` reference:
 source: "npm:/@untheme/aurora/src/resolver.json";
 ```
 
-The config `modifiers` field keeps the themes you want, adds your own themes,
-or turns an axis off. You can also list the files of the preset in your own
-resolver and add tokens.
+The config `modifiers` field keeps the contexts you want, adds your own
+contexts, or turns an axis off. You can also list the files of the preset in
+your own resolver and add tokens.
 
 ## Workspace
 

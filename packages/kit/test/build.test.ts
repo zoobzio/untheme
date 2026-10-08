@@ -76,6 +76,8 @@ describe("build", () => {
       "config.mjs",
       "index.d.mts",
       "index.mjs",
+      "layers.d.mts",
+      "layers.mjs",
       "manifest.d.mts",
       "manifest.mjs",
     ]);

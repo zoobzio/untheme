@@ -42,6 +42,7 @@ describe("makeUntheme", () => {
     for (const key of [
       "config",
       "schema",
+      "theme",
       "modifiers",
       "contexts",
       "tokens",
@@ -64,8 +65,15 @@ describe("makeUntheme", () => {
   it("reflects the initial input, theme, and tokens", () => {
     const u = make();
     expect(u.config.input.color).toBe("light");
-    expect(u.config.theme.id).toBe("alpha");
+    expect(u.config.layer).toBeUndefined();
+    expect(u.theme().id).toBe("alpha");
     expect(u.tokens().primary).toBe("{blue}");
+  });
+
+  it("keeps the base theme out of the state", () => {
+    make();
+    const state = states["untheme:config"]?.value as Record<string, unknown>;
+    expect(Object.keys(state).sort()).toEqual(["input", "override"]);
   });
 
   describe("swap", () => {
@@ -86,15 +94,14 @@ describe("makeUntheme", () => {
   });
 
   describe("apply", () => {
-    it("switches theme, persists the key cookie, and emits untheme:theme", () => {
+    it("stores the layer, persists the key cookie, and emits untheme:layer", () => {
       const u = make();
       u.apply(bravo);
-      expect(u.config.theme.id).toBe("bravo");
+      expect(u.theme().id).toBe("bravo");
+      expect(u.config.layer).toEqual(bravo);
+      expect(states["untheme:config"]?.value).toMatchObject({ layer: bravo });
       expect(cookies["untheme-key"]?.value).toBe("bravo");
-      expect(nuxtApp.callHook).toHaveBeenCalledWith(
-        "untheme:theme",
-        expect.objectContaining({ id: "bravo" }),
-      );
+      expect(nuxtApp.callHook).toHaveBeenCalledWith("untheme:layer", bravo);
     });
 
     it("resolves a layer-carried modifier override on top of the baseline", () => {
@@ -116,17 +123,23 @@ describe("makeUntheme", () => {
       expect(cookies["untheme-key"]?.value ?? null).toBeNull();
     });
 
-    it("update rebinds a token and emits untheme:theme", () => {
+    it("update rebinds a token through a layer and emits untheme:layer", () => {
       const u = make();
       const smoke: Color = {
         colorSpace: "srgb",
         components: [0.93, 0.93, 0.93],
       };
       u.update({ tokens: { white: smoke } });
-      expect(u.config.theme.tokens.white.$value).toEqual(smoke);
-      expect(u.config.theme.tokens.white.$type).toBe("color");
+      expect(u.theme().tokens.white.$value).toEqual(smoke);
+      expect(u.theme().tokens.white.$type).toBe("color");
+      expect(u.config.layer).toEqual({
+        id: "alpha",
+        name: "Alpha",
+        tokens: { white: smoke },
+      });
+      expect(cookies["untheme-key"]?.value).toBe("alpha");
       expect(nuxtApp.callHook).toHaveBeenCalledWith(
-        "untheme:theme",
+        "untheme:layer",
         expect.objectContaining({ id: "alpha" }),
       );
     });

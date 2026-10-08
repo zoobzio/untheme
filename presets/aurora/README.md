@@ -2,11 +2,12 @@
 
 A preset for untheme. The package has DTCG token files in JSON and a build of
 them. The JSON has one resolver document, the token files that the resolver
-lists, and one folder for each modifier with one file for each context. The
-build has the modules that `untheme build` writes from the resolver, ready for
-`makeUntheme`. The tokens are eight tonal color ramps, a set of semantic color
-roles, and the system scales for type, shape, space, elevation, and motion.
-The package has nine modifiers and thirty-one themes.
+lists, one folder for each modifier with one file for each context, and one
+file for each theme. The build has the modules that `untheme build` writes
+from the resolver, ready for `makeUntheme`, and one layer file for each theme,
+ready for `apply`. The tokens are eight tonal color ramps, a set of semantic
+color roles, and the system scales for type, shape, space, elevation, and
+motion. The package has eight modifiers and thirty-one themes.
 
 ## Install
 
@@ -22,9 +23,10 @@ The tokens are in three tiers.
   `success`, `warning`, `neutral`, and `neutral-variant`. Each ramp has the
   eleven stops `primary-50` to `primary-950`. The six accent ramps also have a
   muted column and a vivid column, such as `primary-muted-500` and
-  `primary-vivid-500`. The ramps are the only literal colors. The `theme`
-  modifier is the only modifier that rebinds them. The script in
-  `scripts/generate.mjs` makes them from seed colors.
+  `primary-vivid-500`. The ramps are the only literal colors. The base holds
+  the ramps of the `aurora` palette. A theme is a layer that rebinds them. No
+  modifier rebinds them. The script in `scripts/generate.mjs` makes them from
+  seed colors.
 - **Roles.** For each accent, the roles are a fill, the text on the fill, a
   tinted container, and the text on the container. For `primary`, these are
   `primary`, `on-primary`, `primary-container`, and `on-primary-container`. The
@@ -43,14 +45,26 @@ The tokens are in three tiers.
 A theme defines only the 220 ramp values. Every role and every modifier
 context follows from them.
 
+## Themes
+
+A theme is a layer. Each theme is one token document under `src/themes/`. The
+document holds the eight ramps, 220 color tokens. The build checks each
+document against the contract and writes it as `.dist/layers/<id>.json`. The
+runtime takes the file as it is: `apply(nord)` makes the active theme from the
+base and the ramps of nord. Every role reads the new ramps by reference. Every
+modifier context works as before, because no context binds a ramp.
+
+The `aurora` theme is also the base. Its document is the `ramps` set of the
+resolver. The layer of `aurora` restates the base, so `apply(aurora)` is the
+baseline. See _Themes_ below for the list.
+
 ## Modifiers
 
-The package has nine modifiers. The `resolutionOrder` of the resolver applies
+The package has eight modifiers. The `resolutionOrder` of the resolver applies
 them in the order of this table.
 
 | Modifier   | Contexts                             | Overrides                         |
 | ---------- | ------------------------------------ | --------------------------------- |
-| `theme`    | thirty-one palettes, see _Themes_    | the ramps                         |
 | `color`    | `light` / `dark`                     | color roles + channels            |
 | `vibrancy` | `muted` / `balanced` / `vivid`       | accent roles → chroma channels    |
 | `contrast` | `default` / `medium` / `high`        | shifted roles → contrast channels |
@@ -61,13 +75,12 @@ them in the order of this table.
 | `motion`   | `default` / `reduced` / `expressive` | durations, delay, easing          |
 
 The base tokens are the default context of every modifier. The default context
-of `theme` is the `aurora` palette. The default context of every other
-modifier is empty.
+of every modifier is empty.
 
 The modifiers override separate sets of tokens. `color`, `vibrancy`, and
-`contrast` also override some of the same tokens. All 135,594 combinations
-resolve from the same files. `contrast` follows `vibrancy` in
-`order`, and the `contrast` value wins.
+`contrast` also override some of the same tokens. All 4,374 combinations
+resolve from the same files, under each of the thirty-one themes. `contrast`
+follows `vibrancy` in `order`, and the `contrast` value wins.
 
 ## The contrast channels
 
@@ -101,6 +114,9 @@ token name is also its CSS custom property, such as `--primary-50`.
 ```
 src/
   resolver.json              sets and modifiers, in resolution order
+  themes/                    one file for each theme, 220 tokens each
+    abyss.json ... vesper.json
+    aurora.json              also the ramps set of the resolver
   tokens/                    the base tokens
     roles/                   one file for each color
       primary.json  secondary.json  tertiary.json     16 tokens each
@@ -111,7 +127,6 @@ src/
     motion.json 11    state.json   3    blur.json       3
     stroke.json 2     border.json  3    gradient.json   2
   modifiers/                 one folder for each modifier
-    theme/                   abyss.json to vesper.json, 220 tokens each
     color/                   light.json  dark.json
     vibrancy/                balanced.json  muted.json  vivid.json
     contrast/                default.json  medium.json  high.json
@@ -123,16 +138,20 @@ src/
 ```
 
 - **The resolver** is the document that a build reads. Each set lists token
-  files. Each modifier lists one file in its folder for each context.
+  files. The `ramps` set lists `themes/aurora.json`. Each modifier lists one
+  file in its folder for each context.
+- **A theme file** starts with its `$description` and its display name in
+  `$extensions["io.zoobz.untheme"].name`. Then it holds the eight ramps. An
+  accent ramp has three columns of eleven stops, which are base, muted, and
+  vivid. A neutral ramp has one column. `untheme.config.ts` lists each theme
+  file as a layer.
 - **A context file** starts with its `$description` and its display name in
-  `$extensions["io.zoobz.untheme"].name`. Then it holds the tokens that its
-  context rebinds. A theme file holds the eight ramps. An accent ramp has three
-  columns of eleven stops, which are base, muted, and vivid. A neutral ramp has
-  one column. The default context of every modifier except `theme` holds only
-  the name and the description.
+  the same way. Then it holds the tokens that its context rebinds. The default
+  context of every modifier holds only the name and the description.
 - **Every modifier** has a `description` and a display name in the resolver. The
   manifest of a build lists them for each modifier and each option. An
-  interface can use them to draw a picker.
+  interface can use them to draw a picker. The `layers` module of a build
+  lists each theme with its name and description.
 - **A role file** holds the semantic tokens of one color. For an accent, these
   are 4 roles, 4 contrast channels, and 8 vibrancy channels. The 4 roles are
   `primary`, `on-primary`, `primary-container`, and `on-primary-container`. The
@@ -144,16 +163,16 @@ The next table shows what each token file needs.
 
 | File             | Needs             |
 | ---------------- | ----------------- |
-| a `roles` file   | a theme's ramps   |
+| a `roles` file   | the `ramps` set   |
 | `border`         | `roles`, `stroke` |
-| `gradient`       | a theme, `roles`  |
+| `gradient`       | `ramps`, `roles`  |
+| a theme file     | no other file     |
 | every other file | no other file     |
 
 The next table shows what each modifier needs.
 
 | Modifier                               | Needs                                   |
 | -------------------------------------- | --------------------------------------- |
-| `theme`                                | no other file                           |
 | `color`                                | `roles`, `gradient`                     |
 | `vibrancy`, `contrast`                 | `roles`                                 |
 | `text`                                 | `typography`                            |
@@ -161,36 +180,49 @@ The next table shows what each modifier needs.
 
 The package exports every file, so Node package resolution finds each one:
 `@untheme/aurora/src/tokens/space.json` and
-`@untheme/aurora/src/modifiers/theme/nord.json`.
+`@untheme/aurora/src/themes/nord.json`.
 
 ## Usage
 
 The package exports the modules that `untheme build` writes from its own
-resolver document. The modules hold the whole preset, with every modifier at
-its default and all thirty-one themes.
+config. The modules hold the contract, with every modifier at its default, and
+the aurora palette as the base. The layer files hold the thirty-one themes.
 
 | Export                     | Holds                                                                                                               |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `@untheme/aurora`          | the `Token`, `Modifier`, `Mod`, and `Context` types, the token list, the modifier list, `isToken`, and `isModifier` |
 | `@untheme/aurora/config`   | the base theme, the boot selection, and the `Contract` type                                                         |
 | `@untheme/aurora/manifest` | the id, the name, and the description of each modifier and each context                                             |
+| `@untheme/aurora/layers`   | the id, the name, and the description of each theme, and the `LayerId` type                                         |
+| `@untheme/aurora/layers/*` | one JSON file for each theme, as `apply` takes it: `nord.json`, `dracula.json`, and so on                           |
 
 Import the config and boot a service. The base theme starts at the default of
-each modifier, which is `aurora`, `light`, `balanced`, `default`, `md`,
-`default`, `default`, `default`, and `default`.
+each modifier, which is `light`, `balanced`, `default`, `md`, `default`,
+`default`, `default`, and `default`, with the aurora palette.
 
 ```ts
 import { makeUntheme } from "untheme";
 import { useUnthemeConfig } from "untheme/config";
 
 import config, { type Contract } from "@untheme/aurora/config";
+import nord from "@untheme/aurora/layers/nord.json" with { type: "json" };
 
-const ut = makeUntheme<Contract>(useUnthemeConfig(config));
+const ut = makeUntheme<Contract>(config.theme, useUnthemeConfig(config));
 
-ut.swap("theme", "nord"); // the nord palette under the same roles
+ut.apply(nord); // the nord palette under the same roles
 ut.swap("color", "dark");
 ut.swap("vibrancy", "vivid"); // vivid accents on the dark scheme
 ut.swap("contrast", "high"); // high contrast wins over vibrancy
+```
+
+A theme is one file, so an app can load it on demand. A server can send the
+file as it is, and `defineClient` from `untheme/catalog` checks it against the
+contract of the app. The `layers` module lists the themes for a picker:
+
+```ts
+import { layers } from "@untheme/aurora/layers";
+
+// [{ id: "abyss", name: "Abyss", description: "..." }, ...]
 ```
 
 The [Nuxt module](../../integrations/nuxt) takes the same config as its
@@ -212,37 +244,41 @@ export default defineConfig({
 });
 ```
 
-`untheme build` writes the same three modules into `untheme/`. The Nuxt module
-runs the same build. The service boots from `./untheme/config.mjs` in the same
-way as above.
+`untheme build` writes the same modules into `untheme/`. The Nuxt module runs
+the same build. The service boots from `./untheme/config.mjs` in the same way
+as above. A build with no `layers` reads no theme file other than
+`themes/aurora.json`.
 
 ### Taking part of the preset
 
-The `modifiers` key of the config selects the parts of Aurora that a build
-contains. The thirty-one themes hold more than 6,000 ramp bindings. A build
-that offers three themes contains only those three themes.
+The `layers` key of the config names the themes that a build contains. The
+`modifiers` key selects the contexts of each modifier.
 
 ```ts
 export default defineConfig({
   source: "npm:/@untheme/aurora/src/resolver.json",
+  layers: {
+    // Build three themes as layers.
+    nord: "npm:/@untheme/aurora/src/themes/nord.json",
+    dracula: "npm:/@untheme/aurora/src/themes/dracula.json",
+
+    // Add a palette of your own. The token file rebinds the ramp tokens.
+    brand: "./tokens/brand.json",
+  },
   modifiers: {
-    // Keep three themes, in this order, and start with nord.
-    theme: { contexts: ["nord", "dracula", "aurora"], default: "nord" },
-
-    // Add a palette. The token file rebinds the ramp tokens.
-    // theme: { add: { brand: "./tokens/brand.json" }, default: "brand" },
-
     // Turn off a modifier. Its default stays in the base tokens.
     depth: false,
   },
 });
 ```
 
-The build reads only the themes that the config keeps. The built tokens and the
-types contain only those themes. The `manifest.mjs` of the build lists each
-modifier and each context with its name and description. An interface can read
-this file to offer the choice. The kit README has the rules in its
-[Modifiers](../../packages/kit#modifiers) section.
+The build checks each layer against the contract and writes it to
+`untheme/layers/<id>.json`. The `layers.mjs` of the build lists each layer
+with its name and description. The `manifest.mjs` of the build lists each
+modifier and each context. An interface can read both files to offer the
+choice. The kit README has the rules in its
+[Modifiers](../../packages/kit#modifiers) and
+[Layers](../../packages/kit#layers) sections.
 
 ### Adding tokens
 
@@ -251,14 +287,13 @@ Aurora as sets, and add your own sets. Declare each modifier again with the
 context files of Aurora, such as
 `npm:/@untheme/aurora/src/modifiers/color/dark.json`, and add your own context
 files. The tables in _Layout_ show which files a subset needs. The
-[shiki example](../../examples/shiki) adds a `syntax-*` group in this way. It
-lists `modifiers/theme/aurora.json` as a set to use one fixed palette.
+[shiki example](../../examples/shiki) adds a `syntax-*` group in this way.
 
 ## Themes
 
-The `theme` modifier has thirty-one contexts. Each context is one file under
-`src/modifiers/theme/`. The default theme is `aurora`, which has electric
-teal-green, violet, and magenta on cold blue-grays.
+The package has thirty-one themes. Each theme is one file under `src/themes/`
+and one layer under `.dist/layers/`. The base theme is `aurora`, which has
+electric teal-green, violet, and magenta on cold blue-grays.
 
 Editor classics: `ayu`, `catppuccin`, `cyberdream`, `dracula`, `everforest`,
 `github`, `gruvbox`, `horizon`, `kanagawa`, `monokai`, `night_owl`, `nord`,
@@ -276,10 +311,10 @@ Modern open palettes: `flexoki`, `oxocarbon`.
 
 ## Regenerating
 
-The script generates the files under `src/modifiers/theme/`. It also generates
-the contexts of the `theme` modifier in `src/resolver.json`. The committed JSON
-is the shipped package. The rest of the
-resolver, the token files, and the other modifiers are written by hand.
+The script generates the files under `src/themes/`. The committed JSON is the
+shipped package. The resolver, the token files, and the modifiers are written
+by hand. `untheme.config.ts` reads the ids of the themes from
+`scripts/seeds.json`, so a new seed is a new layer with no other change.
 
 To change a palette or add a theme, edit `scripts/seeds.json`. Then run:
 
@@ -301,14 +336,16 @@ in full, so each run removes the file of a theme that left the seeds.
 
 ## Building
 
-The modules under `.dist/` are a kit build of `src/`. `untheme.config.ts`
-points at the resolver document, and `pnpm build` runs `untheme build`. The
-test suite in `test/` builds the documents, checks every context, checks the
-contrast channels and the vibrancy channels, and compares the exported modules
-with that build. A `.dist/` that is older than `src/` fails the suite.
+The modules and the layer files under `.dist/` are a kit build of `src/`.
+`untheme.config.ts` points at the resolver document and lists each theme as a
+layer, and `pnpm build` runs `untheme build`. The test suite in `test/` builds
+the documents, checks every context, checks every theme against the contract,
+checks the contrast channels and the vibrancy channels, and compares the
+exported modules and layer files with that build. A `.dist/` that is older than
+`src/` fails the suite.
 
 ## Related
 
 - [`@untheme/kit`](../../packages/kit) builds this preset into a theme.
 - [Nuxt example](../../examples/nuxt) changes a page live across every
-  modifier.
+  modifier and every theme.

@@ -36,16 +36,6 @@ export interface NuxtUnthemeConfig<
    * the options have no `theme`.
    */
   config?: string;
-
-  /**
-   * Controls whether the module links the static cascade
-   * (`#build/untheme.css`) into the global CSS of the app. The default is
-   * `true`. With `true`, the token custom properties exist in CSS before
-   * hydration. Set `false` to keep the file out of the bundle. The module
-   * still writes the file to the build directory, and you can import it with
-   * `@import "#build/untheme.css"`.
-   */
-  css?: boolean;
 }
 
 /**

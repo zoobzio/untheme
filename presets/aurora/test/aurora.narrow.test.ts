@@ -3,83 +3,64 @@ import type { Kit } from "@untheme/kit";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { resolveKit } from "@untheme/kit";
-import { resolveAll } from "@untheme/testing";
 
-import { ROOT, boot as bootKit } from "./helpers";
+import { ROOT, build } from "./helpers";
 
 /**
  * Builds of part of the preset. Each test builds the preset under a
- * `modifiers` config and compares the result with a reference. The reference
- * is the preset narrowed to two themes. A full build costs a Terrazzo
- * resolution per context, and the theme axis has most of them. The reference
- * keeps the comparisons and drops that cost. The full build has its own file,
- * `aurora.test.ts`, and the two files run on separate workers.
+ * `modifiers` config and compares the result with the full build. The themes
+ * are layers, so a config that builds no layers skips every theme file. The
+ * full build has its own file, `aurora.test.ts`, and the two files run on
+ * separate workers.
  */
 
 /** The resolver document, as the `source` of a kit config. */
 const source = "./src/resolver.json";
 
-/** The preset at its default theme plus nord. Every other axis is complete. */
+/** The full build of the preset. */
 let reference: Kit;
 
 beforeAll(async () => {
-  reference = await resolveKit(
-    { source, modifiers: { theme: { contexts: ["aurora", "nord"] } } },
-    { cwd: ROOT },
-  );
+  reference = await build();
 });
 
-/** A service over the reference theme, at the defaults plus the given contexts. */
-const boot = (selection: Partial<Record<string, string>> = {}) =>
-  bootKit(reference, selection);
-
 describe("a build of part of the preset", () => {
-  it("keeps every token and axis under a narrowed theme set", () => {
-    expect(Object.keys(reference.theme.tokens)).toHaveLength(392);
-    expect(Object.keys(reference.theme.modifiers.theme ?? {})).toEqual([
-      "aurora",
-      "nord",
+  it("builds the contract with no theme files when the config has no layers", async () => {
+    const bare = await resolveKit({ source }, { cwd: ROOT });
+    expect(bare.theme).toEqual(reference.theme);
+    expect(bare.input).toEqual(reference.input);
+    expect(bare.layers).toEqual([]);
+    expect(bare.documents.filter((path) => /themes[\\/]/.test(path))).toEqual([
+      reference.documents[1],
     ]);
-    expect(reference.input.theme).toBe("aurora");
   });
 
-  it("keeps only the themes the config lists, booting the first", async () => {
-    const narrowed = await resolveKit(
-      { source, modifiers: { theme: { contexts: ["nord", "dracula"] } } },
+  it("builds only the layers the config names", async () => {
+    const two = await resolveKit(
+      {
+        source,
+        layers: {
+          nord: "./src/themes/nord.json",
+          dracula: "./src/themes/dracula.json",
+        },
+      },
       { cwd: ROOT },
     );
-    expect(Object.keys(narrowed.theme.modifiers.theme ?? {})).toEqual([
+    expect(two.layers.map((built) => built.entry.id)).toEqual([
       "nord",
       "dracula",
     ]);
-    expect(narrowed.input).toEqual({ ...reference.input, theme: "nord" });
-    expect(narrowed.theme.modifiers.theme?.nord).toEqual({});
-    expect(Object.keys(narrowed.theme.tokens)).toEqual(
-      Object.keys(reference.theme.tokens),
+    expect(two.layers[0]).toEqual(
+      reference.layers.find((built) => built.entry.id === "nord"),
     );
-
-    /* The base is the nord palette. Every other token is as before. */
-    const resolved = resolveAll(boot({ theme: "nord" }));
-    for (const [token, slot] of Object.entries(narrowed.theme.tokens)) {
-      if (/-\d+$/.test(token)) {
-        expect(slot.$value).toEqual(resolved[token]);
-      } else {
-        expect(slot).toEqual(reference.theme.tokens[token]);
-      }
-    }
-    for (const modifier of reference.theme.order.slice(1)) {
-      expect(narrowed.theme.modifiers[modifier]).toEqual(
-        reference.theme.modifiers[modifier],
-      );
-    }
+    expect(
+      two.documents.filter((path) => /themes[\\/]/.test(path)),
+    ).toHaveLength(3);
   });
 
-  it("turns off an axis that shares its name with a set", async () => {
+  it("turns off an axis and keeps the rest", async () => {
     const narrowed = await resolveKit(
-      {
-        source,
-        modifiers: { theme: { contexts: ["aurora"] }, motion: false },
-      },
+      { source, modifiers: { motion: false } },
       { cwd: ROOT },
     );
     expect(narrowed.theme.order).toEqual(
@@ -87,32 +68,38 @@ describe("a build of part of the preset", () => {
     );
     expect(narrowed.input).not.toHaveProperty("motion");
     expect(narrowed.theme.tokens).toEqual(reference.theme.tokens);
-    expect(
-      narrowed.documents.filter((path) =>
-        /modifiers[\\/]theme[\\/]/.test(path),
-      ),
-    ).toHaveLength(1);
   });
 
-  it("adds a theme from a token file of the project's own", async () => {
+  it("adds a context to an axis from a token file of the project's own", async () => {
     const custom = await resolveKit(
       {
         source,
         modifiers: {
-          theme: {
-            add: { mine: "./src/modifiers/theme/nord.json" },
-            contexts: ["aurora", "mine"],
+          density: {
+            add: { tight: "./src/modifiers/density/compact.json" },
+            contexts: ["default", "tight"],
           },
         },
       },
       { cwd: ROOT },
     );
-    expect(Object.keys(custom.theme.modifiers.theme ?? {})).toEqual([
-      "aurora",
-      "mine",
+    expect(Object.keys(custom.theme.modifiers.density ?? {})).toEqual([
+      "default",
+      "tight",
     ]);
-    expect(custom.theme.modifiers.theme?.mine).toEqual(
-      reference.theme.modifiers.theme?.nord,
+    expect(custom.theme.modifiers.density?.tight).toEqual(
+      reference.theme.modifiers.density?.compact,
     );
+  });
+
+  it("builds a layer of the project's own against the contract", async () => {
+    const custom = await resolveKit(
+      { source, layers: { mine: "./src/themes/nord.json" } },
+      { cwd: ROOT },
+    );
+    expect(custom.layers[0]?.layer).toEqual({
+      ...reference.layers.find((built) => built.entry.id === "nord")?.layer,
+      id: "mine",
+    });
   });
 });

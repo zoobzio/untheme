@@ -24,7 +24,9 @@ export type AppUnthemeThemeLayer = Layer<AppUnthemeContract>;
 export type AppUnthemeInput = Input<AppUnthemeContract>;
 
 /**
- * The state container that the service reads and changes.
+ * The state container that the service reads and changes. It holds the
+ * applied layer, the selection, and the user override. The base theme is the
+ * build module.
  */
 export type AppUnthemeConfig = Config<AppUnthemeContract>;
 
@@ -40,7 +42,7 @@ export type AppUntheme = Untheme<AppUnthemeContract>;
 export interface UnthemeHooks {
   "untheme:ready": (service: AppUntheme) => void;
   "untheme:input": (input: AppUnthemeInput) => void;
-  "untheme:theme": (theme: AppUnthemeTheme) => void;
+  "untheme:layer": (layer: AppUnthemeThemeLayer) => void;
 }
 
 /**

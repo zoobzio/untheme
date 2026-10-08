@@ -31,7 +31,7 @@ import { defineCodeMirrorTheme } from "@untheme/codemirror";
 import config, { type Contract } from "./untheme/config.mjs";
 
 // The theme that `untheme build` wrote, with code-* tokens
-const untheme = makeUntheme<Contract>(useUnthemeConfig(config));
+const untheme = makeUntheme<Contract>(config.theme, useUnthemeConfig(config));
 
 const theme = defineCodeMirrorTheme(
   untheme.schema,

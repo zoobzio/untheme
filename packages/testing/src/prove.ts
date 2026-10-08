@@ -81,7 +81,7 @@ export const resolveAll = <T extends Template>(
   }
   try {
     const resolved: Partial<Record<string, Values<Open>[Type]>> = {};
-    for (const token of Object.keys(untheme.config.theme.tokens)) {
+    for (const token of Object.keys(untheme.theme().tokens)) {
       try {
         resolved[token] = untheme.resolve(token as Token<T>);
       } catch (error) {

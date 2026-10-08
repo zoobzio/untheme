@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { defineConfig, parse } from "@terrazzo/parser";
 
 import { assemble } from "./assemble";
+import { buildLayers } from "./layers";
 import { OUT_DIR } from "./constant";
 import { loader } from "./loader";
 import { normalize } from "./path";
@@ -19,13 +20,15 @@ import { validate } from "./validate";
  * `alphabetize` off. It converts the base theme and the boot selection. The base
  * theme has the tokens, the modifier contexts, and the order. It validates both
  * with the untheme schema and verifies the result against the Terrazzo
- * resolution. This is the only step that reads documents. {@link generate} turns
+ * resolution. Then it builds each layer of the config and checks it against the
+ * contract. This is the only step that reads documents. {@link generate} turns
  * the result into files.
  *
  * @param config - The kit config.
  * @param options - The project root and I/O hooks.
  * @throws InvalidConfigError when the config breaks a rule. The function throws
  * before it reads a document.
+ * @throws InvalidLayerError when a layer violates the contract.
  */
 export const resolveKit = async (
   config: KitConfig,
@@ -49,10 +52,18 @@ export const resolveKit = async (
   });
 
   const { theme, input, manifest } = assemble(parsed, config);
+  const layers = await buildLayers(
+    config.layers ?? {},
+    theme,
+    base,
+    load,
+    options.logger,
+  );
   return {
     theme,
     input,
     manifest,
+    layers,
     outDir: normalize(config.outDir ?? OUT_DIR),
     documents,
   };

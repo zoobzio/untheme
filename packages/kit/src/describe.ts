@@ -20,7 +20,7 @@ export const title = (id: string): string => {
 };
 
 /** Returns the display name in the untheme extension of a node, when it has one. */
-const named = (node: { $extensions?: unknown }): string | undefined => {
+export const named = (node: { $extensions?: unknown }): string | undefined => {
   const { $extensions } = node;
   if (!record($extensions)) {
     return undefined;
@@ -33,7 +33,11 @@ const named = (node: { $extensions?: unknown }): string | undefined => {
 };
 
 /** Makes an entry. The name is `name` or the titled id. A set description is included. */
-const entry = (id: string, name?: string, description?: unknown): Entry => {
+export const entry = (
+  id: string,
+  name?: string,
+  description?: unknown,
+): Entry => {
   const found: Entry = { id, name: name ?? title(id) };
   if (typeof description === "string" && description !== "") {
     found.description = description;

@@ -38,7 +38,8 @@ describe("bootUntheme", () => {
     first.set("white", "#eee");
     expect(second.config.input).toEqual({ color: "light" });
     expect(second.dirty()).toBe(false);
-    expect(first.config.theme).not.toBe(theme);
+    expect(first.schema.base).not.toBe(theme);
+    expect(first.theme()).toBe(first.schema.base);
     expect(theme.tokens.white.$value).toMatchObject({ hex: "#ffffff" });
   });
 

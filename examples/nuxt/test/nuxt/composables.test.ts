@@ -1,16 +1,18 @@
 import type { Untheme } from "untheme";
+import type * as CatalogModule from "untheme/catalog";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { computed, reactive } from "vue";
+import { computed, reactive, ref } from "vue";
 
 import { makeUntheme } from "untheme";
 import { useUnthemeConfig } from "untheme/config";
+import { mockCatalog } from "@untheme/testing";
 
-import type { theme } from "./fixtures";
-
-import { modules } from "./fixtures";
+import { modules, theme } from "./fixtures";
+import { fixtureLayers as layers } from "./layers";
 import { useControls } from "../../app/composables/controls";
 import { useDemo } from "../../app/composables/demo";
+import { useThemes } from "../../app/composables/themes";
 
 /*
  * The generated manifest module, mocked with the module of the fixture. The
@@ -24,20 +26,50 @@ vi.mock("#build/untheme/manifest.mjs", async () => {
 });
 
 /*
- * Nuxt auto-imports `useUntheme` and `computed` into the composables. Here
- * each one is a global for the duration of a test. `useUntheme` answers with
- * a fresh service per test. The service runs over a reactive container, the
- * same way the plugin of the module builds one over `useState`. A `computed`
- * in a composable then tracks the selection the way it does in the app.
+ * The catalog client, mocked with a catalog over the fixture layers. The
+ * picker reads the same `list` and `get` as over the wire, with no server.
+ * The factory builds the provider itself, because `@untheme/testing` imports
+ * this module.
+ */
+vi.mock("untheme/catalog", async (original) => {
+  const actual = await original<typeof CatalogModule>();
+  const { fixtureLayers: layers } = await import("./layers");
+  return {
+    ...actual,
+    defineClient: (schema: Parameters<typeof actual.defineCatalog>[0]) =>
+      actual.defineCatalog(schema, {
+        list: (listing) => ({
+          entries: layers
+            .map(({ id, name }) => ({ id, name }))
+            .slice(listing.offset, listing.offset + listing.limit),
+          total: layers.length,
+          limit: listing.limit,
+          offset: listing.offset,
+        }),
+        get: (id) => layers.find((layer) => layer.id === id),
+      }),
+  };
+});
+
+/*
+ * Nuxt auto-imports `useUntheme`, `useDemo`, `computed`, and `ref` into the
+ * composables. Here each one is a global for the duration of a test.
+ * `useUntheme` answers with a fresh service per test. The service runs over
+ * the theme of the fixture and a reactive container, the same way the plugin
+ * of the module builds one over `useState`. A `computed` in a composable then
+ * tracks the selection and the layer the way it does in the app.
  */
 let untheme: Untheme<typeof theme>;
 
 beforeEach(() => {
   untheme = makeUntheme<typeof theme>(
+    theme,
     reactive(useUnthemeConfig(modules.config)),
   );
   vi.stubGlobal("useUntheme", () => untheme);
+  vi.stubGlobal("useDemo", useDemo);
   vi.stubGlobal("computed", computed);
+  vi.stubGlobal("ref", ref);
 });
 
 afterEach(() => {
@@ -97,5 +129,50 @@ describe("useDemo", () => {
     const change = vi.fn();
     transition(change);
     expect(change).toHaveBeenCalledOnce();
+  });
+});
+
+describe("useThemes", () => {
+  it("starts from the layers manifest and the id of the base theme", () => {
+    const { entries, active } = useThemes();
+    expect(entries.value.map((entry) => entry.id)).toEqual([
+      "fixture",
+      "ink",
+      "paper",
+    ]);
+    expect(active.value).toBe("fixture");
+  });
+
+  it("refreshes the entries from the catalog", async () => {
+    const { entries, refresh } = useThemes();
+    entries.value = [];
+    await refresh();
+    expect(entries.value.map((entry) => entry.id)).toEqual([
+      "fixture",
+      "ink",
+      "paper",
+    ]);
+  });
+
+  it("applies the layer of a selected theme and tracks the active id", async () => {
+    const { active, select } = useThemes();
+    await select("ink");
+    expect(active.value).toBe("ink");
+    expect(untheme.config.layer).toEqual(layers[1]);
+    expect(untheme.resolve("surface")).toEqual(untheme.resolve("black"));
+  });
+
+  it("leaves the state alone on a miss", async () => {
+    const { active, select } = useThemes();
+    await select("ghost");
+    expect(active.value).toBe("fixture");
+    expect(untheme.config.layer).toBeUndefined();
+  });
+
+  it("checks each layer against the contract on the way in", async () => {
+    const catalog = mockCatalog(untheme.schema, [
+      { id: "bad", name: "Bad", tokens: { ghost: "#fff" } } as never,
+    ]);
+    await expect(catalog.get("bad")).rejects.toThrow();
   });
 });

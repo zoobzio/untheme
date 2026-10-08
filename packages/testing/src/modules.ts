@@ -75,8 +75,7 @@ export const mockIndex = <T extends Template>(theme: T): IndexModule<T> => {
  * Returns the `config` module that `untheme build` writes for a theme. It has
  * the theme and a boot selection as named exports and as the default export.
  * `useUnthemeConfig` seeds a container from it. The module holds the theme as
- * passed, like the data of the real module. `useUnthemeConfig` clones the
- * theme into the container.
+ * passed, like the data of the real module.
  *
  * @param theme - The theme that the module holds.
  * @param selection - The contexts to boot at.

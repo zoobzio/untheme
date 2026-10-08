@@ -48,7 +48,7 @@ export type Bindings<T extends Template> = Partial<
 /**
  * The part of the core service that a renderer reads. Pass the service, as in
  * `defineRenderer(untheme)`, or any container with the same members. Each
- * render reads the active theme from `config` and the bindings from `tokens`. A
+ * render reads the active theme from `theme` and the bindings from `tokens`. A
  * reactive container tracks each read and runs the scope again on change.
  */
 export type Source<T extends Template> = {
@@ -56,7 +56,7 @@ export type Source<T extends Template> = {
    * The active theme. Its slots declare the type of each token. Its modifier
    * contexts give the static sheet.
    */
-  config: { readonly theme: T };
+  theme: () => T;
 
   /*
    * The active flat bindings. A reference stays a reference.

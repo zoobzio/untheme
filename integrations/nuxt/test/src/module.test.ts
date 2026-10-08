@@ -1,8 +1,6 @@
 import type * as Kit from "@untheme/kit";
 import type { NuxtUnthemeConfig } from "../../src/config";
 
-import { join } from "node:path";
-
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { theme, input } from "../fixtures";
 
@@ -225,26 +223,15 @@ describe("untheme module", () => {
     );
   });
 
-  it("links the stylesheet into the app css by default", async () => {
+  it("does not link the stylesheet into the app css", async () => {
     await mod.setup(options, nuxt);
-    expect(nuxt.options.css).toEqual([
-      join(nuxt.options.buildDir, "untheme.css"),
-    ]);
+    expect(nuxt.options.css).toBeUndefined();
   });
 
-  it("prepends the stylesheet ahead of css the app already carries", async () => {
+  it("leaves css the app already carries as it is", async () => {
     nuxt.options.css = ["~/assets/css/base.css"];
     await mod.setup(options, nuxt);
-    expect(nuxt.options.css).toEqual([
-      join(nuxt.options.buildDir, "untheme.css"),
-      "~/assets/css/base.css",
-    ]);
-  });
-
-  it("keeps the stylesheet out of the app css when `css` is false", async () => {
-    await mod.setup({ ...options, css: false }, nuxt);
-    expect(nuxt.options.css ?? []).toEqual([]);
-    expect(template("untheme.css")).toBeDefined();
+    expect(nuxt.options.css).toEqual(["~/assets/css/base.css"]);
   });
 
   it("registers the key declarations with the token union and modifier structure", async () => {
@@ -297,14 +284,11 @@ describe("untheme module", () => {
       rebuilt.tokens.primary.$value = "{indigo}";
       nuxt.options._layers = [
         { config: { untheme: { theme: rebuilt, input: { color: "dark" } } } },
-        { config: { untheme: { ...options, css: false } } },
+        { config: { untheme: options } },
       ];
       await mod.setup(corrupted, nuxt);
       expect(exported("theme")).toEqual(rebuilt);
       expect(exported("input")).toEqual({ color: "dark" });
-      expect(nuxt.options.css).toEqual([
-        join(nuxt.options.buildDir, "untheme.css"),
-      ]);
     });
 
     it("never merges a deeper layer's theme into the closest one", async () => {

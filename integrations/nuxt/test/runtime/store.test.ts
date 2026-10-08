@@ -12,7 +12,7 @@ vi.mock("#imports", () => ({
   useCookie: (key: string) => (cookies[key] ??= reactive({ value: null })),
 }));
 
-import { accessUntheme } from "../../src/runtime/store";
+import { accessUntheme, buildTheme } from "../../src/runtime/store";
 
 describe("accessUntheme", () => {
   beforeEach(() => {
@@ -20,21 +20,22 @@ describe("accessUntheme", () => {
     cookies = {};
   });
 
-  it("seeds state with detached copies of the build exports", () => {
+  it("seeds state with a detached copy of the build selection and nothing else", () => {
     const store = accessUntheme();
 
-    expect(store.config.value.theme).toEqual(theme);
-    expect(store.config.value.theme).not.toBe(theme);
-    expect(store.config.value.theme.tokens).not.toBe(theme.tokens);
-
-    expect(store.config.value.input).toEqual(input);
+    expect(store.config.value).toEqual({ input, override: {} });
     expect(store.config.value.input).not.toBe(input);
+    expect(store.config.value.layer).toBeUndefined();
   });
 
   it("keeps writes into the seeded state away from the build module", () => {
     const store = accessUntheme();
-    store.config.value.theme.tokens.primary.$value = "{indigo}";
+    store.config.value.input.color = "dark";
 
-    expect(theme.tokens.primary.$value).toBe("{blue}");
+    expect(input.color).toBe("light");
+  });
+
+  it("exposes the build theme as the base, by reference", () => {
+    expect(buildTheme).toBe(theme);
   });
 });

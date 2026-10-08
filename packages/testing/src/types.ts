@@ -6,7 +6,7 @@ import type {
   Modifier,
   Template,
 } from "untheme";
-import type { Entry, Manifest } from "@untheme/kit";
+import type { BuiltLayer, Entry, Manifest } from "@untheme/kit";
 
 /**
  * A terse token value. A test writes one of these in place of a full DTCG
@@ -111,6 +111,9 @@ export interface KitOptions<T extends Template> {
 
   /** A manifest to use as is, in place of one built from the theme. */
   manifest?: Manifest;
+
+  /** The layers of the kit. Defaults to none. */
+  layers?: BuiltLayer[];
 
   /** The output directory, relative to the project root. Defaults to `untheme`. */
   outDir?: string;

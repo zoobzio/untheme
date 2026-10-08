@@ -113,6 +113,34 @@ const modifiers: Rule = (config) => {
   return issues;
 };
 
+/**
+ * Checks the layers. The member is an object of layer ids. Each id is a
+ * non-empty string. Each value is a source or a non-empty list of sources.
+ */
+const layers: Rule = (config) => {
+  const { layers } = config;
+  if (layers === undefined) {
+    return [];
+  }
+  if (!record(layers)) {
+    return ["layers must be an object of layer ids"];
+  }
+  const issues: string[] = [];
+  for (const [id, source] of Object.entries(layers)) {
+    if (id === "") {
+      issues.push("layers has an empty id");
+      continue;
+    }
+    const files: unknown[] = [source].flat();
+    if (files.length === 0 || !files.every(designator)) {
+      issues.push(
+        `layers.${id} must be a path, a URL, or an npm:/ reference, or a list of them`,
+      );
+    }
+  }
+  return issues;
+};
+
 /** The output directory sits inside the project root. */
 const outDir: Rule = (config) => {
   const { outDir = OUT_DIR } = config;
@@ -132,7 +160,7 @@ const outDir: Rule = (config) => {
  * @throws InvalidConfigError with every issue, when there is any.
  */
 export const validate = (config: KitConfig): void => {
-  const issues = [source, identity, modifiers, outDir].flatMap((rule) =>
+  const issues = [source, identity, modifiers, layers, outDir].flatMap((rule) =>
     rule(config),
   );
   if (issues.length > 0) {
