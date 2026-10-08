@@ -1,20 +1,18 @@
 import type { Entry } from "untheme/catalog";
 
-import { defineClient } from "untheme/catalog";
-import { layers } from "@untheme/aurora/layers";
+import { layers } from "#build/untheme/layers.mjs";
 
 /**
- * Binds the theme picker. The themes are the layers of aurora. The server
- * route under `/api/untheme` serves them. `entries` starts with the layers
- * manifest of aurora. `refresh` replaces it with the first page of the
- * catalog. `active` is the id of the applied theme. `select` gets one layer
- * from the catalog and applies it in a view transition.
+ * Binds the theme picker. The themes are the layers of aurora, which the
+ * module serves as the catalog. `entries` starts with the layers module of the
+ * build. `refresh` replaces it with the first page of the catalog. `active` is
+ * the id of the applied theme. `select` gets one layer from the catalog and
+ * applies it in a view transition.
  */
 export const useThemes = () => {
   const untheme = useUntheme();
+  const catalog = useUnthemeCatalog();
   const { transition } = useDemo();
-
-  const catalog = defineClient(untheme.schema, { base: "/api/untheme" });
 
   const entries = ref<Entry[]>(layers.map(({ id, name }) => ({ id, name })));
 

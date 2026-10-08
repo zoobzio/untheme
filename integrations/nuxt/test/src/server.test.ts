@@ -7,7 +7,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { defineClient } from "untheme/catalog";
 import { defineSchema } from "untheme";
 
-import { createThemeHandler, listEntries } from "../../src/server";
+import { createThemeHandler, listEntries } from "../../src/runtime/server";
 import { theme, themes } from "../fixtures";
 
 /*
@@ -22,16 +22,16 @@ const manifest: Entry[] = [
 ];
 
 /** The base URL that the handler is mounted under. */
-const BASE = "http://app.test/api/untheme";
+const BASE = "http://app.test/api/theme";
 
 /**
  * Serves a handler as Nitro does for a catch-all route file at
- * `server/api/untheme/[...path].get.ts`. Each request under the base reaches
+ * `server/api/theme/[...path].get.ts`. Each request under the base reaches
  * the handler.
  */
 const serve = (handler: EventHandler) => {
   const app = createApp();
-  app.use("/api/untheme", handler);
+  app.use("/api/theme", handler);
   const web = toWebHandler(app);
   return (path: string) => web(new Request(`${BASE}${path}`));
 };
@@ -252,7 +252,7 @@ describe("createThemeHandler", () => {
     };
 
     it("answers the listing and a layer below the base", async () => {
-      const under = route("/api/untheme");
+      const under = route("/api/theme");
       const page = await read(await under("/themes"));
       expect(page).toMatchObject({ total: 4 });
       expect(await read(await under("/themes/charlie"))).toEqual(
@@ -265,7 +265,7 @@ describe("createThemeHandler", () => {
       const app = createApp();
       const router = createRouter();
       router.get(
-        "/api/untheme/**:path",
+        "/api/theme/**:path",
         createThemeHandler({
           list: () => undefined,
           get: (id) => {
@@ -282,7 +282,7 @@ describe("createThemeHandler", () => {
     });
 
     it("needs no name on the catch-all", async () => {
-      const under = route("/api/untheme", "**");
+      const under = route("/api/theme", "**");
       expect(await read(await under("/themes"))).toMatchObject({ total: 4 });
       expect(await read(await under("/themes/charlie"))).toEqual(
         themes.charlie,
@@ -329,10 +329,10 @@ describe("createThemeHandler", () => {
   it("speaks the protocol the catalog client reads", async () => {
     const schema = defineSchema(theme);
     const catalog = defineClient(schema, {
-      base: "/api/untheme",
+      base: "/api/theme",
       fetch: (input, init) =>
         toWebHandler(
-          createApp().use("/api/untheme", createThemeHandler(provider)),
+          createApp().use("/api/theme", createThemeHandler(provider)),
         )(new Request(new URL(String(input), BASE), init)),
     });
     const page = await catalog.list({ search: "nord" });

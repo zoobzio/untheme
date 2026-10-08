@@ -4,12 +4,37 @@ import type { NuxtUnthemeConfig } from "../../src/config";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { theme, input } from "../fixtures";
 
+/** The fixture package that stands in for a preset, by export subpath. */
+const preset = vi.hoisted(() => {
+  const root = new URL("../fixtures/preset/", import.meta.url);
+  const files: Record<string, string> = {
+    config: "config.mjs",
+    manifest: "manifest.mjs",
+    layers: "layers.mjs",
+    "layers/bravo.json": "layers/bravo.json",
+    "layers/charlie.json": "layers/charlie.json",
+  };
+  return {
+    name: "@acme/preset",
+    path: (subpath: string) =>
+      files[subpath] === undefined
+        ? undefined
+        : decodeURIComponent(new URL(files[subpath], root).pathname),
+  };
+});
+
 const kit = vi.hoisted(() => ({
   addTemplate: vi.fn(),
   addPlugin: vi.fn(),
   addImports: vi.fn(),
   addServerHandler: vi.fn(),
   createResolver: vi.fn(() => ({ resolve: (p: string) => `/resolved${p}` })),
+  tryResolveModule: vi.fn(async (id: string) => {
+    const prefix = `${preset.name}/`;
+    return id.startsWith(prefix)
+      ? preset.path(id.slice(prefix.length))
+      : undefined;
+  }),
 }));
 
 vi.mock("@nuxt/kit", () => ({
@@ -22,7 +47,7 @@ vi.mock("@nuxt/kit", () => ({
  * with the fixture theme under another id. This id shows that a theme comes
  * from the local build. The tests use the real `emit` of the kit.
  */
-const built = vi.hoisted(() => ({ id: "built" }));
+const built = vi.hoisted(() => ({ id: "built", layers: [] as unknown[] }));
 
 vi.mock("@untheme/kit", async (original) => ({
   ...(await original<typeof Kit>()),
@@ -30,6 +55,7 @@ vi.mock("@untheme/kit", async (original) => ({
   resolveKit: vi.fn(async () => ({
     theme: { ...structuredClone(theme), id: built.id },
     input: structuredClone(input),
+    layers: built.layers,
     outDir: "untheme",
     documents: ["/app/tokens/a.resolver.json", "/app/tokens/base.json"],
   })),
@@ -37,6 +63,7 @@ vi.mock("@untheme/kit", async (original) => ({
 
 import { emit, loadConfig, resolveKit } from "@untheme/kit";
 import module from "../../src/module";
+import { themes } from "../fixtures";
 
 /** The kit config that the stubbed loader returns. */
 const authored = { source: "./tokens/a.resolver.json" };
@@ -45,9 +72,12 @@ interface FakeNuxt {
   options: {
     rootDir: string;
     buildDir: string;
+    buildId: string;
+    dev: boolean;
     watch: string[];
     css?: string[];
     nitro: { serverAssets?: unknown[] };
+    runtimeConfig: { public: Record<string, unknown> };
     _layers?: { config?: { untheme?: unknown } | null }[];
   };
   hook: ReturnType<typeof vi.fn>;
@@ -92,16 +122,32 @@ let nuxt: FakeNuxt;
 describe("untheme module", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    built.layers = [];
     nuxt = {
       options: {
         rootDir: "/app",
         buildDir: "/app/.nuxt",
+        buildId: "build-1",
+        dev: false,
         watch: [],
         nitro: {},
+        runtimeConfig: { public: {} },
       },
       hook: vi.fn(),
     };
   });
+
+  /** The entries of the `untheme/layers.json` build template, parsed. */
+  const served = (): unknown => {
+    return JSON.parse(template("untheme/layers.json")!.getContents());
+  };
+
+  /** The server assets that the module lists for the catalog. */
+  const assets = {
+    baseName: "untheme",
+    dir: "/app/.nuxt/untheme",
+    pattern: "{layers.json,layers/*.json}",
+  };
 
   it("has the expected meta", () => {
     expect(mod.meta).toEqual({ name: "untheme", configKey: "untheme" });
@@ -166,11 +212,143 @@ describe("untheme module", () => {
     });
   });
 
-  it("registers no server routes and no server assets", async () => {
+  it("serves no catalog for a passed contract, which has no layers", async () => {
     await mod.setup(options, nuxt);
     expect(kit.addServerHandler).not.toHaveBeenCalled();
+    expect(nuxt.options.runtimeConfig.public).toEqual({});
     expect(nuxt.options.nitro.serverAssets).toBeUndefined();
-    expect(nuxt.hook).not.toHaveBeenCalled();
+    expect(template("untheme/layers.json")).toBeUndefined();
+    expect(template("untheme/layers.mjs")!.getContents()).toContain(
+      "export const layers = [];",
+    );
+  });
+
+  describe("given a preset", () => {
+    const options: NuxtUnthemeConfig = { preset: preset.name };
+
+    it("takes the theme, selection, and manifest of the package", async () => {
+      await mod.setup(options, nuxt);
+      expect(loadConfig).not.toHaveBeenCalled();
+      expect(resolveKit).not.toHaveBeenCalled();
+      expect(nuxt.options.watch).toEqual([]);
+      expect(exported("theme")).toEqual(theme);
+      expect(exported("input")).toEqual(input);
+      expect(template("untheme/manifest.mjs")!.getContents()).toContain(
+        '"name": "Colour"',
+      );
+      expect(kit.tryResolveModule).toHaveBeenCalledWith(
+        `${preset.name}/config`,
+        new URL("file:///app/package.json"),
+      );
+    });
+
+    it("writes the layers module and one file for each layer", async () => {
+      await mod.setup(options, nuxt);
+      const list = template("untheme/layers.mjs")!.getContents();
+      expect(list).toContain('"id": "bravo"');
+      expect(list).toContain('"description": "Inverted surfaces."');
+      expect(template("untheme/layers.d.mts")!.getContents()).toContain(
+        'export type LayerId =\n  | "bravo"\n  | "charlie";',
+      );
+      expect(
+        JSON.parse(template("untheme/layers/charlie.json")!.getContents()),
+      ).toEqual(themes.charlie);
+    });
+
+    it("serves the layers under the default route and the build id", async () => {
+      await mod.setup(options, nuxt);
+      expect(served()).toEqual([
+        { id: "bravo", name: "Bravo" },
+        { id: "charlie", name: "Charlie", description: "Inverted surfaces." },
+      ]);
+      expect(template("untheme/layers.json")!.write).toBe(true);
+      expect(nuxt.options.nitro.serverAssets).toEqual([assets]);
+      expect(kit.addServerHandler).toHaveBeenCalledWith({
+        route: "/api/theme/build-1/**",
+        method: "get",
+        handler: "/resolved./runtime/server/catalog",
+      });
+      expect(nuxt.options.runtimeConfig.public.untheme).toEqual({
+        route: "/api/theme/build-1",
+      });
+    });
+
+    it("keeps the server assets the app already lists", async () => {
+      nuxt.options.nitro.serverAssets = [{ baseName: "own", dir: "/app/own" }];
+      await mod.setup(options, nuxt);
+      expect(nuxt.options.nitro.serverAssets).toEqual([
+        { baseName: "own", dir: "/app/own" },
+        assets,
+      ]);
+    });
+
+    it("serves each dev start under a path of its own", async () => {
+      nuxt.options.dev = true;
+      const served = async (): Promise<string> => {
+        await mod.setup(options, nuxt);
+        const { route } = nuxt.options.runtimeConfig.public.untheme as {
+          route: string;
+        };
+        return route;
+      };
+      const first = await served();
+      expect(first).toMatch(/^\/api\/theme\/[0-9a-f-]{36}$/);
+      expect(await served()).not.toBe(first);
+    });
+
+    it("serves under the route of the options, without its trailing slash", async () => {
+      await mod.setup({ ...options, route: "/themes/" }, nuxt);
+      expect(kit.addServerHandler.mock.calls[0]?.[0]).toMatchObject({
+        route: "/themes/build-1/**",
+      });
+      expect(nuxt.options.runtimeConfig.public.untheme).toEqual({
+        route: "/themes/build-1",
+      });
+    });
+
+    it("serves nothing when route is false, and still writes the layers", async () => {
+      await mod.setup({ ...options, route: false }, nuxt);
+      expect(kit.addServerHandler).not.toHaveBeenCalled();
+      expect(nuxt.options.runtimeConfig.public).toEqual({});
+      expect(nuxt.options.nitro.serverAssets).toBeUndefined();
+      expect(template("untheme/layers.json")).toBeUndefined();
+      expect(template("untheme/layers/bravo.json")).toBeDefined();
+    });
+
+    it("rejects a route that is not an absolute path", async () => {
+      await expect(
+        mod.setup({ ...options, route: "api/theme" }, nuxt),
+      ).rejects.toThrow(/`route` must be an absolute path/);
+    });
+
+    it("names the missing export of a package that is not a preset", async () => {
+      await expect(mod.setup({ preset: "@acme/tokens" }, nuxt)).rejects.toThrow(
+        /the preset "@acme\/tokens" does not export "\.\/config"/,
+      );
+      await expect(mod.setup({ preset: "" }, nuxt)).rejects.toThrow(
+        /`preset` must be a package name/,
+      );
+    });
+
+    it("auto-imports useUnthemeCatalog", async () => {
+      await mod.setup(options, nuxt);
+      const imports = kit.addImports.mock.calls[0]?.[0];
+      const names = imports.map((entry: { name: string }) => entry.name);
+      expect(names).toContain("useUnthemeCatalog");
+    });
+  });
+
+  it("serves the layers of a locally built config", async () => {
+    built.layers = [
+      { entry: { id: "charlie", name: "Charlie" }, layer: themes.charlie },
+    ];
+    await mod.setup({}, nuxt);
+    expect(served()).toEqual([{ id: "charlie", name: "Charlie" }]);
+    expect(nuxt.options.nitro.serverAssets).toEqual([assets]);
+    expect(kit.addServerHandler).toHaveBeenCalledTimes(1);
+    expect(
+      JSON.parse(template("untheme/layers/charlie.json")!.getContents()),
+    ).toEqual(themes.charlie);
   });
 
   it("escapes quotes in generated context names", async () => {

@@ -19,7 +19,7 @@ import { readTarget } from "./route";
  * the base.
  *
  * ```ts
- * // server/api/untheme/[...path].get.ts, base "/api/untheme"
+ * // server/api/theme/[...path].get.ts, base "/api/theme"
  * export default createThemeHandler({
  *   list: (listing) => listEntries(entries, listing),
  *   get: (id) => storage.getItem(`themes:${id}`),

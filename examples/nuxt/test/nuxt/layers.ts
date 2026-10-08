@@ -16,7 +16,6 @@ export const fixtureLayers: Layer<typeof theme>[] = [
 ];
 
 /**
- * The layers manifest of the tests. `vitest.config.ts` aliases
- * `@untheme/aurora/layers` to this module.
+ * The layers module of the tests, in place of `#build/untheme/layers.mjs`.
  */
 export const layers = fixtureLayers.map(({ id, name }) => ({ id, name }));
