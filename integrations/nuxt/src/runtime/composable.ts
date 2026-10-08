@@ -17,10 +17,10 @@ export const useUntheme = (): AppUntheme => {
 /**
  * Returns the CSS renderer for the contract of the app. The plugin provides
  * the renderer as `$unthemeRenderer`. The renderer reads the same `$untheme`
- * service. `root()` and `variables()` render again when the patch, the
- * selection, or the override changes. Use the renderer to get the custom property of
- * a token with `property` or `var`, to read the live value of a token, or to
- * emit a static set with `root(set)` or `variables(set)`.
+ * service. `root()` and `variables()` render again when the patch or the
+ * selection changes. Use the renderer to get the custom property of a token
+ * with `property` or `var`, to read the live value of a token, or to emit a
+ * static set with `root(set)` or `variables(set)`.
  */
 export const useUnthemeRenderer = (): Renderer<AppUnthemeContract> => {
   const { $unthemeRenderer } = useNuxtApp();

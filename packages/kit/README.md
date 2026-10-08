@@ -179,7 +179,7 @@ description, in the order of the config.
 
 A layer rebinds the base. A selected context rebinds on top of the base. When
 a layer and a context both bind a token, the context wins while it is
-selected. A user override wins over both.
+selected.
 
 ```ts
 import nord from "./untheme/layers/nord.json" with { type: "json" };

@@ -34,8 +34,8 @@ export const defineUnthemeConfig = <T extends Template>(
 
 /**
  * Makes a state container from a configuration. The container has an empty
- * patch, a copy of the starting selection, and an empty override. Pass the theme of
- * the configuration as the base of the service:
+ * patch and a copy of the starting selection. Pass the theme of the
+ * configuration as the base of the service:
  * `makeUntheme(config.theme, useUnthemeConfig(config))`. Each call makes a
  * new container.
  *
@@ -48,6 +48,5 @@ export const useUnthemeConfig = <T extends Template>(
   return {
     patch: {},
     input: copy(config.input),
-    override: {},
   };
 };

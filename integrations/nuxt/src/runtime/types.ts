@@ -29,8 +29,7 @@ export type AppUnthemePatch = Patch<AppUnthemeContract>;
 export type AppUnthemeInput = Input<AppUnthemeContract>;
 
 /**
- * The state container of the service. It holds the patch, the selection, and
- * the user override.
+ * The state container of the service. It holds the patch and the selection.
  */
 export type AppUnthemeConfig = Config<AppUnthemeContract>;
 

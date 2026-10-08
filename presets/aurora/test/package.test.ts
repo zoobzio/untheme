@@ -109,7 +109,7 @@ describe("a consumer of the config module", () => {
   it("leaves the exported config untouched", async () => {
     const ut = makeUntheme<Contract>(config.theme, useUnthemeConfig(config));
     ut.apply(await layer("dracula"));
-    ut.set("primary", "{primary-50}");
+    ut.update({ tokens: { primary: "{primary-50}" } });
     expect(input.color).toBe("light");
     expect(theme.tokens.primary.$value).toBe("{primary-600}");
     expect(theme.tokens["primary-600"].$value).toEqual(

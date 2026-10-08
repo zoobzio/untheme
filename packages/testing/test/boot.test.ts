@@ -35,11 +35,11 @@ describe("bootUntheme", () => {
     const first = bootUntheme(theme);
     const second = bootUntheme(theme);
     first.swap("color", "dark");
-    first.set("white", "#eee");
+    first.update({ tokens: { white: "{black}" } });
     expect(second.config.input).toEqual({ color: "light" });
-    expect(second.dirty()).toBe(false);
+    expect(second.config.patch).toEqual({});
     expect(first.schema.base).not.toBe(theme);
-    expect(first.theme()).toEqual(first.schema.base);
+    expect(second.theme()).toEqual(second.schema.base);
     expect(theme.tokens.white.$value).toMatchObject({ hex: "#ffffff" });
   });
 

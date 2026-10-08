@@ -5,7 +5,7 @@ import { accessUntheme, buildTheme } from "./store";
 
 /**
  * Makes the untheme service over the shared state. The base theme is the
- * build module. The state holds the patch, the selection, and the override.
+ * build module. The state holds the patch and the selection.
  * A write of the patch saves its id, or `null` when it has none, to the key
  * cookie and calls the `untheme:patch` hook. A write of the selection saves it to the input
  * cookie and calls the `untheme:input` hook. On the server, the function

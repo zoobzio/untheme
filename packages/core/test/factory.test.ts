@@ -1,4 +1,4 @@
-import type { Contract, Input, Overrides, Patch } from "@untheme/schema";
+import type { Contract, Input, Patch } from "@untheme/schema";
 import type { Mod, Tok } from "./fixture";
 
 import { describe, it, expect } from "vitest";
@@ -15,14 +15,9 @@ import { black, blue, theme, white } from "./fixture";
 
 type T = Contract<Tok, Mod>;
 
-const makeConfig = (): {
-  patch: Patch<T>;
-  input: Input<T>;
-  override: Overrides<T>;
-} => ({
+const makeConfig = (): { patch: Patch<T>; input: Input<T> } => ({
   patch: {},
   input: { mode: "light", contrast: "normal" },
-  override: {},
 });
 
 /** Makes a service over a detached copy of the fixture theme. */
@@ -142,53 +137,6 @@ describe("swap", () => {
   });
 });
 
-describe("set / dirty / reset (the override)", () => {
-  it("set wins over the composed value", () => {
-    const u = boot();
-    u.set("color.bg", blue);
-    expect(u.get("color.bg")).toEqual(blue);
-  });
-
-  it("the override is selection-independent", () => {
-    const u = boot();
-    u.set("color.bg", blue);
-    u.swap("mode", "dark");
-    expect(u.get("color.bg")).toEqual(blue);
-  });
-
-  it("is a no-op on an unknown token", () => {
-    const u = boot();
-    Reflect.apply(u.set, undefined, ["ghost", black]);
-    expect(u.dirty()).toBe(false);
-  });
-
-  it("is a no-op on a value invalid for the token's declared type", () => {
-    const u = boot();
-    u.set("color.bg", { value: 4, unit: "px" });
-    u.set("color.bg", "{ghost}");
-    u.set("space.sm", blue);
-    expect(u.dirty()).toBe(false);
-  });
-
-  it("stores a detached copy, so mutating the caller's value afterwards changes nothing", () => {
-    const u = boot();
-    const value = structuredClone(blue);
-    u.set("color.bg", value);
-    Reflect.set(value, "components", "garbage");
-    expect(u.get("color.bg")).toEqual(blue);
-  });
-
-  it("dirty tracks the override; reset clears it", () => {
-    const u = boot();
-    expect(u.dirty()).toBe(false);
-    u.set("color.bg", blue);
-    expect(u.dirty()).toBe(true);
-    u.reset();
-    expect(u.dirty()).toBe(false);
-    expect(u.get("color.bg")).toBe("{color.white}");
-  });
-});
-
 describe("resolve", () => {
   it("follows a reference chain to a literal", () => {
     const u = boot();
@@ -219,18 +167,18 @@ describe("resolve", () => {
     ]);
   });
 
-  it("resolves through the active selection and the override", () => {
+  it("resolves through the active selection and the patch", () => {
     const u = boot();
     u.swap("mode", "dark");
     expect(u.resolve("color.bg")).toEqual(black);
-    u.set("color.bg", "{color.accent}");
+    u.update({ modifiers: { mode: { dark: { "color.bg": "{color.accent}" } } } });
     expect(u.resolve("color.bg")).toEqual(blue);
   });
 
   it("throws on a reference cycle", () => {
     const u = boot();
-    u.set("color.bg", "{color.fg}");
-    u.set("color.fg", "{color.bg}");
+    // The base binds color.bg to {color.white}.
+    u.update({ tokens: { "color.white": "{color.bg}" } });
     expect(() => u.resolve("color.bg")).toThrow(CircularAliasError);
   });
 });
@@ -281,15 +229,12 @@ describe("theme", () => {
 });
 
 describe("update", () => {
-  it("rebinds $value and keeps $type, identity, and the override", () => {
+  it("rebinds $value and keeps $type and identity", () => {
     const u = boot();
-    u.set("color.accent", "{color.white}");
     u.update({ tokens: { "color.bg": "{color.black}" } });
     expect(u.theme().tokens["color.bg"].$value).toBe("{color.black}");
     expect(u.theme().tokens["color.bg"].$type).toBe("color");
     expect(u.theme().id).toBe("demo");
-    expect(u.dirty()).toBe(true);
-    expect(u.get("color.accent")).toBe("{color.white}");
   });
 
   it("stores the bindings with no identity when none is applied", () => {
@@ -366,11 +311,10 @@ describe("delta", () => {
     });
   });
 
-  it("captures both the override and the definition drift", () => {
+  it("captures the token and the context drift", () => {
     const u = boot();
-    u.set("color.accent", "{color.white}");
     u.update({
-      tokens: { "color.bg": "{color.black}" },
+      tokens: { "color.accent": "{color.white}", "color.bg": "{color.black}" },
       modifiers: { mode: { dark: { "color.bg": "{color.accent}" } } },
     });
     const d = u.delta();
@@ -383,8 +327,9 @@ describe("delta", () => {
 
   it("round-trips: updating a fresh baseline with the delta reproduces the drift", () => {
     const u = boot();
-    u.set("color.accent", "{color.white}");
-    u.update({ tokens: { "color.bg": "{color.black}" } });
+    u.update({
+      tokens: { "color.accent": "{color.white}", "color.bg": "{color.black}" },
+    });
 
     const fresh = boot();
     fresh.update(u.delta());
@@ -394,16 +339,14 @@ describe("delta", () => {
 });
 
 describe("apply", () => {
-  it("becomes the layer over the baseline and clears the override", () => {
+  it("becomes the layer over the baseline", () => {
     const u = boot();
-    u.set("color.bg", blue);
     u.apply({
       id: "alt",
       name: "Alt",
       tokens: { "color.accent": "{color.white}" },
     });
     expect(u.theme().id).toBe("alt");
-    expect(u.dirty()).toBe(false);
     expect(u.get("color.accent")).toBe("{color.white}");
     expect(u.theme().tokens["color.accent"].$type).toBe("color");
   });
@@ -462,13 +405,14 @@ describe("create / extract", () => {
     expect(() => u.create(bad)).toThrow(InvalidLayerError);
   });
 
-  it("extract bakes the override into a detached snapshot", () => {
+  it("extract returns a detached snapshot of the active theme", () => {
     const u = boot();
-    u.set("color.bg", blue);
+    u.update({ tokens: { "color.bg": blue } });
     const snap = u.extract("snap", "Snap");
     expect(snap.id).toBe("snap");
     expect(snap.tokens["color.bg"].$value).toEqual(blue);
     expect(snap.tokens["color.bg"].$type).toBe("color");
+    expect(snap).not.toBe(u.theme());
     expect(u.theme().id).toBe("demo");
   });
 
@@ -488,23 +432,6 @@ describe("Options middleware", () => {
     expect(u.get("color.bg")).toBe("{color.black}");
   });
 
-  it("intercepts writes of the override", () => {
-    const writes: unknown[] = [];
-    const u = boot(makeConfig(), {
-      set: {
-        config: {
-          override: (override) => {
-            writes.push(override);
-            return override;
-          },
-        },
-      },
-    });
-    u.set("color.bg", blue);
-    expect(writes).toHaveLength(1);
-    expect(writes[0]).toEqual({ "color.bg": blue });
-  });
-
   it("intercepts reads of the patch", () => {
     const u = boot(makeConfig(), {
       get: {
@@ -513,16 +440,6 @@ describe("Options middleware", () => {
     });
     expect(u.theme().name).toBe("Seen");
     expect(u.config.patch.id).toBe("seen");
-  });
-
-  it("intercepts reads of the override", () => {
-    const u = boot(makeConfig(), {
-      get: {
-        config: { override: () => ({ "color.bg": blue }) },
-      },
-    });
-    expect(u.get("color.bg")).toEqual(blue);
-    expect(u.dirty()).toBe(true);
   });
 
   it("intercepts writes of the patch", () => {

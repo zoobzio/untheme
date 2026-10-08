@@ -52,8 +52,8 @@ app serves the files with the catalog wire protocol:
 
 On every render, the module flattens the tokens of the active selection into
 `--token` CSS variables on the document root. The block is the base theme with
-the applied layer, the selection, and the override. The module also sets the
-selection as `data-<modifier>` attributes. The CSS in `app/assets/css` reads
+the applied layer and the selection. The module also sets the selection as
+`data-<modifier>` attributes. The CSS in `app/assets/css` reads
 those variables, so a change restyles the page.
 
 ## What to read first

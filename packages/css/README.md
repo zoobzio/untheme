@@ -16,7 +16,7 @@ pnpm add @untheme/css
 import { makeUntheme } from "@untheme/core";
 import { defineRenderer } from "@untheme/css";
 
-const untheme = makeUntheme<Contract>(theme, { input, override: {} });
+const untheme = makeUntheme<Contract>(theme, { patch: {}, input });
 const renderer = defineRenderer(untheme);
 
 renderer.root();

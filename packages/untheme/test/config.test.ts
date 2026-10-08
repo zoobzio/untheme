@@ -39,9 +39,9 @@ describe("defineUnthemeConfig", () => {
 });
 
 describe("useUnthemeConfig", () => {
-  it("seeds a container with an empty patch, the selection, and an empty override", () => {
+  it("seeds a container with an empty patch and the selection", () => {
     const seeded = useUnthemeConfig(config);
-    expect(seeded).toEqual({ patch: {}, input: config.input, override: {} });
+    expect(seeded).toEqual({ patch: {}, input: config.input });
   });
 
   it("holds nothing by reference, so the authored config stays detached", () => {
@@ -53,7 +53,7 @@ describe("useUnthemeConfig", () => {
     const first = useUnthemeConfig(config);
     const second = useUnthemeConfig(config);
     expect(first.input).not.toBe(second.input);
-    expect(first.override).not.toBe(second.override);
+    expect(first.patch).not.toBe(second.patch);
   });
 
   it("boots a service beside the theme of the config", () => {

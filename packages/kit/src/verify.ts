@@ -22,11 +22,7 @@ export const verify = (
   base: Theme<Template>,
   input: Input<Template>,
 ): void => {
-  const service = makeUntheme<Template>(base, {
-    patch: {},
-    input,
-    override: {},
-  });
+  const service = makeUntheme<Template>(base, { patch: {}, input });
 
   /*
    * The selections to check. The first is the input. Then come the permutations

@@ -49,10 +49,7 @@ describe("makeUntheme", () => {
       "get",
       "resolve",
       "swap",
-      "set",
       "delta",
-      "dirty",
-      "reset",
       "update",
       "apply",
       "create",
@@ -73,7 +70,7 @@ describe("makeUntheme", () => {
   it("keeps the base theme out of the state", () => {
     make();
     const state = states["untheme:config"]?.value as Record<string, unknown>;
-    expect(Object.keys(state).sort()).toEqual(["input", "override", "patch"]);
+    expect(Object.keys(state).sort()).toEqual(["input", "patch"]);
   });
 
   describe("swap", () => {
@@ -114,15 +111,7 @@ describe("makeUntheme", () => {
     });
   });
 
-  describe("set / update", () => {
-    it("set applies the value without emitting or persisting", () => {
-      const u = make();
-      u.set("primary", "{indigo}");
-      expect(u.get("primary")).toBe("{indigo}");
-      expect(nuxtApp.callHook).not.toHaveBeenCalled();
-      expect(cookies["untheme-key"]?.value ?? null).toBeNull();
-    });
-
+  describe("update", () => {
     it("update rebinds a token through the patch and emits untheme:patch", () => {
       const u = make();
       const smoke: Color = {
@@ -139,18 +128,6 @@ describe("makeUntheme", () => {
         "untheme:patch",
         expect.objectContaining({ tokens: { white: smoke } }),
       );
-    });
-  });
-
-  describe("reset", () => {
-    it("clears the override without emitting or persisting", () => {
-      const u = make();
-      u.set("primary", "{indigo}");
-      expect(u.dirty()).toBe(true);
-      u.reset();
-      expect(u.dirty()).toBe(false);
-      expect(u.get("primary")).toBe("{blue}");
-      expect(nuxtApp.callHook).not.toHaveBeenCalled();
     });
   });
 });

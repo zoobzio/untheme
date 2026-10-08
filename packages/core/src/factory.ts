@@ -30,12 +30,12 @@ import {
 /**
  * Makes an {@link Untheme} service over a base theme and a state container.
  * The base theme is the contract and the baseline. The container holds the
- * patch, the selection, and the user override. The service reads and writes
- * the container through the `options` middleware.
+ * patch and the selection. The service reads and writes the container through
+ * the `options` middleware.
  *
  * A read gives the base tokens, then the patch, then the selected context of
- * each modifier in `order`, then the user override. The service merges the
- * base theme and the patch once for each patch object.
+ * each modifier in `order`. The service merges the base theme and the patch
+ * once for each patch object.
  *
  * @param base - The base theme. The service copies it and checks the copy
  * against its own contract.
@@ -85,21 +85,6 @@ export const makeUntheme = <T extends Theme<T>>(
       }
       config.input = value;
     },
-    get override() {
-      const through = options.get?.config?.override;
-      if (through) {
-        return through(config.override);
-      }
-      return config.override;
-    },
-    set override(value) {
-      const through = options.set?.config?.override;
-      if (through) {
-        config.override = through(value);
-        return;
-      }
-      config.override = value;
-    },
   };
 
   /**
@@ -132,7 +117,7 @@ export const makeUntheme = <T extends Theme<T>>(
   /**
    * Returns the flat token map for a selection. The default selection is the
    * active one. The map binds each token to its `$value`, then adds the
-   * selected context of each modifier in `order`, then adds the user override.
+   * selected context of each modifier in `order`.
    */
   const tokens = (
     input: Input<T> = proxy.input,
@@ -142,23 +127,16 @@ export const makeUntheme = <T extends Theme<T>>(
     for (const modifier of active.order) {
       Object.assign(flat, active.modifiers[modifier]?.[input[modifier]]);
     }
-    Object.assign(flat, proxy.override);
     return flat;
   };
 
   /**
    * Returns the binding of a token for the active selection. The function
-   * checks the user override first. Then it checks the selected context of
-   * each modifier in reverse `order`. Then it checks the base slot. The first
-   * layer that binds the token gives the result. This order gives the same
-   * result as {@link tokens}.
+   * checks the selected context of each modifier in reverse `order`. Then it
+   * checks the base slot. The first layer that binds the token gives the
+   * result. This order gives the same result as {@link tokens}.
    */
   const get = (token: Token<T>): Binding => {
-    const override = proxy.override[token];
-    if (override !== undefined) {
-      return override;
-    }
-
     const active = theme();
     const input = proxy.input;
     for (const modifier of [...active.order].reverse()) {
@@ -169,19 +147,6 @@ export const makeUntheme = <T extends Theme<T>>(
     }
 
     return active.tokens[token].$value;
-  };
-
-  /**
-   * Writes a token to the user override. The function checks the entry as an
-   * override. If the token is unknown, or the value is not valid for the type
-   * of the token, the function does nothing. The override holds a copy of the
-   * value. `dirty` reports the override and `reset` clears it.
-   */
-  const set = (token: Token<T>, value: Binding) => {
-    if (!schema.check.overrides({ [token]: value })) {
-      return;
-    }
-    proxy.override = { ...proxy.override, [token]: copy(value) };
   };
 
   /**
@@ -262,8 +227,7 @@ export const makeUntheme = <T extends Theme<T>>(
    * Merges a patch into the stored patch. The new stored patch is the
    * difference between the base theme and the active theme with the patch
    * merged in. An identity or an order of the patch replaces the stored one.
-   * The override stays the same. Throws {@link InvalidPatchError} when the
-   * patch violates the contract.
+   * Throws {@link InvalidPatchError} when the patch violates the contract.
    */
   const update = (patch: Patch<T>) => {
     reframe(InvalidPatchError, () => schema.assert.patch(patch));
@@ -272,14 +236,13 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * Stores a copy of a layer as the patch and clears the user override. The
-   * active theme becomes the base theme with the layer merged in. Throws
-   * {@link InvalidLayerError} when the layer violates the contract.
+   * Stores a copy of a layer as the patch. The active theme becomes the base
+   * theme with the layer merged in. Throws {@link InvalidLayerError} when the
+   * layer violates the contract.
    */
   const apply = (layer: Layer<T>) => {
     reframe(InvalidLayerError, () => schema.assert.layer(layer));
     proxy.patch = copy(layer);
-    proxy.override = {};
   };
 
   /**
@@ -294,40 +257,22 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * Returns a copy of the active theme with a new `id` and `name`. The copy
-   * has the user override in its base tokens. Throws {@link InvalidThemeError}
-   * when the new identity makes the theme invalid.
+   * Returns a copy of the active theme with a new `id` and `name`. Throws
+   * {@link InvalidThemeError} when the new identity makes the theme invalid.
    */
   const extract = (id: string, name: string): Theme<T> => {
-    const snapshot = merge<T>(theme(), {
-      id,
-      name,
-      tokens: proxy.override,
-    });
+    const snapshot = merge<T>(theme(), { id, name });
     reframe(InvalidThemeError, () => schema.assert.theme(snapshot));
     return snapshot;
   };
 
   /**
-   * Returns the difference between the base theme and the active theme with
-   * the user override in its tokens. The result is a patch with each binding
-   * that `set`, `update`, or `apply` changed. The function ignores the
-   * identity.
+   * Returns the difference between the base theme and the active theme. The
+   * result is a patch with each binding that `update` or `apply` changed. The
+   * function ignores the identity.
    */
   const delta = (): Diff<T> => {
-    return diff<T>(schema.base, merge<T>(theme(), { tokens: proxy.override }));
-  };
-
-  /**
-   * Returns `true` when the user override has an entry.
-   */
-  const dirty = () => Object.keys(proxy.override).length > 0;
-
-  /**
-   * Removes all entries from the user override.
-   */
-  const reset = () => {
-    proxy.override = {};
+    return diff<T>(schema.base, theme());
   };
 
   return {
@@ -340,10 +285,7 @@ export const makeUntheme = <T extends Theme<T>>(
     get,
     resolve,
     swap,
-    set,
     delta,
-    dirty,
-    reset,
     update,
     apply,
     create,

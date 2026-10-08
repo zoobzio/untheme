@@ -7,7 +7,7 @@ import { mockInput } from "./input";
 
 /**
  * Boots a runtime service over a theme. The theme is the base of the service.
- * The container holds the selection and an empty override. Each modifier is at
+ * The container holds an empty patch and the selection. Each modifier is at
  * its first context unless the selection pins another. Each call returns an
  * independent service.
  *
@@ -22,7 +22,7 @@ export const bootUntheme = <T extends Theme<T>>(
 ): Untheme<T> => {
   return makeUntheme<T>(
     theme,
-    { patch: {}, input: mockInput(theme, selection), override: {} },
+    { patch: {}, input: mockInput(theme, selection) },
     options,
   );
 };

@@ -130,12 +130,11 @@ describe("untheme plugin", () => {
       expect(css).toContain("--white: #ffffff;");
     });
 
-    it("re-renders the token CSS with the override", async () => {
+    it("re-renders the token CSS with a patch", async () => {
       const provide = await setup();
-      (provide.untheme as { set: (token: string, value: unknown) => void }).set(
-        "primary",
-        "{indigo}",
-      );
+      (provide.untheme as { update: (patch: unknown) => void }).update({
+        tokens: { primary: "{indigo}" },
+      });
       await nextTick();
       expect(headCalls[0]?.style.value[0]?.innerHTML).toContain(
         "--primary: var(--indigo);",

@@ -30,7 +30,7 @@ import { defineRenderer } from "untheme/css";
 
 import config, { type Contract } from "./untheme/config.mjs";
 
-// The container is { input, override }. `input` selects one context for each modifier.
+// The container is { patch, input }. `input` selects one context for each modifier.
 // The theme of the config is the base theme of the service.
 const ut = makeUntheme<Contract>(config.theme, useUnthemeConfig(config));
 

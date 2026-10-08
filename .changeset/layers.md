@@ -28,13 +28,12 @@ config shrinks from 725 KB to 55 KB of JSON. The preset has eight modifiers.
 
 **Core.** `makeUntheme(theme, config, options?)` takes the base theme and
 the state container as separate arguments. The container holds what changed:
-the `patch`, the `input`, and the `override`. The base theme is not in the
-container. The service derives the active theme from the base and the patch
-and exposes it as `theme()`. An empty patch gives the base theme. `apply`
-stores a copy of the layer as the patch and clears the override. `update`
-merges a patch into the stored patch. The middleware slots are `patch`,
-`input`, and `override`. `useUnthemeConfig` returns `{ patch, input,
-override }`.
+the `patch` and the `input`. The base theme is not in the container. The
+service derives the active theme from the base and the patch and exposes it
+as `theme()`. An empty patch gives the base theme. `apply` stores a copy of
+the layer as the patch. `update` merges a patch into the stored patch. The
+middleware slots are `patch` and `input`. `useUnthemeConfig` returns
+`{ patch, input }`.
 
 **Schema.** A `Patch` can carry an optional `id`, `name`, and `order`. A
 `Layer` is a `Patch` with a required identity. `merge` in `@untheme/utils`
@@ -46,8 +45,8 @@ core service is still a `Source`.
 
 **Testing.** `bootUntheme` passes the theme as the base of the service.
 
-**Nuxt.** The state in `useState` is the container: the selection, the
-override, and the patch. The theme travels in the module only. The
+**Nuxt.** The state in `useState` is the container: the selection and the
+patch. The theme travels in the module only. The
 module writes `#build/untheme.css` and no longer links it into the app CSS;
 the runtime `<style>` block is the CSS of the active state. The `css` option
 is gone. The `untheme:theme` hook is now `untheme:patch` and receives the
