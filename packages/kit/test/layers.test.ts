@@ -16,6 +16,11 @@ import { resolveKit } from "../src/resolve";
 import { FIXTURES } from "./helpers";
 
 const ROOT = fileURLToPath(FIXTURES);
+const PROJECT = fileURLToPath(new URL("project/", FIXTURES));
+
+/** What the validation names as a directory of layers. */
+const DIRECTORY =
+  "a path, a file: URL, or an npm:/ reference to a directory, or an object of layer ids";
 
 /** Serves in-memory layer documents under virtual names beside the fixtures. */
 const serve = (documents: Record<string, object>) => {
@@ -264,23 +269,95 @@ describe("layers", () => {
     const req = async (): Promise<string> => {
       throw new Error("read");
     };
-    for (const layers of [
-      "",
-      "https://example.com/themes",
-      "npm:/@untheme/aurora/src/themes",
-      new URL("npm:/@untheme/aurora/src/themes"),
-    ]) {
+    for (const layers of ["", "https://example.com/themes"]) {
       const failure = resolveKit(
         { source: "./resolver.json", layers },
         { req },
       );
       await expect(failure).rejects.toBeInstanceOf(InvalidConfigError);
       await expect(failure).rejects.toMatchObject({
-        issues: [
-          "layers must be a path to a local directory when it is not an object of layer ids",
-        ],
+        issues: [`layers must be ${DIRECTORY}`],
       });
     }
+  });
+
+  it("rejects an empty list of layer sources before reading anything", async () => {
+    const failure = resolveKit(
+      { source: "./resolver.json", layers: [] },
+      { cwd: ROOT },
+    );
+    await expect(failure).rejects.toMatchObject({
+      issues: ["layers must list at least one source of layers"],
+    });
+  });
+
+  it("fails with the package when an npm directory is not installed", async () => {
+    for (const layers of [
+      "npm:/@untheme/missing/src/themes",
+      new URL("npm:/@untheme/missing/src/themes"),
+    ]) {
+      await expect(
+        resolveKit({ source: "./resolver.json", layers }, { cwd: ROOT }),
+      ).rejects.toThrow(/"@untheme\/missing" is not an installed package/);
+    }
+  });
+
+  it("builds every JSON file of an installed package directory as a layer", async () => {
+    for (const layers of [
+      "npm:/@acme/tokens/themes",
+      new URL("npm:/@acme/tokens/themes/"),
+    ]) {
+      const kit = await resolveKit(
+        { source: "./resolver.json", layers },
+        { cwd: PROJECT },
+      );
+      expect(kit.layers.map((built) => built.entry)).toEqual([
+        { id: "brand", name: "Brand" },
+        { id: "rose", name: "Rose" },
+        { id: "sky", name: "Sky", description: "A sky blue primary." },
+      ]);
+      expect(kit.layers[2]?.layer.tokens?.primary).toMatchObject({
+        hex: "#4db3ff",
+      });
+      expect(kit.documents).toContain(
+        fileURLToPath(new URL("project/themes", FIXTURES)),
+      );
+      expect(kit.documents).toContain(
+        fileURLToPath(new URL("project/themes/sky.json", FIXTURES)),
+      );
+    }
+  });
+
+  it("combines directories and objects in a list, in order", async () => {
+    const kit = await resolveKit(
+      {
+        source: "./resolver.json",
+        layers: [{ extra: "./layer.json" }, "./themes"],
+      },
+      { cwd: ROOT },
+    );
+    expect(kit.layers.map((built) => built.entry.id)).toEqual([
+      "extra",
+      "cool",
+      "dim",
+    ]);
+  });
+
+  it("rejects an id that two sources of layers both list", async () => {
+    const failure = resolveKit(
+      {
+        source: "./resolver.json",
+        layers: ["./themes", { cool: "./layer.json", dim: "./dim.json" }],
+      },
+      { cwd: ROOT },
+    );
+    await expect(failure).rejects.toBeInstanceOf(InvalidConfigError);
+    await expect(failure).rejects.toMatchObject({
+      issues: [
+        'layers: the id "cool" appears twice',
+        'layers: the id "dim" appears twice',
+      ],
+    });
   });
 
   it("rejects a layers member that is neither a directory nor an object", async () => {
@@ -289,9 +366,17 @@ describe("layers", () => {
       { cwd: ROOT },
     );
     await expect(failure).rejects.toMatchObject({
-      issues: [
-        "layers must be a path to a local directory, or an object of layer ids",
-      ],
+      issues: [`layers must be ${DIRECTORY}`],
+    });
+    const listed = resolveKit(
+      {
+        source: "./resolver.json",
+        layers: ["./themes", 7 as unknown as string],
+      },
+      { cwd: ROOT },
+    );
+    await expect(listed).rejects.toMatchObject({
+      issues: [`layers[1] must be ${DIRECTORY}`],
     });
   });
 

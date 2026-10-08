@@ -1,8 +1,9 @@
 import type { Req } from "./types";
 
+import { existsSync, readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { NPM } from "./constant";
@@ -28,6 +29,69 @@ export const installed = (src: URL, root: string): string => {
       { cause: error },
     );
   }
+};
+
+/** Splits the specifier of an `npm:/` URL into the package name and the path inside it. */
+const split = (src: URL): { name: string; inside: string } => {
+  const specifier = decodeURIComponent(src.pathname).replace(/^\/+/, "");
+  const segments = specifier.split("/");
+  const depth = specifier.startsWith("@") ? 2 : 1;
+  return {
+    name: segments.slice(0, depth).join("/"),
+    inside: segments.slice(depth).join("/"),
+  };
+};
+
+/** The name in a package.json, when the file reads. */
+const named = (path: string): string | undefined => {
+  try {
+    const parsed: unknown = JSON.parse(readFileSync(path, "utf8"));
+    if (parsed && typeof parsed === "object" && "name" in parsed) {
+      return typeof parsed.name === "string" ? parsed.name : undefined;
+    }
+  } catch {
+    // No package.json, or not JSON.
+  }
+  return undefined;
+};
+
+/**
+ * Resolves an `npm:/` URL that names a directory to that directory on disk. A
+ * package exports files, not directories, so the function finds the package
+ * itself: the project when the project is the package, or the package in the
+ * `node_modules` that Node resolution searches from the project root. The
+ * path inside the package is joined to it. The files in the directory still
+ * resolve through the exports of the package when the build reads them.
+ *
+ * @param src - The `npm:/` URL of the directory.
+ * @param root - The project root that packages resolve from.
+ * @throws Error when no installed package has the name.
+ */
+export const installedDirectory = (src: URL, root: string): string => {
+  const { name, inside } = split(src);
+  const require = createRequire(join(root, "package.json"));
+  let found: string | undefined;
+  if (named(join(root, "package.json")) === name) {
+    found = root;
+  } else {
+    for (const candidate of require.resolve.paths(name) ?? []) {
+      if (existsSync(join(candidate, name, "package.json"))) {
+        found = join(candidate, name);
+        break;
+      }
+    }
+  }
+  if (found === undefined) {
+    try {
+      found = dirname(require.resolve(`${name}/package.json`));
+    } catch (error) {
+      throw new Error(
+        `@untheme/kit: cannot resolve ${src.href} — "${name}" is not an installed package (from ${root})`,
+        { cause: error },
+      );
+    }
+  }
+  return join(found, inside);
 };
 
 /**

@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-import { installed, loader } from "../src/loader";
+import { installed, installedDirectory, loader } from "../src/loader";
 import { FIXTURES } from "./helpers";
 
 /**
@@ -69,5 +69,25 @@ describe("loader", () => {
     await expect(
       load(new URL("npm:/@acme/tokens/resolver.json"), new URL("file:///")),
     ).resolves.toContain("resolutionOrder");
+  });
+});
+
+describe("installedDirectory", () => {
+  it("resolves a directory of the project when the project is the package", () => {
+    expect(installedDirectory(new URL("npm:/@acme/tokens/themes"), ROOT)).toBe(
+      fileURLToPath(new URL("project/themes", FIXTURES)),
+    );
+  });
+
+  it("resolves a directory of an installed package from its node_modules", () => {
+    const kit = fileURLToPath(new URL("../", import.meta.url));
+    const path = installedDirectory(new URL("npm:/objectively/dist"), kit);
+    expect(path).toMatch(/node_modules[\\/]objectively[\\/]dist$/);
+  });
+
+  it("names the package when none is installed", () => {
+    expect(() =>
+      installedDirectory(new URL("npm:/@untheme/missing/themes"), ROOT),
+    ).toThrow(/"@untheme\/missing" is not an installed package/);
   });
 });

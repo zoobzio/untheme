@@ -1,0 +1,16 @@
+{
+  "$description": "A sky blue primary.",
+  "$extensions": {
+    "io.zoobz.untheme": {
+      "name": "Sky"
+    }
+  },
+  "primary": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [0.3, 0.7, 1],
+      "hex": "#4db3ff"
+    }
+  }
+}

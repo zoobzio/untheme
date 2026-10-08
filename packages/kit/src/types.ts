@@ -31,6 +31,15 @@ export interface ModifierConfig {
 }
 
 /**
+ * One source of layers: a directory, as a path or a URL, or an object of layer
+ * ids with the token files of each.
+ */
+export type LayerSources =
+  | string
+  | URL
+  | Record<string, string | URL | (string | URL)[]>;
+
+/**
  * The authored `untheme.config.ts`. It sets where the DTCG resolver document
  * lives, the id and name of the base theme, what to keep of its modifiers, and
  * where the build writes.
@@ -57,17 +66,20 @@ export interface KitConfig {
    * the base theme. The build checks each layer against the contract and writes
    * it as `layers/<id>.json`, ready for `apply`.
    *
-   * A path or a `file:` URL names a local directory. Each `.json` file in the
-   * directory is one layer, and its basename is the id. The build takes the
-   * files in name order. The build does not list a package or a remote
-   * directory.
+   * A path, a `file:` URL, or an `npm:/` reference names a directory. Each
+   * `.json` file in the directory is one layer, and its basename is the id.
+   * The build takes the files in name order. A package must export the files.
+   * The build does not list a remote directory.
    *
    * An object names the layers by layer id. Each value is a token file or a
    * list of token files. In a list, a later file wins. A file is a path
    * relative to the project root, an absolute URL, or an `npm:/` reference,
    * like `source`.
+   *
+   * A list combines directories and objects. The build takes them in order.
+   * An id can appear once.
    */
-  layers?: string | URL | Record<string, string | URL | (string | URL)[]>;
+  layers?: LayerSources | LayerSources[];
 
   /**
    * The base theme's id. Defaults to the slug of its name.

@@ -1,8 +1,8 @@
-import type { KitConfig } from "./types";
+import type { KitConfig, LayerSources } from "./types";
 
 import { record } from "objectively";
 
-import { OUT_DIR } from "./constant";
+import { NPM, OUT_DIR } from "./constant";
 import { InvalidConfigError } from "./error";
 import { inside, normalize } from "./path";
 
@@ -114,57 +114,78 @@ const modifiers: Rule = (config) => {
 };
 
 /**
- * Whether a designator names a local path: a non-empty string with no scheme
- * other than `file:`, or a `file:` URL. A one-letter scheme is a Windows drive.
+ * Whether a designator can name a directory to list: a non-empty string with
+ * no scheme other than `file:` or `npm:`, or a `file:` or `npm:` URL. A
+ * one-letter scheme is a Windows drive.
  */
-const local = (value: string | URL): boolean => {
+const listable = (value: string | URL): boolean => {
   if (value instanceof URL) {
-    return value.protocol === "file:";
+    return value.protocol === "file:" || value.protocol === NPM;
   }
   if (value.trim() === "") {
     return false;
   }
   const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(value)?.[1];
-  return scheme === undefined || scheme.length === 1 || scheme === "file";
+  return (
+    scheme === undefined ||
+    scheme.length === 1 ||
+    scheme === "file" ||
+    `${scheme}:` === NPM
+  );
+};
+
+const DIRECTORY =
+  "a path, a file: URL, or an npm:/ reference to a directory, or an object of layer ids";
+
+/**
+ * Checks one source of layers. A directory is a path, a `file:` URL, or an
+ * `npm:/` reference. In an object, each id is a non-empty string, and each
+ * value is a source or a non-empty list of sources.
+ */
+const source_ = (at: string, layers: LayerSources): string[] => {
+  if (typeof layers === "string" || layers instanceof URL) {
+    if (listable(layers)) {
+      return [];
+    }
+    return [`${at} must be ${DIRECTORY}`];
+  }
+  if (!record(layers)) {
+    return [`${at} must be ${DIRECTORY}`];
+  }
+  const issues: string[] = [];
+  for (const [id, source] of Object.entries(layers)) {
+    if (id === "") {
+      issues.push(`${at} has an empty id`);
+      continue;
+    }
+    const files: unknown[] = [source].flat();
+    if (files.length === 0 || !files.every(designator)) {
+      issues.push(
+        `${at}.${id} must be a path, a URL, or an npm:/ reference, or a list of them`,
+      );
+    }
+  }
+  return issues;
 };
 
 /**
- * Checks the layers. The member is a local directory or an object of layer ids.
- * A directory is a path or a `file:` URL. In an object, each id is a non-empty
- * string, and each value is a source or a non-empty list of sources.
+ * Checks the layers. The member is one source of layers or a list of them. The
+ * build checks that each id appears once after it lists the directories.
  */
 const layers: Rule = (config) => {
   const { layers } = config;
   if (layers === undefined) {
     return [];
   }
-  if (typeof layers === "string" || layers instanceof URL) {
-    if (local(layers)) {
-      return [];
+  if (Array.isArray(layers)) {
+    if (layers.length === 0) {
+      return ["layers must list at least one source of layers"];
     }
-    return [
-      "layers must be a path to a local directory when it is not an object of layer ids",
-    ];
+    return layers.flatMap((item, index) =>
+      source_(`layers[${index}]`, item as LayerSources),
+    );
   }
-  if (!record(layers)) {
-    return [
-      "layers must be a path to a local directory, or an object of layer ids",
-    ];
-  }
-  const issues: string[] = [];
-  for (const [id, source] of Object.entries(layers)) {
-    if (id === "") {
-      issues.push("layers has an empty id");
-      continue;
-    }
-    const files: unknown[] = [source].flat();
-    if (files.length === 0 || !files.every(designator)) {
-      issues.push(
-        `layers.${id} must be a path, a URL, or an npm:/ reference, or a list of them`,
-      );
-    }
-  }
-  return issues;
+  return source_("layers", layers);
 };
 
 /** The output directory sits inside the project root. */

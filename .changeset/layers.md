@@ -13,8 +13,9 @@ contract does not carry them.
 
 **Kit.** A config can declare `layers`. Each layer is a DTCG token document
 or a list of them, in the same source forms as `add`. `layers` can instead
-name a local directory: each `.json` file in it is one layer, and the file
-name is the id. The directory joins the watched documents. The build normalizes
+name a directory, local or in an installed package: each `.json` file in it
+is one layer, and the file name is the id. A list combines directories and
+objects. A local directory joins the watched documents. The build normalizes
 each document with Terrazzo, converts it to a `Layer`, and checks it against
 the built contract with the schema. The build fails with the file and the
 token when a layer is not applicable. The build writes `layers/<id>.json` for

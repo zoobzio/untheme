@@ -146,18 +146,29 @@ export default defineConfig({
 });
 ```
 
-The `layers` option can also name a local directory, as a path or a `file:`
-URL. Each `.json` file in the directory is one layer, and its file name without
-the extension is the id. The build takes the files in name order and ignores
-every other file. Aurora builds its themes this way. The directory joins the
-`documents` of the build, so a dev server rebuilds when a file is added. Only a
-local directory can be listed: a package or a remote directory is an object of
-layer ids, as above.
+The `layers` option can also name a directory, as a path, a `file:` URL, or
+an `npm:/` reference. Each `.json` file in the directory is one layer, and its
+file name without the extension is the id. The build takes the files in name
+order and ignores every other file. Aurora builds its themes this way, and an
+app that builds on aurora names the same directory in the package. A local
+directory joins the `documents` of the build, so a dev server rebuilds when a
+file is added. A package must export each file. A remote directory cannot be
+listed.
 
 ```ts
 export default defineConfig({
   source: "./src/resolver.json",
   layers: "./src/themes", // themes/nord.json is the layer `nord`
+});
+```
+
+A list combines sources of layers. Each item is a directory or an object of
+layer ids. The build takes the items in order, and an id can appear once.
+
+```ts
+export default defineConfig({
+  source: "./app.resolver.json",
+  layers: ["npm:/@untheme/aurora/src/themes", { brand: "./tokens/brand.json" }],
 });
 ```
 

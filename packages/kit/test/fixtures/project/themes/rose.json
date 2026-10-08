@@ -1,0 +1,10 @@
+{
+  "primary": {
+    "$type": "color",
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [1, 0.3, 0.5],
+      "hex": "#ff4d80"
+    }
+  }
+}

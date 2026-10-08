@@ -253,20 +253,20 @@ as above. A build with no `layers` reads no theme file other than
 
 ### Taking part of the preset
 
-The `layers` key of the config names the themes that a build contains. The
+The `layers` key of the config names the themes that a build contains: the
+themes directory of the package, or some of its files by id. The
 `modifiers` key selects the contexts of each modifier.
 
 ```ts
 export default defineConfig({
   source: "npm:/@untheme/aurora/src/resolver.json",
-  layers: {
-    // Build three themes as layers.
-    nord: "npm:/@untheme/aurora/src/themes/nord.json",
-    dracula: "npm:/@untheme/aurora/src/themes/dracula.json",
+  layers: [
+    // Build every theme of aurora as a layer.
+    "npm:/@untheme/aurora/src/themes",
 
     // Add a palette of your own. The token file rebinds the ramp tokens.
-    brand: "./tokens/brand.json",
-  },
+    { brand: "./tokens/brand.json" },
+  ],
   modifiers: {
     // Turn off a modifier. Its default stays in the base tokens.
     depth: false,
