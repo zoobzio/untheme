@@ -1,0 +1,21 @@
+{
+  "name": "Extended",
+  "version": "2025.10",
+  "description": "Upstream with its core set extended by another file, in the resolution order.",
+  "resolutionOrder": [
+    {
+      "$ref": "./upstream.resolver.json#/sets/core",
+      "sources": [
+        {
+          "$ref": "./core.json"
+        }
+      ]
+    },
+    {
+      "$ref": "./upstream.resolver.json#/modifiers/color"
+    },
+    {
+      "$ref": "./upstream.resolver.json#/modifiers/density"
+    }
+  ]
+}

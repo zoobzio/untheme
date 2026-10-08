@@ -1,0 +1,30 @@
+{
+  "name": "Declared",
+  "version": "2025.10",
+  "description": "Upstream's set and modifiers, referenced from the root maps.",
+  "sets": {
+    "core": {
+      "$ref": "./upstream.resolver.json#/sets/core"
+    }
+  },
+  "modifiers": {
+    "color": {
+      "$ref": "./upstream.resolver.json#/modifiers/color"
+    },
+    "density": {
+      "$ref": "./upstream.resolver.json#/modifiers/density",
+      "default": "compact"
+    }
+  },
+  "resolutionOrder": [
+    {
+      "$ref": "#/sets/core"
+    },
+    {
+      "$ref": "#/modifiers/color"
+    },
+    {
+      "$ref": "#/modifiers/density"
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { defineConfig, parse } from "@terrazzo/parser";
 
 import { assemble } from "./assemble";
+import { compose } from "./compose";
 import { buildLayers } from "./layers";
 import { OUT_DIR } from "./constant";
 import { loader } from "./loader";
@@ -15,7 +16,8 @@ import { validate } from "./validate";
 
 /**
  * Validates a config and resolves it into a {@link Kit}. The function reads the
- * resolver document and tailors it to the `modifiers` of the config. It reads
+ * resolver document, inlines each set and modifier that it references in
+ * another document, and tailors it to the `modifiers` of the config. It reads
  * every document that the resolver references with `@terrazzo/parser`, with
  * `alphabetize` off. It converts the base theme and the boot selection. The base
  * theme has the tokens, the modifier contexts, and the order. It validates both
@@ -43,7 +45,7 @@ export const resolveKit = async (
 
   const files = loader(root, options.req);
   const { load, documents } = files;
-  let src = await load(url, base);
+  let src = await compose(await load(url, base), url, load);
   if (config.modifiers && Object.keys(config.modifiers).length > 0) {
     src = tailor(src, config.modifiers, base);
   }

@@ -1,0 +1,14 @@
+{
+  "name": "Chained",
+  "version": "2025.10",
+  "description": "A set reached through another document's reference.",
+  "resolutionOrder": [
+    {
+      "$ref": "./declares.resolver.json#/sets/core",
+      "description": "Chained."
+    },
+    {
+      "$ref": "./declares.resolver.json#/modifiers/density"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Acme Extended",
+  "version": "2025.10",
+  "resolutionOrder": [
+    {
+      "$ref": "npm:/@acme/tokens/resolver.json#/sets/base",
+      "description": "From the package."
+    }
+  ]
+}

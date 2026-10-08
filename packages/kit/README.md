@@ -226,41 +226,75 @@ A `source` and each `$ref` in the documents is one of these:
 
 ## Composition
 
-To add tokens, write a resolver document in the DTCG resolver format. List the
-files as sets. Use an `npm:/` reference for a package. Add your own set. Then
-declare each modifier again with the files of each context.
+A resolver document can build on another one. The DTCG resolver format lets a
+`$ref` point to a set or a modifier of another document, and lets the keys
+beside the `$ref` override the keys of what it points to. To build on a
+package, reference its resolver with `npm:/`. List each set and each modifier
+that you keep, and override what you change.
+
+```json
+{
+  "name": "App",
+  "version": "2025.10",
+  "resolutionOrder": [
+    {
+      "$ref": "npm:/@untheme/aurora/src/resolver.json#/sets/ramps",
+      "sources": [{ "$ref": "./palette.json" }]
+    },
+    { "$ref": "npm:/@untheme/aurora/src/resolver.json#/sets/roles" },
+    { "$ref": "npm:/@untheme/aurora/src/resolver.json#/modifiers/color" }
+  ]
+}
+```
+
+- The first item is the `ramps` set of aurora with its sources replaced. The
+  palette of the app takes the place of the aurora palette, and every role of
+  aurora resolves from it.
+- The other items are the sets and modifiers of aurora as they are. Each `$ref`
+  inside them, such as `./tokens/roles/primary.json`, resolves against the
+  aurora document.
+- The keys beside a `$ref` override one level deep. A `contexts` beside a
+  modifier reference replaces the whole contexts map.
+- The same reference works in the root `sets` and `modifiers` maps, as in
+  `"sets": { "ramps": { "$ref": "...#/sets/ramps" } }`.
+- A reference to a reference is followed. The overrides of each step apply.
+
+The kit inlines each of these references before the parse. Terrazzo reads only
+a same-document pointer as a set or a modifier, so without this step an
+external one is dropped. The build fails when a reference names a set or a
+modifier that its document lacks, when a set references a modifier or a
+modifier a set, or when references loop.
+
+To add tokens, add a set of your own. To add a context, override the
+`contexts` of the modifier and list the files of aurora beside yours.
 
 ```json
 {
   "name": "App",
   "version": "2025.10",
   "sets": {
-    "acme": { "sources": [{ "$ref": "npm:/@acme/tokens/base.json" }] },
-    "app": { "sources": [{ "$ref": "./app.json" }] }
-  },
-  "modifiers": {
-    "color": {
-      "contexts": {
-        "light": [],
-        "dark": [
-          { "$ref": "npm:/@acme/tokens/dark.json" },
-          { "$ref": "./app-dark.json" }
-        ]
-      },
-      "default": "light"
-    }
+    "syntax": { "sources": [{ "$ref": "./syntax.json" }] }
   },
   "resolutionOrder": [
-    { "$ref": "#/sets/acme" },
-    { "$ref": "#/sets/app" },
-    { "$ref": "#/modifiers/color" }
+    { "$ref": "npm:/@untheme/aurora/src/resolver.json#/sets/ramps" },
+    { "$ref": "#/sets/syntax" },
+    {
+      "$ref": "npm:/@untheme/aurora/src/resolver.json#/modifiers/color",
+      "contexts": {
+        "light": [
+          { "$ref": "npm:/@untheme/aurora/src/modifiers/color/light.json" }
+        ],
+        "dark": [
+          { "$ref": "npm:/@untheme/aurora/src/modifiers/color/dark.json" },
+          { "$ref": "./syntax-dark.json" }
+        ]
+      }
+    }
   ]
 }
 ```
 
 - The position of a set in `resolutionOrder` decides which value wins.
-- A `$ref` references a file. The kit ignores a `$ref` in `resolutionOrder`
-  that points to a modifier in another file.
 - A `$ref` can include a JSON pointer to a part of a file, for example
   `color.json#/dark`.
 
