@@ -74,26 +74,19 @@ const fold = <T extends Theme<T>>(
 
 /**
  * Makes an {@link Untheme} service over a base theme and a state container.
- * The base theme is the contract and the baseline. The function checks the
- * base theme against its own contract. The container holds what changed from
- * the base theme: the applied layer, the selection, and the user override.
+ * The base theme is the contract and the baseline. The container holds the
+ * applied layer, the selection, and the user override. The service reads and
+ * writes the container through the `options` middleware.
  *
- * The service reads and writes the container. The container can be a plain
- * object or a reactive proxy. The `options` argument can change each value
- * that the service reads or writes. A read gives the base tokens, then the
- * applied layer, then the selected context of each modifier in `order`, then
- * the user override. `set` writes the override. `swap` selects a context of a
- * modifier. `update` and `apply` change the layer. `apply` also clears the
- * override.
+ * A read gives the base tokens, then the applied layer, then the selected
+ * context of each modifier in `order`, then the user override. The service
+ * merges the base theme and the layer once for each layer object.
  *
- * The service derives the active theme from the base theme and the layer. It
- * keeps the result until the layer changes. Replace the layer through `apply`
- * or `update`. A change inside the stored layer object is not seen.
- *
- * @param base - The base theme. The service copies it.
- * @param config - The container with the layer, the selection, and the override.
+ * @param base - The base theme. The service copies it and checks the copy
+ * against its own contract.
+ * @param config - The state container.
  * @param options - The middleware for reads and writes of `config`.
- * @returns The service for the container.
+ * @returns The service.
  * @throws InvalidThemeError when the base theme or the selection violates the contract.
  */
 export const makeUntheme = <T extends Theme<T>>(
@@ -155,9 +148,7 @@ export const makeUntheme = <T extends Theme<T>>(
   };
 
   /**
-   * The schema for the base theme. A complete theme is a valid template. The
-   * service copies the theme before it makes the schema. `schema.base` is the
-   * baseline that `theme`, `merge`, and `diff` read.
+   * The schema of the base theme. `schema.base` is the copy of the base theme.
    */
   const schema: Schema<T> = reframe(InvalidThemeError, () =>
     defineSchema(clone(base)),
@@ -167,8 +158,7 @@ export const makeUntheme = <T extends Theme<T>>(
   reframe(InvalidThemeError, () => schema.assert.input(proxy.input));
 
   /**
-   * The last merge of the base theme and a layer. The service merges again
-   * when the layer in the container is another object.
+   * The last merge of the base theme and a layer.
    */
   let merged: { layer: Layer<T>; theme: T } | undefined;
 

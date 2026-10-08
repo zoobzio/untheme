@@ -9,9 +9,8 @@ import { mockManifest } from "./manifest";
  * Returns a resolved kit over a theme. This is what `resolveKit` returns for
  * a config, without a read of any document. The kit has the theme, a boot
  * selection, a manifest, the layers, the output directory, and the documents
- * read. A
- * test of code that builds through the kit, such as a framework module, uses
- * it to run without DTCG JSON or Terrazzo.
+ * read. A test of code that builds through the kit, such as a framework
+ * module, uses it to run without DTCG JSON or Terrazzo.
  *
  * @param theme - The theme that the kit resolved to.
  * @param options - The members of the kit other than the theme.

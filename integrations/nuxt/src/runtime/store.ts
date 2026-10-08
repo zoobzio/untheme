@@ -8,17 +8,15 @@ import {
 } from "#build/untheme/config.mjs";
 
 /**
- * The base theme of the app, as the build module exports it. The service
- * takes it as its base. The state does not hold it.
+ * The base theme of the app, as the build module exports it.
  */
 export { buildTheme };
 
 /**
  * Returns the state and the cookies that the plugin and the composable share.
- * The state holds what changed from the base theme: the applied layer, the
- * selection, and the user override. It starts with a copy of the selection of
- * the build module, an empty override, and no layer. Each request has its own
- * state.
+ * The state holds the applied layer, the selection, and the user override. It
+ * starts with a copy of the selection of the build module, an empty override,
+ * and no layer.
  */
 export const accessUntheme = () => {
   const config = useState<AppUnthemeConfig>("untheme:config", () => ({

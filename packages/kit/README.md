@@ -122,8 +122,8 @@ The kit reports all config errors together.
 
 ```
 @untheme/kit: the config is invalid —
-  modifiers.theme.contexts: "nrod" is not a context of "theme" (abyss, aurora, ...)
-  modifiers.shadow: the source declares no modifier "shadow" (theme, color, ...)
+  modifiers.motion.contexts: "reduce" is not a context of "motion" (default, reduced, expressive)
+  modifiers.shadow: the source declares no modifier "shadow" (color, vibrancy, ...)
 ```
 
 To add tokens, write a resolver document. See Composition.
@@ -329,12 +329,12 @@ import { manifest } from "./untheme/manifest.mjs";
 
 // [
 //   {
-//     id: "theme",
-//     name: "Theme",
-//     description: "The palette: each context is one theme's eight tonal ramps.",
+//     id: "color",
+//     name: "Color scheme",
+//     description: "The scheme: light or dark surfaces, with every role and channel rebound to match.",
 //     contexts: [
-//       { id: "nord", name: "Nord", description: "Arctic blues on polar grays, from Nord" },
-//       { id: "night_owl", name: "Night Owl", description: "..." },
+//       { id: "light", name: "Light", description: "Dark text on light surfaces." },
+//       { id: "dark", name: "Dark", description: "Light text on dark surfaces." },
 //     ],
 //   },
 //   ...

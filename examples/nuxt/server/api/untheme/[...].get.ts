@@ -2,14 +2,9 @@ import { createThemeHandler, listEntries } from "@untheme/nuxt/server";
 import { layers } from "@untheme/aurora/layers";
 
 /**
- * The theme catalog of the app. The themes are the layers of aurora. The
- * route answers the catalog wire protocol under `/api/untheme`.
- *
- * `list` answers from the layers manifest of aurora, which the server bundle
- * holds. `get` reads one layer file from the server assets. `nuxt.config.ts`
- * puts the `layers/` directory of the aurora build there, so the output of
- * `nuxt build` holds the files and reads nothing from `node_modules` at run
- * time. An id outside the manifest is a miss.
+ * The theme catalog of the app, under `/api/untheme`. The themes are the
+ * layers of aurora. `list` reads the layers manifest. `get` reads one layer
+ * file from the `themes` server assets. An id outside the manifest is a miss.
  */
 const entries = layers.map(({ id, name }) => ({ id, name }));
 const ids = new Set<string>(entries.map((entry) => entry.id));

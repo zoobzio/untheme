@@ -52,7 +52,7 @@ The kit also builds the base theme. Its `config` module exports the base `theme`
 
 The service reads and writes the `config` container. The container holds what changed from the base theme: the applied `layer`, the `input`, and the `override` that `set` writes. The base theme is not in the container. A container with no layer and an empty override is the base theme at the selection. The caller can pass a plain object for tests and Node. The caller can pass a reactive proxy, for example in Vue, to track each read and write.
 
-The service replaces each member of the container as a whole. It never changes a member in place. The service merges the base theme and the layer once for each layer object, so a change inside the stored layer object is not seen. Change the layer through `apply` or `update`.
+The service replaces each member of the container as a whole. It merges the base theme and the layer once for each layer object. Change the layer with `apply` or `update`.
 
 ## The service
 
@@ -80,7 +80,7 @@ The service replaces each member of the container as a whole. It never changes a
 
 The base theme is the baseline. `apply` stores a layer, and the active theme is the baseline with the layer merged in. Each active theme has the full token set. `delta()` compares the active theme with the baseline. `dirty()` reports the user override and `reset()` clears it. Use them to find and revert the edits since the last `apply`.
 
-A layer with the identity of the base theme is an edit of the base theme. `update` makes one when no layer is applied. An editor can read that as "the user changed the current theme" and offer to save it. `extract(id, name)` gives the active theme with the override as a theme with a new identity.
+A layer with the identity of the base theme is an edit of the base theme. `update` makes one when no layer is applied. `extract(id, name)` gives the active theme with the override as a theme with a new identity.
 
 ## Errors
 

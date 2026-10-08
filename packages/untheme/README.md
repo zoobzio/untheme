@@ -50,7 +50,7 @@ const catalog = defineClient(ut.schema, { base: "/api/untheme" });
 
 const midnight = await catalog.get("midnight"); // checked against the contract
 if (midnight) {
-  ut.apply(midnight); // the active theme is now the base with midnight merged in
+  ut.apply(midnight); // the active theme is the base with midnight merged in
 }
 ```
 

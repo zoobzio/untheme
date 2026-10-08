@@ -24,7 +24,7 @@ import { ROOT, build } from "./helpers";
  * `.dist/` are the `.`, `./config`, `./manifest`, and `./layers` exports. The
  * layer files are the `./layers/*` exports. The DTCG documents are the
  * `./src/*` exports. The tests compare the modules with a new build of the
- * documents, so a `.dist/` that is older than `src/` fails here.
+ * documents.
  */
 let kit: Kit;
 

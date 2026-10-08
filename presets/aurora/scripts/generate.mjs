@@ -2,8 +2,7 @@
  * Generates the themes from `scripts/seeds.json` as DTCG JSON. The script
  * writes one token document for each theme at `src/themes/<id>.json`. The
  * document holds the name, the description, and the eight ramps of the theme.
- * Each document is a layer of the kit config. The `aurora` document is also
- * the `ramps` set of the resolver. The script does not change the resolver.
+ * The `aurora` document is also the `ramps` set of the resolver.
  *
  * Each seed gives a hue and a chroma. All ramps use one OKLCH lightness ladder
  * across the eleven Tailwind-style stops, 50 to 950. The chroma curve peaks at
@@ -178,8 +177,8 @@ const themes = JSON.parse(
 );
 
 /*
- * Writes one document for each theme. The document holds all eight ramps. The
- * script removes the theme folder first, so each run writes the full set.
+ * Writes one document for each theme. The script removes the theme folder
+ * first.
  */
 await rm(new URL("src/themes/", ROOT), { recursive: true, force: true });
 for (const [id, theme] of Object.entries(themes)) {

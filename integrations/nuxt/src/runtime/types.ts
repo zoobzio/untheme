@@ -14,7 +14,7 @@ export type AppUnthemeContract = Contract;
 export type AppUnthemeTheme = Theme<AppUnthemeContract>;
 
 /**
- * A partial overlay with an identity. `apply` takes a layer at runtime.
+ * A layer of the contract. `apply` takes one.
  */
 export type AppUnthemeThemeLayer = Layer<AppUnthemeContract>;
 
@@ -24,9 +24,8 @@ export type AppUnthemeThemeLayer = Layer<AppUnthemeContract>;
 export type AppUnthemeInput = Input<AppUnthemeContract>;
 
 /**
- * The state container that the service reads and changes. It holds the
- * applied layer, the selection, and the user override. The base theme is the
- * build module.
+ * The state container of the service. It holds the applied layer, the
+ * selection, and the user override.
  */
 export type AppUnthemeConfig = Config<AppUnthemeContract>;
 

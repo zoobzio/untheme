@@ -75,7 +75,7 @@ describe("layers", () => {
       hex: "#e5f2ff",
     });
     expect(ut.resolve("size.md")).toEqual({ value: 4, unit: "px" });
-    // The selected context still wins over the layer on read.
+    // The selected context wins over the layer.
     ut.swap("density", "compact");
     expect(ut.resolve("size.md")).toEqual({ value: 6, unit: "px" });
   });

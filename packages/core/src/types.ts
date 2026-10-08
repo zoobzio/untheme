@@ -18,15 +18,10 @@ import type { Diff } from "@untheme/utils";
 
 /**
  * The state that an {@link Untheme} service reads and writes. The state has
- * what changed from the base theme: the applied layer, the active selection
- * with one context for each modifier, and the user override that `set`
- * writes. The base theme is not in the state. The service derives the active
- * theme from the base theme and the layer.
- *
- * A container with no layer and an empty override is the base theme at the
- * selection. The caller can pass a plain object or a reactive proxy. The
- * service replaces each member as a whole and never changes a member in
- * place.
+ * the applied layer, the selection with one context for each modifier, and
+ * the user override. The base theme is not in the state. The container can be
+ * a plain object or a reactive proxy. The service replaces each member as a
+ * whole.
  */
 export type Config<T extends Template> = {
   layer?: Layer<T> | undefined;

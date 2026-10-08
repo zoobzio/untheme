@@ -83,11 +83,10 @@ A mock theme from [`@untheme/testing`](../../packages/testing) stands in for the
 build. The theme is in [`test/nuxt/fixtures.ts`](./test/nuxt/fixtures.ts). It
 has two axes over a few tokens. `mockModules` supplies the
 `#build/untheme/manifest.mjs` module that the demo imports. A stub of
-`useUntheme` returns a service over the theme and a reactive container, the
-same way the plugin of the module builds one over `useState`.
+`useUntheme` returns a service over the theme and a reactive container.
 [`test/nuxt/layers.ts`](./test/nuxt/layers.ts) holds three layers. The vitest
 config aliases `@untheme/aurora/layers` to it, and a mock of `untheme/catalog`
-serves the same layers in place of the server route.
+serves the same layers.
 
 The tests check five things:
 

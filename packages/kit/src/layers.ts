@@ -31,16 +31,15 @@ const root = (
 };
 
 /**
- * Builds one layer from its sources. The function reads each source through
- * `load`. Terrazzo parses the sources with aliases unresolved, so a reference
- * to a token of the base stays a `{name}` string and the parse needs no base
- * document. Terrazzo flattens the groups and normalizes the values. The
- * function converts each token to its binding. The result has the tokens of
- * the sources, in the order of the Terrazzo collation. A later source wins.
+ * Builds one layer from its sources. Terrazzo parses the sources with
+ * `resolveAliases` off. It flattens the groups and normalizes the values. A
+ * reference stays a `{name}` string. The function converts each token to its
+ * binding and sorts the tokens with the Terrazzo collation. A later source
+ * wins.
  *
- * The name is the `name` under the `io.zoobz.untheme` key of `$extensions` at
- * the root of the last source that has one, or the titled id. The description
- * is the `$description` at the root of the last source that has one.
+ * The name is the `name` in the untheme extension at the root of the last
+ * source that has one, or the titled id. The description is the
+ * `$description` at the root of the last source that has one.
  */
 const build = async (
   id: string,
@@ -117,9 +116,9 @@ const check = (
 
 /**
  * Builds the layers of a config against a base theme. The function reads the
- * sources of each layer through `load`, so the loader records them. It checks
- * each layer against the contract of the theme and reports every issue of
- * every layer together. The result keeps the order of the config.
+ * sources of each layer through `load`. It checks each layer against the
+ * contract of the theme and reports every issue of every layer together. The
+ * result keeps the order of the config.
  *
  * @param layers - The `layers` of the config.
  * @param theme - The base theme that the layers apply to.

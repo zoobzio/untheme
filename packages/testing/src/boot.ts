@@ -6,11 +6,10 @@ import { makeUntheme } from "untheme";
 import { mockInput } from "./input";
 
 /**
- * Boots a runtime service over a theme. The service copies the theme as its
- * base. The container holds the selection and an empty override. Each
- * modifier is at its first context unless the selection pins another. Every
- * call returns an independent service, so the swaps and edits of one test do
- * not reach another test.
+ * Boots a runtime service over a theme. The theme is the base of the service.
+ * The container holds the selection and an empty override. Each modifier is at
+ * its first context unless the selection pins another. Each call returns an
+ * independent service.
  *
  * @param theme - The theme to boot, usually from {@link mockTheme}.
  * @param selection - The contexts to pin.

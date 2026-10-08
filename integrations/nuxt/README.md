@@ -166,7 +166,7 @@ The plugin also sets the selected context of each modifier on `<html>` as a `dat
 
 ## Static CSS
 
-The module renders the static cascade to `#build/untheme.css`. The module writes the file and does not link it. The runtime plugin renders the active tokens, so the app needs no second copy of them. The module renders the file with [`defineRenderer(...).sheet()`](../../packages/css) over the base theme. The file has the base bindings under `:root`. Each modifier context follows as a `[data-<modifier>="<context>"]` block. Editors index the file and complete `var(--surface)`.
+The module renders the static cascade to `#build/untheme.css`. The module writes the file and does not link it. The module renders the file with [`defineRenderer(...).sheet()`](../../packages/css) over the base theme. The file has the base bindings under `:root`. Each modifier context follows as a `[data-<modifier>="<context>"]` block. Editors index the file and complete `var(--surface)`.
 
 The cascade sits in an `@layer untheme` block. If you import the file, the unlayered `<style>` tag of the runtime plugin wins over the layer. Your own unlayered CSS also wins over the layer.
 

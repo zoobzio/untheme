@@ -11,13 +11,10 @@ import { proveTheme } from "@untheme/testing";
 import { SRC, build, boot as bootKit } from "./helpers";
 
 /**
- * The documents of the preset, built by the kit. A build checks the
- * structure: a valid contract, references that resolve, every context
- * verified against Terrazzo, and every theme checked against the contract as
- * a layer. The checks below cover what a build cannot detect: the channel
- * tokens ("channels") that the color, vibrancy, and contrast axes route
- * through, how those three axes resolve their collisions, and what a theme
- * rebinds.
+ * The build of the preset. The build checks the contract, the references,
+ * each context against Terrazzo, and each theme against the contract. The
+ * tests check the channel tokens of the color, vibrancy, and contrast axes,
+ * the collisions of those axes, and the tokens that a theme rebinds.
  */
 let kit: Kit;
 

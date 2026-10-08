@@ -51,8 +51,8 @@ A theme is a layer. Each theme is one token document under `src/themes/`. The
 document holds the eight ramps, 220 color tokens. The build checks each
 document against the contract and writes it as `.dist/layers/<id>.json`. The
 runtime takes the file as it is: `apply(nord)` makes the active theme from the
-base and the ramps of nord. Every role reads the new ramps by reference. Every
-modifier context works as before, because no context binds a ramp.
+base and the ramps of nord. Every role reads the new ramps by reference. No
+modifier context binds a ramp, so each context applies to each theme.
 
 The `aurora` theme is also the base. Its document is the `ramps` set of the
 resolver. The layer of `aurora` restates the base, so `apply(aurora)` is the

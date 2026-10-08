@@ -7,11 +7,8 @@ import { resolveKit } from "@untheme/kit";
 import { ROOT, build } from "./helpers";
 
 /**
- * Builds of part of the preset. Each test builds the preset under a
- * `modifiers` config and compares the result with the full build. The themes
- * are layers, so a config that builds no layers skips every theme file. The
- * full build has its own file, `aurora.test.ts`, and the two files run on
- * separate workers.
+ * Builds of part of the preset. Each test builds the preset under a config
+ * and compares the result with the full build.
  */
 
 /** The resolver document, as the `source` of a kit config. */

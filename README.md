@@ -80,7 +80,7 @@ import config, { type Contract } from "./untheme/config.mjs";
 const untheme = makeUntheme<Contract>(config.theme, useUnthemeConfig(config));
 
 untheme.resolve("primary"); // the blue-600 color object
-untheme.swap("color", "dark"); // primary now follows {blue-200}
+untheme.swap("color", "dark"); // primary follows {blue-200}
 ```
 
 A config can also declare `layers`. Each layer is a DTCG token document that

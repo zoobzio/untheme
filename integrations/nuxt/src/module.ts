@@ -32,8 +32,7 @@ import { closest, loadTheme } from "./theme";
  *   under `untheme/`. The modules hold the `Token` union, the `Mod` axis
  *   structure, the theme, and the selection.
  * - It renders the static cascade to the `untheme.css` template. The module
- *   writes the file for editors and does not link it. The runtime plugin
- *   renders the active tokens.
+ *   writes the file and does not link it.
  * - It registers the runtime plugin and the `useUntheme` and
  *   `useUnthemeRenderer` auto-imports.
  *
@@ -70,11 +69,9 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
     }
 
     /*
-     * The static cascade holds the base bindings under `:root`. Each modifier
-     * context follows as a data-attribute block. The cascade sits in the
-     * `untheme` cascade layer. The module writes the file and does not link
-     * it. An editor indexes it for completion. An app can import it. The
-     * unlayered block that the runtime plugin injects wins over the layer.
+     * The static cascade holds the base bindings under `:root` and one block
+     * for each modifier context, in the `untheme` cascade layer. The module
+     * writes the file and does not link it.
      */
     const renderer = defineRenderer({
       theme: () => theme,

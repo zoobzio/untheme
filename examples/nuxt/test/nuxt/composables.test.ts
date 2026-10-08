@@ -15,10 +15,9 @@ import { useDemo } from "../../app/composables/demo";
 import { useThemes } from "../../app/composables/themes";
 
 /*
- * The generated manifest module, mocked with the module of the fixture. The
- * composables run against a theme that no kit build made. The factory imports
- * the fixture itself, because `vi.mock` is hoisted above the imports of this
- * file.
+ * The manifest module of the fixture, in place of the build template. The
+ * factory imports the fixture itself, because `vi.mock` is hoisted above the
+ * imports of this file.
  */
 vi.mock("#build/untheme/manifest.mjs", async () => {
   const fixtures = await import("./fixtures");
@@ -26,10 +25,9 @@ vi.mock("#build/untheme/manifest.mjs", async () => {
 });
 
 /*
- * The catalog client, mocked with a catalog over the fixture layers. The
- * picker reads the same `list` and `get` as over the wire, with no server.
- * The factory builds the provider itself, because `@untheme/testing` imports
- * this module.
+ * A catalog over the fixture layers, in place of the client over the wire.
+ * The factory imports the layers itself, because `vi.mock` is hoisted above
+ * the imports of this file.
  */
 vi.mock("untheme/catalog", async (original) => {
   const actual = await original<typeof CatalogModule>();
@@ -52,12 +50,8 @@ vi.mock("untheme/catalog", async (original) => {
 });
 
 /*
- * Nuxt auto-imports `useUntheme`, `useDemo`, `computed`, and `ref` into the
- * composables. Here each one is a global for the duration of a test.
- * `useUntheme` answers with a fresh service per test. The service runs over
- * the theme of the fixture and a reactive container, the same way the plugin
- * of the module builds one over `useState`. A `computed` in a composable then
- * tracks the selection and the layer the way it does in the app.
+ * The auto-imports of Nuxt, as globals for each test. `useUntheme` returns a
+ * new service over the fixture theme and a reactive container.
  */
 let untheme: Untheme<typeof theme>;
 

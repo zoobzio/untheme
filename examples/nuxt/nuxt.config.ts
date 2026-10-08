@@ -3,18 +3,10 @@ import { fileURLToPath } from "node:url";
 import { defineNuxtConfig } from "nuxt/config";
 
 /**
- * The aurora showcase.
- *
- * `untheme.config.ts` holds the theme wiring and points at the DTCG JSON of
- * aurora. The module finds it and builds it through `@untheme/kit`. On every
- * render, the module flattens the tokens of the active selection into
- * `--token` CSS variables. The module also sets the selection as
- * `data-<modifier>` attributes on the document root.
- *
- * The themes of aurora are layers. The `layers/` directory of the aurora
- * build goes into the server assets of Nitro as `themes`. The route in
- * `server/api/untheme/` reads the files from there, so the output of
- * `nuxt build` holds them.
+ * The aurora showcase. `untheme.config.ts` points at the resolver document of
+ * aurora, and the module builds it with `@untheme/kit`. The `layers/`
+ * directory of the aurora build is the `themes` server asset of Nitro. The
+ * route in `server/api/untheme/` reads the layer files from it.
  */
 const src = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
