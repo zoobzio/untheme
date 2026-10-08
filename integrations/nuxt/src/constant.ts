@@ -11,3 +11,16 @@ export const STYLESHEET = "untheme.css";
  * them as `#build/untheme/index.mjs` and `#build/untheme/config.mjs`.
  */
 export const MODULES = "untheme";
+
+/**
+ * The base route of the theme catalog that the module serves when the build
+ * has layers. The `route` option changes it. The handler answers
+ * `GET <route>/themes` and `GET <route>/themes/<id>`.
+ */
+export const ROUTE = "/api/untheme";
+
+/**
+ * The server template that holds the entries and the layers of the build. The
+ * catalog handler imports it.
+ */
+export const LAYERS = "#untheme/layers.mjs";

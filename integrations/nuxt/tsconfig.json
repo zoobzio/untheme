@@ -18,7 +18,8 @@
       "#imports": ["../nuxt/src/stubs/imports.d.ts"],
       "#build/untheme/config.mjs": [
         "../nuxt/src/stubs/build/untheme/config.d.mts"
-      ]
+      ],
+      "#untheme/layers.mjs": ["../nuxt/src/stubs/untheme/layers.d.mts"]
     }
   },
   "include": ["../nuxt/src", "../nuxt/test"]

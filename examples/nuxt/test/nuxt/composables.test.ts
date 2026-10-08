@@ -1,5 +1,4 @@
 import type { Untheme } from "untheme";
-import type * as CatalogModule from "untheme/catalog";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { computed, reactive, ref } from "vue";
@@ -24,33 +23,20 @@ vi.mock("#build/untheme/manifest.mjs", async () => {
 });
 
 /*
- * A catalog over the fixture layers, in place of the client over the wire.
- * The factory imports the layers itself, because `vi.mock` is hoisted above
- * the imports of this file.
+ * The layers module of the fixture, in place of the build template. The
+ * factory imports the layers itself, because `vi.mock` is hoisted above the
+ * imports of this file.
  */
-vi.mock("untheme/catalog", async (original) => {
-  const actual = await original<typeof CatalogModule>();
-  const { fixtureLayers: layers } = await import("./layers");
-  return {
-    ...actual,
-    defineClient: (schema: Parameters<typeof actual.defineCatalog>[0]) =>
-      actual.defineCatalog(schema, {
-        list: (listing) => ({
-          entries: layers
-            .map(({ id, name }) => ({ id, name }))
-            .slice(listing.offset, listing.offset + listing.limit),
-          total: layers.length,
-          limit: listing.limit,
-          offset: listing.offset,
-        }),
-        get: (id) => layers.find((layer) => layer.id === id),
-      }),
-  };
+vi.mock("#build/untheme/layers.mjs", async () => {
+  const { layers } = await import("./layers");
+  return { layers };
 });
 
 /*
  * The auto-imports of Nuxt, as globals for each test. `useUntheme` returns a
  * new service over the fixture theme and a reactive container.
+ * `useUnthemeCatalog` returns a catalog over the fixture layers, in place of
+ * the client over the wire.
  */
 let untheme: Untheme<typeof theme>;
 
@@ -60,6 +46,7 @@ beforeEach(() => {
     reactive({ patch: {}, input: modules.config.input }),
   );
   vi.stubGlobal("useUntheme", () => untheme);
+  vi.stubGlobal("useUnthemeCatalog", () => mockCatalog(untheme.schema, layers));
   vi.stubGlobal("useDemo", useDemo);
   vi.stubGlobal("computed", computed);
   vi.stubGlobal("ref", ref);

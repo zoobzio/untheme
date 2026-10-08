@@ -1,7 +1,10 @@
 import type { AppUnthemeContract, AppUntheme } from "./types";
+import type { Catalog } from "untheme/catalog";
 import type { Renderer } from "untheme/css";
 
 import { useNuxtApp } from "#app";
+import { useRequestFetch, useRuntimeConfig } from "#imports";
+import { defineClient } from "untheme/catalog";
 
 /**
  * Returns the `$untheme` service. Each read and write goes through the
@@ -25,4 +28,41 @@ export const useUntheme = (): AppUntheme => {
 export const useUnthemeRenderer = (): Renderer<AppUnthemeContract> => {
   const { $unthemeRenderer } = useNuxtApp();
   return $unthemeRenderer;
+};
+
+/**
+ * Returns a catalog client over the theme catalog that the module serves. The
+ * client lists the layers of the build and gets one by id, checked against the
+ * contract of the app. `apply` takes a layer that `get` returns. Requests go
+ * through the fetch of the request, so a call during server rendering reaches
+ * the route of the same app.
+ *
+ * ```ts
+ * const catalog = useUnthemeCatalog();
+ * const layer = await catalog.get("nord");
+ * if (layer) useUntheme().apply(layer);
+ * ```
+ *
+ * @throws When the module serves no catalog: the build has no layers, or
+ * `route` is `false`.
+ */
+export const useUnthemeCatalog = (): Catalog<AppUnthemeContract> => {
+  const { untheme } = useRuntimeConfig().public as {
+    untheme?: { route?: string };
+  };
+  const route = untheme?.route;
+  if (typeof route !== "string") {
+    throw new Error(
+      "untheme: no theme catalog is served — the build has no layers, or `route` is false",
+    );
+  }
+  const request = useRequestFetch();
+  return defineClient(useUntheme().schema, {
+    base: route,
+    fetch: (url, init) =>
+      request.raw(String(url), {
+        headers: init?.headers,
+        ignoreResponseError: true,
+      }),
+  });
 };

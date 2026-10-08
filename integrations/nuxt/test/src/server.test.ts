@@ -7,7 +7,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { defineClient } from "untheme/catalog";
 import { defineSchema } from "untheme";
 
-import { createThemeHandler, listEntries } from "../../src/server";
+import { createThemeHandler, listEntries } from "../../src/runtime/server";
 import { theme, themes } from "../fixtures";
 
 /*

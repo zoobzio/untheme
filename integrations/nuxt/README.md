@@ -14,22 +14,26 @@ pnpm add @untheme/nuxt
 // nuxt.config.ts
 export default defineNuxtConfig({
   modules: ["@untheme/nuxt"],
+  untheme: { preset: "@untheme/aurora" },
 });
 ```
 
-```ts
-// untheme.config.ts
-import { defineConfig } from "@untheme/kit";
+The module gets the theme in one of three ways.
 
-export default defineConfig({
-  source: "npm:/@untheme/aurora/src/resolver.json",
-});
-```
+- **A preset.** Name a package that exports a kit build with `preset`. The module takes the base theme, the boot selection, the manifest, and the layers from the package, and serves the layers as a theme catalog. [Aurora](../../presets/aurora) is a preset. So is any package whose `untheme build` output it exports: `./config`, `./manifest`, `./layers`, and `./layers/<id>.json`. The module resolves the package from the project root, so it is a dependency of the app.
+- **Built here.** When the options have no `theme` and no `preset`, the module reads `untheme.config.ts` in the project root. The module builds the config in memory with [`@untheme/kit`](../../packages/kit). The `config` option names a different file. Nuxt watches the config file and each JSON document that the build read. A change to one of these files restarts the dev server. The layers of the config are served the same way as the layers of a preset.
 
-The module gets the theme in one of two ways.
+  ```ts
+  // untheme.config.ts
+  import { defineConfig } from "@untheme/kit";
 
-- **Built here.** When the options have no `theme`, the module reads `untheme.config.ts` in the project root. The module builds the config in memory with [`@untheme/kit`](../../packages/kit). The `config` option names a different file. Nuxt watches the config file and each JSON document that the build read. A change to one of these files restarts the dev server.
-- **Built elsewhere.** Pass the `theme` and `input` from a kit build. The build can come from a theme package in a monorepo or from a published theme package. The module uses the values as you pass them.
+  export default defineConfig({
+    source: "./app.resolver.json",
+    layers: "npm:/@untheme/aurora/src/themes",
+  });
+  ```
+
+- **Built elsewhere.** Pass the `theme` and `input` from a kit build. The module uses the values as you pass them, and serves no layers.
 
   ```ts
   import config from "@acme/theme/config";
@@ -44,11 +48,13 @@ The module gets the theme in one of two ways.
 
 `defineUnthemeConfig` from `@untheme/nuxt/config` types the options. Pass `theme` and `input` together.
 
-| Option   | Default             | Description                                                                         |
-| -------- | ------------------- | ----------------------------------------------------------------------------------- |
-| `config` | `untheme.config.ts` | The kit config to build, relative to the project root. Read when `theme` is absent. |
-| `theme`  | none                | A built base theme. Pass it with `input`.                                           |
-| `input`  | none                | The built boot selection, with one context for each modifier. Pass it with `theme`. |
+| Option   | Default             | Description                                                                                       |
+| -------- | ------------------- | ------------------------------------------------------------------------------------------------- |
+| `preset` | none                | A package that exports a kit build, such as `@untheme/aurora`. Read when `theme` is absent.       |
+| `config` | `untheme.config.ts` | The kit config to build, relative to the project root. Read when `theme` and `preset` are absent. |
+| `theme`  | none                | A built base theme. Pass it with `input`.                                                         |
+| `input`  | none                | The built boot selection, with one context for each modifier. Pass it with `theme`.               |
+| `route`  | `/api/untheme`      | The base route of the theme catalog, when the build has layers. `false` serves no catalog.        |
 
 When more than one Nuxt layer sets `untheme`, the module uses the value of the closest layer as a whole.
 
@@ -61,9 +67,11 @@ At build time the module validates the theme and the boot selection with `define
 - `#build/untheme/manifest.mjs` holds `manifest`. Each modifier and context has an id, a name, and a description. When the module builds the config, the names and descriptions come from the documents of the theme. A theme from the `theme` and `input` options gets titled ids.
 - `#build/untheme.css` holds the static cascade. The module writes the file and does not link it. See [Static CSS](#static-css).
 
-The `untheme/` modules are the same modules that `untheme build` writes. A kit config with `layers` also writes `#build/untheme/layers.mjs` and one `#build/untheme/layers/<id>.json` for each layer.
+- `#build/untheme/layers.mjs` holds `layers`, the id, name, and description of each layer of the build, and `layers.d.mts` the `LayerId` union. `#build/untheme/layers/<id>.json` is one layer. The list is empty when the build has no layers.
 
-The module also registers the runtime plugin and these auto-imports: `useUntheme()`, `useUnthemeRenderer()`, and `accessUntheme()`. It registers these type imports from the generated contract: `AppUnthemeContract`, `AppUnthemeTheme`, `AppUnthemeThemeLayer`, `AppUnthemePatch`, `AppUnthemeInput`, `AppUnthemeConfig`, and `AppUntheme`.
+The `untheme/` modules are the same modules that `untheme build` writes.
+
+The module also registers the runtime plugin and these auto-imports: `useUntheme()`, `useUnthemeRenderer()`, `useUnthemeCatalog()`, and `accessUntheme()`. It registers these type imports from the generated contract: `AppUnthemeContract`, `AppUnthemeTheme`, `AppUnthemeThemeLayer`, `AppUnthemePatch`, `AppUnthemeInput`, `AppUnthemeConfig`, and `AppUntheme`.
 
 ## `useUntheme()`
 
@@ -83,12 +91,36 @@ const ut = useUntheme();
 
 `accessUntheme()` returns the state that the service uses. This is the reactive `config` container from `useState`, with the `patch` and the `input`, and the `input` and `key` cookie refs. Most components need only `useUntheme()`.
 
-## Serving themes
+## `useUnthemeCatalog()`
 
-The service has one base theme and one applied layer. The app fetches themes as layers and calls `apply` with them. To serve the layers, create a catch-all server route file. The folder of the file is the base that the catalog client uses.
+The service has one base theme and one applied layer. The app fetches a theme as a layer and calls `apply` with it. When the build has layers, from a preset or from the kit config, the module serves them under `route` with the catalog wire protocol, and `useUnthemeCatalog()` returns a catalog client over that route. The client checks each layer against the contract of the app on the way in.
 
 ```ts
-// server/api/untheme/[...path].get.ts
+import { layers } from "#build/untheme/layers.mjs";
+
+const untheme = useUntheme();
+const catalog = useUnthemeCatalog();
+
+layers; // [{ id: "nord", name: "Nord", description: "..." }, ...]
+const page = await catalog.list({ limit: 50 }); // the same entries, paged and searchable
+const layer = await catalog.get("nord");
+if (layer) untheme.apply(layer);
+untheme.theme().id; // "nord"
+```
+
+The client fetches through the request, so a call during server rendering reaches the route of the same app. `useUnthemeCatalog()` throws when the module serves no catalog: the build has no layers, or `route` is `false`.
+
+## Serving themes
+
+The module serves the layers of the build itself. It writes the entries and the layers to a server template and registers a catch-all handler under `route`.
+
+- `GET {route}/themes?q=<JSON query>` answers a page of entries.
+- `GET {route}/themes/{id}` answers one layer, or 404.
+
+To serve themes from a store of your own, set `route: false` and mount `createThemeHandler` from `@untheme/nuxt/server` in a catch-all server route file. The folder of the file is the base that a catalog client uses.
+
+```ts
+// server/api/themes/[...path].get.ts
 import { createThemeHandler, listEntries } from "@untheme/nuxt/server";
 
 export default createThemeHandler({
@@ -97,60 +129,16 @@ export default createThemeHandler({
 });
 ```
 
-`createThemeHandler(provider)` returns an h3 event handler for the catalog wire protocol. `defineClient` from `untheme/catalog` reads this protocol.
-
-- `GET {base}/themes?q=<JSON query>` answers a page of entries.
-- `GET {base}/themes/{id}` answers one layer, or 404.
-
-The provider is the `Provider` type of `untheme/catalog`. `list` receives the validated and normalized query. `get` returns a layer, or `null` or `undefined` when no layer matches. `listEntries(entries, listing)` filters, sorts, and cuts a window from entries in memory.
+`createThemeHandler(provider)` returns an h3 event handler for the catalog wire protocol. `defineClient` from `untheme/catalog` reads this protocol. The provider is the `Provider` type of `untheme/catalog`. `list` receives the validated and normalized query. `get` returns a layer, or `null` or `undefined` when no layer matches. `listEntries(entries, listing)` filters, sorts, and cuts a window from entries in memory.
 
 ```ts
 // in the app
 import { defineClient } from "untheme/catalog";
 
-const catalog = defineClient(useUntheme().schema, { base: "/api/untheme" });
-const layer = await catalog.get("nord");
-if (layer) useUntheme().apply(layer);
+const catalog = defineClient(useUntheme().schema, { base: "/api/themes" });
 ```
 
-Put the file in the folder above `themes`, as in `server/api/untheme/[...path].get.ts`. The catch-all can have any name, or no name, as in `[...].get.ts`. The handler reads the base from the route of the file.
-
-### Aurora themes
-
-[Aurora](../../presets/aurora) has 31 themes. Each theme is a layer that the kit build of the package writes. `@untheme/aurora/layers` lists them with an id, a name, and a description. `@untheme/aurora/layers/<id>.json` is the layer. Serve the files from the dependency. The route below puts the layer files in the server assets of Nitro, so the output of `nuxt build` holds them.
-
-```ts
-// nuxt.config.ts
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const aurora = dirname(
-  fileURLToPath(import.meta.resolve("@untheme/aurora/package.json")),
-);
-
-export default defineNuxtConfig({
-  modules: ["@untheme/nuxt"],
-  nitro: {
-    serverAssets: [{ baseName: "themes", dir: join(aurora, ".dist/layers") }],
-  },
-});
-```
-
-```ts
-// server/api/untheme/[...].get.ts
-import { createThemeHandler, listEntries } from "@untheme/nuxt/server";
-import { layers } from "@untheme/aurora/layers";
-
-const ids = new Set(layers.map((layer) => layer.id));
-
-export default createThemeHandler({
-  list: (listing) => listEntries(layers, listing),
-  get: (id) =>
-    ids.has(id) ? useStorage("assets:themes").getItem(`${id}.json`) : null,
-});
-```
-
-The app applies a theme with the catalog client. `useUntheme().theme().id` is the id of the active theme. See the [Nuxt example](../../examples/nuxt).
+See the [Nuxt example](../../examples/nuxt) for aurora served as a preset.
 
 ## CSS
 

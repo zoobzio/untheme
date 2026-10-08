@@ -1,0 +1,8 @@
+{
+  "id": "charlie",
+  "name": "Charlie",
+  "tokens": {
+    "surface": "{black}",
+    "on-surface": "{white}"
+  }
+}
