@@ -1,10 +1,13 @@
 <script setup lang="ts">
-const { entries, active, select } = useThemes();
+const untheme = useUntheme();
+const { transition } = useDemo();
 
 const selection = computed({
-  get: () => active.value,
+  get: () => untheme.theme().id,
   set: (id: string) => {
-    void select(id);
+    void transition(async () => {
+      await untheme.select(id);
+    });
   },
 });
 </script>
@@ -13,7 +16,7 @@ const selection = computed({
   <fieldset class="axis" title="The palette: each theme is a layer of aurora">
     <legend class="axis-label">Theme</legend>
     <select v-model="selection" name="theme">
-      <option v-for="entry in entries" :key="entry.id" :value="entry.id">
+      <option v-for="entry in untheme.layers" :key="entry.id" :value="entry.id">
         {{ entry.name }}
       </option>
     </select>

@@ -14,7 +14,7 @@ import { makeNuxtUntheme } from "./client";
  *
  * The plugin keeps the container in {@link useState}. The patch and the
  * selection go from the server to the client. The base theme is the build
- * module. Vue tracks each read and write of the container. The plugin injects
+ * module. On the server, the cookies restore the selection and the layer. Vue tracks each read and write of the container. The plugin injects
  * the active token set as CSS custom properties. The block renders again when
  * the patch or the selection changes. The
  * plugin also sets the selected context of each modifier on the document root
@@ -23,7 +23,7 @@ import { makeNuxtUntheme } from "./client";
 export default defineNuxtPlugin({
   name: "untheme",
   setup: async (nuxtApp) => {
-    const untheme = makeNuxtUntheme(nuxtApp);
+    const untheme = await makeNuxtUntheme(nuxtApp);
     const unthemeRenderer = defineRenderer(untheme);
 
     const htmlAttrs: Record<string, ComputedRef<string>> = {};

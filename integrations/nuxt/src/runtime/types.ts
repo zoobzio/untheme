@@ -1,4 +1,5 @@
 import type { Contract } from "#build/untheme/config.mjs";
+import type { LayerEntry } from "#build/untheme/layers.mjs";
 import type { Config, Input, Layer, Patch, Theme, Untheme } from "untheme";
 import type { Renderer } from "untheme/css";
 
@@ -34,9 +35,15 @@ export type AppUnthemeInput = Input<AppUnthemeContract>;
 export type AppUnthemeConfig = Config<AppUnthemeContract>;
 
 /**
- * The runtime theme service bound to the app's contract.
+ * The service of the app: the `Untheme` service for its contract, with the
+ * layers of the build. `layers` lists them. `select` loads one by id through
+ * the catalog and applies it. It resolves the layer, or `undefined` for an id
+ * outside the build.
  */
-export type AppUntheme = Untheme<AppUnthemeContract>;
+export interface AppUntheme extends Untheme<AppUnthemeContract> {
+  layers: readonly LayerEntry[];
+  select: (id: string) => Promise<AppUnthemeThemeLayer | undefined>;
+}
 
 /**
  * The runtime hooks of the service, keyed by event name. The `#app`

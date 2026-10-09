@@ -41,9 +41,9 @@ description from the aurora documents.
 The palette is not an axis. Each aurora theme is a layer.
 `#build/untheme/layers.mjs` lists them and imports one by id.
 
-- `useThemes` lists the entries of the layers module. A pick loads the layer
-  through `useUnthemeCatalog()` and calls `apply`. The state of the app holds
-  the layer. The base theme stays in the build module.
+- The theme picker lists `layers` of `useUntheme()`. A pick calls `select`,
+  which loads the layer and applies it. The key cookie restores it on the next
+  request. The base theme stays in the build module.
 
 On every render, the module flattens the tokens of the active selection into
 `--token` CSS variables on the document root. The block is the base theme with
@@ -58,11 +58,10 @@ those variables, so a change restyles the page.
 | [`nuxt.config.ts`](./nuxt.config.ts)                           | The preset: aurora, served by the module             |
 | [`app/composables/demo.ts`](./app/composables/demo.ts)         | `useDemo`: the manifest and `shuffle`                |
 | [`app/composables/controls.ts`](./app/composables/controls.ts) | `useControls`: two-way binding for one modifier axis |
-| [`app/composables/themes.ts`](./app/composables/themes.ts)     | `useThemes`: the catalog client and `apply`          |
 | [`app/components/Demo.vue`](./app/components/Demo.vue)         | The demo bar that consumes the composables           |
 
 The composables call `useUntheme()`, the runtime service of the module.
-`demo.ts` lists the axes and shuffles the selection. `controls.ts` binds one axis
+`demo.ts` lists the axes and shuffles the selection and the theme. `controls.ts` binds one axis
 to its allowed contexts. `themes.ts` lists the themes and applies one.
 
 ## Test
@@ -78,14 +77,10 @@ build. The theme is in [`test/nuxt/fixtures.ts`](./test/nuxt/fixtures.ts). It
 has two axes over a few tokens. `mockModules` supplies the
 `#build/untheme/manifest.mjs` module that the demo imports. A stub of
 `useUntheme` returns a service over the theme and a reactive container.
-[`test/nuxt/layers.ts`](./test/nuxt/layers.ts) holds three layers. It stands in
-for `#build/untheme/layers.mjs`, and a stub of `useUnthemeCatalog` loads the
-same layers from memory.
 
-The tests check five things:
+The tests check four things:
 
 - The contexts that an axis offers.
 - The two-way binding of an axis.
 - The prose of the manifest.
-- The theme picker: the entries, a pick that applies a layer, and a miss.
-- `shuffle` picks a selection that the contract accepts.
+- `shuffle` picks a selection that the contract accepts, and a theme.

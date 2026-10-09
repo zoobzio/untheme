@@ -3,10 +3,8 @@ import type { Catalog } from "untheme/catalog";
 import type { Renderer } from "untheme/css";
 
 import { useNuxtApp } from "#app";
-import { layers, load } from "#build/untheme/layers.mjs";
-import { defineCatalog } from "untheme/catalog";
 
-import { listEntries } from "./entries";
+import { makeCatalog } from "./catalog";
 
 /**
  * Returns the `$untheme` service. Each read and write goes through the
@@ -44,8 +42,5 @@ export const useUnthemeRenderer = (): Renderer<AppUnthemeContract> => {
  * ```
  */
 export const useUnthemeCatalog = (): Catalog<AppUnthemeContract> => {
-  return defineCatalog(useUntheme().schema, {
-    list: (listing) => listEntries(layers, listing),
-    get: (id) => (Object.hasOwn(load, id) ? load[id]?.() : undefined),
-  });
+  return makeCatalog(useUntheme().schema);
 };

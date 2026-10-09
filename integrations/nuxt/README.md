@@ -74,7 +74,7 @@ The module also registers the runtime plugin and these auto-imports: `useUntheme
 
 ## `useUntheme()`
 
-`useUntheme()` returns the theme service. This is the `Untheme` service of [`@untheme/core`](../../packages/core) for the token contract of your app. See that package for the full API: `theme`, `get`, `resolve`, `set`, `swap`, `apply`, `create`, `update`, `delta`, `dirty`, `reset`, and more.
+`useUntheme()` returns the theme service. This is the `Untheme` service of [`@untheme/core`](../../packages/core) for the token contract of your app, with the layers of the build. See that package for the full API: `theme`, `get`, `resolve`, `set`, `swap`, `apply`, `create`, `update`, `delta`, `dirty`, `reset`, and more.
 
 ```vue
 <script setup>
@@ -83,8 +83,15 @@ const ut = useUntheme();
 
 <template>
   <button @click="ut.swap('color', 'dark')">Dark mode</button>
+  <select @change="ut.select($event.target.value)">
+    <option v-for="layer in ut.layers" :key="layer.id" :value="layer.id">
+      {{ layer.name }}
+    </option>
+  </select>
 </template>
 ```
+
+`layers` lists the layers of the build: an id, a name, and a description each. `select(id)` loads one by id and applies it. It resolves the layer, or `undefined` for an id outside the build. `theme().id` is the id of the applied layer, or of the base theme when none is applied. The key cookie restores the layer on the next request. See [Cookies](#cookies).
 
 `useUnthemeRenderer()` returns the [CSS renderer](../../packages/css) for the same service. Use it to get the custom property of a token with `var("primary")`, to read a live value, or to emit a static set.
 
@@ -160,7 +167,7 @@ The module writes the file again when the theme changes.
 
 ## Cookies and SSR
 
-The module saves the selection and the id of the patch to two cookies, `untheme-input` and `untheme-key`. `swap` writes the input cookie. `apply` and `update` write the key cookie. A patch with no id clears it. On the server, the module reads the input cookie before it renders. It checks the stored input with `schema.check.input`. When the input matches the contract, the module uses it. Otherwise the module clears the cookie. The module does not restore the layer from the key cookie. The app decides when to fetch and apply a layer.
+The module saves the selection and the id of the patch to two cookies, `untheme-input` and `untheme-key`. `swap` writes the input cookie. `apply`, `select`, and `update` write the key cookie. A patch with no id clears it. On the server, the module reads both cookies before it renders. It checks the stored input with `schema.check.input` and uses it when it matches the contract. It loads the layer that the key names through the catalog and uses it when it matches. A cookie that fails, or a key that names no layer of the build, is cleared.
 
 The state in `useState` holds the patch and the selection. The base theme is the build module and does not travel in the payload.
 

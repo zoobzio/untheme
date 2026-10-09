@@ -26,6 +26,8 @@ vi.mock("#app", () => ({
   defineNuxtPlugin: (def: unknown) => def,
 }));
 
+vi.mock("#build/untheme/layers.mjs", () => ({ layers: [], load: {} }));
+
 vi.mock("#imports", () => ({
   useState: (key: string, init: () => AppUnthemeConfig) => {
     const state = ref(init());

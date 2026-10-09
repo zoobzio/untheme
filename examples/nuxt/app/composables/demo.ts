@@ -2,21 +2,22 @@ import { manifest } from "#build/untheme/manifest.mjs";
 
 /**
  * Returns the state and actions for the interactive demo. `manifest` lists the
- * modifier axes, including the theme, each with its named contexts. `shuffle`
- * selects a random context for each axis. A selection change runs as a
- * view-transition cross-fade where the browser supports it.
+ * modifier axes, each with its named contexts. `shuffle` selects a random
+ * context for each axis and a random theme. A change runs as a
+ * view-transition cross-fade where the browser supports it, and the fade
+ * waits for an async change.
  */
 export const useDemo = () => {
   const untheme = useUntheme();
 
   const axes = untheme.modifiers();
 
-  const transition = (change: () => void) => {
+  const transition = async (change: () => void | Promise<void>) => {
     if (typeof document !== "undefined" && "startViewTransition" in document) {
-      document.startViewTransition(change);
+      await document.startViewTransition(change).updateCallbackDone;
       return;
     }
-    change();
+    await change();
   };
 
   const pick = <T>(list: readonly T[]): T => {
@@ -27,9 +28,9 @@ export const useDemo = () => {
     return found;
   };
 
-  /* Picks a random context for each axis and applies the result as one
-   selection. The schema validates the selection. */
-  const shuffle = () => {
+  /* Picks a random context for each axis and a random theme, and applies
+   both in one change. The schema validates the selection. */
+  const shuffle = async () => {
     const random: Record<string, string> = {};
     for (const axis of axes) {
       random[axis] = pick(untheme.contexts(axis));
@@ -37,8 +38,12 @@ export const useDemo = () => {
     if (!untheme.schema.check.input(random)) {
       return;
     }
-    transition(() => {
+    const theme = untheme.layers.length > 0 ? pick(untheme.layers).id : null;
+    await transition(async () => {
       untheme.config.input = random;
+      if (theme !== null) {
+        await untheme.select(theme);
+      }
     });
   };
 

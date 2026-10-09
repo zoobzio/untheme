@@ -1,16 +1,14 @@
-import type { Untheme } from "untheme";
+import type { Layer, Untheme } from "untheme";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { computed, reactive, ref } from "vue";
 
 import { makeUntheme } from "untheme";
-import { mockCatalog } from "@untheme/testing";
 
 import { modules, theme } from "./fixtures";
-import { fixtureLayers as layers } from "./layers";
+import { fixtureLayers, layers } from "./layers";
 import { useControls } from "../../app/composables/controls";
 import { useDemo } from "../../app/composables/demo";
-import { useThemes } from "../../app/composables/themes";
 
 /*
  * The manifest module of the fixture, in place of the build template. The
@@ -23,30 +21,31 @@ vi.mock("#build/untheme/manifest.mjs", async () => {
 });
 
 /*
- * The layers module of the fixture, in place of the build template. The
- * factory imports the layers itself, because `vi.mock` is hoisted above the
- * imports of this file.
- */
-vi.mock("#build/untheme/layers.mjs", async () => {
-  const { layers } = await import("./layers");
-  return { layers };
-});
-
-/*
  * The auto-imports of Nuxt, as globals for each test. `useUntheme` returns a
- * new service over the fixture theme and a reactive container.
- * `useUnthemeCatalog` returns a catalog over the fixture layers, in place of
- * the catalog over the layers module.
+ * new service over the fixture theme and a reactive container, with the
+ * fixture layers as the layers of the build.
  */
-let untheme: Untheme<typeof theme>;
+let untheme: Untheme<typeof theme> & {
+  layers: typeof layers;
+  select: (id: string) => Promise<Layer<typeof theme> | undefined>;
+};
 
 beforeEach(() => {
-  untheme = makeUntheme<typeof theme>(
+  const service = makeUntheme<typeof theme>(
     theme,
     reactive({ patch: {}, input: modules.config.input }),
   );
+  untheme = Object.assign(service, {
+    layers,
+    select: async (id: string) => {
+      const layer = fixtureLayers.find((layer) => layer.id === id);
+      if (layer !== undefined) {
+        service.apply(layer);
+      }
+      return layer;
+    },
+  });
   vi.stubGlobal("useUntheme", () => untheme);
-  vi.stubGlobal("useUnthemeCatalog", () => mockCatalog(untheme.schema, layers));
   vi.stubGlobal("useDemo", useDemo);
   vi.stubGlobal("computed", computed);
   vi.stubGlobal("ref", ref);
@@ -90,11 +89,13 @@ describe("useDemo", () => {
     });
   });
 
-  it("shuffles to a selection the contract accepts", () => {
+  it("shuffles to a selection the contract accepts, and to a theme", async () => {
     const { shuffle } = useDemo();
+    const ids = layers.map((entry) => entry.id);
     for (let round = 0; round < 10; round += 1) {
-      shuffle();
+      await shuffle();
       expect(untheme.schema.check.input(untheme.config.input)).toBe(true);
+      expect(ids).toContain(untheme.theme().id);
     }
   });
 
@@ -109,39 +110,5 @@ describe("useDemo", () => {
     const change = vi.fn();
     transition(change);
     expect(change).toHaveBeenCalledOnce();
-  });
-});
-
-describe("useThemes", () => {
-  it("starts from the layers manifest and the id of the base theme", () => {
-    const { entries, active } = useThemes();
-    expect(entries.map((entry) => entry.id)).toEqual([
-      "fixture",
-      "ink",
-      "paper",
-    ]);
-    expect(active.value).toBe("fixture");
-  });
-
-  it("applies the layer of a selected theme and tracks the active id", async () => {
-    const { active, select } = useThemes();
-    await select("ink");
-    expect(active.value).toBe("ink");
-    expect(untheme.config.patch).toEqual(layers[1]);
-    expect(untheme.resolve("surface")).toEqual(untheme.resolve("black"));
-  });
-
-  it("leaves the state alone on a miss", async () => {
-    const { active, select } = useThemes();
-    await select("ghost");
-    expect(active.value).toBe("fixture");
-    expect(untheme.config.patch).toEqual({});
-  });
-
-  it("checks each layer against the contract on the way in", async () => {
-    const catalog = mockCatalog(untheme.schema, [
-      { id: "bad", name: "Bad", tokens: { ghost: "#fff" } } as never,
-    ]);
-    await expect(catalog.get("bad")).rejects.toThrow();
   });
 });
