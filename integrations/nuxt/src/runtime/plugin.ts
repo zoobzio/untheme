@@ -1,4 +1,5 @@
 import type { ComputedRef } from "vue";
+import type { AppUnthemeContract } from "./types";
 
 import { defineNuxtPlugin } from "#app";
 import { useHead } from "#imports";
@@ -14,17 +15,26 @@ import { makeNuxtUntheme } from "./client";
  *
  * The plugin keeps the container in {@link useState}. The patch and the
  * selection go from the server to the client. The base theme is the build
- * module. Vue tracks each read and write of the container. The plugin injects
- * the active token set as CSS custom properties. The block renders again when
- * the patch or the selection changes. The
- * plugin also sets the selected context of each modifier on the document root
- * as a `data-<modifier>` attribute.
+ * module. On the server, the cookies restore the selection and the layer.
+ *
+ * The base cascade is the linked stylesheet of the module. The plugin sets
+ * the selected context of each modifier on the document root as a
+ * `data-<modifier>` attribute, which selects the context blocks of that
+ * stylesheet. The plugin injects the patch alone as a `<style>` tag: the
+ * tokens and the context overrides of the applied layer. The tag is empty
+ * when the patch is. The block renders again when the patch changes.
  */
 export default defineNuxtPlugin({
   name: "untheme",
   setup: async (nuxtApp) => {
-    const untheme = makeNuxtUntheme(nuxtApp);
+    const untheme = await makeNuxtUntheme(nuxtApp);
     const unthemeRenderer = defineRenderer(untheme);
+
+    // Renders over the base theme, so a render of the patch merges nothing.
+    const overrides = defineRenderer<AppUnthemeContract>({
+      theme: () => untheme.schema.base,
+      tokens: () => untheme.tokens(),
+    });
 
     const htmlAttrs: Record<string, ComputedRef<string>> = {};
     for (const modifier of untheme.modifiers()) {
@@ -35,12 +45,10 @@ export default defineNuxtPlugin({
 
     useHead({
       htmlAttrs,
-      style: computed(() => [
-        {
-          key: "untheme",
-          innerHTML: unthemeRenderer.root(),
-        },
-      ]),
+      style: computed(() => {
+        const css = overrides.patch(untheme.config.patch);
+        return css === "" ? [] : [{ key: "untheme", innerHTML: css }];
+      }),
     });
 
     await nuxtApp.callHook("untheme:ready", untheme);

@@ -4,12 +4,53 @@ import type { NuxtUnthemeConfig } from "../../src/config";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { theme, input } from "../fixtures";
 
+/**
+ * The fixture packages that stand in for presets. Each maps an export subpath
+ * to a fixture file. `@acme/preset` is a kit build. The others each break one
+ * export.
+ */
+const preset = vi.hoisted(() => {
+  const root = new URL("../fixtures/", import.meta.url);
+  const sound = {
+    config: "preset/config.mjs",
+    manifest: "preset/manifest.mjs",
+    layers: "preset/layers.mjs",
+    "layers/bravo.json": "preset/layers/bravo.json",
+    "layers/charlie.json": "preset/layers/charlie.json",
+  };
+  const packages: Record<string, Record<string, string>> = {
+    "@acme/preset": sound,
+    "@acme/no-config": { ...sound, config: "broken/config.mjs" },
+    "@acme/no-manifest": { ...sound, manifest: "broken/manifest.mjs" },
+    "@acme/no-layers": { ...sound, layers: "broken/layers.mjs" },
+    "@acme/mismatch": {
+      ...sound,
+      layers: "broken/mismatch.mjs",
+      "layers/bravo.json": "broken/layers/bravo.json",
+    },
+  };
+  return {
+    name: "@acme/preset",
+    resolve: (id: string): string | undefined => {
+      for (const [name, files] of Object.entries(packages)) {
+        const file = id.startsWith(`${name}/`)
+          ? files[id.slice(name.length + 1)]
+          : undefined;
+        if (file !== undefined) {
+          return decodeURIComponent(new URL(file, root).pathname);
+        }
+      }
+      return undefined;
+    },
+  };
+});
+
 const kit = vi.hoisted(() => ({
   addTemplate: vi.fn(),
   addPlugin: vi.fn(),
   addImports: vi.fn(),
-  addServerHandler: vi.fn(),
   createResolver: vi.fn(() => ({ resolve: (p: string) => `/resolved${p}` })),
+  tryResolveModule: vi.fn(async (id: string) => preset.resolve(id)),
 }));
 
 vi.mock("@nuxt/kit", () => ({
@@ -22,7 +63,7 @@ vi.mock("@nuxt/kit", () => ({
  * with the fixture theme under another id. This id shows that a theme comes
  * from the local build. The tests use the real `emit` of the kit.
  */
-const built = vi.hoisted(() => ({ id: "built" }));
+const built = vi.hoisted(() => ({ id: "built", layers: [] as unknown[] }));
 
 vi.mock("@untheme/kit", async (original) => ({
   ...(await original<typeof Kit>()),
@@ -30,6 +71,7 @@ vi.mock("@untheme/kit", async (original) => ({
   resolveKit: vi.fn(async () => ({
     theme: { ...structuredClone(theme), id: built.id },
     input: structuredClone(input),
+    layers: built.layers,
     outDir: "untheme",
     documents: ["/app/tokens/a.resolver.json", "/app/tokens/base.json"],
   })),
@@ -37,6 +79,7 @@ vi.mock("@untheme/kit", async (original) => ({
 
 import { emit, loadConfig, resolveKit } from "@untheme/kit";
 import module from "../../src/module";
+import { themes } from "../fixtures";
 
 /** The kit config that the stubbed loader returns. */
 const authored = { source: "./tokens/a.resolver.json" };
@@ -47,7 +90,6 @@ interface FakeNuxt {
     buildDir: string;
     watch: string[];
     css?: string[];
-    nitro: { serverAssets?: unknown[] };
     _layers?: { config?: { untheme?: unknown } | null }[];
   };
   hook: ReturnType<typeof vi.fn>;
@@ -92,16 +134,25 @@ let nuxt: FakeNuxt;
 describe("untheme module", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    built.layers = [];
     nuxt = {
       options: {
         rootDir: "/app",
         buildDir: "/app/.nuxt",
         watch: [],
-        nitro: {},
       },
       hook: vi.fn(),
     };
   });
+
+  /** The `untheme/layers.mjs` build template: the entries, parsed, and the code. */
+  const served = () => {
+    const code = template("untheme/layers.mjs")!.getContents();
+    const match = /export const layers = ([\s\S]*?);\nexport default/.exec(
+      code,
+    );
+    return { entries: JSON.parse(match![1]!) as unknown, code };
+  };
 
   it("has the expected meta", () => {
     expect(mod.meta).toEqual({ name: "untheme", configKey: "untheme" });
@@ -166,11 +217,113 @@ describe("untheme module", () => {
     });
   });
 
-  it("registers no server routes and no server assets", async () => {
+  it("adds an empty import map for a passed contract", async () => {
     await mod.setup(options, nuxt);
-    expect(kit.addServerHandler).not.toHaveBeenCalled();
-    expect(nuxt.options.nitro.serverAssets).toBeUndefined();
-    expect(nuxt.hook).not.toHaveBeenCalled();
+    const { entries, code } = served();
+    expect(entries).toEqual([]);
+    expect(code).toContain("export const load = {\n\n};");
+    expect(template("untheme/layers.d.mts")!.getContents()).toContain(
+      "export type LayerId = never;",
+    );
+  });
+
+  describe("given a preset", () => {
+    const options: NuxtUnthemeConfig = { preset: preset.name };
+
+    it("takes the theme, selection, and manifest of the package", async () => {
+      await mod.setup(options, nuxt);
+      expect(loadConfig).not.toHaveBeenCalled();
+      expect(resolveKit).not.toHaveBeenCalled();
+      expect(nuxt.options.watch).toEqual([]);
+      expect(exported("theme")).toEqual(theme);
+      expect(exported("input")).toEqual(input);
+      expect(template("untheme/manifest.mjs")!.getContents()).toContain(
+        '"name": "Colour"',
+      );
+      expect(kit.tryResolveModule).toHaveBeenCalledWith(
+        `${preset.name}/config`,
+        new URL("file:///app/package.json"),
+      );
+    });
+
+    it("re-exports the list of the package and imports each layer from it", async () => {
+      await mod.setup(options, nuxt);
+      const code = template("untheme/layers.mjs")!.getContents();
+      expect(code).toContain(
+        'export { layers, default } from "@acme/preset/layers";',
+      );
+      expect(code).toContain(
+        '"charlie": () => import("@acme/preset/layers/charlie.json").then((m) => m.default),',
+      );
+      expect(code).not.toContain('"name": "Charlie"');
+      expect(template("untheme/layers.mjs")!.write).toBe(true);
+      expect(template("untheme/layers.d.mts")!.getContents()).toContain(
+        'export { layers, default, type LayerId, type LayerEntry } from "@acme/preset/layers";',
+      );
+    });
+
+    it("writes no layer file of its own", async () => {
+      await mod.setup(options, nuxt);
+      expect(template("untheme/layers/bravo.json")).toBeUndefined();
+      expect(template("untheme/layers/charlie.json")).toBeUndefined();
+    });
+
+    it("names the missing export of a package that is not a preset", async () => {
+      await expect(mod.setup({ preset: "@acme/tokens" }, nuxt)).rejects.toThrow(
+        /the preset "@acme\/tokens" does not export "\.\/config"/,
+      );
+      await expect(mod.setup({ preset: "" }, nuxt)).rejects.toThrow(
+        /`preset` must be a package name/,
+      );
+      await expect(
+        mod.setup({ preset: 1 as unknown as string }, nuxt),
+      ).rejects.toThrow(/`preset` must be a package name/);
+    });
+
+    it("names the export of a package that breaks the shape of a kit build", async () => {
+      await expect(
+        mod.setup({ preset: "@acme/no-config" }, nuxt),
+      ).rejects.toThrow(
+        /"@acme\/no-config\/config" must export the theme and input/,
+      );
+      await expect(
+        mod.setup({ preset: "@acme/no-manifest" }, nuxt),
+      ).rejects.toThrow(
+        /"@acme\/no-manifest\/manifest" must export a manifest/,
+      );
+      await expect(
+        mod.setup({ preset: "@acme/no-layers" }, nuxt),
+      ).rejects.toThrow(
+        /"@acme\/no-layers\/layers" must export a list of layers/,
+      );
+      await expect(
+        mod.setup({ preset: "@acme/mismatch" }, nuxt),
+      ).rejects.toThrow(
+        /"@acme\/mismatch\/layers\/bravo.json" is not the layer "bravo"/,
+      );
+    });
+
+    it("auto-imports useUnthemeCatalog", async () => {
+      await mod.setup(options, nuxt);
+      const imports = kit.addImports.mock.calls[0]?.[0];
+      const names = imports.map((entry: { name: string }) => entry.name);
+      expect(names).toContain("useUnthemeCatalog");
+    });
+  });
+
+  it("writes the layers of a locally built config once and imports them", async () => {
+    built.layers = [
+      { entry: { id: "charlie", name: "Charlie" }, layer: themes.charlie },
+    ];
+    await mod.setup({}, nuxt);
+    const { entries, code } = served();
+    expect(entries).toEqual([{ id: "charlie", name: "Charlie" }]);
+    expect(code).toContain(
+      '"charlie": () => import("./layers/charlie.json").then((m) => m.default),',
+    );
+    const file = template("untheme/layers/charlie.json");
+    expect(file!.write).toBe(true);
+    expect(JSON.parse(file!.getContents())).toEqual(themes.charlie);
   });
 
   it("escapes quotes in generated context names", async () => {
@@ -223,15 +376,18 @@ describe("untheme module", () => {
     );
   });
 
-  it("does not link the stylesheet into the app css", async () => {
+  it("links the stylesheet into the app css", async () => {
     await mod.setup(options, nuxt);
-    expect(nuxt.options.css).toBeUndefined();
+    expect(nuxt.options.css).toEqual(["/app/.nuxt/untheme.css"]);
   });
 
-  it("leaves css the app already carries as it is", async () => {
+  it("links the stylesheet before the css the app already carries", async () => {
     nuxt.options.css = ["~/assets/css/base.css"];
     await mod.setup(options, nuxt);
-    expect(nuxt.options.css).toEqual(["~/assets/css/base.css"]);
+    expect(nuxt.options.css).toEqual([
+      "/app/.nuxt/untheme.css",
+      "~/assets/css/base.css",
+    ]);
   });
 
   it("registers the key declarations with the token union and modifier structure", async () => {
@@ -244,13 +400,17 @@ describe("untheme module", () => {
     }
   });
 
-  it("registers exactly the modules the kit emits", async () => {
+  it("registers the modules the kit emits, with the import map appended", async () => {
     await mod.setup(options, nuxt);
     for (const file of emit({ theme, input })) {
       const registered = template(`untheme/${file.path}`);
       expect(registered).toBeDefined();
       expect(registered!.write).toBe(true);
-      expect(registered!.getContents()).toBe(file.contents);
+      if (file.path.startsWith("layers")) {
+        expect(registered!.getContents().startsWith(file.contents)).toBe(true);
+      } else {
+        expect(registered!.getContents()).toBe(file.contents);
+      }
     }
   });
 

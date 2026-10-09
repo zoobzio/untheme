@@ -40,6 +40,7 @@ The `Renderer` has these methods:
 - `var(token)` returns the `var()` text of a token.
 - `value(token)` returns the active binding of a token as CSS text.
 - `sheet()` returns the static cascade.
+- `patch(patch)` returns the cascade of one patch: its tokens under `:root`, then its context overrides as attribute blocks. It returns an empty string for an empty patch.
 
 ## Static sets
 

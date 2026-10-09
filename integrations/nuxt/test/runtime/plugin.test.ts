@@ -26,6 +26,8 @@ vi.mock("#app", () => ({
   defineNuxtPlugin: (def: unknown) => def,
 }));
 
+vi.mock("#build/untheme/layers.mjs", () => ({ layers: [], load: {} }));
+
 vi.mock("#imports", () => ({
   useState: (key: string, init: () => AppUnthemeConfig) => {
     const state = ref(init());
@@ -74,17 +76,10 @@ describe("untheme plugin", () => {
     expect(provide.unthemeRenderer).toBeDefined();
   });
 
-  it("mirrors the selection as data attributes and injects token CSS", async () => {
+  it("mirrors the selection as data attributes and injects no CSS", async () => {
     await setup();
     expect(headCalls[0]?.htmlAttrs["data-color"]?.value).toBe("light");
-    expect(headCalls[0]?.style.value[0]?.key).toBe("untheme");
-    const css = headCalls[0]?.style.value[0]?.innerHTML;
-    if (css === undefined) {
-      throw new Error("expected injected token CSS");
-    }
-    expect(css).toContain(":root {");
-    expect(css).toContain("--white: #ffffff;");
-    expect(css).toContain("--primary: var(--blue);");
+    expect(headCalls[0]?.style.value).toEqual([]);
   });
 
   it("emits untheme:ready with the service", async () => {
@@ -101,44 +96,43 @@ describe("untheme plugin", () => {
       expect(headCalls[0]?.htmlAttrs["data-color"]?.value).toBe("dark");
     });
 
-    it("re-renders the token CSS when the context changes", async () => {
+    it("renders no CSS when the context changes", async () => {
       await setup();
-      expect(headCalls[0]?.style.value[0]?.innerHTML).toContain(
-        "--primary: var(--blue);",
-      );
       config.value.input.color = "dark";
       await nextTick();
-      expect(headCalls[0]?.style.value[0]?.innerHTML).toContain(
-        "--primary: var(--indigo);",
-      );
+      expect(headCalls[0]?.style.value).toEqual([]);
     });
 
-    it("re-renders the token CSS with the bindings of an applied layer", async () => {
+    it("renders only the bindings of an applied layer", async () => {
       const provide = await setup();
       const charlie = themes.charlie;
       if (charlie === undefined) {
         throw new Error("expected the charlie theme fixture");
       }
-      expect(headCalls[0]?.style.value[0]?.innerHTML).toContain(
-        "--surface: var(--white);",
-      );
       (provide.untheme as { apply: (layer: unknown) => void }).apply(charlie);
       await nextTick();
       const css = headCalls[0]?.style.value[0]?.innerHTML;
+      expect(headCalls[0]?.style.value[0]?.key).toBe("untheme");
+      expect(css).toContain(":root {");
       expect(css).toContain("--surface: var(--black);");
       expect(css).toContain("--on-surface: var(--white);");
-      expect(css).toContain("--white: #ffffff;");
+      expect(css).not.toContain("--white: #ffffff;");
+      expect(css).not.toContain("--primary:");
     });
 
-    it("re-renders the token CSS with a patch", async () => {
+    it("renders only the tokens of a patch, and nothing once it is reset", async () => {
       const provide = await setup();
-      (provide.untheme as { update: (patch: unknown) => void }).update({
-        tokens: { primary: "{indigo}" },
-      });
+      const service = provide.untheme as {
+        update: (patch: unknown) => void;
+        config: { patch: unknown };
+      };
+      service.update({ tokens: { primary: "{indigo}" } });
       await nextTick();
-      expect(headCalls[0]?.style.value[0]?.innerHTML).toContain(
-        "--primary: var(--indigo);",
-      );
+      const css = headCalls[0]?.style.value[0]?.innerHTML;
+      expect(css).toBe(":root {\n --primary: var(--indigo);\n}");
+      service.config.patch = {};
+      await nextTick();
+      expect(headCalls[0]?.style.value).toEqual([]);
     });
   });
 });

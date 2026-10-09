@@ -48,7 +48,7 @@ The service has one base theme and one applied layer. A layer has an identity an
 ```ts
 import { defineClient } from "untheme/catalog";
 
-const catalog = defineClient(ut.schema, { base: "/api/untheme" });
+const catalog = defineClient(ut.schema, { base: "/api/theme" });
 
 const midnight = await catalog.get("midnight"); // checked against the contract
 if (midnight) {

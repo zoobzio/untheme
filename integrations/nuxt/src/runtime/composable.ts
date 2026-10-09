@@ -1,7 +1,10 @@
 import type { AppUnthemeContract, AppUntheme } from "./types";
+import type { Catalog } from "untheme/catalog";
 import type { Renderer } from "untheme/css";
 
 import { useNuxtApp } from "#app";
+
+import { makeCatalog } from "./catalog";
 
 /**
  * Returns the `$untheme` service. Each read and write goes through the
@@ -25,4 +28,19 @@ export const useUntheme = (): AppUntheme => {
 export const useUnthemeRenderer = (): Renderer<AppUnthemeContract> => {
   const { $unthemeRenderer } = useNuxtApp();
   return $unthemeRenderer;
+};
+
+/**
+ * Returns a catalog over the layers of the build. `list` pages the entries of
+ * the layers module. `get` imports one layer on demand and checks it against
+ * the contract of the app. The catalog is empty when the build has no layers.
+ *
+ * ```ts
+ * const catalog = useUnthemeCatalog();
+ * const layer = await catalog.get("nord");
+ * if (layer) useUntheme().apply(layer);
+ * ```
+ */
+export const useUnthemeCatalog = (): Catalog<AppUnthemeContract> => {
+  return makeCatalog(useUntheme().schema);
 };

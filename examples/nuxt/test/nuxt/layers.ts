@@ -12,11 +12,8 @@ export const fixtureLayers: Layer<typeof theme>[] = [
     name: "Ink",
     tokens: { surface: "{black}", "on-surface": "{white}" },
   },
-  { id: "paper", name: "Paper", tokens: { gap: "{gap}" } },
+  { id: "paper", name: "Paper", tokens: { gap: { value: 12, unit: "px" } } },
 ];
 
-/**
- * The layers manifest of the tests. `vitest.config.ts` aliases
- * `@untheme/aurora/layers` to this module.
- */
+/** The entries of the fixture layers, as `layers` of the service lists them. */
 export const layers = fixtureLayers.map(({ id, name }) => ({ id, name }));

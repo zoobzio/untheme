@@ -18,6 +18,9 @@
       "#imports": ["../nuxt/src/stubs/imports.d.ts"],
       "#build/untheme/config.mjs": [
         "../nuxt/src/stubs/build/untheme/config.d.mts"
+      ],
+      "#build/untheme/layers.mjs": [
+        "../nuxt/src/stubs/build/untheme/layers.d.mts"
       ]
     }
   },

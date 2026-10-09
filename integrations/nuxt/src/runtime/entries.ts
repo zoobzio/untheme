@@ -10,8 +10,11 @@ import type { Entry, Listing, Page } from "untheme/catalog";
  * @param listing - The normalized listing that the handler received.
  * @returns The page that the listing selects.
  */
-export const listEntries = (entries: Entry[], listing: Listing): Page => {
-  let matches = entries;
+export const listEntries = (
+  entries: readonly Entry[],
+  listing: Listing,
+): Page => {
+  let matches: readonly Entry[] = entries;
   if (listing.search !== undefined) {
     const needle = listing.search.toLowerCase();
     matches = matches.filter((entry) =>

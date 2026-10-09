@@ -1,0 +1,12 @@
+{
+  "id": "bravo",
+  "name": "Bravo",
+  "modifiers": {
+    "color": {
+      "dark": {
+        "primary": "{blue}",
+        "surface": "{black}"
+      }
+    }
+  }
+}

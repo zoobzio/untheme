@@ -94,9 +94,6 @@ importers:
         specifier: workspace:*
         version: link:../../packages/untheme
     devDependencies:
-      '@untheme/kit':
-        specifier: workspace:*
-        version: link:../../packages/kit
       '@untheme/testing':
         specifier: workspace:*
         version: link:../../packages/testing

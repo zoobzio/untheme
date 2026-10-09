@@ -1,6 +1,6 @@
 # @untheme/nuxt
 
-The Nuxt module for untheme. The module builds a theme from DTCG JSON at build time and adds a runtime theme service, a reactive stylesheet, and cookie storage for the selection.
+The Nuxt module for untheme. The module builds a theme from DTCG JSON at build time and adds a base stylesheet, a runtime theme service, a reactive style tag for the applied layer, and cookie storage for the selection and the layer.
 
 ## Install
 
@@ -14,22 +14,26 @@ pnpm add @untheme/nuxt
 // nuxt.config.ts
 export default defineNuxtConfig({
   modules: ["@untheme/nuxt"],
+  untheme: { preset: "@untheme/aurora" },
 });
 ```
 
-```ts
-// untheme.config.ts
-import { defineConfig } from "@untheme/kit";
+The module gets the theme in one of three ways.
 
-export default defineConfig({
-  source: "npm:/@untheme/aurora/src/resolver.json",
-});
-```
+- **A preset.** Name a package that exports a kit build with `preset`. The module takes the base theme, the boot selection, the manifest, and the layers from the package, and serves the layers as a theme catalog. [Aurora](../../presets/aurora) is a preset. So is any package whose `untheme build` output it exports: `./config`, `./manifest`, `./layers`, and `./layers/<id>.json`. The module resolves the package from the project root, so it is a dependency of the app.
+- **Built here.** When the options have no `theme` and no `preset`, the module reads `untheme.config.ts` in the project root. The module builds the config in memory with [`@untheme/kit`](../../packages/kit). The `config` option names a different file. Nuxt watches the config file and each JSON document that the build read. A change to one of these files restarts the dev server. The layers of the config are served the same way as the layers of a preset.
 
-The module gets the theme in one of two ways.
+  ```ts
+  // untheme.config.ts
+  import { defineConfig } from "@untheme/kit";
 
-- **Built here.** When the options have no `theme`, the module reads `untheme.config.ts` in the project root. The module builds the config in memory with [`@untheme/kit`](../../packages/kit). The `config` option names a different file. Nuxt watches the config file and each JSON document that the build read. A change to one of these files restarts the dev server.
-- **Built elsewhere.** Pass the `theme` and `input` from a kit build. The build can come from a theme package in a monorepo or from a published theme package. The module uses the values as you pass them.
+  export default defineConfig({
+    source: "./app.resolver.json",
+    layers: "npm:/@untheme/aurora/src/themes",
+  });
+  ```
+
+- **Built elsewhere.** Pass the `theme` and `input` from a kit build. The module uses the values as you pass them, and serves no layers.
 
   ```ts
   import config from "@acme/theme/config";
@@ -44,11 +48,12 @@ The module gets the theme in one of two ways.
 
 `defineUnthemeConfig` from `@untheme/nuxt/config` types the options. Pass `theme` and `input` together.
 
-| Option   | Default             | Description                                                                         |
-| -------- | ------------------- | ----------------------------------------------------------------------------------- |
-| `config` | `untheme.config.ts` | The kit config to build, relative to the project root. Read when `theme` is absent. |
-| `theme`  | none                | A built base theme. Pass it with `input`.                                           |
-| `input`  | none                | The built boot selection, with one context for each modifier. Pass it with `theme`. |
+| Option   | Default             | Description                                                                                       |
+| -------- | ------------------- | ------------------------------------------------------------------------------------------------- |
+| `preset` | none                | A package that exports a kit build, such as `@untheme/aurora`. Read when `theme` is absent.       |
+| `config` | `untheme.config.ts` | The kit config to build, relative to the project root. Read when `theme` and `preset` are absent. |
+| `theme`  | none                | A built base theme. Pass it with `input`.                                                         |
+| `input`  | none                | The built boot selection, with one context for each modifier. Pass it with `theme`.               |
 
 When more than one Nuxt layer sets `untheme`, the module uses the value of the closest layer as a whole.
 
@@ -59,15 +64,17 @@ At build time the module validates the theme and the boot selection with `define
 - `#build/untheme/config.mjs` holds the `theme` and `input` data. The file `config.d.mts` types the data with the `Contract`.
 - `#build/untheme/index.mjs` holds the token list, the modifier list, and the `isToken` and `isModifier` guards. The file `index.d.mts` has the `Token` union, the `Overrides` type, and the `Mod` type. `Mod` describes the contexts of each modifier.
 - `#build/untheme/manifest.mjs` holds `manifest`. Each modifier and context has an id, a name, and a description. When the module builds the config, the names and descriptions come from the documents of the theme. A theme from the `theme` and `input` options gets titled ids.
-- `#build/untheme.css` holds the static cascade. The module writes the file and does not link it. See [Static CSS](#static-css).
+- `#build/untheme.css` holds the base cascade. The module links it into the CSS of the app. See [CSS](#css).
 
-The `untheme/` modules are the same modules that `untheme build` writes. A kit config with `layers` also writes `#build/untheme/layers.mjs` and one `#build/untheme/layers/<id>.json` for each layer.
+- `#build/untheme/layers.mjs` holds `layers`, the id, name, and description of each layer of the build, and `load`, one lazy import for each layer by id. The file `layers.d.mts` has the `LayerId` union. For a preset the list and the layers are the package's own, re-exported. For a kit config the module writes the list and `#build/untheme/layers/<id>.json`. The list and the map are empty when the build has no layers.
 
-The module also registers the runtime plugin and these auto-imports: `useUntheme()`, `useUnthemeRenderer()`, and `accessUntheme()`. It registers these type imports from the generated contract: `AppUnthemeContract`, `AppUnthemeTheme`, `AppUnthemeThemeLayer`, `AppUnthemePatch`, `AppUnthemeInput`, `AppUnthemeConfig`, and `AppUntheme`.
+The `untheme/` modules are the same modules that `untheme build` writes.
+
+The module also registers the runtime plugin and these auto-imports: `useUntheme()`, `useUnthemeRenderer()`, `useUnthemeCatalog()`, and `accessUntheme()`. It registers these type imports from the generated contract: `AppUnthemeContract`, `AppUnthemeTheme`, `AppUnthemeThemeLayer`, `AppUnthemePatch`, `AppUnthemeInput`, `AppUnthemeConfig`, and `AppUntheme`.
 
 ## `useUntheme()`
 
-`useUntheme()` returns the theme service. This is the `Untheme` service of [`@untheme/core`](../../packages/core) for the token contract of your app. See that package for the full API: `theme`, `get`, `resolve`, `set`, `swap`, `apply`, `create`, `update`, `delta`, `dirty`, `reset`, and more.
+`useUntheme()` returns the theme service. This is the `Untheme` service of [`@untheme/core`](../../packages/core) for the token contract of your app, with the layers of the build. See that package for the full API: `theme`, `get`, `resolve`, `set`, `swap`, `apply`, `create`, `update`, `delta`, `dirty`, `reset`, and more.
 
 ```vue
 <script setup>
@@ -76,19 +83,45 @@ const ut = useUntheme();
 
 <template>
   <button @click="ut.swap('color', 'dark')">Dark mode</button>
+  <select @change="ut.select($event.target.value)">
+    <option v-for="layer in ut.layers" :key="layer.id" :value="layer.id">
+      {{ layer.name }}
+    </option>
+  </select>
 </template>
 ```
+
+`layers` lists the layers of the build: an id, a name, and a description each. `select(id)` loads one by id and applies it. It resolves the layer, or `undefined` for an id outside the build. `theme().id` is the id of the applied layer, or of the base theme when none is applied. The key cookie restores the layer on the next request. See [Cookies](#cookies).
 
 `useUnthemeRenderer()` returns the [CSS renderer](../../packages/css) for the same service. Use it to get the custom property of a token with `var("primary")`, to read a live value, or to emit a static set.
 
 `accessUntheme()` returns the state that the service uses. This is the reactive `config` container from `useState`, with the `patch` and the `input`, and the `input` and `key` cookie refs. Most components need only `useUntheme()`.
 
-## Serving themes
+## `useUnthemeCatalog()`
 
-The service has one base theme and one applied layer. The app fetches themes as layers and calls `apply` with them. To serve the layers, create a catch-all server route file. The folder of the file is the base that the catalog client uses.
+The service has one base theme and one applied layer. The app loads a theme as a layer and calls `apply` with it. `useUnthemeCatalog()` returns a catalog over the layers of the build. `list` pages the entries of the layers module. `get` imports one layer on demand and checks it against the contract of the app. Each layer is its own chunk, so the client loads only the themes it applies, and a new build has new chunk URLs.
 
 ```ts
-// server/api/untheme/[...path].get.ts
+import { layers } from "#build/untheme/layers.mjs";
+
+const untheme = useUntheme();
+const catalog = useUnthemeCatalog();
+
+layers; // [{ id: "nord", name: "Nord", description: "..." }, ...]
+const page = await catalog.list({ limit: 50 }); // the same entries, paged and searchable
+const layer = await catalog.get("nord");
+if (layer) untheme.apply(layer);
+untheme.theme().id; // "nord"
+```
+
+The catalog is empty when the build has no layers. The import works during server rendering, so a layer applied on the server renders on the first response.
+
+## Remote themes
+
+For themes that are not in the build, mount `createThemeHandler` from `@untheme/nuxt/server` in a catch-all server route file. The folder of the file is the base that a catalog client uses.
+
+```ts
+// server/api/themes/[...path].get.ts
 import { createThemeHandler, listEntries } from "@untheme/nuxt/server";
 
 export default createThemeHandler({
@@ -97,66 +130,22 @@ export default createThemeHandler({
 });
 ```
 
-`createThemeHandler(provider)` returns an h3 event handler for the catalog wire protocol. `defineClient` from `untheme/catalog` reads this protocol.
-
-- `GET {base}/themes?q=<JSON query>` answers a page of entries.
-- `GET {base}/themes/{id}` answers one layer, or 404.
-
-The provider is the `Provider` type of `untheme/catalog`. `list` receives the validated and normalized query. `get` returns a layer, or `null` or `undefined` when no layer matches. `listEntries(entries, listing)` filters, sorts, and cuts a window from entries in memory.
+`createThemeHandler(provider)` returns an h3 event handler for the catalog wire protocol. `defineClient` from `untheme/catalog` reads this protocol. The provider is the `Provider` type of `untheme/catalog`. `list` receives the validated and normalized query. `get` returns a layer, or `null` or `undefined` when no layer matches. `listEntries(entries, listing)` filters, sorts, and cuts a window from entries in memory.
 
 ```ts
 // in the app
 import { defineClient } from "untheme/catalog";
 
-const catalog = defineClient(useUntheme().schema, { base: "/api/untheme" });
-const layer = await catalog.get("nord");
-if (layer) useUntheme().apply(layer);
+const catalog = defineClient(useUntheme().schema, { base: "/api/themes" });
 ```
 
-Put the file in the folder above `themes`, as in `server/api/untheme/[...path].get.ts`. The catch-all can have any name, or no name, as in `[...].get.ts`. The handler reads the base from the route of the file.
-
-### Aurora themes
-
-[Aurora](../../presets/aurora) has 31 themes. Each theme is a layer that the kit build of the package writes. `@untheme/aurora/layers` lists them with an id, a name, and a description. `@untheme/aurora/layers/<id>.json` is the layer. Serve the files from the dependency. The route below puts the layer files in the server assets of Nitro, so the output of `nuxt build` holds them.
-
-```ts
-// nuxt.config.ts
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const aurora = dirname(
-  fileURLToPath(import.meta.resolve("@untheme/aurora/package.json")),
-);
-
-export default defineNuxtConfig({
-  modules: ["@untheme/nuxt"],
-  nitro: {
-    serverAssets: [{ baseName: "themes", dir: join(aurora, ".dist/layers") }],
-  },
-});
-```
-
-```ts
-// server/api/untheme/[...].get.ts
-import { createThemeHandler, listEntries } from "@untheme/nuxt/server";
-import { layers } from "@untheme/aurora/layers";
-
-const ids = new Set(layers.map((layer) => layer.id));
-
-export default createThemeHandler({
-  list: (listing) => listEntries(layers, listing),
-  get: (id) =>
-    ids.has(id) ? useStorage("assets:themes").getItem(`${id}.json`) : null,
-});
-```
-
-The app applies a theme with the catalog client. `useUntheme().theme().id` is the id of the active theme. See the [Nuxt example](../../examples/nuxt).
+See the [Nuxt example](../../examples/nuxt) for aurora served as a preset.
 
 ## CSS
 
-The runtime plugin injects one reactive `<style>` tag. The tag holds a `:root` block with one CSS custom property for each active token. The plugin makes the block with [`defineRenderer(untheme).root()`](../../packages/css) from `untheme/css`. The block is the result of the base theme, the patch, and the selection. The block renders again when one of them changes.
+The module renders the base cascade to `#build/untheme.css` at build time and links it into the CSS of the app. The module renders the file with [`defineRenderer(...).sheet()`](../../packages/css) over the base theme. The file has the base bindings under `:root`. Each modifier context follows as a `[data-<modifier>="<context>"]` block. The cascade sits in an `@layer untheme` block, so your own unlayered CSS wins over it. Editors index the file and complete `var(--surface)`.
 
-The plugin also sets the selected context of each modifier on `<html>` as a `data-<modifier>` attribute, such as `data-color="dark"`. Your stylesheets can select on the attribute.
+The runtime plugin sets the selected context of each modifier on `<html>` as a `data-<modifier>` attribute, such as `data-color="dark"`. The attribute selects the context blocks of the stylesheet, so a `swap` renders no CSS. Your stylesheets can select on the attribute too.
 
 ```css
 [data-color="dark"] .card {
@@ -164,21 +153,11 @@ The plugin also sets the selected context of each modifier on `<html>` as a `dat
 }
 ```
 
-## Static CSS
-
-The module renders the static cascade to `#build/untheme.css`. The module writes the file and does not link it. The module renders the file with [`defineRenderer(...).sheet()`](../../packages/css) over the base theme. The file has the base bindings under `:root`. Each modifier context follows as a `[data-<modifier>="<context>"]` block. Editors index the file and complete `var(--surface)`.
-
-The cascade sits in an `@layer untheme` block. If you import the file, the unlayered `<style>` tag of the runtime plugin wins over the layer. Your own unlayered CSS also wins over the layer.
-
-```css
-@import "#build/untheme.css";
-```
-
-The module writes the file again when the theme changes.
+The plugin injects the patch alone as one reactive `<style>` tag: the tokens that an applied layer or `update` rebinds, and the context overrides a layer carries, made with [`defineRenderer(...).patch()`](../../packages/css). The tag is unlayered, so it wins over the base cascade. It is empty when the patch is, so a page with no applied layer carries no runtime CSS. The tag renders again when the patch changes.
 
 ## Cookies and SSR
 
-The module saves the selection and the id of the patch to two cookies, `untheme-input` and `untheme-key`. `swap` writes the input cookie. `apply` and `update` write the key cookie. A patch with no id clears it. On the server, the module reads the input cookie before it renders. It checks the stored input with `schema.check.input`. When the input matches the contract, the module uses it. Otherwise the module clears the cookie. The module does not restore the layer from the key cookie. The app decides when to fetch and apply a layer.
+The module saves the selection and the id of the patch to two cookies, `untheme-input` and `untheme-key`. `swap` writes the input cookie. `apply`, `select`, and `update` write the key cookie. A patch with no id clears it. On the server, the module reads both cookies before it renders. It checks the stored input with `schema.check.input` and uses it when it matches the contract. It loads the layer that the key names through the catalog and uses it when it matches. A cookie that fails, or a key that names no layer of the build, is cleared.
 
 The state in `useState` holds the patch and the selection. The base theme is the build module and does not travel in the payload.
 
