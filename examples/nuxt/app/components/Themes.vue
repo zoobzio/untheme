@@ -1,7 +1,5 @@
 <script setup lang="ts">
-const { entries, active, refresh, select } = useThemes();
-
-onMounted(refresh);
+const { entries, active, select } = useThemes();
 
 const selection = computed({
   get: () => active.value,

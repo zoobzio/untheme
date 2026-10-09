@@ -1,6 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const service = { marker: "untheme", schema: { marker: "schema" } };
+import { themes } from "../fixtures";
+
+/** A schema that accepts every layer, and records what it inspected. */
+const schema = {
+  inspect: {
+    layer: vi.fn((value: unknown) => ({ success: true, data: value })),
+  },
+};
+const service = { marker: "untheme", schema };
 const renderer = { marker: "renderer" };
 const nuxtApp = { $untheme: service, $unthemeRenderer: renderer };
 
@@ -8,26 +16,24 @@ vi.mock("#app", () => ({
   useNuxtApp: () => nuxtApp,
 }));
 
-/** The runtime config and the request fetch of the app, as the tests set them. */
-const runtime = vi.hoisted(() => ({
-  public: {} as Record<string, unknown>,
-  raw: vi.fn(async () => new Response("{}", { status: 200 })),
+/** The layers module of the build, with a loader for each layer. */
+const build = vi.hoisted(() => ({
+  bravo: vi.fn(),
+  charlie: vi.fn(),
 }));
 
-vi.mock("#imports", () => ({
-  useRuntimeConfig: () => ({ public: runtime.public }),
-  useRequestFetch: () => ({ raw: runtime.raw }),
-}));
-
-/** `defineClient` as a spy that returns what it was given. */
-const catalog = vi.hoisted(() => ({
-  defineClient: vi.fn((schema: unknown, client: unknown) => ({
-    schema,
-    client,
-  })),
-}));
-
-vi.mock("untheme/catalog", () => catalog);
+vi.mock("#build/untheme/layers.mjs", async () => {
+  const { themes } = await import("../fixtures");
+  build.bravo.mockResolvedValue(themes.bravo);
+  build.charlie.mockResolvedValue(themes.charlie);
+  return {
+    layers: [
+      { id: "charlie", name: "Charlie", description: "Inverted surfaces." },
+      { id: "bravo", name: "Bravo" },
+    ],
+    load: { bravo: build.bravo, charlie: build.charlie },
+  };
+});
 
 import {
   useUntheme,
@@ -50,35 +56,28 @@ describe("useUnthemeRenderer", () => {
 describe("useUnthemeCatalog", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    runtime.public = {};
   });
 
-  it("makes a catalog client for the contract over the served route", async () => {
-    runtime.public = { untheme: { route: "/api/theme" } };
-    const made = useUnthemeCatalog() as unknown as {
-      schema: unknown;
-      client: {
-        base: string;
-        fetch: (url: string, init?: RequestInit) => Promise<Response>;
-      };
-    };
-    expect(catalog.defineClient).toHaveBeenCalledOnce();
-    expect(made.schema).toBe(service.schema);
-    expect(made.client.base).toBe("/api/theme");
-    // The client fetches through the request, and a miss stays a response.
-    const response = await made.client.fetch("/api/theme/themes/nord", {
-      headers: { accept: "application/json" },
+  it("pages the entries of the layers module", async () => {
+    const page = await useUnthemeCatalog().list({ limit: 1 });
+    expect(page).toEqual({
+      entries: [{ id: "bravo", name: "Bravo" }],
+      total: 2,
+      limit: 1,
+      offset: 0,
     });
-    expect(response.status).toBe(200);
-    expect(runtime.raw).toHaveBeenCalledWith("/api/theme/themes/nord", {
-      headers: { accept: "application/json" },
-      ignoreResponseError: true,
-    });
+    expect(build.bravo).not.toHaveBeenCalled();
   });
 
-  it("throws when the module serves no catalog", () => {
-    expect(() => useUnthemeCatalog()).toThrow(/no theme catalog is served/);
-    runtime.public = { untheme: { route: false } };
-    expect(() => useUnthemeCatalog()).toThrow(/no theme catalog is served/);
+  it("imports a layer on demand and checks it against the contract", async () => {
+    const layer = await useUnthemeCatalog().get("charlie");
+    expect(layer).toEqual(themes.charlie);
+    expect(build.charlie).toHaveBeenCalledOnce();
+    expect(schema.inspect.layer).toHaveBeenCalledWith(themes.charlie);
+  });
+
+  it("misses an id outside the build", async () => {
+    expect(await useUnthemeCatalog().get("delta")).toBeUndefined();
+    expect(await useUnthemeCatalog().get("constructor")).toBeUndefined();
   });
 });

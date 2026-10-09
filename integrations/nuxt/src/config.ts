@@ -31,9 +31,8 @@ import type { UnthemeConfig } from "untheme/config";
  *   });
  *   ```
  *
- * When the build has layers, from a preset or from the kit config, the module
- * serves them under `route` with the catalog wire protocol, and
- * `useUnthemeCatalog()` reads them.
+ * When the build has layers, from a preset or from the kit config,
+ * `useUnthemeCatalog()` lists them and loads one on demand.
  *
  * When more than one Nuxt layer sets `untheme`, the module uses the value of
  * the closest layer as a whole.
@@ -56,12 +55,6 @@ export interface NuxtUnthemeConfig<
    * reads this option only when the options have no `theme`.
    */
   preset?: string;
-
-  /**
-   * The base route of the theme catalog, when the build has layers. The default
-   * is `/api/theme`. The value `false` serves no catalog.
-   */
-  route?: string | false;
 }
 
 /**

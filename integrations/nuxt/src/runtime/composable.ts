@@ -3,8 +3,10 @@ import type { Catalog } from "untheme/catalog";
 import type { Renderer } from "untheme/css";
 
 import { useNuxtApp } from "#app";
-import { useRequestFetch, useRuntimeConfig } from "#imports";
-import { defineClient } from "untheme/catalog";
+import { layers, load } from "#build/untheme/layers.mjs";
+import { defineCatalog } from "untheme/catalog";
+
+import { listEntries } from "./entries";
 
 /**
  * Returns the `$untheme` service. Each read and write goes through the
@@ -31,37 +33,19 @@ export const useUnthemeRenderer = (): Renderer<AppUnthemeContract> => {
 };
 
 /**
- * Returns a catalog client over the catalog that the module serves. The client
- * checks each layer against the contract of the app. Requests go through the
- * fetch of the request, so a call during server rendering reaches the same
- * app.
+ * Returns a catalog over the layers of the build. `list` pages the entries of
+ * the layers module. `get` imports one layer on demand and checks it against
+ * the contract of the app. The catalog is empty when the build has no layers.
  *
  * ```ts
  * const catalog = useUnthemeCatalog();
  * const layer = await catalog.get("nord");
  * if (layer) useUntheme().apply(layer);
  * ```
- *
- * @throws When the module serves no catalog: the build has no layers, or
- * `route` is `false`.
  */
 export const useUnthemeCatalog = (): Catalog<AppUnthemeContract> => {
-  const { untheme } = useRuntimeConfig().public as {
-    untheme?: { route?: string };
-  };
-  const route = untheme?.route;
-  if (typeof route !== "string") {
-    throw new Error(
-      "untheme: no theme catalog is served — the build has no layers, or `route` is false",
-    );
-  }
-  const request = useRequestFetch();
-  return defineClient(useUntheme().schema, {
-    base: route,
-    fetch: (url, init) =>
-      request.raw(String(url), {
-        headers: init?.headers,
-        ignoreResponseError: true,
-      }),
+  return defineCatalog(useUntheme().schema, {
+    list: (listing) => listEntries(layers, listing),
+    get: (id) => (Object.hasOwn(load, id) ? load[id]?.() : undefined),
   });
 };

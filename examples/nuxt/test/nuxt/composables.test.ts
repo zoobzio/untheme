@@ -36,7 +36,7 @@ vi.mock("#build/untheme/layers.mjs", async () => {
  * The auto-imports of Nuxt, as globals for each test. `useUntheme` returns a
  * new service over the fixture theme and a reactive container.
  * `useUnthemeCatalog` returns a catalog over the fixture layers, in place of
- * the client over the wire.
+ * the catalog over the layers module.
  */
 let untheme: Untheme<typeof theme>;
 
@@ -115,23 +115,12 @@ describe("useDemo", () => {
 describe("useThemes", () => {
   it("starts from the layers manifest and the id of the base theme", () => {
     const { entries, active } = useThemes();
-    expect(entries.value.map((entry) => entry.id)).toEqual([
+    expect(entries.map((entry) => entry.id)).toEqual([
       "fixture",
       "ink",
       "paper",
     ]);
     expect(active.value).toBe("fixture");
-  });
-
-  it("refreshes the entries from the catalog", async () => {
-    const { entries, refresh } = useThemes();
-    entries.value = [];
-    await refresh();
-    expect(entries.value.map((entry) => entry.id)).toEqual([
-      "fixture",
-      "ink",
-      "paper",
-    ]);
   });
 
   it("applies the layer of a selected theme and tracks the active id", async () => {

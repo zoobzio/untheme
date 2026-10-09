@@ -54,7 +54,6 @@ The module gets the theme in one of three ways.
 | `config` | `untheme.config.ts` | The kit config to build, relative to the project root. Read when `theme` and `preset` are absent. |
 | `theme`  | none                | A built base theme. Pass it with `input`.                                                         |
 | `input`  | none                | The built boot selection, with one context for each modifier. Pass it with `theme`.               |
-| `route`  | `/api/theme`        | The base route of the theme catalog, when the build has layers. `false` serves no catalog.        |
 
 When more than one Nuxt layer sets `untheme`, the module uses the value of the closest layer as a whole.
 
@@ -67,8 +66,7 @@ At build time the module validates the theme and the boot selection with `define
 - `#build/untheme/manifest.mjs` holds `manifest`. Each modifier and context has an id, a name, and a description. When the module builds the config, the names and descriptions come from the documents of the theme. A theme from the `theme` and `input` options gets titled ids.
 - `#build/untheme.css` holds the static cascade. The module writes the file and does not link it. See [Static CSS](#static-css).
 
-- `#build/untheme/layers.mjs` holds `layers`, the id, name, and description of each layer of the build, and `layers.d.mts` the `LayerId` union. `#build/untheme/layers/<id>.json` is one layer. The list is empty when the build has no layers.
-- `#build/untheme/layers.json` holds the same entries as JSON, when the module serves the catalog. See [Serving themes](#serving-themes).
+- `#build/untheme/layers.mjs` holds `layers`, the id, name, and description of each layer of the build, and `load`, one lazy import for each layer by id. The file `layers.d.mts` has the `LayerId` union. For a preset the list and the layers are the package's own, re-exported. For a kit config the module writes the list and `#build/untheme/layers/<id>.json`. The list and the map are empty when the build has no layers.
 
 The `untheme/` modules are the same modules that `untheme build` writes.
 
@@ -94,7 +92,7 @@ const ut = useUntheme();
 
 ## `useUnthemeCatalog()`
 
-The service has one base theme and one applied layer. The app fetches a theme as a layer and calls `apply` with it. When the build has layers, from a preset or from the kit config, the module serves them under `route` with the catalog wire protocol, and `useUnthemeCatalog()` returns a catalog client over that route. The client checks each layer against the contract of the app on the way in.
+The service has one base theme and one applied layer. The app loads a theme as a layer and calls `apply` with it. `useUnthemeCatalog()` returns a catalog over the layers of the build. `list` pages the entries of the layers module. `get` imports one layer on demand and checks it against the contract of the app. Each layer is its own chunk, so the client loads only the themes it applies, and a new build has new chunk URLs.
 
 ```ts
 import { layers } from "#build/untheme/layers.mjs";
@@ -109,18 +107,11 @@ if (layer) untheme.apply(layer);
 untheme.theme().id; // "nord"
 ```
 
-The client fetches through the request, so a call during server rendering reaches the route of the same app. `useUnthemeCatalog()` throws when the module serves no catalog: the build has no layers, or `route` is `false`.
+The catalog is empty when the build has no layers. The import works during server rendering, so a layer applied on the server renders on the first response.
 
-## Serving themes
+## Remote themes
 
-The module serves the layers of the build itself. It lists `layers.json` and `layers/<id>.json` of the build directory as Nitro server assets and registers a catch-all handler under `route` and the build id. `list` reads the entries file. `get` reads one layer file.
-
-- `GET {route}/{build}/themes?q=<JSON query>` answers a page of entries.
-- `GET {route}/{build}/themes/{id}` answers one layer, or 404.
-
-Each build serves the catalog under a path of its own, so no browser or Nitro cache outlives a build. Nitro caches each response of a build for a year. `useUnthemeCatalog()` reads the served path from the public runtime config.
-
-To serve themes from a store of your own, set `route: false` and mount `createThemeHandler` from `@untheme/nuxt/server` in a catch-all server route file. The folder of the file is the base that a catalog client uses.
+For themes that are not in the build, mount `createThemeHandler` from `@untheme/nuxt/server` in a catch-all server route file. The folder of the file is the base that a catalog client uses.
 
 ```ts
 // server/api/themes/[...path].get.ts

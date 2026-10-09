@@ -3,8 +3,7 @@ import { defineNuxtConfig } from "nuxt/config";
 
 /**
  * The aurora showcase. Aurora is the preset: the module takes its build from
- * the installed package and serves its themes as the catalog under
- * `/api/theme`.
+ * the installed package, and the theme picker imports its themes on demand.
  */
 const src = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 

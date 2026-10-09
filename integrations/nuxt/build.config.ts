@@ -15,6 +15,7 @@ export default defineBuildConfig({
     "#app",
     "#imports",
     "#build/untheme/config.mjs",
+    "#build/untheme/layers.mjs",
     "@nuxt/kit",
     "@nuxt/schema",
     "@untheme/kit",

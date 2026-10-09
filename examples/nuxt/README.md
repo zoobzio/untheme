@@ -38,15 +38,12 @@ The demo bar reads `#build/untheme/manifest.mjs`. The bar shows one selector for
 each modifier and one option for each context. Each option has the name and the
 description from the aurora documents.
 
-The palette is not an axis. Each aurora theme is a layer. The module serves the
-layers under `/api/theme` with the catalog wire protocol, and
-`#build/untheme/layers.mjs` lists them.
+The palette is not an axis. Each aurora theme is a layer.
+`#build/untheme/layers.mjs` lists them and imports one by id.
 
-- `GET /api/theme/themes` answers the entries, paged and searchable.
-- `GET /api/theme/themes/{id}` answers one layer.
-- `useThemes` takes the catalog client from `useUnthemeCatalog()`. The theme
-  picker lists the entries. A pick fetches the layer and calls `apply`. The
-  state of the app holds the layer. The base theme stays in the build module.
+- `useThemes` lists the entries of the layers module. A pick loads the layer
+  through `useUnthemeCatalog()` and calls `apply`. The state of the app holds
+  the layer. The base theme stays in the build module.
 
 On every render, the module flattens the tokens of the active selection into
 `--token` CSS variables on the document root. The block is the base theme with
@@ -82,7 +79,7 @@ has two axes over a few tokens. `mockModules` supplies the
 `#build/untheme/manifest.mjs` module that the demo imports. A stub of
 `useUntheme` returns a service over the theme and a reactive container.
 [`test/nuxt/layers.ts`](./test/nuxt/layers.ts) holds three layers. It stands in
-for `#build/untheme/layers.mjs`, and a stub of `useUnthemeCatalog` serves the
+for `#build/untheme/layers.mjs`, and a stub of `useUnthemeCatalog` loads the
 same layers from memory.
 
 The tests check five things:

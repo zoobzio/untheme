@@ -4,9 +4,6 @@ import type { NuxtUnthemeConfig } from "./config";
 import { defineSchema } from "untheme";
 import { defineRenderer } from "untheme/css";
 
-import { randomUUID } from "node:crypto";
-import { join } from "node:path";
-
 import { map } from "objectively";
 
 import {
@@ -14,32 +11,38 @@ import {
   addTemplate,
   addPlugin,
   addImports,
-  addServerHandler,
   createResolver,
 } from "@nuxt/kit";
 
 import { emit } from "@untheme/kit";
 
-import { ASSETS, ENTRIES, MODULES, ROUTE, STYLESHEET } from "./constant";
+import { MODULES, STYLESHEET } from "./constant";
 import { closest, loadTheme } from "./theme";
 
+const json = (value: unknown): string => JSON.stringify(value, null, 2);
+
 /**
- * Reads the `route` option. The default is {@link ROUTE}. The value `false`
- * serves no catalog. A route is an absolute path with no trailing slash.
+ * Makes the `load` export of the `layers` module and its declaration: one
+ * lazy import for each layer, by id. `from` gives the import specifier of a
+ * layer. The map is empty when the build has no layers.
  */
-const catalogRoute = (route: string | false | undefined): string | false => {
-  if (route === false) {
-    return false;
-  }
-  if (route === undefined) {
-    return ROUTE;
-  }
-  if (typeof route !== "string" || !route.startsWith("/")) {
-    throw new Error(
-      "untheme: `route` must be an absolute path, such as /api/theme, or false",
-    );
-  }
-  return route.replace(/\/+$/, "") || "/";
+const loaders = (
+  ids: string[],
+  from: (id: string) => string,
+): { code: string; types: string } => {
+  const entries = ids.map(
+    (id) =>
+      `  ${json(id)}: () => import(${json(from(id))}).then((m) => m.default),`,
+  );
+  return {
+    code: `export const load = {\n${entries.join("\n")}\n};\n`,
+    types: [
+      'import type { Layer } from "untheme";',
+      'import type { Contract } from "./config.mjs";',
+      "export declare const load: { readonly [Id in LayerId]: () => Promise<Layer<Contract>> };",
+      "",
+    ].join("\n"),
+  };
 };
 
 /**
@@ -51,19 +54,13 @@ const catalogRoute = (route: string | false | undefined): string | false => {
  * At build time the module does these steps.
  *
  * - It validates the base theme and the initial selection.
- * - It writes the `index` and `config` modules of the kit as build templates
- *   under `untheme/`. The modules hold the `Token` union, the `Mod` axis
- *   structure, the theme, and the selection.
+ * - It writes the modules of the kit as build templates under `untheme/`,
+ *   and adds `load` to the `layers` module: one lazy import for each layer.
+ *   For a preset the list and the layers are the package's own.
  * - It renders the static cascade to the `untheme.css` template. The module
  *   writes the file and does not link it.
  * - It registers the runtime plugin and the `useUntheme`,
  *   `useUnthemeRenderer`, and `useUnthemeCatalog` auto-imports.
- * - When the build has layers, it writes the `layers` module, one JSON file
- *   for each layer, and the `layers.json` entries file. It serves the JSON
- *   under `route` and the build id with the catalog wire protocol.
- *
- * An app that serves themes from another store mounts `createThemeHandler`
- * from `@untheme/nuxt/server` in a server route file of its own.
  */
 export default defineNuxtModule<NuxtUnthemeConfig>({
   meta: {
@@ -74,7 +71,6 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
     const resolver = createResolver(import.meta.url);
 
     const config = closest(options, nuxt);
-    const route = catalogRoute(config.route);
     const { theme, input, manifest, layers } = await loadTheme(config, nuxt);
 
     const schema: Schema<Theme<Template>> = defineSchema(theme);
@@ -82,53 +78,57 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
     schema.assert.input(input);
 
     /*
-     * The theme modules are the same modules that `untheme build` writes.
-     * `index` holds the `Token` union, the `Mod` structure, and the guards.
-     * `config` holds the base theme and the boot selection. `manifest` holds
-     * the name and description of each modifier and context.
+     * The `layers` module lists the layers and imports one by id. A preset
+     * has its own list, so the module re-exports it. The list of a kit config
+     * comes from the emitter, with the layer files. The module adds `load`.
      */
+    const preset = config.preset;
+    const load = loaders(
+      layers.map(({ layer }) => layer.id),
+      (id) =>
+        preset === undefined
+          ? `./layers/${id}.json`
+          : `${preset}/layers/${id}.json`,
+    );
+    const append = (path: string, contents: string): string => {
+      if (path === "layers.mjs") {
+        return contents + load.code;
+      }
+      if (path === "layers.d.mts") {
+        return contents + load.types;
+      }
+      return contents;
+    };
+
     for (const file of emit({
       theme,
       input,
-      layers,
       ...(manifest && { manifest }),
+      ...(preset === undefined && { layers }),
     })) {
+      if (preset !== undefined && file.path.startsWith("layers")) {
+        continue;
+      }
       addTemplate({
         filename: `${MODULES}/${file.path}`,
         write: true,
-        getContents: () => file.contents,
+        getContents: () => append(file.path, file.contents),
       });
     }
 
-    /*
-     * The catalog. The kit writes `layers/<id>.json`. The module writes the
-     * entries to `layers.json` beside them and lists both as server assets.
-     * The build id in the route gives each build a path of its own, so no
-     * browser or Nitro cache outlives a build. In dev each start is a build.
-     */
-    if (route !== false && layers.length > 0) {
-      const build = nuxt.options.dev ? randomUUID() : nuxt.options.buildId;
-      const served = `${route === "/" ? "" : route}/${build}`;
-      const entries = JSON.stringify(layers.map(({ entry }) => entry));
+    if (preset !== undefined) {
       addTemplate({
-        filename: `${MODULES}/${ENTRIES}`,
+        filename: `${MODULES}/layers.mjs`,
         write: true,
-        getContents: () => `${entries}\n`,
+        getContents: () =>
+          `export { layers, default } from ${json(`${preset}/layers`)};\n${load.code}`,
       });
-      nuxt.options.nitro.serverAssets = [
-        ...(nuxt.options.nitro.serverAssets ?? []),
-        {
-          baseName: ASSETS,
-          dir: join(nuxt.options.buildDir, MODULES),
-          pattern: `{${ENTRIES},layers/*.json}`,
-        },
-      ];
-      addServerHandler({
-        route: `${served}/**`,
-        method: "get",
-        handler: resolver.resolve("./runtime/server/catalog"),
+      addTemplate({
+        filename: `${MODULES}/layers.d.mts`,
+        write: true,
+        getContents: () =>
+          `export { layers, default, type LayerId, type LayerEntry } from ${json(`${preset}/layers`)};\n${load.types}`,
       });
-      nuxt.options.runtimeConfig.public.untheme = { route: served };
     }
 
     /*
