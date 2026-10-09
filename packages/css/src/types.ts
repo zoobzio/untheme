@@ -1,6 +1,7 @@
 import type {
   Binding,
   Open,
+  Patch,
   Template,
   Token,
   Type,
@@ -100,4 +101,10 @@ export type Renderer<T extends Template> = {
    * block.
    */
   sheet: () => string;
+
+  /*
+   * Returns the cascade of a patch alone: its tokens under `:root`, then its
+   * context overrides as attribute blocks. Returns `""` for an empty patch.
+   */
+  patch: (patch: Patch<T>) => string;
 };

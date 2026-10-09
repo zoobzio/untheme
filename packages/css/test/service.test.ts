@@ -190,6 +190,37 @@ describe("defineRenderer", () => {
     });
   });
 
+  describe("patch", () => {
+    it("renders nothing for an empty patch", () => {
+      expect(make().patch({})).toBe("");
+    });
+
+    it("emits only the tokens of the patch under :root", () => {
+      const css = make().patch({ tokens: { "color.accent": "{color.paper}" } });
+      expect(css.match(/:root \{/g)).toHaveLength(1);
+      expect(css).toContain(" --color-accent: var(--color-paper);");
+      expect(css).not.toContain("--color-white");
+      expect(css).not.toContain("[data-mode");
+    });
+
+    it("emits the context overrides of the patch under attribute blocks", () => {
+      const css = make().patch({
+        modifiers: { mode: { dark: { "color.accent": "{color.paper}" } } },
+      });
+      expect(css).not.toContain(":root");
+      expect(css).toContain('[data-mode="dark"] {');
+      expect(css).toContain(" --color-accent: var(--color-paper);");
+      expect(css).not.toContain("--color-white");
+    });
+
+    it("skips a context the patch leaves empty", () => {
+      const css = make().patch({
+        modifiers: { mode: { light: {}, dark: {} } },
+      });
+      expect(css).toBe("");
+    });
+  });
+
   describe("empty contract", () => {
     const empty: Contract<never, Record<string, Record<string, object>>> = {
       id: "empty",

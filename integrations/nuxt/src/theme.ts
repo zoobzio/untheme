@@ -86,11 +86,7 @@ export const loadPreset = async (
   };
   const load = async (subpath: string): Promise<Record<string, unknown>> => {
     const path = await locate(subpath);
-    const loaded: unknown = await import(pathToFileURL(path).href);
-    if (!record(loaded)) {
-      throw new Error(`untheme: "${name}/${subpath}" is not a module`);
-    }
-    return loaded;
+    return import(pathToFileURL(path).href) as Promise<Record<string, unknown>>;
   };
 
   const config = await load("config");

@@ -1,7 +1,6 @@
 /**
- * The filename of the static cascade template. The module writes it to the
- * build directory and does not link it. An app stylesheet can import it as
- * `#build/untheme.css`.
+ * The filename of the base cascade template. The module writes it to the
+ * build directory and links it into the CSS of the app.
  */
 export const STYLESHEET = "untheme.css";
 

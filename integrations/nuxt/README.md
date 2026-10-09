@@ -1,6 +1,6 @@
 # @untheme/nuxt
 
-The Nuxt module for untheme. The module builds a theme from DTCG JSON at build time and adds a runtime theme service, a reactive stylesheet, and cookie storage for the selection.
+The Nuxt module for untheme. The module builds a theme from DTCG JSON at build time and adds a base stylesheet, a runtime theme service, a reactive style tag for the applied layer, and cookie storage for the selection and the layer.
 
 ## Install
 
@@ -64,7 +64,7 @@ At build time the module validates the theme and the boot selection with `define
 - `#build/untheme/config.mjs` holds the `theme` and `input` data. The file `config.d.mts` types the data with the `Contract`.
 - `#build/untheme/index.mjs` holds the token list, the modifier list, and the `isToken` and `isModifier` guards. The file `index.d.mts` has the `Token` union, the `Overrides` type, and the `Mod` type. `Mod` describes the contexts of each modifier.
 - `#build/untheme/manifest.mjs` holds `manifest`. Each modifier and context has an id, a name, and a description. When the module builds the config, the names and descriptions come from the documents of the theme. A theme from the `theme` and `input` options gets titled ids.
-- `#build/untheme.css` holds the static cascade. The module writes the file and does not link it. See [Static CSS](#static-css).
+- `#build/untheme.css` holds the base cascade. The module links it into the CSS of the app. See [CSS](#css).
 
 - `#build/untheme/layers.mjs` holds `layers`, the id, name, and description of each layer of the build, and `load`, one lazy import for each layer by id. The file `layers.d.mts` has the `LayerId` union. For a preset the list and the layers are the package's own, re-exported. For a kit config the module writes the list and `#build/untheme/layers/<id>.json`. The list and the map are empty when the build has no layers.
 
@@ -143,9 +143,9 @@ See the [Nuxt example](../../examples/nuxt) for aurora served as a preset.
 
 ## CSS
 
-The runtime plugin injects one reactive `<style>` tag. The tag holds a `:root` block with one CSS custom property for each active token. The plugin makes the block with [`defineRenderer(untheme).root()`](../../packages/css) from `untheme/css`. The block is the result of the base theme, the patch, and the selection. The block renders again when one of them changes.
+The module renders the base cascade to `#build/untheme.css` at build time and links it into the CSS of the app. The module renders the file with [`defineRenderer(...).sheet()`](../../packages/css) over the base theme. The file has the base bindings under `:root`. Each modifier context follows as a `[data-<modifier>="<context>"]` block. The cascade sits in an `@layer untheme` block, so your own unlayered CSS wins over it. Editors index the file and complete `var(--surface)`.
 
-The plugin also sets the selected context of each modifier on `<html>` as a `data-<modifier>` attribute, such as `data-color="dark"`. Your stylesheets can select on the attribute.
+The runtime plugin sets the selected context of each modifier on `<html>` as a `data-<modifier>` attribute, such as `data-color="dark"`. The attribute selects the context blocks of the stylesheet, so a `swap` renders no CSS. Your stylesheets can select on the attribute too.
 
 ```css
 [data-color="dark"] .card {
@@ -153,17 +153,7 @@ The plugin also sets the selected context of each modifier on `<html>` as a `dat
 }
 ```
 
-## Static CSS
-
-The module renders the static cascade to `#build/untheme.css`. The module writes the file and does not link it. The module renders the file with [`defineRenderer(...).sheet()`](../../packages/css) over the base theme. The file has the base bindings under `:root`. Each modifier context follows as a `[data-<modifier>="<context>"]` block. Editors index the file and complete `var(--surface)`.
-
-The cascade sits in an `@layer untheme` block. If you import the file, the unlayered `<style>` tag of the runtime plugin wins over the layer. Your own unlayered CSS also wins over the layer.
-
-```css
-@import "#build/untheme.css";
-```
-
-The module writes the file again when the theme changes.
+The plugin injects the patch alone as one reactive `<style>` tag: the tokens that an applied layer or `update` rebinds, and the context overrides a layer carries, made with [`defineRenderer(...).patch()`](../../packages/css). The tag is unlayered, so it wins over the base cascade. It is empty when the patch is, so a page with no applied layer carries no runtime CSS. The tag renders again when the patch changes.
 
 ## Cookies and SSR
 

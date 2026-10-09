@@ -1,4 +1,4 @@
-import type { Template, Token, Type } from "@untheme/schema";
+import type { Patch, Template, Token, Type } from "@untheme/schema";
 import type {
   Bindings,
   Inputs,
@@ -149,6 +149,35 @@ export const defineRenderer = <T extends Template>(
     return blocks.join("\n");
   };
 
+  /**
+   * Returns the cascade of a patch alone: its tokens under `:root`, then its
+   * overrides of each modifier context under an attribute block, in the
+   * composition order of the theme. A part with no declarations has no block.
+   * Returns `""` when the patch has none. The function reads the slots of the
+   * theme for the types and nothing else.
+   */
+  const patch = (patch: Patch<T>): string => {
+    const blocks: string[] = [];
+    const root = declarations(patch.tokens ?? {});
+    if (Object.keys(root).length > 0) {
+      blocks.push(block(":root", root));
+    }
+    for (const modifier of patch.order ?? source.theme().order) {
+      const contexts = patch.modifiers?.[modifier];
+      if (contexts === undefined) {
+        continue;
+      }
+      for (const [context, overrides] of entries(contexts)) {
+        const decls = declarations(overrides ?? {});
+        if (Object.keys(decls).length === 0) {
+          continue;
+        }
+        blocks.push(block(attribute(modifier, context), decls));
+      }
+    }
+    return blocks.join("\n");
+  };
+
   return {
     property: prop,
     var: indirect,
@@ -156,5 +185,6 @@ export const defineRenderer = <T extends Template>(
     variables,
     root,
     sheet,
+    patch,
   };
 };

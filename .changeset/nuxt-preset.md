@@ -12,6 +12,9 @@ returns a catalog over the module: `list` pages the entries and `get` imports
 one layer on demand. The service of `useUntheme()` gains `layers`, the
 entries of the build, and `select(id)`, which loads a layer and applies it.
 On the server, the key cookie restores the applied layer before the first
-render, as the input cookie restores the selection. An app that serves
+render, as the input cookie restores the selection. The module links the base
+cascade, `#build/untheme.css`, into the CSS of the app, and the runtime
+plugin renders only the patch: a page with no applied layer carries no
+runtime CSS, and a context switch renders none. An app that serves
 aurora no longer mounts a server route, lists server assets, writes a kit
 config, or binds a theme picker of its own.

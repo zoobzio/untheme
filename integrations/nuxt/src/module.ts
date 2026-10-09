@@ -4,6 +4,8 @@ import type { NuxtUnthemeConfig } from "./config";
 import { defineSchema } from "untheme";
 import { defineRenderer } from "untheme/css";
 
+import { join } from "node:path";
+
 import { map } from "objectively";
 
 import {
@@ -19,7 +21,11 @@ import { emit } from "@untheme/kit";
 import { MODULES, STYLESHEET } from "./constant";
 import { closest, loadTheme } from "./theme";
 
-const json = (value: unknown): string => JSON.stringify(value, null, 2);
+/** A string literal for generated code. The line separators are escaped. */
+const literal = (value: string): string =>
+  JSON.stringify(value)
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
 
 /**
  * Makes the `load` export of the `layers` module and its declaration: one
@@ -32,7 +38,7 @@ const loaders = (
 ): { code: string; types: string } => {
   const entries = ids.map(
     (id) =>
-      `  ${json(id)}: () => import(${json(from(id))}).then((m) => m.default),`,
+      `  ${literal(id)}: () => import(${literal(from(id))}).then((m) => m.default),`,
   );
   return {
     code: `export const load = {\n${entries.join("\n")}\n};\n`,
@@ -57,8 +63,8 @@ const loaders = (
  * - It writes the modules of the kit as build templates under `untheme/`,
  *   and adds `load` to the `layers` module: one lazy import for each layer.
  *   For a preset the list and the layers are the package's own.
- * - It renders the static cascade to the `untheme.css` template. The module
- *   writes the file and does not link it.
+ * - It renders the base cascade to the `untheme.css` template and links it
+ *   into the CSS of the app.
  * - It registers the runtime plugin and the `useUntheme`,
  *   `useUnthemeRenderer`, and `useUnthemeCatalog` auto-imports.
  */
@@ -121,20 +127,20 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
         filename: `${MODULES}/layers.mjs`,
         write: true,
         getContents: () =>
-          `export { layers, default } from ${json(`${preset}/layers`)};\n${load.code}`,
+          `export { layers, default } from ${literal(`${preset}/layers`)};\n${load.code}`,
       });
       addTemplate({
         filename: `${MODULES}/layers.d.mts`,
         write: true,
         getContents: () =>
-          `export { layers, default, type LayerId, type LayerEntry } from ${json(`${preset}/layers`)};\n${load.types}`,
+          `export { layers, default, type LayerId, type LayerEntry } from ${literal(`${preset}/layers`)};\n${load.types}`,
       });
     }
 
     /*
-     * The static cascade holds the base bindings under `:root` and one block
-     * for each modifier context, in the `untheme` cascade layer. The module
-     * writes the file and does not link it.
+     * The base cascade holds the base bindings under `:root` and one block
+     * for each modifier context, in the `untheme` cascade layer. The runtime
+     * plugin renders only the patch over it.
      */
     const renderer = defineRenderer({
       theme: () => theme,
@@ -146,6 +152,8 @@ export default defineNuxtModule<NuxtUnthemeConfig>({
       write: true,
       getContents: () => `@layer untheme {\n${renderer.sheet()}\n}`,
     });
+    nuxt.options.css ||= [];
+    nuxt.options.css.unshift(join(nuxt.options.buildDir, STYLESHEET));
 
     addPlugin({
       src: resolver.resolve("./runtime/plugin"),

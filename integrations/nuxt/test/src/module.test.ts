@@ -4,22 +4,44 @@ import type { NuxtUnthemeConfig } from "../../src/config";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { theme, input } from "../fixtures";
 
-/** The fixture package that stands in for a preset, by export subpath. */
+/**
+ * The fixture packages that stand in for presets. Each maps an export subpath
+ * to a fixture file. `@acme/preset` is a kit build. The others each break one
+ * export.
+ */
 const preset = vi.hoisted(() => {
-  const root = new URL("../fixtures/preset/", import.meta.url);
-  const files: Record<string, string> = {
-    config: "config.mjs",
-    manifest: "manifest.mjs",
-    layers: "layers.mjs",
-    "layers/bravo.json": "layers/bravo.json",
-    "layers/charlie.json": "layers/charlie.json",
+  const root = new URL("../fixtures/", import.meta.url);
+  const sound = {
+    config: "preset/config.mjs",
+    manifest: "preset/manifest.mjs",
+    layers: "preset/layers.mjs",
+    "layers/bravo.json": "preset/layers/bravo.json",
+    "layers/charlie.json": "preset/layers/charlie.json",
+  };
+  const packages: Record<string, Record<string, string>> = {
+    "@acme/preset": sound,
+    "@acme/no-config": { ...sound, config: "broken/config.mjs" },
+    "@acme/no-manifest": { ...sound, manifest: "broken/manifest.mjs" },
+    "@acme/no-layers": { ...sound, layers: "broken/layers.mjs" },
+    "@acme/mismatch": {
+      ...sound,
+      layers: "broken/mismatch.mjs",
+      "layers/bravo.json": "broken/layers/bravo.json",
+    },
   };
   return {
     name: "@acme/preset",
-    path: (subpath: string) =>
-      files[subpath] === undefined
-        ? undefined
-        : decodeURIComponent(new URL(files[subpath], root).pathname),
+    resolve: (id: string): string | undefined => {
+      for (const [name, files] of Object.entries(packages)) {
+        const file = id.startsWith(`${name}/`)
+          ? files[id.slice(name.length + 1)]
+          : undefined;
+        if (file !== undefined) {
+          return decodeURIComponent(new URL(file, root).pathname);
+        }
+      }
+      return undefined;
+    },
   };
 });
 
@@ -28,12 +50,7 @@ const kit = vi.hoisted(() => ({
   addPlugin: vi.fn(),
   addImports: vi.fn(),
   createResolver: vi.fn(() => ({ resolve: (p: string) => `/resolved${p}` })),
-  tryResolveModule: vi.fn(async (id: string) => {
-    const prefix = `${preset.name}/`;
-    return id.startsWith(prefix)
-      ? preset.path(id.slice(prefix.length))
-      : undefined;
-  }),
+  tryResolveModule: vi.fn(async (id: string) => preset.resolve(id)),
 }));
 
 vi.mock("@nuxt/kit", () => ({
@@ -258,6 +275,32 @@ describe("untheme module", () => {
       await expect(mod.setup({ preset: "" }, nuxt)).rejects.toThrow(
         /`preset` must be a package name/,
       );
+      await expect(
+        mod.setup({ preset: 1 as unknown as string }, nuxt),
+      ).rejects.toThrow(/`preset` must be a package name/);
+    });
+
+    it("names the export of a package that breaks the shape of a kit build", async () => {
+      await expect(
+        mod.setup({ preset: "@acme/no-config" }, nuxt),
+      ).rejects.toThrow(
+        /"@acme\/no-config\/config" must export the theme and input/,
+      );
+      await expect(
+        mod.setup({ preset: "@acme/no-manifest" }, nuxt),
+      ).rejects.toThrow(
+        /"@acme\/no-manifest\/manifest" must export a manifest/,
+      );
+      await expect(
+        mod.setup({ preset: "@acme/no-layers" }, nuxt),
+      ).rejects.toThrow(
+        /"@acme\/no-layers\/layers" must export a list of layers/,
+      );
+      await expect(
+        mod.setup({ preset: "@acme/mismatch" }, nuxt),
+      ).rejects.toThrow(
+        /"@acme\/mismatch\/layers\/bravo.json" is not the layer "bravo"/,
+      );
     });
 
     it("auto-imports useUnthemeCatalog", async () => {
@@ -333,15 +376,18 @@ describe("untheme module", () => {
     );
   });
 
-  it("does not link the stylesheet into the app css", async () => {
+  it("links the stylesheet into the app css", async () => {
     await mod.setup(options, nuxt);
-    expect(nuxt.options.css).toBeUndefined();
+    expect(nuxt.options.css).toEqual(["/app/.nuxt/untheme.css"]);
   });
 
-  it("leaves css the app already carries as it is", async () => {
+  it("links the stylesheet before the css the app already carries", async () => {
     nuxt.options.css = ["~/assets/css/base.css"];
     await mod.setup(options, nuxt);
-    expect(nuxt.options.css).toEqual(["~/assets/css/base.css"]);
+    expect(nuxt.options.css).toEqual([
+      "/app/.nuxt/untheme.css",
+      "~/assets/css/base.css",
+    ]);
   });
 
   it("registers the key declarations with the token union and modifier structure", async () => {
