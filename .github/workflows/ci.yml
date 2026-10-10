@@ -17,8 +17,10 @@ permissions:
 jobs:
   # Build every package to its .dist once and share it with the downstream
   # typecheck and test jobs — .dist output is Node-independent, so there is no
-  # need to rebuild it per matrix entry. .dist is a dotfile dir, so the upload
-  # must opt into hidden files or the artifact comes back empty.
+  # need to rebuild it per matrix entry. The theme example is in the artifact
+  # too: it is the preset of the other examples, and nuxt prepare reads its
+  # build. .dist is a dotfile dir, so the upload must opt into hidden files or
+  # the artifact comes back empty.
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -37,6 +39,7 @@ jobs:
             packages/*/.dist
             integrations/*/.dist
             presets/*/.dist
+            examples/theme/.dist
 
   # Lint and format read source only (no type-aware rules, no cross-package
   # resolution), so they run immediately without waiting on the build.
