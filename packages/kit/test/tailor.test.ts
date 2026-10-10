@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { anchor, merge } from "../src/merge";
+import { anchor, extend } from "../src/tailor";
 import { FIXTURES } from "./helpers";
 
-describe("merge", () => {
+describe("extend", () => {
   it("merges objects key by key and adds the keys the document lacks", () => {
     const document = { sets: { a: { sources: [1] } }, name: "A" };
-    const result = merge(document, { sets: { b: { sources: [2] } } });
+    const result = extend(document, { sets: { b: { sources: [2] } } });
     expect(result).toEqual({
       sets: { a: { sources: [1] }, b: { sources: [2] } },
       name: "A",
@@ -14,32 +14,32 @@ describe("merge", () => {
   });
 
   it("concatenates arrays, the document first", () => {
-    const result = merge({ sources: [1, 2] }, { sources: [3] });
+    const result = extend({ sources: [1, 2] }, { sources: [3] });
     expect(result).toEqual({ sources: [1, 2, 3] });
   });
 
   it("replaces a scalar", () => {
-    expect(merge({ default: "light" }, { default: "dark" })).toEqual({
+    expect(extend({ default: "light" }, { default: "dark" })).toEqual({
       default: "dark",
     });
   });
 
   it("replaces when the kinds differ", () => {
-    expect(merge({ a: [1] }, { a: { b: 1 } })).toEqual({ a: { b: 1 } });
-    expect(merge({ a: { b: 1 } }, { a: "x" })).toEqual({ a: "x" });
+    expect(extend({ a: [1] }, { a: { b: 1 } })).toEqual({ a: { b: 1 } });
+    expect(extend({ a: { b: 1 } }, { a: "x" })).toEqual({ a: "x" });
   });
 
   it("leaves both inputs as they are", () => {
     const document = { sets: { a: { sources: [1] } } };
     const fragment = { sets: { a: { sources: [2] } } };
-    merge(document, fragment);
+    extend(document, fragment);
     expect(document).toEqual({ sets: { a: { sources: [1] } } });
     expect(fragment).toEqual({ sets: { a: { sources: [2] } } });
   });
 
   it("ignores inherited keys of the document", () => {
     const document: Record<string, unknown> = Object.create({ toString: 1 });
-    const result = merge(document, { toString: { a: 1 } });
+    const result = extend(document, { toString: { a: 1 } });
     expect(result).toEqual({ toString: { a: 1 } });
   });
 });

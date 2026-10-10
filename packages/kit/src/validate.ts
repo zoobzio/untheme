@@ -4,7 +4,7 @@ import { entries, record } from "objectively";
 
 import { OUT_DIR } from "./constant";
 import { InvalidConfigError } from "./error";
-import { inside, normalize } from "./path";
+import { inside, normalize } from "./source";
 import { isText } from "./util";
 
 /** One rule over a config. The rule returns the issues that it finds. */

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { identity } from "../src/identity";
+import { identity } from "../src/assemble";
 import { load } from "./helpers";
 
 describe("identity", () => {

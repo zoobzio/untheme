@@ -13,7 +13,7 @@ import type { KitConfig } from "../src/types";
 
 import { build } from "../src/build";
 import { InvalidConfigError, InvalidLayerError } from "../src/error";
-import { generate } from "../src/generate";
+import { generate } from "../src/build";
 import { resolveKit } from "../src/resolve";
 import { FIXTURES } from "./helpers";
 

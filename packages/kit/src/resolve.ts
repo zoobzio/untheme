@@ -14,10 +14,15 @@ import { assemble } from "./assemble";
 import { buildLayers } from "./layers";
 import { OUT_DIR } from "./constant";
 import { skeleton } from "./contexts";
-import { loader } from "./loader";
-import { normalize } from "./path";
 import { portable, readPreset } from "./preset";
-import { designate, isPreset, locate, packageName } from "./source";
+import {
+  designate,
+  isPreset,
+  loader,
+  locate,
+  normalize,
+  packageName,
+} from "./source";
 import { tailor } from "./tailor";
 import { toDocument } from "./util";
 import { validate } from "./validate";

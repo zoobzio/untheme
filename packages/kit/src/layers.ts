@@ -1,5 +1,5 @@
 import type { Definition, Schema, Template, Theme } from "@untheme/schema";
-import type { Loader } from "./loader";
+import type { Loader } from "./source";
 import type {
   BuiltLayer,
   Document,

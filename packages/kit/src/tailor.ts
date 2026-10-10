@@ -1,11 +1,36 @@
 import type { Document, KitConfig, ModifierConfig } from "./types";
 
-import { entries, keys, pick, record } from "objectively";
+import { entries, keys, own, pick, record } from "objectively";
 
 import { InvalidConfigError } from "./error";
-import { anchor, merge } from "./merge";
 import { locate } from "./source";
-import { toDocument } from "./util";
+import { refs, toDocument } from "./util";
+
+/**
+ * Extends a document with a fragment. Objects merge by key. Arrays concatenate,
+ * the document first. Any other value of the fragment replaces the value of
+ * the document. Both inputs stay as they are.
+ */
+export const extend = (document: unknown, fragment: unknown): unknown => {
+  if (Array.isArray(document) && Array.isArray(fragment)) {
+    return [...document, ...fragment];
+  }
+  if (record(document) && record(fragment)) {
+    const result: Record<string, unknown> = { ...document };
+    for (const [key, value] of entries(fragment)) {
+      result[key] = own(key, document) ? extend(document[key], value) : value;
+    }
+    return result;
+  }
+  return fragment;
+};
+
+/** Resolves each relative `$ref` of a fragment against a base. A `#` pointer stays as it is. */
+export const anchor = (fragment: unknown, base: URL): unknown => {
+  return refs(fragment, (ref) =>
+    ref.startsWith("#") ? ref : locate(ref, base).href,
+  );
+};
 
 /** The `$ref` prefix of an entry in `resolutionOrder` that names a top-level modifier. */
 const POINTER = "#/modifiers/";
@@ -136,8 +161,8 @@ const changes = (
  * before the parse. The tailored document declares what the build keeps. The
  * parse, the conversion, and the verification read it.
  *
- * The function merges `extend` first. The fragment merges onto the document
- * with {@link merge}, after {@link anchor} resolves each relative `$ref` of
+ * The function applies `extend` first. The fragment extends the document
+ * with {@link extend}, after {@link anchor} resolves each relative `$ref` of
  * the fragment from the project root. The `modifiers` then act on the merged
  * document, so they can keep or turn off a context that the fragment added.
  *
@@ -176,10 +201,10 @@ export const tailor = (
     throw new InvalidConfigError(issues);
   }
   if (config.extend !== undefined) {
-    // Two records merge to a record.
-    const merged = merge(document, anchor(config.extend, base));
-    if (record(merged)) {
-      document = merged;
+    // Two records extend to a record.
+    const extended = extend(document, anchor(config.extend, base));
+    if (record(extended)) {
+      document = extended;
     }
   }
   const order: unknown[] = Array.isArray(document.resolutionOrder)

@@ -2,11 +2,10 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-import { generate } from "../src/generate";
-import { loader } from "../src/loader";
+import { generate } from "../src/build";
 import { portable, readPreset } from "../src/preset";
 import { resolveKit } from "../src/resolve";
-import { bare, designate, isPreset, packageName } from "../src/source";
+import { bare, designate, isPreset, loader, packageName } from "../src/source";
 import { FIXTURES } from "./helpers";
 
 /** The fixture package `@acme/tokens`, as a project root and as a preset. */
