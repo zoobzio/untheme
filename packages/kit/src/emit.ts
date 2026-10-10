@@ -1,4 +1,5 @@
 import type { Core, OutputFile } from "./types";
+import { PRESET, RESOLVER } from "./constant";
 import { describe } from "./describe";
 import { banner, json, pair, union } from "./print";
 
@@ -154,6 +155,21 @@ const layers = (core: Core): OutputFile[] => {
   ];
 };
 
+/** Makes `resolver.json` and `preset.json`, when the build has a portable resolver. */
+const preset = (core: Core): OutputFile[] => {
+  if (core.resolver === undefined) {
+    return [];
+  }
+  const layers = (core.layers ?? []).map(({ entry }) => entry);
+  return [
+    { path: RESOLVER, contents: `${json(core.resolver)}\n` },
+    {
+      path: PRESET,
+      contents: `${json({ resolver: `./${RESOLVER}`, layers })}\n`,
+    },
+  ];
+};
+
 /**
  * Emits every file of a build.
  *
@@ -163,6 +179,7 @@ const layers = (core: Core): OutputFile[] => {
  *   the default export.
  * - `manifest` has each modifier and context with its id, name, and description.
  * - `layers/<id>.json` is one layer, and `layers` lists the layers.
+ * - `resolver.json` and `preset.json` make the build a source for another.
  *
  * Each module is an `.mjs` file with a `.d.mts` file beside it. The runtime
  * renders CSS from the active theme.
@@ -175,5 +192,11 @@ const layers = (core: Core): OutputFile[] => {
  * layers when the consumer has them.
  */
 export const emit = (core: Core): OutputFile[] => {
-  return [...index(core), ...config(core), ...manifest(core), ...layers(core)];
+  return [
+    ...index(core),
+    ...config(core),
+    ...manifest(core),
+    ...layers(core),
+    ...preset(core),
+  ];
 };

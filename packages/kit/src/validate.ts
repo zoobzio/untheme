@@ -113,6 +113,14 @@ const modifiers: Rule = (config) => {
   return issues;
 };
 
+/** The fragment to merge onto the source, when set, is an object. */
+const extend: Rule = (config) => {
+  if (config.extend === undefined || record(config.extend)) {
+    return [];
+  }
+  return ["extend must be an object: a fragment of the source document"];
+};
+
 /**
  * Whether a designator names a local path: a non-empty string with no scheme
  * other than `file:`, or a `file:` URL. A one-letter scheme is a Windows drive.
@@ -186,8 +194,8 @@ const outDir: Rule = (config) => {
  * @throws InvalidConfigError with every issue, when there is any.
  */
 export const validate = (config: KitConfig): void => {
-  const issues = [source, identity, modifiers, layers, outDir].flatMap((rule) =>
-    rule(config),
+  const issues = [source, identity, extend, modifiers, layers, outDir].flatMap(
+    (rule) => rule(config),
   );
   if (issues.length > 0) {
     throw new InvalidConfigError(issues);

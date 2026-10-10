@@ -1,0 +1,4 @@
+{
+  "resolver": "./resolver.json",
+  "layers": [{ "id": "sky", "name": "Sky", "description": "A sky primary." }]
+}

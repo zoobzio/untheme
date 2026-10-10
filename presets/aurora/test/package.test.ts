@@ -158,7 +158,7 @@ describe("the package exports", () => {
     );
     expect(referenced.theme).toEqual(kit.theme);
     expect(referenced.input).toEqual(kit.input);
-    expect(referenced.layers[0]).toEqual(
+    expect(referenced.layers[1]).toEqual(
       kit.layers.find((built) => built.entry.id === "nord"),
     );
   });

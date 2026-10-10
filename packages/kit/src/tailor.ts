@@ -3,6 +3,7 @@ import type { KitConfig, ModifierConfig } from "./types";
 import { record } from "objectively";
 
 import { InvalidConfigError } from "./error";
+import { anchor, merge } from "./merge";
 import { locate } from "./source";
 
 /** The `$ref` prefix of an entry in `resolutionOrder` that names a top-level modifier. */
@@ -78,7 +79,7 @@ const unused = (document: Record<string, unknown>, name: string): string => {
  * sets the default. The function returns the issues that it finds. When there
  * are issues, the function leaves the modifier as it was.
  */
-const change = (
+const changes = (
   name: string,
   modifier: Record<string, unknown>,
   config: ModifierConfig,
@@ -138,9 +139,14 @@ const change = (
 };
 
 /**
- * Tailors a resolver document to the `modifiers` of a config before the parse.
- * The tailored document declares what the build keeps. The parse, the
- * conversion, and the verification read it.
+ * Tailors a source document to the `extend` and the `modifiers` of a config
+ * before the parse. The tailored document declares what the build keeps. The
+ * parse, the conversion, and the verification read it.
+ *
+ * The function merges `extend` first. The fragment merges onto the document
+ * with {@link merge}, after {@link anchor} resolves each relative `$ref` of
+ * the fragment from the project root. The `modifiers` then act on the merged
+ * document, so they can keep or turn off a context that the fragment added.
  *
  * - A modifier set to `false` is turned off. The sources of its default context
  *   stay in the resolution order as a set, and the modifier is removed.
@@ -152,16 +158,17 @@ const change = (
  *   absent, the default of the document boots if the config keeps it. Otherwise
  *   the first kept context boots.
  *
- * @param src - The resolver document, as text.
- * @param changes - The `modifiers` of the config.
+ * @param src - The source document, as text.
+ * @param config - The `extend` and the `modifiers` of the config.
  * @param base - The project root that added sources resolve against.
  * @returns The tailored document, as text.
- * @throws InvalidConfigError when the config names a modifier or a context that
- * is missing from the document, or a default that the config does not keep.
+ * @throws InvalidConfigError when the source is not an object, or the config
+ * names a modifier or a context that is missing from the document, or a
+ * default that the config does not keep.
  */
 export const tailor = (
   src: string,
-  changes: NonNullable<KitConfig["modifiers"]>,
+  config: Pick<KitConfig, "extend" | "modifiers">,
   base: URL,
 ): string => {
   let document: unknown;
@@ -169,6 +176,14 @@ export const tailor = (
     document = JSON.parse(src);
   } catch {
     document = undefined;
+  }
+  const issues: string[] = [];
+  if (config.extend !== undefined) {
+    if (record(document)) {
+      document = merge(document, anchor(config.extend, base));
+    } else {
+      issues.push("extend: the source is not a JSON object");
+    }
   }
   let order: unknown[] = [];
   if (record(document) && Array.isArray(document.resolutionOrder)) {
@@ -179,8 +194,7 @@ export const tailor = (
     : new Map<string, Declared>();
   const known = [...found.keys()].join(", ") || "none";
 
-  const issues: string[] = [];
-  for (const [name, config] of Object.entries(changes)) {
+  for (const [name, change] of Object.entries(config.modifiers ?? {})) {
     const entry = found.get(name);
     if (!entry || !record(document)) {
       issues.push(
@@ -189,8 +203,8 @@ export const tailor = (
       continue;
     }
     const { modifier, at, key } = entry;
-    if (config !== false) {
-      issues.push(...change(name, modifier, config, base));
+    if (change !== false) {
+      issues.push(...changes(name, modifier, change, base));
       continue;
     }
     if (typeof modifier.default !== "string") {

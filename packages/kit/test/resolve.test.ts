@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import type { Schema, Template } from "@untheme/schema";
+import type { KitConfig } from "../src/types";
 
 import { defineSchema } from "@untheme/schema";
 
@@ -378,6 +379,178 @@ describe("resolveKit", () => {
         "name must be a non-empty string when set",
         'outDir "../outside" must be a subdirectory of the project root',
       ],
+    });
+  });
+});
+
+describe("resolveKit with extend", () => {
+  /** A token document that rebinds `size.md`, inline in a source list. */
+  const md = (value: number) => ({
+    size: { $type: "dimension", md: { $value: { value, unit: "px" } } },
+  });
+
+  it("adds a file to a set, rebinding the base and keeping the contexts", async () => {
+    const kit = await resolveKit(
+      {
+        source: "./resolver.json",
+        extend: { sets: { core: { sources: [md(10)] } } },
+      },
+      { cwd: ROOT },
+    );
+    expect(kit.theme.tokens["size.md"]?.$value).toEqual({
+      value: 10,
+      unit: "px",
+    });
+    // The compact context follows the set in the order and still wins.
+    expect(kit.theme.modifiers.density?.compact).toEqual({
+      "size.md": { value: 6, unit: "px" },
+    });
+    expect(kit.input).toEqual({ color: "light", density: "default" });
+  });
+
+  it("adds a file to a set from a relative path and records it", async () => {
+    const kit = await resolveKit(
+      {
+        source: "./resolver.json",
+        extend: { sets: { core: { sources: [{ $ref: "./extra.json" }] } } },
+      },
+      { cwd: ROOT },
+    );
+    expect(kit.theme.tokens.extra?.$value).toBe(1);
+    expect(kit.documents).toContain(
+      fileURLToPath(new URL("extra.json", FIXTURES)),
+    );
+  });
+
+  it("adds a file to a context", async () => {
+    const kit = await resolveKit(
+      {
+        source: "./resolver.json",
+        extend: {
+          modifiers: {
+            density: {
+              contexts: {
+                compact: [
+                  {
+                    size: {
+                      $type: "dimension",
+                      sm: { $value: { value: 2, unit: "px" } },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      { cwd: ROOT },
+    );
+    expect(kit.theme.modifiers.density?.compact).toEqual({
+      "size.sm": { value: 2, unit: "px" },
+      "size.md": { value: 6, unit: "px" },
+    });
+  });
+
+  it("adds a context and changes the default", async () => {
+    const kit = await resolveKit(
+      {
+        source: "./resolver.json",
+        extend: {
+          modifiers: {
+            color: {
+              contexts: { dim: [{ $ref: "./dim.json" }] },
+              default: "dark",
+            },
+          },
+        },
+      },
+      { cwd: ROOT },
+    );
+    expect(Object.keys(kit.theme.modifiers.color ?? {})).toEqual([
+      "light",
+      "dark",
+      "dim",
+    ]);
+    expect(kit.input.color).toBe("dark");
+    // The base is the dark context now, so dim rebinds against it.
+    expect(kit.theme.tokens["color.primary.default"]?.$value).toBe(
+      "{color.primary.50}",
+    );
+    expect(kit.theme.modifiers.color?.dim).toEqual({
+      "color.surface": kit.theme.modifiers.color?.light?.["color.surface"],
+    });
+  });
+
+  it("applies modifiers after the merge, so they see an added context", async () => {
+    const kit = await resolveKit(
+      {
+        source: "./resolver.json",
+        extend: {
+          modifiers: { color: { contexts: { dim: [{ $ref: "./dim.json" }] } } },
+        },
+        modifiers: { color: { contexts: ["light", "dim"] } },
+      },
+      { cwd: ROOT },
+    );
+    expect(Object.keys(kit.theme.modifiers.color ?? {})).toEqual([
+      "light",
+      "dim",
+    ]);
+  });
+
+  it("puts a new set where the order says, after the modifiers", async () => {
+    const kit = await resolveKit(
+      {
+        source: "./resolver.json",
+        extend: {
+          sets: { brand: { sources: [md(10)] } },
+          resolutionOrder: [{ $ref: "#/sets/brand" }],
+        },
+      },
+      { cwd: ROOT },
+    );
+    expect(kit.theme.tokens["size.md"]?.$value).toEqual({
+      value: 10,
+      unit: "px",
+    });
+    // The set is last, so it wins over the compact context: the context no
+    // longer rebinds the token.
+    expect(kit.theme.modifiers.density?.compact).toEqual({});
+  });
+
+  it("extends a plain token document", async () => {
+    const kit = await resolveKit(
+      {
+        source: "./base.json",
+        name: "Base",
+        extend: { extra: { $type: "number", $value: 2 } },
+      },
+      { cwd: ROOT },
+    );
+    expect(kit.theme.tokens.extra?.$value).toBe(2);
+  });
+
+  it("rejects a fragment that is not an object before reading anything", async () => {
+    const req = async (): Promise<string> => {
+      throw new Error("read");
+    };
+    const config: KitConfig = JSON.parse(
+      '{ "source": "./resolver.json", "extend": [] }',
+    );
+    const failure = resolveKit(config, { req });
+    await expect(failure).rejects.toBeInstanceOf(InvalidConfigError);
+    await expect(failure).rejects.toMatchObject({
+      issues: ["extend must be an object: a fragment of the source document"],
+    });
+  });
+
+  it("rejects a source that is not a JSON object", async () => {
+    const failure = resolveKit(
+      { source: "./themes/notes.md", name: "Notes", extend: {} },
+      { cwd: ROOT },
+    );
+    await expect(failure).rejects.toMatchObject({
+      issues: ["extend: the source is not a JSON object"],
     });
   });
 });

@@ -78,3 +78,29 @@ export const walk = (
   }
   return node;
 };
+
+/** Maps every `$ref` below a node. */
+export const refs = (node: unknown, fn: (ref: string) => string): unknown => {
+  if (Array.isArray(node)) {
+    return node.map((item) => refs(item, fn));
+  }
+  if (record(node)) {
+    return rewrite(node, fn);
+  }
+  return node;
+};
+
+/** Returns a copy of a document with every `$ref` mapped through `fn`. */
+export const rewrite = (
+  document: Record<string, unknown>,
+  fn: (ref: string) => string,
+): Record<string, unknown> => {
+  return Object.fromEntries(
+    Object.entries(document).map(([key, value]) => {
+      if (key === "$ref" && typeof value === "string") {
+        return [key, fn(value)];
+      }
+      return [key, refs(value, fn)];
+    }),
+  );
+};

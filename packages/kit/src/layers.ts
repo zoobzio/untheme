@@ -1,14 +1,21 @@
 import type { Logger } from "@terrazzo/parser";
-import type { Layer, Schema, Template, Theme } from "@untheme/schema";
+import type { Schema, Template, Theme } from "@untheme/schema";
 import type { Loader } from "./loader";
-import type { BuiltLayer, KitConfig, Req } from "./types";
+import type {
+  BuiltLayer,
+  Entry,
+  KitConfig,
+  LayerSources,
+  Preset,
+  Req,
+} from "./types";
 
 import { readdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 import { defineConfig, parse } from "@terrazzo/parser";
 import { SchemaError, defineSchema } from "@untheme/schema";
-import { map, record } from "objectively";
+import { copy, equals, map, record } from "objectively";
 
 import { sorted } from "./contexts";
 import { binding } from "./convert";
@@ -16,10 +23,14 @@ import { entry, named } from "./describe";
 import { InvalidLayerError } from "./error";
 import { locate } from "./source";
 
-/**
- * The root of one source document of a layer, as authored. The name and the
- * description of the layer come from it.
- */
+/** A layer before the check. `types` has the declared `$type` of each token. */
+interface Candidate {
+  entry: Entry;
+  layer: unknown;
+  types: Record<string, string>;
+}
+
+/** The root of one source document of a layer, as authored. */
 const root = (
   src: string,
 ): { $description?: unknown; $extensions?: unknown } => {
@@ -36,13 +47,9 @@ const root = (
 
 /**
  * Builds one layer from its sources. Terrazzo parses the sources with
- * `resolveAliases` off. It flattens the groups and normalizes the values. A
- * reference stays a `{name}` string. The function converts each token to its
- * binding and sorts the tokens with the Terrazzo collation. A later source
- * wins.
- *
- * The name is the `name` in the untheme extension at the root of the last
- * source that has one, or the titled id. The description is the
+ * `resolveAliases` off. A reference stays a `{name}` string. A later source
+ * wins. The name is the `name` in the untheme extension at the root of the
+ * last source that has one, or the titled id. The description is the
  * `$description` at the root of the last source that has one.
  */
 const build = async (
@@ -51,7 +58,7 @@ const build = async (
   base: URL,
   load: Req,
   logger: Logger | undefined,
-): Promise<{ layer: BuiltLayer; types: Record<string, string> }> => {
+): Promise<Candidate> => {
   const inputs: { filename: URL; src: string }[] = [];
   let name: string | undefined;
   let description: unknown;
@@ -71,29 +78,67 @@ const build = async (
     resolveAliases: false,
   });
   const tokens = sorted(parsed.tokens);
-  const layer: Layer<Template> = {
-    id,
-    name: name ?? entry(id).name,
-    tokens: map(tokens, binding) as Layer<Template>["tokens"],
-  };
+  const listed = entry(id, name, description);
   return {
-    layer: { entry: entry(id, name, description), layer },
+    entry: listed,
+    layer: { id, name: listed.name, tokens: map(tokens, binding) },
     types: map(tokens, (token) => token.$type),
   };
 };
 
+/** The layer of the base. It holds the tokens that the config changed. */
+const own = (
+  theme: Theme<Template>,
+  pristine: LayerSources["pristine"],
+  description: unknown,
+): Candidate => {
+  const tokens: Record<string, unknown> = {};
+  for (const [token, slot] of Object.entries(theme.tokens)) {
+    const was = pristine?.[token];
+    if (was !== undefined && !equals(was.$value, slot.$value)) {
+      tokens[token] = copy(slot.$value);
+    }
+  }
+  const layer: Record<string, unknown> = { id: theme.id, name: theme.name };
+  if (Object.keys(tokens).length > 0) {
+    layer.tokens = tokens;
+  }
+  return { entry: entry(theme.id, theme.name, description), layer, types: {} };
+};
+
 /**
- * Checks a built layer against the contract. The function returns one issue
- * for each token whose declared `$type` is not the type of the token in the
- * contract, and one issue for each failure of the layer schema. Each issue
- * names the layer and the token.
+ * Reads a layer file of the preset.
+ *
+ * @throws Error when the file is missing or is not the listed layer.
  */
-const check = (
-  built: BuiltLayer,
+const inherit = async (
+  source: Preset["layers"][number],
+  load: Req,
+): Promise<Candidate> => {
+  const { entry: listed, url } = source;
+  let layer: unknown;
+  try {
+    layer = JSON.parse(await load(url, url));
+  } catch (error) {
+    throw new Error(
+      `@untheme/kit: cannot read the layer "${listed.id}" at ${url.href}`,
+      { cause: error },
+    );
+  }
+  if (!record(layer) || layer.id !== listed.id) {
+    throw new Error(
+      `@untheme/kit: ${url.href} is not the layer "${listed.id}"`,
+    );
+  }
+  return { entry: listed, layer, types: {} };
+};
+
+/** One issue for each token whose declared `$type` is not the type in the contract. */
+const typed = (
+  id: string,
   types: Record<string, string>,
   theme: Theme<Template>,
 ): string[] => {
-  const { id } = built.layer;
   const issues: string[] = [];
   for (const [token, type] of Object.entries(types)) {
     const slot = theme.tokens[token];
@@ -101,18 +146,6 @@ const check = (
       issues.push(
         `layers.${id}: tokens.${token} declares type "${type}", the contract has "${slot.$type}"`,
       );
-    }
-  }
-  const schema: Schema<Theme<Template>> = defineSchema(theme);
-  try {
-    schema.assert.layer(built.layer);
-  } catch (error) {
-    if (!(error instanceof SchemaError)) {
-      throw error;
-    }
-    for (const issue of error.issues) {
-      const at = (issue.path ?? []).join(".");
-      issues.push(`layers.${id}: ${at}: ${issue.message}`);
     }
   }
   return issues;
@@ -124,7 +157,7 @@ const EXTENSION = ".json";
 /**
  * Lists the layer documents of a local directory. Each `.json` file is one
  * layer. The id is the file name without the extension. The result is in name
- * order. The directory must be a `file:` URL that exists.
+ * order.
  *
  * @param directory - The directory, as a URL with a trailing slash.
  * @throws Error when the directory is not local or cannot be listed.
@@ -181,13 +214,12 @@ const expand = async (
 };
 
 /**
- * Builds the layers of a config against a base theme. A `layers` directory is
- * listed first, and each `.json` file in it is one layer. The function reads
- * the sources of each layer through the loader. It checks each layer against
- * the contract of the theme and reports every issue of every layer together.
- * The result keeps the order of the config, or the name order of the directory.
+ * Builds the layers of a build against its base theme. The base is the first
+ * layer. The inherited layers follow, then the configured layers. A configured
+ * layer with the id of an earlier one takes its place. The function checks
+ * each layer against the contract and reports every issue together.
  *
- * @param layers - The `layers` of the config.
+ * @param sources - The configured layers, the inherited layers, and the base.
  * @param theme - The base theme that the layers apply to.
  * @param base - The project root that relative sources resolve against.
  * @param loader - The loader of the build. The directory joins its documents.
@@ -196,26 +228,39 @@ const expand = async (
  * @throws Error when the layers directory is not local or cannot be listed.
  */
 export const buildLayers = async (
-  layers: KitConfig["layers"],
+  sources: LayerSources,
   theme: Theme<Template>,
   base: URL,
   loader: Loader,
   logger?: Logger,
 ): Promise<BuiltLayer[]> => {
   const { load, documents } = loader;
-  const sources = await expand(layers, base, documents);
-  const built: BuiltLayer[] = [];
+  const all = new Map<string, Candidate>();
+  all.set(theme.id, own(theme, sources.pristine, sources.description));
+  for (const source of sources.inherited) {
+    all.set(source.entry.id, await inherit(source, load));
+  }
+  const configured = await expand(sources.configured, base, documents);
+  for (const [id, source] of Object.entries(configured)) {
+    all.set(id, await build(id, [source].flat(), base, load, logger));
+  }
+  const schema: Schema<Theme<Template>> = defineSchema(theme);
   const issues: string[] = [];
-  for (const [id, source] of Object.entries(sources)) {
-    const { layer, types } = await build(
-      id,
-      [source].flat(),
-      base,
-      load,
-      logger,
-    );
-    issues.push(...check(layer, types, theme));
-    built.push(layer);
+  const built: BuiltLayer[] = [];
+  for (const { entry: listed, layer, types } of all.values()) {
+    issues.push(...typed(listed.id, types, theme));
+    try {
+      schema.assert.layer(layer);
+      built.push({ entry: listed, layer });
+    } catch (error) {
+      if (!(error instanceof SchemaError)) {
+        throw error;
+      }
+      for (const issue of error.issues) {
+        const at = (issue.path ?? []).join(".");
+        issues.push(`layers.${listed.id}: ${at}: ${issue.message}`);
+      }
+    }
   }
   if (issues.length > 0) {
     throw new InvalidLayerError(issues);

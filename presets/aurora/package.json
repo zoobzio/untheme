@@ -27,6 +27,8 @@
       "import": "./.dist/layers.mjs"
     },
     "./layers/*": "./.dist/layers/*",
+    "./preset.json": "./.dist/preset.json",
+    "./resolver.json": "./.dist/resolver.json",
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
