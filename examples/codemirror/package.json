@@ -4,10 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "theme": "untheme build",
-    "dev": "untheme build && vite",
-    "build": "untheme build && vite build",
-    "typecheck": "untheme build && tsc --noEmit",
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "oxlint"
   },
@@ -16,13 +15,12 @@
     "@codemirror/lang-javascript": "^6.2.5",
     "@codemirror/state": "^6.6.0",
     "@codemirror/view": "^6.41.1",
-    "@untheme/aurora": "workspace:*",
+    "@untheme/example-theme": "workspace:*",
     "@untheme/codemirror": "workspace:*",
     "untheme": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
-    "@untheme/kit": "workspace:*",
     "@untheme/testing": "workspace:*",
     "typescript": "^6.0.3",
     "vite": "^7.3.5",

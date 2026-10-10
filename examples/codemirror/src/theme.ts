@@ -1,5 +1,5 @@
 import type { CodeMirrorOptions, TagMap } from "@untheme/codemirror";
-import type { Contract } from "../untheme/config.mjs";
+import type { Contract } from "@untheme/example-theme/config";
 
 /**
  * The interchange from Lezer tag names to the carrier tokens of the theme.
@@ -7,7 +7,7 @@ import type { Contract } from "../untheme/config.mjs";
  *
  * The map is declared `as const`, so each binding keeps its literal token
  * name. The tests check the map over a small mock contract that defines only
- * these carriers, without a build of aurora.
+ * these carriers, without the theme package.
  */
 export const MAP = {
   keyword: "syntax-keyword",

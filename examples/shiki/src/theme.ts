@@ -1,5 +1,5 @@
 import type { ShikiOptions, SyntaxMap } from "@untheme/shiki";
-import type { Contract } from "../untheme/config.mjs";
+import type { Contract } from "@untheme/example-theme/config";
 
 /**
  * The interchange that the app owns. It binds each LSP semantic token type to
@@ -10,7 +10,7 @@ import type { Contract } from "../untheme/config.mjs";
  *
  * The map is declared `as const`, so each binding keeps its literal token
  * name. The tests check the map over a small mock contract that defines only
- * these carriers, without a build of aurora.
+ * these carriers, without the theme package.
  */
 export const MAP = {
   keyword: "syntax-keyword",
@@ -43,7 +43,7 @@ export const MAP = {
  * between light and dark.
  */
 export const OPTIONS = {
-  name: "aurora-syntax",
+  name: "mantis-syntax",
   fg: "syntax-text",
   bg: "surface-container",
 } as const satisfies ShikiOptions<Contract>;

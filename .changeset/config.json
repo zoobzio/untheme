@@ -1,6 +1,11 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
-  "changelog": ["@changesets/changelog-github", { "repo": "zoobzio/untheme" }],
+  "changelog": [
+    "@changesets/changelog-github",
+    {
+      "repo": "zoobzio/untheme"
+    }
+  ],
   "commit": false,
   "access": "public",
   "baseBranch": "main",
@@ -25,6 +30,7 @@
   "ignore": [
     "@untheme/example-codemirror",
     "@untheme/example-nuxt",
-    "@untheme/example-shiki"
+    "@untheme/example-shiki",
+    "@untheme/example-theme"
   ]
 }

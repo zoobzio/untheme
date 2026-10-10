@@ -4,21 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "theme": "untheme build",
-    "generate": "untheme build && jiti src/generate.ts",
-    "typecheck": "untheme build && tsc --noEmit",
+    "generate": "jiti src/generate.ts",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "oxlint"
   },
   "dependencies": {
-    "@untheme/aurora": "workspace:*",
+    "@untheme/example-theme": "workspace:*",
     "@untheme/shiki": "workspace:*",
     "shiki": "^3.0.0",
     "untheme": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
-    "@untheme/kit": "workspace:*",
     "@untheme/testing": "workspace:*",
     "jiti": "^2.7.0",
     "typescript": "^6.0.3",

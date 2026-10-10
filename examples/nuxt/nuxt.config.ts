@@ -2,15 +2,16 @@ import { fileURLToPath } from "node:url";
 import { defineNuxtConfig } from "nuxt/config";
 
 /**
- * The aurora showcase. Aurora is the preset: the module takes its build from
- * the installed package, and the theme picker imports its themes on demand.
+ * The showcase. The theme example is the preset: mantis, a palette over
+ * aurora, with every theme of aurora as a layer. The module takes its build
+ * from the installed package, and the theme picker imports a layer on demand.
  */
 const src = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
 export default defineNuxtConfig({
   compatibilityDate: "2026-07-01",
   modules: ["@untheme/nuxt"],
-  untheme: { preset: "@untheme/aurora" },
+  untheme: { preset: "@untheme/example-theme" },
   css: ["~/assets/css/main.css"],
   imports: {
     dirs: ["constants", "types"],

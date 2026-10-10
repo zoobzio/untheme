@@ -289,7 +289,8 @@ Aurora as sets, and add your own sets. Declare each modifier again with the
 context files of Aurora, such as
 `npm:/@untheme/aurora/src/modifiers/color/dark.json`, and add your own context
 files. The tables in _Layout_ show which files a subset needs. The
-[shiki example](../../examples/shiki) adds a `syntax-*` group in this way.
+[theme example](../../examples/theme) adds a `syntax-*` group with the
+`extend` of its config, which merges the group onto this document.
 
 ## Themes
 
@@ -324,7 +325,11 @@ To change a palette or add a theme, edit `scripts/seeds.json`. Then run:
 pnpm generate && pnpm format
 ```
 
-The script `scripts/generate.mjs` expands each seed into a tonal ramp in OKLCH.
+The script `scripts/generate.mjs` expands each seed into a tonal ramp in OKLCH
+with `ramp` from `scripts/ramp.mjs`. The package exports that module as
+`@untheme/aurora/ramp`, so a theme of your own can make its ramps the same way.
+`palette({ name, description, seeds })` makes a whole theme document from one
+seed per ramp. The [theme example](../../examples/theme) does this.
 The seed gives the hue and the chroma. All ramps use one lightness ladder
 across the eleven stops. The chroma curve peaks at the middle stops and
 tapers toward both ends. When a color is outside the sRGB gamut, the script

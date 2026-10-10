@@ -50,12 +50,12 @@ importers:
       '@codemirror/view':
         specifier: ^6.41.1
         version: 6.43.6
-      '@untheme/aurora':
-        specifier: workspace:*
-        version: link:../../presets/aurora
       '@untheme/codemirror':
         specifier: workspace:*
         version: link:../../integrations/codemirror
+      '@untheme/example-theme':
+        specifier: workspace:*
+        version: link:../theme
       untheme:
         specifier: workspace:*
         version: link:../../packages/untheme
@@ -63,9 +63,6 @@ importers:
       '@types/node':
         specifier: ^25.9.1
         version: 25.9.1
-      '@untheme/kit':
-        specifier: workspace:*
-        version: link:../../packages/kit
       '@untheme/testing':
         specifier: workspace:*
         version: link:../../packages/testing
@@ -81,9 +78,9 @@ importers:
 
   examples/nuxt:
     dependencies:
-      '@untheme/aurora':
+      '@untheme/example-theme':
         specifier: workspace:*
-        version: link:../../presets/aurora
+        version: link:../theme
       '@untheme/nuxt':
         specifier: workspace:*
         version: link:../../integrations/nuxt
@@ -109,9 +106,9 @@ importers:
 
   examples/shiki:
     dependencies:
-      '@untheme/aurora':
+      '@untheme/example-theme':
         specifier: workspace:*
-        version: link:../../presets/aurora
+        version: link:../theme
       '@untheme/shiki':
         specifier: workspace:*
         version: link:../../integrations/shiki
@@ -125,15 +122,37 @@ importers:
       '@types/node':
         specifier: ^25.9.1
         version: 25.9.1
-      '@untheme/kit':
-        specifier: workspace:*
-        version: link:../../packages/kit
       '@untheme/testing':
         specifier: workspace:*
         version: link:../../packages/testing
       jiti:
         specifier: ^2.7.0
         version: 2.7.0
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^5.0.3
+        version: 5.0.3(@types/node@25.9.1)(@vitest/coverage-v8@5.0.3)(vite@8.0.16(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.1))
+
+  examples/theme:
+    dependencies:
+      '@untheme/aurora':
+        specifier: workspace:*
+        version: link:../../presets/aurora
+      untheme:
+        specifier: workspace:*
+        version: link:../../packages/untheme
+    devDependencies:
+      '@types/node':
+        specifier: ^25.9.1
+        version: 25.9.1
+      '@untheme/kit':
+        specifier: workspace:*
+        version: link:../../packages/kit
+      '@untheme/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
       typescript:
         specifier: ^6.0.3
         version: 6.0.3

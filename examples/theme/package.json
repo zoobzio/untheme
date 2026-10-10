@@ -1,11 +1,6 @@
 {
-  "name": "@untheme/aurora",
-  "version": "0.5.0",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/zoobzio/untheme.git",
-    "directory": "presets/aurora"
-  },
+  "name": "@untheme/example-theme",
+  "private": true,
   "type": "module",
   "main": "./.dist/index.mjs",
   "types": "./.dist/index.d.mts",
@@ -29,36 +24,26 @@
     "./layers/*": "./.dist/layers/*",
     "./preset.json": "./.dist/preset.json",
     "./resolver.json": "./.dist/resolver.json",
-    "./ramp": "./scripts/ramp.mjs",
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
-  "files": [
-    ".dist",
-    "scripts/ramp.mjs",
-    "src"
-  ],
   "scripts": {
     "build": "untheme build",
     "stub": "untheme build",
     "generate": "node scripts/generate.mjs",
     "lint": "oxlint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "untheme build && tsc --noEmit",
     "test": "vitest run"
   },
-  "peerDependencies": {
+  "dependencies": {
+    "@untheme/aurora": "workspace:*",
     "untheme": "workspace:*"
-  },
-  "peerDependenciesMeta": {
-    "untheme": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
     "@untheme/kit": "workspace:*",
     "@untheme/testing": "workspace:*",
     "typescript": "^6.0.3",
-    "untheme": "workspace:*"
+    "vitest": "^5.0.3"
   }
 }

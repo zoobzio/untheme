@@ -4,9 +4,11 @@ A Nuxt landing page that restyles live. It renders **Borealis**, a fictional
 observability product, as a marketing page with a hero, features, pricing,
 testimonials, and an FAQ.
 
-A floating demo bar sets the eight modifier axes of [aurora](../../presets/aurora)
-and picks one of its 31 themes. A change restyles the page with no reload. The
-page cross-fades where the browser supports view transitions.
+A floating demo bar sets the eight modifier axes of the theme and picks the
+palette: mantis, the base of the [theme example](../theme), or one of the 31
+themes of [aurora](../../presets/aurora) that it carries as layers. A change
+restyles the page with no reload. The page cross-fades where the browser
+supports view transitions.
 
 ## Run
 
@@ -18,19 +20,21 @@ pnpm build
 pnpm --filter @untheme/example-nuxt dev
 ```
 
-Open the printed URL. The module takes the build of aurora from the installed
-package, so build the workspace first. `nuxt.config.ts` aliases the runtime
+Open the printed URL. The module takes the build of the theme example from
+the installed package, so build the workspace first. `nuxt.config.ts` aliases the runtime
 libraries that the app bundles to their TypeScript source.
 
 Other scripts: `build`, `preview`, `generate`, `typecheck`, `test`.
 
 ## Theme wiring
 
-**`nuxt.config.ts`** sets `untheme: { preset: "@untheme/aurora" }`. That is the
-whole wiring. The [`@untheme/nuxt`](../../integrations/nuxt) module takes the
-build of aurora from the installed package: the base theme, the boot selection,
-the manifest, and the thirty-one themes as layers. The module boots the eight
-axes of aurora at their default contexts. The axes are `color`, `vibrancy`,
+**`nuxt.config.ts`** sets `untheme: { preset: "@untheme/example-theme" }`.
+That is the whole wiring. The [`@untheme/nuxt`](../../integrations/nuxt)
+module takes the build of the theme example from the installed package: the
+base theme, the boot selection, the manifest, and the layers. The base is
+mantis, a palette over aurora. The layers are mantis itself and the
+thirty-one themes of aurora. The module boots the eight axes of aurora at
+their default contexts. The axes are `color`, `vibrancy`,
 `contrast`, `text`, `density`, `radius`, `depth`, and `motion`. The app has no
 `untheme.config.ts` and no server route of its own.
 
@@ -38,7 +42,7 @@ The demo bar reads `#build/untheme/manifest.mjs`. The bar shows one selector for
 each modifier and one option for each context. Each option has the name and the
 description from the aurora documents.
 
-The palette is not an axis. Each aurora theme is a layer.
+The palette is not an axis. The base and each aurora theme are layers.
 `#build/untheme/layers.mjs` lists them and imports one by id.
 
 - The theme picker lists `layers` of `useUntheme()`. A pick calls `select`,
@@ -55,7 +59,7 @@ those variables, so a change restyles the page.
 
 | File                                                           | What it shows                                        |
 | -------------------------------------------------------------- | ---------------------------------------------------- |
-| [`nuxt.config.ts`](./nuxt.config.ts)                           | The preset: aurora, served by the module             |
+| [`nuxt.config.ts`](./nuxt.config.ts)                           | The preset: the theme example, served by the module  |
 | [`app/composables/demo.ts`](./app/composables/demo.ts)         | `useDemo`: the manifest and `shuffle`                |
 | [`app/composables/controls.ts`](./app/composables/controls.ts) | `useControls`: two-way binding for one modifier axis |
 | [`app/components/Demo.vue`](./app/components/Demo.vue)         | The demo bar that consumes the composables           |
@@ -71,7 +75,7 @@ pnpm --filter @untheme/example-nuxt test
 ```
 
 [`test/nuxt/composables.test.ts`](./test/nuxt/composables.test.ts) runs the
-composables in vitest. The tests use no Nuxt environment and no build of aurora.
+composables in vitest. The tests use no Nuxt environment and no build of the preset.
 A mock theme from [`@untheme/testing`](../../packages/testing) stands in for the
 build. The theme is in [`test/nuxt/fixtures.ts`](./test/nuxt/fixtures.ts). It
 has two axes over a few tokens. `mockModules` supplies the
