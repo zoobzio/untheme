@@ -16,7 +16,7 @@
     "@codemirror/lang-javascript": "^6.2.5",
     "@codemirror/state": "^6.6.0",
     "@codemirror/view": "^6.41.1",
-    "@untheme/aurora": "workspace:*",
+    "@untheme/example-theme": "workspace:*",
     "@untheme/codemirror": "workspace:*",
     "untheme": "workspace:*"
   },

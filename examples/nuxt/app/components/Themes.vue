@@ -13,7 +13,10 @@ const selection = computed({
 </script>
 
 <template>
-  <fieldset class="axis" title="The palette: each theme is a layer of aurora">
+  <fieldset
+    class="axis"
+    title="The palette: the base of the preset, or one of its layers"
+  >
     <legend class="axis-label">Theme</legend>
     <select v-model="selection" name="theme">
       <option v-for="entry in untheme.layers" :key="entry.id" :value="entry.id">

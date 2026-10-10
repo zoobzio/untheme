@@ -139,7 +139,7 @@ your own resolver and add tokens.
 | [`packages`](./packages)         | The library, the `untheme` package, and the build kit                                   |
 | [`presets`](./presets)           | The presets as DTCG JSON. [`@untheme/aurora`](./presets/aurora) is the reference preset |
 | [`integrations`](./integrations) | The Nuxt module and the Shiki and CodeMirror theme packages                             |
-| [`examples`](./examples)         | A Nuxt app, a Shiki demo, and a CodeMirror demo                                         |
+| [`examples`](./examples)         | A theme package over aurora, a Nuxt app, a Shiki demo, and a CodeMirror demo            |
 
 ## Development
 

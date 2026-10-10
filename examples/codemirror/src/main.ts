@@ -11,7 +11,7 @@ import { CHROME, MAP } from "./theme";
 
 /*
  * Boots the theme that `untheme build` wrote to `untheme/`, at its default
- * selection. The theme is aurora with the syntax carriers. The renderer emits
+ * selection. The theme is mantis with the syntax carriers. The renderer emits
  * the whole cascade as custom properties: ramps, roles, and the syntax-*
  * carriers.
  */

@@ -11,7 +11,7 @@
     "lint": "oxlint"
   },
   "dependencies": {
-    "@untheme/aurora": "workspace:*",
+    "@untheme/example-theme": "workspace:*",
     "@untheme/shiki": "workspace:*",
     "shiki": "^3.0.0",
     "untheme": "workspace:*"

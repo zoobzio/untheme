@@ -64,7 +64,7 @@ describe("the interchange", () => {
     const shiki = defineShikiTheme(untheme.schema, MAP, OPTIONS);
     const keyword = shiki.settings?.find((rule) => rule.scope === "keyword");
     expect(keyword?.settings.foreground).toBe("var(--syntax-keyword)");
-    expect(shiki.name).toBe("aurora-syntax");
+    expect(shiki.name).toBe("mantis-syntax");
     expect(shiki.fg).toBe("var(--syntax-text)");
     expect(shiki.bg).toBe("var(--surface-container)");
     for (const rule of shiki.settings ?? []) {

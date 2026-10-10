@@ -48,7 +48,7 @@ const theme = defineShikiTheme(untheme.schema, MAP, OPTIONS);
 const highlighted = await codeToHtml(SAMPLE, { lang: "ts", theme });
 
 /*
- * The full cascade: the ramps and roles of aurora under :root, and the
+ * The full cascade: the ramps and roles of the preset under :root, and the
  * [data-color="dark"] block that rebinds the syntax tokens. A change to the
  * data-color attribute re-themes the code.
  */

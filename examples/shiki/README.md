@@ -6,20 +6,19 @@ The example has two parts. **Carrier tokens** hold the colors. The
 
 ## Carrier tokens
 
-The carriers come from the [aurora](../../presets/aurora) preset, with extra DTCG
-JSON files.
+The carriers come from the [theme example](../theme), a preset over aurora,
+with two DTCG JSON files of this example's own.
 
 - [`tokens/syntax.json`](./tokens/syntax.json) adds a `syntax-*` token group.
-  The members reference the tonal ramps of aurora.
+  The members reference the tonal ramps of the preset.
 - [`tokens/syntax-dark.json`](./tokens/syntax-dark.json) rebinds the group for
   the dark context. The colors flip between light and dark through the same
-  modifier axis as the aurora roles.
-- [`tokens/aurora-syntax.resolver.json`](./tokens/aurora-syntax.resolver.json)
-  lists the aurora files from its package (`npm:/@untheme/aurora/...`). It adds
-  the syntax set after the aurora sets. It adds the dark file in the dark color
-  context.
-- [`untheme.config.ts`](./untheme.config.ts) points at the resolver.
-  `untheme build` writes the theme to `untheme/`.
+  modifier axis as the color roles.
+- [`untheme.config.ts`](./untheme.config.ts) names the preset as its source
+  and extends it: the syntax file joins the `roles` set, since the carriers
+  are color roles over the ramps, and the dark file joins the dark color
+  context. The example has no resolver of its own. `untheme build` writes the
+  theme to `untheme/`.
 
 ## Interchange
 
@@ -52,7 +51,7 @@ pnpm generate
 ```
 
 The script runs `untheme build` and writes `.dist/index.html`. The page has the
-full aurora cascade in a `<style>` block, a code sample that the generated theme
+full cascade of the preset in a `<style>` block, a code sample that the generated theme
 highlights, and a light/dark toggle. The toggle flips the `data-color`
 attribute. The custom-property graph re-themes the highlighted code.
 
@@ -66,7 +65,7 @@ The script prints the two-hop path from scope to color:
 
 A Shiki span reads `var(--syntax-keyword)`. The cascade resolves it to
 `var(--primary-600)` under `:root` and to `var(--primary-400)` under
-`[data-color="dark"]`. The ramp of aurora defines the final color.
+`[data-color="dark"]`. The ramp of the preset defines the final color.
 
 ## Test
 
@@ -75,7 +74,7 @@ pnpm test
 ```
 
 [`test/theme.test.ts`](./test/theme.test.ts) checks the interchange without a
-build of aurora. A mock theme from [`@untheme/testing`](../../packages/testing)
+build of the preset. A mock theme from [`@untheme/testing`](../../packages/testing)
 defines only the carriers that the map names, over two stops of two ramps. The
 tests check three things:
 

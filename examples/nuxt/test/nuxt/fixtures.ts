@@ -1,7 +1,7 @@
 import { mockModules, mockTheme } from "@untheme/testing";
 
 /**
- * A stand-in for the aurora build that the module makes at build time. It
+ * A stand-in for the preset build that the module makes at build time. It
  * has two axes with a few contexts each, over a few tokens. That is enough
  * to drive the composables, and a test does not wait for it.
  */
