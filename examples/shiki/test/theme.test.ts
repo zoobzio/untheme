@@ -10,9 +10,9 @@ import { MAP, OPTIONS } from "../src/theme";
  * The carriers that the interchange binds, over a stand-in for aurora. The
  * stand-in has two stops of two ramps in place of the hundreds of tokens of
  * the preset. Its dark context rebinds the carriers the way
- * `tokens/syntax-dark.json` does. The tests check the map against this
- * contract without a kit build. Every role in the map must name a color
- * carrier here.
+ * `src/syntax-dark.json` of the theme example does. The tests check the map
+ * against this contract without the theme package. Every role in the map
+ * must name a color carrier here.
  */
 const theme = mockTheme({
   tokens: {

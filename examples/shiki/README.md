@@ -6,19 +6,13 @@ The example has two parts. **Carrier tokens** hold the colors. The
 
 ## Carrier tokens
 
-The carriers come from the [theme example](../theme), a preset over aurora,
-with two DTCG JSON files of this example's own.
-
-- [`tokens/syntax.json`](./tokens/syntax.json) adds a `syntax-*` token group.
-  The members reference the tonal ramps of the preset.
-- [`tokens/syntax-dark.json`](./tokens/syntax-dark.json) rebinds the group for
-  the dark context. The colors flip between light and dark through the same
-  modifier axis as the color roles.
-- [`untheme.config.ts`](./untheme.config.ts) names the preset as its source
-  and extends it: the syntax file joins the `roles` set, since the carriers
-  are color roles over the ramps, and the dark file joins the dark color
-  context. The example has no resolver of its own. `untheme build` writes the
-  theme to `untheme/`.
+The carriers come from the [theme example](../theme), a preset over aurora.
+Its `syntax-*` token group holds one color role for each kind of syntax, over
+the tonal ramps of the preset, and its dark color context rebinds the group.
+The colors flip between light and dark through the same modifier axis as the
+other color roles. This example adds no tokens and runs no build. It imports
+`@untheme/example-theme/config`: the built theme, its boot selection, and the
+`Contract` type.
 
 ## Interchange
 
@@ -50,8 +44,8 @@ const theme = defineShikiTheme(untheme.schema, MAP, {
 pnpm generate
 ```
 
-The script runs `untheme build` and writes `.dist/index.html`. The page has the
-full cascade of the preset in a `<style>` block, a code sample that the generated theme
+The script writes `.dist/index.html`. The page has the full cascade of the
+preset in a `<style>` block, a code sample that the generated theme
 highlights, and a light/dark toggle. The toggle flips the `data-color`
 attribute. The custom-property graph re-themes the highlighted code.
 
@@ -73,8 +67,8 @@ A Shiki span reads `var(--syntax-keyword)`. The cascade resolves it to
 pnpm test
 ```
 
-[`test/theme.test.ts`](./test/theme.test.ts) checks the interchange without a
-build of the preset. A mock theme from [`@untheme/testing`](../../packages/testing)
+[`test/theme.test.ts`](./test/theme.test.ts) checks the interchange without
+the theme package. A mock theme from [`@untheme/testing`](../../packages/testing)
 defines only the carriers that the map names, over two stops of two ramps. The
 tests check three things:
 

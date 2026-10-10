@@ -6,8 +6,8 @@ import { defineRenderer } from "untheme/css";
 import { defineShikiTheme } from "@untheme/shiki";
 import { codeToHtml } from "shiki";
 
-import config from "../untheme/config.mjs";
-import type { Contract } from "../untheme/config.mjs";
+import config from "@untheme/example-theme/config";
+import type { Contract } from "@untheme/example-theme/config";
 import { MAP, OPTIONS } from "./theme";
 
 /**
@@ -28,8 +28,9 @@ export function greet(name: string, mode: Mode = "light"): number {
 `;
 
 /*
- * Boots the built theme at its default selection and renders over it. The
- * Shiki theme wraps every scope around the var() output of the renderer.
+ * Boots the theme from the installed package at its default selection and
+ * renders over it. The Shiki theme wraps every scope around the var() output
+ * of the renderer.
  */
 const untheme = makeUntheme<Contract>(config.theme, {
   patch: {},

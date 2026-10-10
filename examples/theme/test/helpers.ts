@@ -13,6 +13,14 @@ export const ROOT = fileURLToPath(new URL("..", import.meta.url));
 export const palette = async (): Promise<Record<string, unknown>> =>
   JSON.parse(await readFile(join(ROOT, "src/mantis.json"), "utf8"));
 
+/** The `syntax-*` group of the theme: its token document, as authored. */
+export const syntax = async (): Promise<Record<string, unknown>> =>
+  JSON.parse(await readFile(join(ROOT, "src/syntax.json"), "utf8"));
+
+/** The dark bindings of the `syntax-*` group, as authored. */
+export const syntaxDark = async (): Promise<Record<string, unknown>> =>
+  JSON.parse(await readFile(join(ROOT, "src/syntax-dark.json"), "utf8"));
+
 /**
  * Builds the theme from its own config, as `untheme build` does for `.dist/`.
  * Each test file runs one build.

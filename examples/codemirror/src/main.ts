@@ -5,15 +5,15 @@ import { EditorView, lineNumbers } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { javascript } from "@codemirror/lang-javascript";
 
-import config from "../untheme/config.mjs";
-import type { Contract } from "../untheme/config.mjs";
+import config from "@untheme/example-theme/config";
+import type { Contract } from "@untheme/example-theme/config";
 import { CHROME, MAP } from "./theme";
 
 /*
- * Boots the theme that `untheme build` wrote to `untheme/`, at its default
- * selection. The theme is mantis with the syntax carriers. The renderer emits
- * the whole cascade as custom properties: ramps, roles, and the syntax-*
- * carriers.
+ * Boots the theme from the installed package, at its default selection. The
+ * theme is mantis, with the syntax carriers among its roles. The renderer
+ * emits the whole cascade as custom properties: ramps, roles, and the
+ * syntax-* carriers.
  */
 const untheme = makeUntheme<Contract>(config.theme, {
   patch: {},

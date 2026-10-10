@@ -289,7 +289,8 @@ Aurora as sets, and add your own sets. Declare each modifier again with the
 context files of Aurora, such as
 `npm:/@untheme/aurora/src/modifiers/color/dark.json`, and add your own context
 files. The tables in _Layout_ show which files a subset needs. The
-[shiki example](../../examples/shiki) adds a `syntax-*` group in this way.
+[theme example](../../examples/theme) adds a `syntax-*` group with the
+`extend` of its config, which merges the group onto this document.
 
 ## Themes
 
