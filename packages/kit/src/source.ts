@@ -2,9 +2,8 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { record } from "objectively";
-
 import { NPM, PRESET } from "./constant";
+import { toDocument } from "./util";
 
 /**
  * Resolves a source designator to a URL. An absolute URL (`https:`, `file:`,
@@ -35,12 +34,17 @@ export const request = async (src: URL): Promise<string> => {
   return response.text();
 };
 
+/** Returns the URL with one trailing slash, so a relative path resolves below it. */
+export const slashed = (url: URL): URL => {
+  return new URL(`${url.href.replace(/\/+$/, "")}/`);
+};
+
 /**
  * Makes a file URL with a trailing slash from a directory path. Relative source
  * paths resolve against it.
  */
 export const directory = (path: string): URL => {
-  return new URL(`${pathToFileURL(path).href}/`);
+  return slashed(pathToFileURL(path));
 };
 
 /** Whether an `npm:/` URL names a package and no path in it. */
@@ -60,7 +64,7 @@ export const designate = (url: URL): URL => {
   if (!bare(url)) {
     return url;
   }
-  return new URL(`${url.href.replace(/\/+$/, "")}/${PRESET}`);
+  return new URL(`${slashed(url).href}${PRESET}`);
 };
 
 /** Whether a URL names a preset manifest. */
@@ -72,15 +76,13 @@ export const isPreset = (url: URL): boolean => {
 export const packageName = async (
   root: string,
 ): Promise<string | undefined> => {
+  let text: string;
   try {
-    const manifest: unknown = JSON.parse(
-      await readFile(join(root, "package.json"), "utf8"),
-    );
-    if (record(manifest) && typeof manifest.name === "string") {
-      return manifest.name;
-    }
+    text = await readFile(join(root, "package.json"), "utf8");
   } catch {
     // No package: the build is not a preset.
+    return undefined;
   }
-  return undefined;
+  const manifest = toDocument(text);
+  return typeof manifest?.name === "string" ? manifest.name : undefined;
 };

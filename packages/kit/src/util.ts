@@ -1,4 +1,5 @@
-import type { Source } from "./types";
+import type { Issue } from "@untheme/schema";
+import type { Document, Source } from "./types";
 
 import { entries, map, record, wrapped } from "objectively";
 
@@ -7,6 +8,29 @@ import { entries, map, record, wrapped } from "objectively";
  * starts with `{` and ends with `}`.
  */
 export const isReference = wrapped("{", "}");
+
+/** Whether a value is a non-empty string. */
+export const isText = (value: unknown): value is string => {
+  return typeof value === "string" && value !== "";
+};
+
+/**
+ * Parses JSON text to a document. The function returns `undefined` when the
+ * text is not JSON, or when the JSON is not an object.
+ */
+export const toDocument = (text: string): Document | undefined => {
+  try {
+    const value: unknown = JSON.parse(text);
+    return record(value) ? value : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+/** One line for a schema issue: the dotted path, then the message. */
+export const line = (issue: Issue): string => {
+  return `${(issue.path ?? []).join(".")}: ${issue.message}`;
+};
 
 /**
  * Names a token with its origin document, for an error message.

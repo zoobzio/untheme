@@ -1,10 +1,9 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { record } from "objectively";
-
 import { MANIFEST } from "./constant";
 import { inside, normalize } from "./path";
+import { toDocument } from "./util";
 
 /**
  * Reads the paths that the manifest file in an output directory lists. The
@@ -14,17 +13,13 @@ import { inside, normalize } from "./path";
  * @param dir - The absolute output directory.
  */
 export const readManifest = async (dir: string): Promise<string[]> => {
-  let files: unknown;
+  let text: string;
   try {
-    const manifest: unknown = JSON.parse(
-      await readFile(join(dir, MANIFEST), "utf8"),
-    );
-    if (record(manifest)) {
-      files = manifest.files;
-    }
+    text = await readFile(join(dir, MANIFEST), "utf8");
   } catch {
     return [];
   }
+  const files = toDocument(text)?.files;
   if (!Array.isArray(files)) {
     return [];
   }

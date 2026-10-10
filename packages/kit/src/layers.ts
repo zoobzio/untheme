@@ -1,8 +1,8 @@
-import type { Logger } from "@terrazzo/parser";
 import type { Definition, Schema, Template, Theme } from "@untheme/schema";
 import type { Loader } from "./loader";
 import type {
   BuiltLayer,
+  Document,
   Entry,
   KitConfig,
   LayerSources,
@@ -13,15 +13,15 @@ import type {
 import { readdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
-import { defineConfig, parse } from "@terrazzo/parser";
-import { SchemaError, defineSchema } from "@untheme/schema";
+import { defineSchema } from "@untheme/schema";
 import { collect, copy, entries, equals, keys, map, record } from "objectively";
 
 import { sorted } from "./contexts";
 import { binding } from "./convert";
 import { entry, named } from "./describe";
 import { InvalidLayerError } from "./error";
-import { locate } from "./source";
+import { locate, slashed } from "./source";
+import { line, toDocument } from "./util";
 
 /** A layer before the check. `types` has the declared `$type` of each token. */
 interface Candidate {
@@ -29,21 +29,6 @@ interface Candidate {
   layer: unknown;
   types: Record<string, string>;
 }
-
-/** The root of one source document of a layer, as authored. */
-const root = (
-  src: string,
-): { $description?: unknown; $extensions?: unknown } => {
-  try {
-    const document: unknown = JSON.parse(src);
-    if (record(document)) {
-      return document;
-    }
-  } catch {
-    // The parser reports a malformed document.
-  }
-  return {};
-};
 
 /**
  * Builds one layer from its sources. Terrazzo parses the sources with
@@ -55,28 +40,21 @@ const root = (
 const build = async (
   id: string,
   sources: (string | URL)[],
-  base: URL,
-  load: Req,
-  logger: Logger | undefined,
+  loader: Loader,
 ): Promise<Candidate> => {
   const inputs: { filename: URL; src: string }[] = [];
   let name: string | undefined;
   let description: unknown;
   for (const source of sources) {
-    const filename = locate(source, base);
-    const src = await load(filename, base);
+    const filename = locate(source, loader.base);
+    const src = await loader.load(filename, loader.base);
     inputs.push({ filename, src });
-    const authored = root(src);
+    // The parser reports a malformed document.
+    const authored: Document = toDocument(src) ?? {};
     name = named(authored) ?? name;
     description = authored.$description ?? description;
   }
-  const parsed = await parse(inputs, {
-    config: defineConfig({ alphabetize: false }, { cwd: base }),
-    req: load,
-    logger,
-    skipLint: true,
-    resolveAliases: false,
-  });
+  const parsed = await loader.parse(inputs, { resolveAliases: false });
   const tokens = sorted(parsed.tokens);
   const listed = entry(id, name, description);
   return {
@@ -187,13 +165,12 @@ const list = async (directory: URL): Promise<Record<string, URL>> => {
 /**
  * Expands the `layers` of a config to the sources of each layer, by id. An
  * object is returned as it is. A path or URL names a directory: the function
- * lists it with {@link list} and records the directory in `documents`, so a
+ * lists it with {@link list} and tracks the directory as a document, so a
  * watcher sees a new file.
  */
 const expand = async (
   layers: KitConfig["layers"],
-  base: URL,
-  documents: string[],
+  loader: Loader,
 ): Promise<Record<string, string | URL | (string | URL)[]>> => {
   if (layers === undefined) {
     return {};
@@ -201,13 +178,9 @@ const expand = async (
   if (typeof layers !== "string" && !(layers instanceof URL)) {
     return layers;
   }
-  const located = locate(layers, base);
-  const directory = new URL(`${located.href.replace(/\/+$/, "")}/`);
+  const directory = slashed(locate(layers, loader.base));
   const sources = await list(directory);
-  const path = fileURLToPath(directory).replace(/[\\/]+$/, "");
-  if (!documents.includes(path)) {
-    documents.push(path);
-  }
+  loader.track(fileURLToPath(directory).replace(/[\\/]+$/, ""));
   return sources;
 };
 
@@ -219,45 +192,36 @@ const expand = async (
  *
  * @param sources - The configured layers, the inherited layers, and the base.
  * @param theme - The base theme that the layers apply to.
- * @param base - The project root that relative sources resolve against.
- * @param loader - The loader of the build. The directory joins its documents.
- * @param logger - The Terrazzo logger of the build.
+ * @param loader - The loader of the build. It reads and parses each layer.
  * @throws InvalidLayerError when a layer violates the contract.
  * @throws Error when the layers directory is not local or cannot be listed.
  */
 export const buildLayers = async (
   sources: LayerSources,
   theme: Theme<Template>,
-  base: URL,
   loader: Loader,
-  logger?: Logger,
 ): Promise<BuiltLayer[]> => {
-  const { load, documents } = loader;
   const all = new Map<string, Candidate>();
   all.set(theme.id, own(theme, sources.pristine, sources.description));
   for (const source of sources.inherited) {
-    all.set(source.entry.id, await inherit(source, load));
+    all.set(source.entry.id, await inherit(source, loader.load));
   }
-  const configured = await expand(sources.configured, base, documents);
+  const configured = await expand(sources.configured, loader);
   for (const [id, source] of entries(configured)) {
-    all.set(id, await build(id, [source].flat(), base, load, logger));
+    all.set(id, await build(id, [source].flat(), loader));
   }
   const schema: Schema<Theme<Template>> = defineSchema(theme);
   const issues: string[] = [];
   const built: BuiltLayer[] = [];
   for (const { entry: listed, layer, types } of all.values()) {
     issues.push(...typed(listed.id, types, theme));
-    try {
-      schema.assert.layer(layer);
-      built.push({ entry: listed, layer });
-    } catch (error) {
-      if (!(error instanceof SchemaError)) {
-        throw error;
-      }
-      for (const issue of error.issues) {
-        const at = (issue.path ?? []).join(".");
-        issues.push(`layers.${listed.id}: ${at}: ${issue.message}`);
-      }
+    const result = schema.inspect.layer(layer);
+    if (result.success) {
+      built.push({ entry: listed, layer: result.data });
+      continue;
+    }
+    for (const issue of result.issues) {
+      issues.push(`layers.${listed.id}: ${line(issue)}`);
     }
   }
   if (issues.length > 0) {

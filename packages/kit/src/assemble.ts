@@ -8,6 +8,7 @@ import { isTemplate } from "@untheme/utils";
 import { skeleton } from "./contexts";
 import { describe } from "./describe";
 import { identity } from "./identity";
+import { line } from "./util";
 import { verify } from "./verify";
 
 /**
@@ -22,17 +23,10 @@ export const reframe = <T>(tokens: TokenNormalizedSet, run: () => T): T => {
       throw error;
     }
     const lines = error.issues.map((issue) => {
-      const path = issue.path ?? [];
-      const token = path.find((segment) => segment in tokens);
-      const at = path.join(".");
-      let origin = "";
-      if (token !== undefined) {
-        const filename = tokens[token]?.source.filename;
-        if (filename) {
-          origin = ` (${filename})`;
-        }
-      }
-      return `${at}: ${issue.message}${origin}`;
+      const token = (issue.path ?? []).find((segment) => segment in tokens);
+      const filename =
+        token === undefined ? undefined : tokens[token]?.source.filename;
+      return filename ? `${line(issue)} (${filename})` : line(issue);
     });
     throw new Error(
       `@untheme/kit: the converted tokens violate untheme's schema —\n${lines.join("\n")}`,

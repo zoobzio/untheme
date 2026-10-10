@@ -1,10 +1,11 @@
-import type { KitConfig, ModifierConfig } from "./types";
+import type { Document, KitConfig, ModifierConfig } from "./types";
 
 import { entries, keys, pick, record } from "objectively";
 
 import { InvalidConfigError } from "./error";
 import { anchor, merge } from "./merge";
 import { locate } from "./source";
+import { toDocument } from "./util";
 
 /** The `$ref` prefix of an entry in `resolutionOrder` that names a top-level modifier. */
 const POINTER = "#/modifiers/";
@@ -153,7 +154,7 @@ const changes = (
  * @param src - The source document, as text.
  * @param config - The `extend` and the `modifiers` of the config.
  * @param base - The project root that added sources resolve against.
- * @returns The tailored document, as text.
+ * @returns The tailored document.
  * @throws InvalidConfigError when the source is not an object, or the config
  * names a modifier or a context that is missing from the document, or a
  * default that the config does not keep.
@@ -162,33 +163,35 @@ export const tailor = (
   src: string,
   config: Pick<KitConfig, "extend" | "modifiers">,
   base: URL,
-): string => {
-  let document: unknown;
-  try {
-    document = JSON.parse(src);
-  } catch {
-    document = undefined;
+): Document => {
+  let document = toDocument(src);
+  if (document === undefined) {
+    const issues = keys(config.modifiers ?? {}).map(
+      (name) =>
+        `modifiers.${name}: the source declares no modifier "${name}" (none)`,
+    );
+    if (config.extend !== undefined) {
+      issues.unshift("extend: the source is not a JSON object");
+    }
+    throw new InvalidConfigError(issues);
   }
-  const issues: string[] = [];
   if (config.extend !== undefined) {
-    if (record(document)) {
-      document = merge(document, anchor(config.extend, base));
-    } else {
-      issues.push("extend: the source is not a JSON object");
+    // Two records merge to a record.
+    const merged = merge(document, anchor(config.extend, base));
+    if (record(merged)) {
+      document = merged;
     }
   }
-  let order: unknown[] = [];
-  if (record(document) && Array.isArray(document.resolutionOrder)) {
-    order = document.resolutionOrder;
-  }
-  const found = record(document)
-    ? declared(document, order)
-    : new Map<string, Declared>();
+  const order: unknown[] = Array.isArray(document.resolutionOrder)
+    ? document.resolutionOrder
+    : [];
+  const found = declared(document, order);
   const known = [...found.keys()].join(", ") || "none";
+  const issues: string[] = [];
 
   for (const [name, change] of entries(config.modifiers ?? {})) {
     const entry = found.get(name);
-    if (!entry || !record(document)) {
+    if (!entry) {
       issues.push(
         `modifiers.${name}: the source declares no modifier "${name}" (${known})`,
       );
@@ -217,5 +220,5 @@ export const tailor = (
   if (issues.length > 0) {
     throw new InvalidConfigError(issues);
   }
-  return JSON.stringify(document, null, 2);
+  return document;
 };

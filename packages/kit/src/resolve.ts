@@ -1,9 +1,14 @@
-import type { GenerateOptions, Kit, KitConfig, Preset } from "./types";
+import type {
+  Document,
+  GenerateOptions,
+  Kit,
+  KitConfig,
+  Preset,
+} from "./types";
 
 import { resolve } from "node:path";
 
-import { defineConfig, parse } from "@terrazzo/parser";
-import { keys, record } from "objectively";
+import { keys } from "objectively";
 
 import { assemble } from "./assemble";
 import { buildLayers } from "./layers";
@@ -12,8 +17,9 @@ import { skeleton } from "./contexts";
 import { loader } from "./loader";
 import { normalize } from "./path";
 import { portable, readPreset } from "./preset";
-import { designate, directory, isPreset, locate, packageName } from "./source";
+import { designate, isPreset, locate, packageName } from "./source";
 import { tailor } from "./tailor";
+import { toDocument } from "./util";
 import { validate } from "./validate";
 
 /**
@@ -42,9 +48,8 @@ export const resolveKit = async (
 ): Promise<Kit> => {
   validate(config);
   const root = resolve(options.cwd ?? process.cwd());
-  const base = directory(root);
-  const files = loader(root, options.req);
-  const { load, documents } = files;
+  const files = loader(root, options.req, options.logger);
+  const { base, load, documents } = files;
 
   let url = designate(locate(config.source, base));
   let inherited: Preset["layers"] = [];
@@ -55,26 +60,22 @@ export const resolveKit = async (
   }
 
   const authored = await load(url, base);
-  let src = authored;
+  let tailored: Document | undefined;
   if (
     config.extend !== undefined ||
     (config.modifiers && keys(config.modifiers).length > 0)
   ) {
-    src = tailor(src, config, base);
+    tailored = tailor(authored, config, base);
   }
-  const settings = {
-    config: defineConfig({ alphabetize: false }, { cwd: base }),
-    req: load,
-    logger: options.logger,
-    skipLint: true,
-  };
-  const parsed = await parse([{ filename: url, src }], settings);
+  const parsed = await files.parse([
+    { filename: url, src: tailored ?? authored },
+  ]);
   const { theme, input, manifest } = assemble(parsed, config);
 
   // The base as authored, so the base layer can hold what the config changed.
   let pristine: Record<string, Record<string, unknown>> | undefined;
-  if (src !== authored) {
-    const upstream = await parse([{ filename: url, src: authored }], settings);
+  if (tailored !== undefined) {
+    const upstream = await files.parse([{ filename: url, src: authored }]);
     pristine = skeleton(upstream.resolver, upstream.tokens).tokens;
   }
 
@@ -86,15 +87,13 @@ export const resolveKit = async (
       description: parsed.resolver?.source.description,
     },
     theme,
-    base,
     files,
-    options.logger,
   );
 
-  let resolver: Record<string, unknown> | undefined;
+  let resolver: Document | undefined;
   const name = await packageName(root);
-  const document: unknown = JSON.parse(src);
-  if (name !== undefined && record(document)) {
+  const document = tailored ?? toDocument(authored);
+  if (name !== undefined && document !== undefined) {
     resolver = portable({ ...document, name: theme.name }, url, base, name);
   }
 

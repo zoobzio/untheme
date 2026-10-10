@@ -4,13 +4,13 @@ import { record } from "objectively";
 
 import { NPM } from "./constant";
 import { entry } from "./describe";
-import { rewrite } from "./util";
+import { isText, rewrite } from "./util";
 
 /** Whether a listed layer has an id. */
 const listed = (
   item: unknown,
 ): item is { id: string; name?: unknown; description?: unknown } => {
-  return record(item) && typeof item.id === "string" && item.id !== "";
+  return record(item) && isText(item.id);
 };
 
 /**

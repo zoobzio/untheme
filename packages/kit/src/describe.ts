@@ -6,6 +6,7 @@ import { keys, record } from "objectively";
 
 import { EXTENSION } from "./constant";
 import { axes } from "./contexts";
+import { isText } from "./util";
 
 /**
  * Makes a display name from an id. The function splits the id on `-`, `_`, `.`,
@@ -39,7 +40,7 @@ export const entry = (
   description?: unknown,
 ): Entry => {
   const found: Entry = { id, name: name ?? title(id) };
-  if (typeof description === "string" && description !== "") {
+  if (isText(description)) {
     found.description = description;
   }
   return found;

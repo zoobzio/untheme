@@ -5,6 +5,7 @@ import { entries, record } from "objectively";
 import { OUT_DIR } from "./constant";
 import { InvalidConfigError } from "./error";
 import { inside, normalize } from "./path";
+import { isText } from "./util";
 
 /** One rule over a config. The rule returns the issues that it finds. */
 type Rule = (config: KitConfig) => string[];
@@ -36,14 +37,15 @@ const identity: Rule = (config) => {
   return issues;
 };
 
-/** Whether a value is a non-empty string. */
-const named = (value: unknown): value is string => {
-  return typeof value === "string" && value !== "";
-};
-
 /** Whether a value is a source designator, a non-empty string or a URL. */
 const designator = (value: unknown): boolean => {
-  return named(value) || value instanceof URL;
+  return isText(value) || value instanceof URL;
+};
+
+/** Whether a value is a source designator or a non-empty list of them. */
+const sources = (value: unknown): boolean => {
+  const files: unknown[] = [value].flat();
+  return files.length > 0 && files.every(designator);
 };
 
 /**
@@ -78,8 +80,7 @@ const modifiers: Rule = (config) => {
         issues.push(`${at}.add must be an object of context names`);
       } else {
         for (const [context, source] of entries(add)) {
-          const files: unknown[] = [source].flat();
-          if (files.length === 0 || !files.every(designator)) {
+          if (!sources(source)) {
             issues.push(
               `${at}.add.${context} must be a path, a URL, or an npm:/ reference, or a list of them`,
             );
@@ -92,7 +93,7 @@ const modifiers: Rule = (config) => {
       if (
         !Array.isArray(contexts) ||
         contexts.length === 0 ||
-        !contexts.every(named) ||
+        !contexts.every(isText) ||
         new Set(contexts).size !== contexts.length
       ) {
         issues.push(
@@ -102,7 +103,7 @@ const modifiers: Rule = (config) => {
         listed = contexts;
       }
     }
-    if (boot !== undefined && !named(boot)) {
+    if (boot !== undefined && !isText(boot)) {
       issues.push(`${at}.default must be a non-empty string when set`);
     } else if (boot !== undefined && listed && !listed.includes(boot)) {
       issues.push(
@@ -165,8 +166,7 @@ const layers: Rule = (config) => {
       issues.push("layers has an empty id");
       continue;
     }
-    const files: unknown[] = [source].flat();
-    if (files.length === 0 || !files.every(designator)) {
+    if (!sources(source)) {
       issues.push(
         `layers.${id} must be a path, a URL, or an npm:/ reference, or a list of them`,
       );
