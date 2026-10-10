@@ -1,8 +1,63 @@
 import type { Source } from "./types";
 
-import { has } from "objectively";
+import { entries, has, record } from "objectively";
+
 import { REJECTED_TYPES } from "./constant";
-import { braced, cite, isReference, walk } from "./util";
+import { braced, cite, isReference } from "./util";
+
+/**
+ * Converts one node of a normalized value. The function restores partial aliases
+ * from the parallel `partialAliasOf` branch. A `null` color component of
+ * Terrazzo becomes the schema value `"none"`. The function drops the `inset`
+ * member of a shadow when it is false and throws when it is true. The function
+ * returns all other values unchanged.
+ */
+export const walk = (
+  node: unknown,
+  partial: unknown,
+  token: Source,
+): unknown => {
+  if (typeof partial === "string") {
+    return braced(partial);
+  }
+  if (isReference(node)) {
+    return node;
+  }
+  if (node === null) {
+    return "none";
+  }
+  if (Array.isArray(node)) {
+    return node.map((entry, index) => {
+      if (Array.isArray(partial)) {
+        return walk(entry, partial[index], token);
+      }
+      return walk(entry, undefined, token);
+    });
+  }
+  if (record(node)) {
+    const out: Record<string, unknown> = {};
+    for (const [key, value] of entries(node)) {
+      if (key === "inset") {
+        if (value === true) {
+          throw new Error(
+            `@untheme/kit: inset shadows are not representable — ${cite(token)}`,
+          );
+        }
+        continue;
+      }
+      if (value === undefined) {
+        continue;
+      }
+      if (record(partial)) {
+        out[key] = walk(value, partial[key], token);
+        continue;
+      }
+      out[key] = walk(value, undefined, token);
+    }
+    return out;
+  }
+  return node;
+};
 
 /**
  * Whether a value is a token definition, an object that is not an array and has

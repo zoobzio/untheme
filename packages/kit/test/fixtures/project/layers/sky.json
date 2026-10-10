@@ -1,0 +1,11 @@
+{
+  "id": "sky",
+  "name": "Sky",
+  "tokens": {
+    "primary": {
+      "colorSpace": "srgb",
+      "components": [0.5, 0.8, 1],
+      "hex": "#80ccff"
+    }
+  }
+}

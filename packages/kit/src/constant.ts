@@ -37,3 +37,9 @@ export const NPM = "npm:";
  * the token.
  */
 export const REJECTED_TYPES = new Set(["boolean", "string", "link"]);
+
+/** The preset manifest that a build writes. A bare `npm:/` source reads it. */
+export const PRESET = "preset.json";
+
+/** The portable resolver document that a build writes beside the manifest. */
+export const RESOLVER = "resolver.json";

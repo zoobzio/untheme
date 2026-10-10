@@ -27,6 +27,6 @@
   },
   "dependencies": {
     "@untheme/schema": "workspace:*",
-    "objectively": "^0.1.2"
+    "objectively": "^0.2.0"
   }
 }

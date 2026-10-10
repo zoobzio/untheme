@@ -39,6 +39,12 @@ export default defineConfig({
   id: "app",
   name: "App",
 
+  // Optional. A fragment of the source document, merged onto it before the
+  // parse. See Extend.
+  extend: {
+    sets: { ramps: { sources: [{ $ref: "./tokens/palette.json" }] } },
+  },
+
   // Optional. Selects the modifiers and contexts to build. See Modifiers.
   modifiers: {
     depth: false,
@@ -127,7 +133,113 @@ The kit reports all config errors together.
   modifiers.shadow: the source declares no modifier "shadow" (color, vibrancy, ...)
 ```
 
-To add tokens, write a resolver document. See Composition.
+To add tokens or files, extend the source. See Extend.
+
+## Extend
+
+The `extend` option is a fragment of the source document. The kit merges the
+fragment onto the document before the parse. The merged document is plain
+DTCG: Terrazzo reads it as it is, and the proof covers it.
+
+```ts
+export default defineConfig({
+  source: "npm:/@untheme/aurora/src/resolver.json",
+  name: "App",
+  extend: {
+    sets: {
+      ramps: { sources: [{ $ref: "./tokens/palette.json" }] },
+      brand: { sources: [{ $ref: "./tokens/brand.json" }] },
+    },
+    modifiers: {
+      color: {
+        contexts: { dark: [{ $ref: "./tokens/brand-dark.json" }] },
+        default: "dark",
+      },
+    },
+    resolutionOrder: [{ $ref: "#/sets/brand" }],
+  },
+});
+```
+
+The merge has three rules:
+
+- **Objects merge** key by key. A key that the document lacks is added.
+- **Arrays concatenate.** The items of the document come first, then the items
+  of the fragment. A later source wins in a resolver, so a file added to a set
+  or a context rebinds the files before it.
+- **Any other value replaces** the value of the document. This is how a
+  `default` changes.
+
+A relative `$ref` in the fragment resolves from the project root. A `$ref` in
+the source document resolves from the document, as before. A `$ref` that
+starts with `#` points into the document and stays as it is.
+
+The fragment names the node that it changes. The node sets the precedence, as
+the resolution order of the document declares it. The merge adds no rule of
+its own.
+
+| Where the file goes                    | It rebinds                  | It loses to                    |
+| -------------------------------------- | --------------------------- | ------------------------------ |
+| A set before the modifiers             | Earlier sets                | Every context, when selected   |
+| A context of a modifier                | The sets, earlier modifiers | Later modifiers, when selected |
+| A set appended to the resolution order | Everything                  | Nothing                        |
+
+In the example, `palette.json` rebinds the ramps of aurora. It defines some or
+all of the ramp tokens. Each role of aurora references a ramp, and each
+modifier context rebinds a role, so the roles, the contexts, and the themes
+follow the new ramps. The `brand` set adds tokens of the app's own. It is last
+in the order, so no context of aurora changes a brand token. The dark context
+gets a file of the app's own after the files of aurora.
+
+A fragment can add tokens. A layer rebinds a subset of the contract, so each
+theme of a preset still applies to the extended theme. A consumer of a preset
+writes token files, and no resolver of its own.
+
+The fragment has the members of a DTCG resolver document, each optional. Any
+other member is a group of tokens, for a source that is a token document.
+
+The `modifiers` option acts on the merged document. It can keep or turn off a
+context that the fragment added.
+
+## Presets
+
+A preset is a package that the kit built: it exports the modules of the build
+and, beside them, the DTCG form of the build. A config names a preset as its
+source with an `npm:/` reference to the package and no path.
+
+```ts
+export default defineConfig({
+  source: "npm:/@untheme/aurora",
+  name: "Mantis",
+  extend: {
+    sets: { ramps: { sources: [{ $ref: "./src/mantis.json" }] } },
+  },
+});
+```
+
+The kit reads the `preset.json` of the package. The manifest names the
+resolver document of the build and lists its layers. The kit takes that
+resolver as the source and builds it as any source, with `extend` and
+`modifiers` applied. The layers of the preset join the build: the kit reads
+each layer file of the package and checks it against the new contract. A
+configured layer with the id of an inherited one takes its place.
+
+Every build writes the two files, when the project is a named package:
+
+- **`resolver.json`** is the document that the parse read, with `extend` and
+  `modifiers` applied, and with every reference to a file of the project
+  rewritten as an `npm:/` reference into the package. A `$ref` into another
+  package stays as it is. The package must export the referenced files, for
+  example with `"./src/*": "./src/*"`.
+- **`preset.json`** names that document and lists the layers with their id,
+  name, and description. The layer files sit beside it under `layers/`.
+
+A package exports both at its root, as aurora does with `"./preset.json"` and
+`"./resolver.json"`. A build in a project with no package name writes neither.
+
+The chain has no end. The [theme example](../../examples/theme) builds on
+aurora and is the source of the [shiki example](../../examples/shiki), which
+adds tokens of its own.
 
 ## Layers
 
@@ -164,6 +276,15 @@ export default defineConfig({
 A layer is a partial theme with an identity. It rebinds tokens that the base
 theme defines. It does not add tokens. The runtime takes a layer with `apply`
 and makes the active theme from the base theme and the layer.
+
+The base is always the first layer, under the id and the name of the theme.
+Its tokens are what the config changed about the base of its source: with
+`extend` or `modifiers`, the bindings that differ from the source. With no
+change, the layer has no tokens, and applying it is the base. A catalog lists
+the base this way, and a service comes back to it. A configured layer with
+the id of the base takes its place. Aurora does this with its own palette, so
+a build on aurora inherits the aurora palette as a real layer. The layers of a
+preset source follow the base, then the configured layers.
 
 The kit builds a layer in four steps:
 
@@ -226,8 +347,9 @@ A `source` and each `$ref` in the documents is one of these:
 
 ## Composition
 
-To add tokens, write a resolver document in the DTCG resolver format. List the
-files as sets. Use an `npm:/` reference for a package. Add your own set. Then
+A resolver of your own composes packages in the DTCG resolver format. To
+build on one package, `extend` is shorter. See Extend. To compose several, list
+the files as sets. Use an `npm:/` reference for a package. Add your own set. Then
 declare each modifier again with the files of each context.
 
 ```json
@@ -312,7 +434,9 @@ starts.
 | `config.mjs`       | `theme`, `input`, and `{ theme, input }` as the default export.                                           |
 | `manifest.mjs`     | `manifest`, a list of the modifiers and their contexts. Each entry has an id, a name, and a description.  |
 | `layers.mjs`       | `layers`, a list of the layers. Each entry has an id, a name, and a description. `type LayerId`.          |
-| `layers/<id>.json` | One layer, as `apply` takes it: `id`, `name`, and `tokens`.                                               |
+| `layers/<id>.json` | One layer, as `apply` takes it: `id`, `name`, and `tokens`. The base is the first.                        |
+| `resolver.json`    | The resolver document of the build, with portable references. Written for a named package. See Presets.   |
+| `preset.json`      | The preset manifest: the resolver and the layer list. Written for a named package. See Presets.           |
 | `.untheme.json`    | The record of the written files.                                                                          |
 
 Each module has a `.d.mts` file beside it. The declarations use explicit
@@ -398,7 +522,8 @@ as the `untheme` option.
 - `writeOutput` writes the files that `generate` returns.
 - `build()` runs the pipeline of the CLI.
 - `resolveKit(config, options)` returns `{ theme, input, manifest, layers,
-outDir, documents }`. The `documents` value lists each local file that the
+resolver, outDir, documents }`. `resolver` is the portable resolver document,
+  or `undefined` in a project with no package name. The `documents` value lists each local file that the
   build read, the documents of the layers among them, and the layers directory
   when the config names one. Each item of `layers` has the `layer` and its
   `entry`.

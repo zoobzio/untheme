@@ -2,7 +2,8 @@ import type { Source } from "../src/types";
 
 import { describe, expect, it } from "vitest";
 
-import { braced, cite, walk } from "../src/util";
+import { walk } from "../src/convert";
+import { braced, cite } from "../src/util";
 
 const token = (over: Partial<Source>): Source => {
   return { id: "test.token", $type: "color", $value: "#000000", ...over };

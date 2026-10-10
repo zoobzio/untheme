@@ -1,8 +1,47 @@
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import type { Output } from "./types";
+
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 
-import type { Output } from "./types";
-import { readManifest, writeManifest } from "./manifest";
+import { MANIFEST } from "./constant";
+import { inside, normalize } from "./source";
+import { toDocument } from "./util";
+
+/**
+ * Reads the paths that the manifest file in an output directory lists. The
+ * function returns no paths when the file is missing or unreadable. The function
+ * drops an entry that reaches outside the directory.
+ *
+ * @param dir - The absolute output directory.
+ */
+const readManifest = async (dir: string): Promise<string[]> => {
+  let text: string;
+  try {
+    text = await readFile(join(dir, MANIFEST), "utf8");
+  } catch {
+    return [];
+  }
+  const files = toDocument(text)?.files;
+  if (!Array.isArray(files)) {
+    return [];
+  }
+  return files.filter((path): path is string => {
+    return typeof path === "string" && inside(normalize(path));
+  });
+};
+
+/**
+ * Records the paths that a write produced in the manifest file.
+ *
+ * @param dir - The absolute output directory.
+ * @param files - The written paths, relative to `dir`.
+ */
+const writeManifest = async (dir: string, files: string[]): Promise<void> => {
+  await writeFile(
+    join(dir, MANIFEST),
+    `${JSON.stringify({ files }, null, 2)}\n`,
+  );
+};
 
 /**
  * Writes the files of an output under `<root>/<outDir>`. The kit overwrites its

@@ -30,18 +30,67 @@ export interface ModifierConfig {
   default?: string;
 }
 
+/** A token document, or a `$ref` to one. */
+export type Document = Record<string, unknown>;
+
+/** A fragment of a set of a resolver document, keyed or inline in the order. */
+export interface SetFragment {
+  type?: "set";
+  name?: string;
+  description?: string;
+  sources?: Document[];
+  $extensions?: Record<string, unknown>;
+  $defs?: Record<string, unknown>;
+}
+
+/** A fragment of a modifier of a resolver document, keyed or inline in the order. */
+export interface ModifierFragment {
+  type?: "modifier";
+  name?: string;
+  description?: string;
+  contexts?: Record<string, Document[]>;
+  default?: string;
+  $extensions?: Record<string, unknown>;
+  $defs?: Record<string, unknown>;
+}
+
+/**
+ * A fragment of the source. The members are those of a DTCG resolver document.
+ * Any other member is a group of tokens, for a source that is a token document.
+ */
+export interface Fragment {
+  name?: string;
+  version?: string;
+  description?: string;
+  sets?: Record<string, SetFragment>;
+  modifiers?: Record<string, ModifierFragment>;
+  resolutionOrder?: (SetFragment | ModifierFragment | { $ref: string })[];
+  $extensions?: Record<string, unknown>;
+  $defs?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 /**
  * The authored `untheme.config.ts`. It sets where the DTCG resolver document
- * lives, the id and name of the base theme, what to keep of its modifiers, and
- * where the build writes.
+ * lives, what to merge onto it, the id and name of the base theme, what to keep
+ * of its modifiers, and where the build writes.
  */
 export interface KitConfig {
   /**
    * The resolver document or a plain token document. The value is a path relative
    * to the project root, an absolute URL, or an `npm:/` reference into an
    * installed package, for example `npm:/@untheme/aurora/src/resolver.json`.
+   * A package with no path, such as `npm:/@untheme/aurora`, is a preset. The
+   * build reads its `preset.json`.
    */
   source: string | URL;
+
+  /**
+   * A fragment merged onto the source before the parse. Objects merge by key.
+   * Arrays concatenate, the document first. Any other value replaces the one
+   * of the document. A relative `$ref` resolves from the project root.
+   */
+  extend?: Fragment;
 
   /**
    * Changes to the modifiers of the document, by modifier name. A modifier config
@@ -55,7 +104,9 @@ export interface KitConfig {
   /**
    * The layers of the build. A layer is a token document that rebinds tokens of
    * the base theme. The build checks each layer against the contract and writes
-   * it as `layers/<id>.json`, ready for `apply`.
+   * it as `layers/<id>.json`, ready for `apply`. The base is the first layer.
+   * The layers of a preset source follow. A layer here with the id of one of
+   * those takes its place.
    *
    * A path or a `file:` URL names a local directory. Each `.json` file in the
    * directory is one layer, and its basename is the id. The build takes the
@@ -160,6 +211,27 @@ export interface BuiltLayer {
   layer: Layer<Template>;
 }
 
+/** A preset manifest as read. Each layer has its entry and the URL of its file. */
+export interface Preset {
+  resolver: URL;
+  layers: { entry: Entry; url: URL }[];
+}
+
+/** What the layers of a build come from. */
+export interface LayerSources {
+  /** The `layers` of the config. */
+  configured: KitConfig["layers"];
+
+  /** The layers of the preset. Empty without a preset. */
+  inherited: Preset["layers"];
+
+  /** The base tokens of the source as authored. The base layer holds what differs. */
+  pristine?: Record<string, Record<string, unknown>> | undefined;
+
+  /** The description of the base. */
+  description?: unknown;
+}
+
 /**
  * The validated base of a build. It has the base theme that the kit reads from
  * the DTCG documents, the boot selection, and the manifest. The kit narrows the
@@ -185,6 +257,13 @@ export interface Core {
    * layers can omit it. The emitters then write an empty layer list.
    */
   layers?: BuiltLayer[];
+
+  /**
+   * The resolver document of the build, with each file of the project as an
+   * `npm:/` reference into the package. The emitters write `resolver.json` and
+   * `preset.json` from it. A build outside a named package omits it.
+   */
+  resolver?: Record<string, unknown>;
 }
 
 /**

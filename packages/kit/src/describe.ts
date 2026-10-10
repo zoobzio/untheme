@@ -2,10 +2,11 @@ import type { Resolver } from "@terrazzo/parser";
 import type { Template, Theme } from "@untheme/schema";
 import type { Entry, Manifest } from "./types";
 
-import { record } from "objectively";
+import { keys, record } from "objectively";
 
 import { EXTENSION } from "./constant";
 import { axes } from "./contexts";
+import { isText } from "./util";
 
 /**
  * Makes a display name from an id. The function splits the id on `-`, `_`, `.`,
@@ -39,7 +40,7 @@ export const entry = (
   description?: unknown,
 ): Entry => {
   const found: Entry = { id, name: name ?? title(id) };
-  if (typeof description === "string" && description !== "") {
+  if (isText(description)) {
     found.description = description;
   }
   return found;
@@ -68,7 +69,7 @@ export const describe = (
   const declared = new Map(axes(resolver).map((axis) => [axis.name, axis]));
   return theme.order.map((modifier) => {
     const axis = declared.get(modifier);
-    const contexts = Object.keys(theme.modifiers[modifier] ?? {}).map((id) => {
+    const contexts = keys(theme.modifiers[modifier] ?? {}).map((id) => {
       let name: string | undefined;
       let description: unknown;
       for (const source of axis?.contexts[id] ?? []) {

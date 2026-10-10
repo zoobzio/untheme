@@ -1,9 +1,36 @@
-import type { KitConfig, ModifierConfig } from "./types";
+import type { Document, KitConfig, ModifierConfig } from "./types";
 
-import { record } from "objectively";
+import { entries, keys, own, pick, record } from "objectively";
 
 import { InvalidConfigError } from "./error";
 import { locate } from "./source";
+import { refs, toDocument } from "./util";
+
+/**
+ * Extends a document with a fragment. Objects merge by key. Arrays concatenate,
+ * the document first. Any other value of the fragment replaces the value of
+ * the document. Both inputs stay as they are.
+ */
+export const extend = (document: unknown, fragment: unknown): unknown => {
+  if (Array.isArray(document) && Array.isArray(fragment)) {
+    return [...document, ...fragment];
+  }
+  if (record(document) && record(fragment)) {
+    const result: Record<string, unknown> = { ...document };
+    for (const [key, value] of entries(fragment)) {
+      result[key] = own(key, document) ? extend(document[key], value) : value;
+    }
+    return result;
+  }
+  return fragment;
+};
+
+/** Resolves each relative `$ref` of a fragment against a base. A `#` pointer stays as it is. */
+export const anchor = (fragment: unknown, base: URL): unknown => {
+  return refs(fragment, (ref) =>
+    ref.startsWith("#") ? ref : locate(ref, base).href,
+  );
+};
 
 /** The `$ref` prefix of an entry in `resolutionOrder` that names a top-level modifier. */
 const POINTER = "#/modifiers/";
@@ -59,14 +86,9 @@ const declared = (
 
 /** Returns a name that no set of the document has. */
 const unused = (document: Record<string, unknown>, name: string): string => {
-  const taken = new Set<string>();
-  if (record(document.sets)) {
-    for (const key of Object.keys(document.sets)) {
-      taken.add(key);
-    }
-  }
+  const taken = record(document.sets) ? keys(document.sets) : [];
   let candidate = name;
-  while (taken.has(candidate)) {
+  while (taken.includes(candidate)) {
     candidate = `${candidate}-default`;
   }
   return candidate;
@@ -78,20 +100,19 @@ const unused = (document: Record<string, unknown>, name: string): string => {
  * sets the default. The function returns the issues that it finds. When there
  * are issues, the function leaves the modifier as it was.
  */
-const change = (
+const changes = (
   name: string,
   modifier: Record<string, unknown>,
   config: ModifierConfig,
   base: URL,
 ): string[] => {
   const issues: string[] = [];
-  const contexts: Record<string, unknown> = {};
-  if (record(modifier.contexts)) {
-    Object.assign(contexts, modifier.contexts);
-  }
-  const existing = Object.keys(contexts);
+  const contexts: Record<string, unknown> = record(modifier.contexts)
+    ? { ...modifier.contexts }
+    : {};
+  const existing = keys(contexts);
 
-  for (const [context, source] of Object.entries(config.add ?? {})) {
+  for (const [context, source] of entries(config.add ?? {})) {
     if (existing.includes(context)) {
       issues.push(
         `modifiers.${name}.add: "${context}" is already a context of "${name}"`,
@@ -103,7 +124,7 @@ const change = (
       .map((file) => ({ $ref: locate(file, base).href }));
   }
 
-  const available = Object.keys(contexts);
+  const available = keys(contexts);
   const kept = config.contexts ?? available;
   for (const context of kept) {
     if (!available.includes(context)) {
@@ -113,23 +134,21 @@ const change = (
     }
   }
 
-  let boot: unknown = config.default;
+  let boot = config.default;
   if (boot === undefined && modifier.default !== undefined) {
-    boot = modifier.default;
-    if (typeof boot !== "string" || !kept.includes(boot)) {
-      boot = kept[0];
-    }
+    boot =
+      typeof modifier.default === "string" && kept.includes(modifier.default)
+        ? modifier.default
+        : kept[0];
   }
-  if (typeof boot === "string" && !kept.includes(boot)) {
+  if (boot !== undefined && !kept.includes(boot)) {
     issues.push(
       `modifiers.${name}.default: "${boot}" is not one of the kept contexts (${kept.join(", ")})`,
     );
   }
 
   if (issues.length === 0) {
-    modifier.contexts = Object.fromEntries(
-      kept.map((context) => [context, contexts[context]]),
-    );
+    modifier.contexts = pick(contexts, kept);
     if (boot !== undefined) {
       modifier.default = boot;
     }
@@ -138,9 +157,14 @@ const change = (
 };
 
 /**
- * Tailors a resolver document to the `modifiers` of a config before the parse.
- * The tailored document declares what the build keeps. The parse, the
- * conversion, and the verification read it.
+ * Tailors a source document to the `extend` and the `modifiers` of a config
+ * before the parse. The tailored document declares what the build keeps. The
+ * parse, the conversion, and the verification read it.
+ *
+ * The function applies `extend` first. The fragment extends the document
+ * with {@link extend}, after {@link anchor} resolves each relative `$ref` of
+ * the fragment from the project root. The `modifiers` then act on the merged
+ * document, so they can keep or turn off a context that the fragment added.
  *
  * - A modifier set to `false` is turned off. The sources of its default context
  *   stay in the resolution order as a set, and the modifier is removed.
@@ -152,45 +176,55 @@ const change = (
  *   absent, the default of the document boots if the config keeps it. Otherwise
  *   the first kept context boots.
  *
- * @param src - The resolver document, as text.
- * @param changes - The `modifiers` of the config.
+ * @param src - The source document, as text.
+ * @param config - The `extend` and the `modifiers` of the config.
  * @param base - The project root that added sources resolve against.
- * @returns The tailored document, as text.
- * @throws InvalidConfigError when the config names a modifier or a context that
- * is missing from the document, or a default that the config does not keep.
+ * @returns The tailored document.
+ * @throws InvalidConfigError when the source is not an object, or the config
+ * names a modifier or a context that is missing from the document, or a
+ * default that the config does not keep.
  */
 export const tailor = (
   src: string,
-  changes: NonNullable<KitConfig["modifiers"]>,
+  config: Pick<KitConfig, "extend" | "modifiers">,
   base: URL,
-): string => {
-  let document: unknown;
-  try {
-    document = JSON.parse(src);
-  } catch {
-    document = undefined;
+): Document => {
+  let document = toDocument(src);
+  if (document === undefined) {
+    const issues = keys(config.modifiers ?? {}).map(
+      (name) =>
+        `modifiers.${name}: the source declares no modifier "${name}" (none)`,
+    );
+    if (config.extend !== undefined) {
+      issues.unshift("extend: the source is not a JSON object");
+    }
+    throw new InvalidConfigError(issues);
   }
-  let order: unknown[] = [];
-  if (record(document) && Array.isArray(document.resolutionOrder)) {
-    order = document.resolutionOrder;
+  if (config.extend !== undefined) {
+    // Two records extend to a record.
+    const extended = extend(document, anchor(config.extend, base));
+    if (record(extended)) {
+      document = extended;
+    }
   }
-  const found = record(document)
-    ? declared(document, order)
-    : new Map<string, Declared>();
+  const order: unknown[] = Array.isArray(document.resolutionOrder)
+    ? document.resolutionOrder
+    : [];
+  const found = declared(document, order);
   const known = [...found.keys()].join(", ") || "none";
-
   const issues: string[] = [];
-  for (const [name, config] of Object.entries(changes)) {
+
+  for (const [name, change] of entries(config.modifiers ?? {})) {
     const entry = found.get(name);
-    if (!entry || !record(document)) {
+    if (!entry) {
       issues.push(
         `modifiers.${name}: the source declares no modifier "${name}" (${known})`,
       );
       continue;
     }
     const { modifier, at, key } = entry;
-    if (config !== false) {
-      issues.push(...change(name, modifier, config, base));
+    if (change !== false) {
+      issues.push(...changes(name, modifier, change, base));
       continue;
     }
     if (typeof modifier.default !== "string") {
@@ -211,5 +245,5 @@ export const tailor = (
   if (issues.length > 0) {
     throw new InvalidConfigError(issues);
   }
-  return JSON.stringify(document, null, 2);
+  return document;
 };

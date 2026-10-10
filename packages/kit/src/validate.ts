@@ -1,10 +1,11 @@
 import type { KitConfig } from "./types";
 
-import { record } from "objectively";
+import { entries, record } from "objectively";
 
 import { OUT_DIR } from "./constant";
 import { InvalidConfigError } from "./error";
-import { inside, normalize } from "./path";
+import { inside, normalize } from "./source";
+import { isText } from "./util";
 
 /** One rule over a config. The rule returns the issues that it finds. */
 type Rule = (config: KitConfig) => string[];
@@ -36,14 +37,15 @@ const identity: Rule = (config) => {
   return issues;
 };
 
-/** Whether a value is a non-empty string. */
-const named = (value: unknown): value is string => {
-  return typeof value === "string" && value !== "";
-};
-
 /** Whether a value is a source designator, a non-empty string or a URL. */
 const designator = (value: unknown): boolean => {
-  return named(value) || value instanceof URL;
+  return isText(value) || value instanceof URL;
+};
+
+/** Whether a value is a source designator or a non-empty list of them. */
+const sources = (value: unknown): boolean => {
+  const files: unknown[] = [value].flat();
+  return files.length > 0 && files.every(designator);
 };
 
 /**
@@ -61,7 +63,7 @@ const modifiers: Rule = (config) => {
     return ["modifiers must be an object of modifier names"];
   }
   const issues: string[] = [];
-  for (const [name, change] of Object.entries(modifiers)) {
+  for (const [name, change] of entries(modifiers)) {
     const at = `modifiers.${name}`;
     if (change === false) {
       continue;
@@ -77,9 +79,8 @@ const modifiers: Rule = (config) => {
       if (!record(add)) {
         issues.push(`${at}.add must be an object of context names`);
       } else {
-        for (const [context, source] of Object.entries(add)) {
-          const files: unknown[] = [source].flat();
-          if (files.length === 0 || !files.every(designator)) {
+        for (const [context, source] of entries(add)) {
+          if (!sources(source)) {
             issues.push(
               `${at}.add.${context} must be a path, a URL, or an npm:/ reference, or a list of them`,
             );
@@ -92,7 +93,7 @@ const modifiers: Rule = (config) => {
       if (
         !Array.isArray(contexts) ||
         contexts.length === 0 ||
-        !contexts.every(named) ||
+        !contexts.every(isText) ||
         new Set(contexts).size !== contexts.length
       ) {
         issues.push(
@@ -102,7 +103,7 @@ const modifiers: Rule = (config) => {
         listed = contexts;
       }
     }
-    if (boot !== undefined && !named(boot)) {
+    if (boot !== undefined && !isText(boot)) {
       issues.push(`${at}.default must be a non-empty string when set`);
     } else if (boot !== undefined && listed && !listed.includes(boot)) {
       issues.push(
@@ -111,6 +112,14 @@ const modifiers: Rule = (config) => {
     }
   }
   return issues;
+};
+
+/** The fragment to merge onto the source, when set, is an object. */
+const extend: Rule = (config) => {
+  if (config.extend === undefined || record(config.extend)) {
+    return [];
+  }
+  return ["extend must be an object: a fragment of the source document"];
 };
 
 /**
@@ -152,13 +161,12 @@ const layers: Rule = (config) => {
     ];
   }
   const issues: string[] = [];
-  for (const [id, source] of Object.entries(layers)) {
+  for (const [id, source] of entries(layers)) {
     if (id === "") {
       issues.push("layers has an empty id");
       continue;
     }
-    const files: unknown[] = [source].flat();
-    if (files.length === 0 || !files.every(designator)) {
+    if (!sources(source)) {
       issues.push(
         `layers.${id} must be a path, a URL, or an npm:/ reference, or a list of them`,
       );
@@ -186,8 +194,8 @@ const outDir: Rule = (config) => {
  * @throws InvalidConfigError with every issue, when there is any.
  */
 export const validate = (config: KitConfig): void => {
-  const issues = [source, identity, modifiers, layers, outDir].flatMap((rule) =>
-    rule(config),
+  const issues = [source, identity, extend, modifiers, layers, outDir].flatMap(
+    (rule) => rule(config),
   );
   if (issues.length > 0) {
     throw new InvalidConfigError(issues);

@@ -26,7 +26,10 @@ describe("a build of part of the preset", () => {
     const bare = await resolveKit({ source }, { cwd: ROOT });
     expect(bare.theme).toEqual(reference.theme);
     expect(bare.input).toEqual(reference.input);
-    expect(bare.layers).toEqual([]);
+    // The base is always a layer. With no theme files, it is the only one, and
+    // it has no tokens: applying it is the base.
+    expect(bare.layers.map((built) => built.entry.id)).toEqual(["aurora"]);
+    expect(bare.layers[0]?.layer).toEqual({ id: "aurora", name: "Aurora" });
     expect(bare.documents.filter((path) => /themes[\\/]/.test(path))).toEqual([
       reference.documents[1],
     ]);
@@ -44,10 +47,11 @@ describe("a build of part of the preset", () => {
       { cwd: ROOT },
     );
     expect(two.layers.map((built) => built.entry.id)).toEqual([
+      "aurora",
       "nord",
       "dracula",
     ]);
-    expect(two.layers[0]).toEqual(
+    expect(two.layers[1]).toEqual(
       reference.layers.find((built) => built.entry.id === "nord"),
     );
     expect(
@@ -94,7 +98,7 @@ describe("a build of part of the preset", () => {
       { source, layers: { mine: "./src/themes/nord.json" } },
       { cwd: ROOT },
     );
-    expect(custom.layers[0]?.layer).toEqual({
+    expect(custom.layers[1]?.layer).toEqual({
       ...reference.layers.find((built) => built.entry.id === "nord")?.layer,
       id: "mine",
     });

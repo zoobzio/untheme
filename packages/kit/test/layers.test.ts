@@ -9,9 +9,11 @@ import type { Schema, Template } from "@untheme/schema";
 import { defineSchema } from "@untheme/schema";
 import { makeUntheme } from "@untheme/core";
 
+import type { KitConfig } from "../src/types";
+
 import { build } from "../src/build";
 import { InvalidConfigError, InvalidLayerError } from "../src/error";
-import { generate } from "../src/generate";
+import { generate } from "../src/build";
 import { resolveKit } from "../src/resolve";
 import { FIXTURES } from "./helpers";
 
@@ -35,8 +37,8 @@ describe("layers", () => {
       { source: "./resolver.json", layers: { cool: "./layer.json" } },
       { cwd: ROOT },
     );
-    expect(kit.layers).toHaveLength(1);
-    const [built] = kit.layers;
+    expect(kit.layers).toHaveLength(2);
+    const [, built] = kit.layers;
     expect(built?.entry).toEqual({
       id: "cool",
       name: "Cool",
@@ -69,7 +71,7 @@ describe("layers", () => {
     expect(ut.resolve("color.primary.default")).toMatchObject({
       hex: "#1d4ed8",
     });
-    ut.apply(kit.layers[0]!.layer);
+    ut.apply(kit.layers[1]!.layer);
     expect(ut.theme().id).toBe("cool");
     expect(ut.resolve("color.primary.default")).toMatchObject({
       hex: "#e5f2ff",
@@ -95,8 +97,8 @@ describe("layers", () => {
       { source: "./resolver.json", layers: { dim_one: "./dim.json" } },
       { cwd: ROOT },
     );
-    expect(kit.layers[0]?.entry).toEqual({ id: "dim_one", name: "Dim One" });
-    expect(kit.layers[0]?.layer.name).toBe("Dim One");
+    expect(kit.layers[1]?.entry).toEqual({ id: "dim_one", name: "Dim One" });
+    expect(kit.layers[1]?.layer.name).toBe("Dim One");
   });
 
   it("merges a list of documents, and the last one wins", async () => {
@@ -118,7 +120,7 @@ describe("layers", () => {
         }),
       },
     );
-    const [built] = kit.layers;
+    const [, built] = kit.layers;
     expect(built?.entry).toEqual({
       id: "both",
       name: "Cool",
@@ -139,6 +141,7 @@ describe("layers", () => {
       { cwd: ROOT },
     );
     expect(kit.layers.map((built) => built.entry.id)).toEqual([
+      "fixture",
       "second",
       "first",
     ]);
@@ -219,6 +222,7 @@ describe("layers", () => {
       { cwd: ROOT },
     );
     expect(kit.layers.map((built) => built.entry)).toEqual([
+      { id: "fixture", name: "Fixture" },
       {
         id: "cool",
         name: "Cool",
@@ -226,7 +230,7 @@ describe("layers", () => {
       },
       { id: "dim", name: "Dim" },
     ]);
-    expect(kit.layers[0]?.layer.tokens?.["size.md"]).toBe("{size.sm}");
+    expect(kit.layers[1]?.layer.tokens?.["size.md"]).toBe("{size.sm}");
   });
 
   it("takes the directory as a file URL, with or without a trailing slash", async () => {
@@ -240,6 +244,7 @@ describe("layers", () => {
         { cwd: ROOT },
       );
       expect(kit.layers.map((built) => built.entry.id)).toEqual([
+        "fixture",
         "cool",
         "dim",
       ]);
@@ -284,10 +289,10 @@ describe("layers", () => {
   });
 
   it("rejects a layers member that is neither a directory nor an object", async () => {
-    const failure = resolveKit(
-      { source: "./resolver.json", layers: 7 as unknown as string },
-      { cwd: ROOT },
+    const config: KitConfig = JSON.parse(
+      '{ "source": "./resolver.json", "layers": 7 }',
     );
+    const failure = resolveKit(config, { cwd: ROOT });
     await expect(failure).rejects.toMatchObject({
       issues: [
         "layers must be a path to a local directory, or an object of layer ids",
@@ -335,6 +340,7 @@ describe("layers", () => {
       .split("export const layers = ")[1]!
       .split(";\nexport default")[0]!;
     expect(JSON.parse(literal)).toEqual([
+      { id: "fixture", name: "Fixture" },
       {
         id: "cool",
         name: "Cool",
@@ -346,7 +352,7 @@ describe("layers", () => {
       (file) => file.path === "layers.d.mts",
     )!.contents;
     expect(declarations).toContain(
-      'export type LayerId =\n  | "cool"\n  | "dim";',
+      'export type LayerId =\n  | "fixture"\n  | "cool"\n  | "dim";',
     );
   });
 
@@ -368,11 +374,13 @@ describe("layers", () => {
       expect((await readdir(join(root, "untheme", "layers"))).sort()).toEqual([
         "cool.json",
         "dim.json",
+        "fixture.json",
       ]);
       await config(`{ cool: ${JSON.stringify(layer)} }`);
       await build({ root });
-      expect(await readdir(join(root, "untheme", "layers"))).toEqual([
+      expect((await readdir(join(root, "untheme", "layers"))).sort()).toEqual([
         "cool.json",
+        "fixture.json",
       ]);
     } finally {
       await rm(root, { recursive: true, force: true });
