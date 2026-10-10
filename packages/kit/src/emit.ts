@@ -1,4 +1,7 @@
 import type { Core, OutputFile } from "./types";
+
+import { collect, entries, keys } from "objectively";
+
 import { PRESET, RESOLVER } from "./constant";
 import { describe } from "./describe";
 import { banner, json, pair, union } from "./print";
@@ -10,12 +13,12 @@ import { banner, json, pair, union } from "./print";
  * modifiers.
  */
 const structure = (modifiers: Core["theme"]["modifiers"]): string => {
-  const axes = Object.entries(modifiers);
+  const axes = entries(modifiers);
   if (axes.length === 0) {
     return "{}";
   }
   const lines = axes.map(([modifier, contexts]) => {
-    const members = Object.keys(contexts)
+    const members = keys(contexts)
       .map((context) => `${JSON.stringify(context)}: Overrides`)
       .join("; ");
     return `  ${JSON.stringify(modifier)}: { ${members} };`;
@@ -29,13 +32,11 @@ const structure = (modifiers: Core["theme"]["modifiers"]): string => {
  */
 const index = (core: Core): OutputFile[] => {
   const { theme } = core;
-  const tokens = Object.keys(theme.tokens);
-  const modifiers = Object.fromEntries(
-    theme.order.map((modifier) => [
-      modifier,
-      Object.keys(theme.modifiers[modifier] ?? {}),
-    ]),
-  );
+  const tokens = keys(theme.tokens);
+  const modifiers = collect(theme.order, (modifier) => [
+    modifier,
+    keys(theme.modifiers[modifier] ?? {}),
+  ]);
   return pair(
     "index",
     [

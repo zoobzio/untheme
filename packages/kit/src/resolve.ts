@@ -3,7 +3,7 @@ import type { GenerateOptions, Kit, KitConfig, Preset } from "./types";
 import { resolve } from "node:path";
 
 import { defineConfig, parse } from "@terrazzo/parser";
-import { record } from "objectively";
+import { keys, record } from "objectively";
 
 import { assemble } from "./assemble";
 import { buildLayers } from "./layers";
@@ -58,7 +58,7 @@ export const resolveKit = async (
   let src = authored;
   if (
     config.extend !== undefined ||
-    (config.modifiers && Object.keys(config.modifiers).length > 0)
+    (config.modifiers && keys(config.modifiers).length > 0)
   ) {
     src = tailor(src, config, base);
   }

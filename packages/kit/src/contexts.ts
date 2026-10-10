@@ -1,7 +1,7 @@
 import type { Resolver, ResolverModifierNormalized } from "@terrazzo/parser";
 import type { TokenNormalizedSet } from "@terrazzo/token-types";
 
-import { entries, map } from "objectively";
+import { keys, map, sort } from "objectively";
 import { delta } from "@untheme/utils";
 
 import { binding, collisions, definition } from "./convert";
@@ -17,7 +17,7 @@ const collator = new Intl.Collator("en-us", { numeric: true });
  * Returns a token set with its keys in the alphabetical order of Terrazzo.
  */
 export const sorted = <T>(set: Record<string, T>): Record<string, T> =>
-  Object.fromEntries(entries(set).sort(([a], [b]) => collator.compare(a, b)));
+  sort(set, collator.compare);
 
 /**
  * The pieces of a base theme that the kit reads from a resolver document.
@@ -63,7 +63,7 @@ export const axes = (
     if (entry.type !== "modifier") {
       continue;
     }
-    if (synthetic(entry.name, Object.keys(entry.contexts))) {
+    if (synthetic(entry.name, keys(entry.contexts))) {
       continue;
     }
     found.push(entry);
@@ -82,9 +82,7 @@ export const bridged = (resolver: Resolver | undefined): boolean => {
   );
   return (
     modifiers.length > 0 &&
-    modifiers.every((entry) =>
-      synthetic(entry.name, Object.keys(entry.contexts)),
-    )
+    modifiers.every((entry) => synthetic(entry.name, keys(entry.contexts)))
   );
 };
 
@@ -104,7 +102,7 @@ export const skeleton = (
 ): Skeleton => {
   const modifiers = axes(resolver);
   if (!resolver || modifiers.length === 0) {
-    collisions(Object.keys(tokens));
+    collisions(keys(tokens));
     return {
       tokens: map(sorted(tokens), definition),
       modifiers: {},
@@ -125,20 +123,20 @@ export const skeleton = (
   }
 
   const base = sorted(resolver.apply(input));
-  collisions(Object.keys(base));
+  collisions(keys(base));
   const flat = map(base, binding);
 
   const contexts: Record<string, Record<string, Record<string, unknown>>> = {};
   for (const modifier of modifiers) {
     const name = modifier.name;
     const overrides: Record<string, Record<string, unknown>> = {};
-    for (const context of Object.keys(modifier.contexts)) {
+    for (const context of keys(modifier.contexts)) {
       if (context === modifier.default) {
         overrides[context] = {};
         continue;
       }
       const applied = sorted(resolver.apply({ ...input, [name]: context }));
-      const alien = Object.keys(applied).filter((key) => !(key in base));
+      const alien = keys(applied).filter((key) => !(key in base));
       if (alien.length > 0) {
         throw new Error(
           `@untheme/kit: context "${context}" of modifier "${name}" introduces tokens missing from the base contract: ${alien.join(", ")} — a context may only rebind base tokens`,

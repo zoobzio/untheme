@@ -1,6 +1,6 @@
 import type { Source } from "./types";
 
-import { record, wrapped } from "objectively";
+import { entries, map, record, wrapped } from "objectively";
 
 /**
  * Whether a value is a reference in curly-brace syntax. This is a string that
@@ -56,7 +56,7 @@ export const walk = (
   }
   if (record(node)) {
     const out: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(node)) {
+    for (const [key, value] of entries(node)) {
       if (key === "inset") {
         if (value === true) {
           throw new Error(
@@ -95,12 +95,10 @@ export const rewrite = (
   document: Record<string, unknown>,
   fn: (ref: string) => string,
 ): Record<string, unknown> => {
-  return Object.fromEntries(
-    Object.entries(document).map(([key, value]) => {
-      if (key === "$ref" && typeof value === "string") {
-        return [key, fn(value)];
-      }
-      return [key, refs(value, fn)];
-    }),
-  );
+  return map(document, (value, key) => {
+    if (key === "$ref" && typeof value === "string") {
+      return fn(value);
+    }
+    return refs(value, fn);
+  });
 };

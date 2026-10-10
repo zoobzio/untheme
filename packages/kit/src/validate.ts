@@ -1,6 +1,6 @@
 import type { KitConfig } from "./types";
 
-import { record } from "objectively";
+import { entries, record } from "objectively";
 
 import { OUT_DIR } from "./constant";
 import { InvalidConfigError } from "./error";
@@ -61,7 +61,7 @@ const modifiers: Rule = (config) => {
     return ["modifiers must be an object of modifier names"];
   }
   const issues: string[] = [];
-  for (const [name, change] of Object.entries(modifiers)) {
+  for (const [name, change] of entries(modifiers)) {
     const at = `modifiers.${name}`;
     if (change === false) {
       continue;
@@ -77,7 +77,7 @@ const modifiers: Rule = (config) => {
       if (!record(add)) {
         issues.push(`${at}.add must be an object of context names`);
       } else {
-        for (const [context, source] of Object.entries(add)) {
+        for (const [context, source] of entries(add)) {
           const files: unknown[] = [source].flat();
           if (files.length === 0 || !files.every(designator)) {
             issues.push(
@@ -160,7 +160,7 @@ const layers: Rule = (config) => {
     ];
   }
   const issues: string[] = [];
-  for (const [id, source] of Object.entries(layers)) {
+  for (const [id, source] of entries(layers)) {
     if (id === "") {
       issues.push("layers has an empty id");
       continue;

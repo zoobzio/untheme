@@ -2,7 +2,7 @@ import type { Resolver } from "@terrazzo/parser";
 import type { Template, Theme } from "@untheme/schema";
 import type { Entry, Manifest } from "./types";
 
-import { record } from "objectively";
+import { keys, record } from "objectively";
 
 import { EXTENSION } from "./constant";
 import { axes } from "./contexts";
@@ -68,7 +68,7 @@ export const describe = (
   const declared = new Map(axes(resolver).map((axis) => [axis.name, axis]));
   return theme.order.map((modifier) => {
     const axis = declared.get(modifier);
-    const contexts = Object.keys(theme.modifiers[modifier] ?? {}).map((id) => {
+    const contexts = keys(theme.modifiers[modifier] ?? {}).map((id) => {
       let name: string | undefined;
       let description: unknown;
       for (const source of axis?.contexts[id] ?? []) {

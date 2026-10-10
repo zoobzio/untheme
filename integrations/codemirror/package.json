@@ -32,7 +32,7 @@
     "@lezer/highlight": "^1.0.0"
   },
   "dependencies": {
-    "objectively": "^0.1.2",
+    "objectively": "^0.2.0",
     "untheme": "workspace:*"
   },
   "devDependencies": {

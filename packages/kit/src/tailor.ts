@@ -1,6 +1,6 @@
 import type { KitConfig, ModifierConfig } from "./types";
 
-import { record } from "objectively";
+import { entries, keys, pick, record } from "objectively";
 
 import { InvalidConfigError } from "./error";
 import { anchor, merge } from "./merge";
@@ -60,14 +60,9 @@ const declared = (
 
 /** Returns a name that no set of the document has. */
 const unused = (document: Record<string, unknown>, name: string): string => {
-  const taken = new Set<string>();
-  if (record(document.sets)) {
-    for (const key of Object.keys(document.sets)) {
-      taken.add(key);
-    }
-  }
+  const taken = record(document.sets) ? keys(document.sets) : [];
   let candidate = name;
-  while (taken.has(candidate)) {
+  while (taken.includes(candidate)) {
     candidate = `${candidate}-default`;
   }
   return candidate;
@@ -86,13 +81,12 @@ const changes = (
   base: URL,
 ): string[] => {
   const issues: string[] = [];
-  const contexts: Record<string, unknown> = {};
-  if (record(modifier.contexts)) {
-    Object.assign(contexts, modifier.contexts);
-  }
-  const existing = Object.keys(contexts);
+  const contexts: Record<string, unknown> = record(modifier.contexts)
+    ? { ...modifier.contexts }
+    : {};
+  const existing = keys(contexts);
 
-  for (const [context, source] of Object.entries(config.add ?? {})) {
+  for (const [context, source] of entries(config.add ?? {})) {
     if (existing.includes(context)) {
       issues.push(
         `modifiers.${name}.add: "${context}" is already a context of "${name}"`,
@@ -104,7 +98,7 @@ const changes = (
       .map((file) => ({ $ref: locate(file, base).href }));
   }
 
-  const available = Object.keys(contexts);
+  const available = keys(contexts);
   const kept = config.contexts ?? available;
   for (const context of kept) {
     if (!available.includes(context)) {
@@ -114,23 +108,21 @@ const changes = (
     }
   }
 
-  let boot: unknown = config.default;
+  let boot = config.default;
   if (boot === undefined && modifier.default !== undefined) {
-    boot = modifier.default;
-    if (typeof boot !== "string" || !kept.includes(boot)) {
-      boot = kept[0];
-    }
+    boot =
+      typeof modifier.default === "string" && kept.includes(modifier.default)
+        ? modifier.default
+        : kept[0];
   }
-  if (typeof boot === "string" && !kept.includes(boot)) {
+  if (boot !== undefined && !kept.includes(boot)) {
     issues.push(
       `modifiers.${name}.default: "${boot}" is not one of the kept contexts (${kept.join(", ")})`,
     );
   }
 
   if (issues.length === 0) {
-    modifier.contexts = Object.fromEntries(
-      kept.map((context) => [context, contexts[context]]),
-    );
+    modifier.contexts = pick(contexts, kept);
     if (boot !== undefined) {
       modifier.default = boot;
     }
@@ -194,7 +186,7 @@ export const tailor = (
     : new Map<string, Declared>();
   const known = [...found.keys()].join(", ") || "none";
 
-  for (const [name, change] of Object.entries(config.modifiers ?? {})) {
+  for (const [name, change] of entries(config.modifiers ?? {})) {
     const entry = found.get(name);
     if (!entry || !record(document)) {
       issues.push(

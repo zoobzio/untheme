@@ -1,4 +1,4 @@
-import { record } from "objectively";
+import { entries, own, record } from "objectively";
 
 import { locate } from "./source";
 import { refs } from "./util";
@@ -14,10 +14,8 @@ export const merge = (document: unknown, fragment: unknown): unknown => {
   }
   if (record(document) && record(fragment)) {
     const result: Record<string, unknown> = { ...document };
-    for (const [key, value] of Object.entries(fragment)) {
-      result[key] = Object.hasOwn(document, key)
-        ? merge(document[key], value)
-        : value;
+    for (const [key, value] of entries(fragment)) {
+      result[key] = own(key, document) ? merge(document[key], value) : value;
     }
     return result;
   }

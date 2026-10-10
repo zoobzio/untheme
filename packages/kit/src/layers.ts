@@ -1,5 +1,5 @@
 import type { Logger } from "@terrazzo/parser";
-import type { Schema, Template, Theme } from "@untheme/schema";
+import type { Definition, Schema, Template, Theme } from "@untheme/schema";
 import type { Loader } from "./loader";
 import type {
   BuiltLayer,
@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 
 import { defineConfig, parse } from "@terrazzo/parser";
 import { SchemaError, defineSchema } from "@untheme/schema";
-import { copy, equals, map, record } from "objectively";
+import { collect, copy, entries, equals, keys, map, record } from "objectively";
 
 import { sorted } from "./contexts";
 import { binding } from "./convert";
@@ -92,15 +92,15 @@ const own = (
   pristine: LayerSources["pristine"],
   description: unknown,
 ): Candidate => {
-  const tokens: Record<string, unknown> = {};
-  for (const [token, slot] of Object.entries(theme.tokens)) {
+  const tokens: Record<string, Definition["$value"]> = {};
+  for (const [token, slot] of entries(theme.tokens)) {
     const was = pristine?.[token];
     if (was !== undefined && !equals(was.$value, slot.$value)) {
       tokens[token] = copy(slot.$value);
     }
   }
   const layer: Record<string, unknown> = { id: theme.id, name: theme.name };
-  if (Object.keys(tokens).length > 0) {
+  if (keys(tokens).length > 0) {
     layer.tokens = tokens;
   }
   return { entry: entry(theme.id, theme.name, description), layer, types: {} };
@@ -140,7 +140,7 @@ const typed = (
   theme: Theme<Template>,
 ): string[] => {
   const issues: string[] = [];
-  for (const [token, type] of Object.entries(types)) {
+  for (const [token, type] of entries(types)) {
     const slot = theme.tokens[token];
     if (slot !== undefined && slot.$type !== type) {
       issues.push(
@@ -178,12 +178,10 @@ const list = async (directory: URL): Promise<Record<string, URL>> => {
     });
   }
   const names = entries.filter((name) => name.endsWith(EXTENSION)).sort();
-  return Object.fromEntries(
-    names.map((name) => [
-      name.slice(0, -EXTENSION.length),
-      new URL(name, directory),
-    ]),
-  );
+  return collect(names, (name) => [
+    name.slice(0, -EXTENSION.length),
+    new URL(name, directory),
+  ]);
 };
 
 /**
@@ -241,7 +239,7 @@ export const buildLayers = async (
     all.set(source.entry.id, await inherit(source, load));
   }
   const configured = await expand(sources.configured, base, documents);
-  for (const [id, source] of Object.entries(configured)) {
+  for (const [id, source] of entries(configured)) {
     all.set(id, await build(id, [source].flat(), base, load, logger));
   }
   const schema: Schema<Theme<Template>> = defineSchema(theme);
