@@ -5,7 +5,6 @@ export default defineBuildConfig({
     "src/module",
     "src/config",
     "src/constant",
-    { input: "src/runtime/server/index", name: "server" },
     // The runtime files ship unbundled. Nuxt compiles them in the app.
     { input: "src/runtime/", outDir: ".dist/runtime", builder: "mkdist" },
   ],
@@ -21,7 +20,6 @@ export default defineBuildConfig({
     "@untheme/kit",
     "nuxt",
     "vue",
-    "h3",
   ],
   rollup: {
     emitCJS: false,

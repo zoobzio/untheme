@@ -193,9 +193,6 @@ importers:
       '@untheme/kit':
         specifier: workspace:*
         version: link:../../packages/kit
-      h3:
-        specifier: ^1.15.11
-        version: 1.15.11
       objectively:
         specifier: ^0.2.0
         version: 0.2.0

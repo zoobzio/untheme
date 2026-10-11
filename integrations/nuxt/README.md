@@ -99,7 +99,7 @@ const ut = useUntheme();
 
 ## `useUnthemeCatalog()`
 
-The service has one base theme and one applied layer. The app loads a theme as a layer and calls `apply` with it. `useUnthemeCatalog()` returns a catalog over the layers of the build. `list` pages the entries of the layers module. `get` imports one layer on demand and checks it against the contract of the app. Each layer is its own chunk, so the client loads only the themes it applies, and a new build has new chunk URLs.
+The service has one base theme and one applied layer. The app loads a theme as a layer and calls `apply` with it. `useUnthemeCatalog()` returns the catalog over the layers of the build, which the plugin provides as `$unthemeCatalog`. `list` pages the entries of the layers module. `get` imports one layer on demand and checks it against the contract of the app. Each layer is its own chunk, so the client loads only the themes it applies, and a new build has new chunk URLs.
 
 ```ts
 import { layers } from "#build/untheme/layers.mjs";
@@ -115,29 +115,6 @@ untheme.theme().id; // "nord"
 ```
 
 The catalog is empty when the build has no layers. The import works during server rendering, so a layer applied on the server renders on the first response.
-
-## Remote themes
-
-For themes that are not in the build, mount `createThemeHandler` from `@untheme/nuxt/server` in a catch-all server route file. The folder of the file is the base that a catalog client uses.
-
-```ts
-// server/api/themes/[...path].get.ts
-import { createThemeHandler, listEntries } from "@untheme/nuxt/server";
-
-export default createThemeHandler({
-  list: (listing) => listEntries(entries, listing),
-  get: (id) => useStorage("themes").getItem(id),
-});
-```
-
-`createThemeHandler(provider)` returns an h3 event handler for the catalog wire protocol. `defineClient` from `untheme/catalog` reads this protocol. The provider is the `Provider` type of `untheme/catalog`. `list` receives the validated and normalized query. `get` returns a layer, or `null` or `undefined` when no layer matches. `listEntries(entries, listing)` filters, sorts, and cuts a window from entries in memory.
-
-```ts
-// in the app
-import { defineClient } from "untheme/catalog";
-
-const catalog = defineClient(useUntheme().schema, { base: "/api/themes" });
-```
 
 See the [Nuxt example](../../examples/nuxt) for aurora served as a preset.
 

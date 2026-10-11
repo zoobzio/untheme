@@ -76,6 +76,14 @@ describe("untheme plugin", () => {
     expect(provide.unthemeRenderer).toBeDefined();
   });
 
+  it("provides the catalog over the layers of the build", async () => {
+    const provide = await setup();
+    const catalog = provide.unthemeCatalog as {
+      list: (query?: object) => Promise<{ entries: unknown[] }>;
+    };
+    expect((await catalog.list()).entries).toEqual([]);
+  });
+
   it("mirrors the selection as data attributes and injects no CSS", async () => {
     await setup();
     expect(headCalls[0]?.htmlAttrs["data-color"]?.value).toBe("light");

@@ -1,6 +1,7 @@
 import type { Contract } from "#build/untheme/config.mjs";
 import type { LayerEntry } from "#build/untheme/layers.mjs";
 import type { Config, Input, Layer, Patch, Theme, Untheme } from "untheme";
+import type { Catalog } from "untheme/catalog";
 import type { Renderer } from "untheme/css";
 
 /**
@@ -69,6 +70,7 @@ declare module "#app" {
   interface NuxtApp {
     $untheme: AppUntheme;
     $unthemeRenderer: Renderer<AppUnthemeContract>;
+    $unthemeCatalog: Catalog<AppUnthemeContract>;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type

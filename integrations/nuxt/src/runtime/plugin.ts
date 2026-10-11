@@ -5,13 +5,15 @@ import { defineNuxtPlugin } from "#app";
 import { useHead } from "#imports";
 import { computed } from "vue";
 import { defineRenderer } from "untheme/css";
+import { makeCatalog } from "./catalog";
 import { makeNuxtUntheme } from "./client";
 
 /**
  * The Nuxt plugin for untheme. The plugin makes the untheme service over a
  * reactive {@link AppUnthemeConfig} container and provides it as `$untheme`.
  * The plugin also provides a CSS renderer for the same service as
- * `$unthemeRenderer`.
+ * `$unthemeRenderer`, and a catalog over the layers of the build as
+ * `$unthemeCatalog`.
  *
  * The plugin keeps the container in {@link useState}. The patch and the
  * selection go from the server to the client. The base theme is the build
@@ -29,6 +31,7 @@ export default defineNuxtPlugin({
   setup: async (nuxtApp) => {
     const untheme = await makeNuxtUntheme(nuxtApp);
     const unthemeRenderer = defineRenderer(untheme);
+    const unthemeCatalog = makeCatalog(untheme.schema);
 
     // Renders over the base theme, so a render of the patch merges nothing.
     const overrides = defineRenderer<AppUnthemeContract>({
@@ -57,6 +60,7 @@ export default defineNuxtPlugin({
       provide: {
         untheme,
         unthemeRenderer,
+        unthemeCatalog,
       },
     };
   },

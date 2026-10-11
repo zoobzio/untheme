@@ -4,8 +4,6 @@ import type { Renderer } from "untheme/css";
 
 import { useNuxtApp } from "#app";
 
-import { makeCatalog } from "./catalog";
-
 /**
  * Returns the `$untheme` service. Each read and write goes through the
  * reactive `config` container. `swap` saves the selection to the input cookie.
@@ -31,9 +29,10 @@ export const useUnthemeRenderer = (): Renderer<AppUnthemeContract> => {
 };
 
 /**
- * Returns a catalog over the layers of the build. `list` pages the entries of
- * the layers module. `get` imports one layer on demand and checks it against
- * the contract of the app. The catalog is empty when the build has no layers.
+ * Returns the `$unthemeCatalog` catalog over the layers of the build. `list`
+ * pages the entries of the layers module. `get` imports one layer on demand
+ * and checks it against the contract of the app. The catalog is empty when
+ * the build has no layers.
  *
  * ```ts
  * const catalog = useUnthemeCatalog();
@@ -42,5 +41,6 @@ export const useUnthemeRenderer = (): Renderer<AppUnthemeContract> => {
  * ```
  */
 export const useUnthemeCatalog = (): Catalog<AppUnthemeContract> => {
-  return makeCatalog(useUntheme().schema);
+  const { $unthemeCatalog } = useNuxtApp();
+  return $unthemeCatalog;
 };

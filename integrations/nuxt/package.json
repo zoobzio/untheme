@@ -21,10 +21,6 @@
     "./constant": {
       "types": "./.dist/constant.d.ts",
       "import": "./.dist/constant.mjs"
-    },
-    "./server": {
-      "types": "./.dist/server.d.ts",
-      "import": "./.dist/server.mjs"
     }
   },
   "files": [
@@ -40,7 +36,6 @@
   "dependencies": {
     "@nuxt/kit": "^4.4.6",
     "@untheme/kit": "workspace:*",
-    "h3": "^1.15.11",
     "objectively": "^0.2.0",
     "untheme": "workspace:*",
     "vue": "^3.5.35"
