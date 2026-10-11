@@ -1,0 +1,40 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "agentGuidance": false,
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".dist/**"]
+    },
+    "@untheme/example-codemirror#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "@untheme/example-nuxt#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".output/**", ".nuxt/**"]
+    },
+    "stub": {
+      "dependsOn": ["^stub"],
+      "cache": false
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"]
+    },
+    "@untheme/aurora#typecheck": {
+      "dependsOn": ["build", "^build"]
+    },
+    "@untheme/aurora#test": {
+      "dependsOn": ["build", "^build"]
+    },
+    "@untheme/example-theme#typecheck": {
+      "dependsOn": ["build", "^build"]
+    },
+    "@untheme/example-theme#test": {
+      "dependsOn": ["build", "^build"]
+    }
+  }
+}

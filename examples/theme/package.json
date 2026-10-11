@@ -32,7 +32,7 @@
     "stub": "untheme build",
     "generate": "node scripts/generate.mjs",
     "lint": "oxlint",
-    "typecheck": "untheme build && tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
