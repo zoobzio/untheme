@@ -46,18 +46,11 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
-  "peerDependencies": {
-    "untheme": "workspace:*"
-  },
-  "peerDependenciesMeta": {
-    "untheme": {
-      "optional": true
-    }
-  },
   "devDependencies": {
     "@types/node": "^25.9.1",
     "@untheme/kit": "workspace:*",
     "@untheme/testing": "workspace:*",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "untheme": "workspace:*"
   }
 }
