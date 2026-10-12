@@ -1,4 +1,8 @@
-import type { AppUnthemeConfig, AppUnthemeInput } from "./types";
+import type {
+  AppUnthemeConfig,
+  AppUnthemeInput,
+  AppUnthemeStore,
+} from "./types";
 
 import { copy } from "objectively";
 import { useCookie, useState } from "#imports";
@@ -9,7 +13,7 @@ import { input as buildInput } from "#build/untheme/config.mjs";
  * The state holds the patch and the selection. It starts with an empty patch
  * and a copy of the selection of the build module.
  */
-export const accessUntheme = () => {
+export const accessUntheme = (): AppUnthemeStore => {
   const config = useState<AppUnthemeConfig>("untheme:config", () => ({
     patch: {},
     input: copy(buildInput),

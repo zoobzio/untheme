@@ -20,11 +20,11 @@
     "@changesets/cli": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "jiti": "catalog:",
+    "obuild": "catalog:",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "turbo": "catalog:",
     "typescript": "catalog:",
-    "unbuild": "catalog:",
     "vitest": "catalog:"
   }
 }

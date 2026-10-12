@@ -1,19 +1,11 @@
-import { defineBuildConfig } from "unbuild";
+import { defineBuildConfig } from "obuild/config";
 
 export default defineBuildConfig({
-  entries: ["src/index", "src/cli"],
-  outDir: ".dist",
-  declaration: true,
-  externals: [
-    "@terrazzo/parser",
-    "@terrazzo/token-types",
-    "@untheme/core",
-    "@untheme/schema",
-    "@untheme/utils",
-    "jiti",
-    "objectively",
+  entries: [
+    {
+      type: "bundle",
+      input: ["./src/index.ts", "./src/cli.ts"],
+      outDir: ".dist",
+    },
   ],
-  rollup: {
-    emitCJS: false,
-  },
 });

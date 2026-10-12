@@ -1,27 +1,34 @@
-import { defineBuildConfig } from "unbuild";
+import { readdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+
+import { defineBuildConfig } from "obuild/config";
 
 export default defineBuildConfig({
   entries: [
-    "src/module",
-    "src/config",
-    "src/constant",
-    // The runtime files ship unbundled. Nuxt compiles them in the app.
-    { input: "src/runtime/", outDir: ".dist/runtime", builder: "mkdist" },
+    {
+      type: "bundle",
+      input: ["./src/module.ts", "./src/config.ts", "./src/constant.ts"],
+      outDir: ".dist",
+      rolldown: { external: ["@nuxt/schema"] },
+    },
+    {
+      type: "transform",
+      input: "./src/runtime",
+      outDir: ".dist/runtime",
+      dts: (file) => !file.endsWith("plugin.ts"),
+    },
   ],
-  outDir: ".dist",
-  declaration: true,
-  externals: [
-    "#app",
-    "#imports",
-    "#build/untheme/config.mjs",
-    "#build/untheme/layers.mjs",
-    "@nuxt/kit",
-    "@nuxt/schema",
-    "@untheme/kit",
-    "nuxt",
-    "vue",
-  ],
-  rollup: {
-    emitCJS: false,
+  hooks: {
+    end: async (ctx) => {
+      const dir = join(ctx.pkgDir, ".dist/runtime");
+      for (const file of await readdir(dir)) {
+        if (!file.endsWith(".d.mts")) continue;
+        const name = file.slice(0, -".d.mts".length);
+        await writeFile(
+          join(dir, `${name}.d.ts`),
+          `export * from "./${name}.mjs";\n`,
+        );
+      }
+    },
   },
 });

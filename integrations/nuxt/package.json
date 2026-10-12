@@ -8,18 +8,18 @@
   },
   "type": "module",
   "main": "./.dist/module.mjs",
-  "types": "./.dist/module.d.ts",
+  "types": "./.dist/module.d.mts",
   "exports": {
     ".": {
-      "types": "./.dist/module.d.ts",
+      "types": "./.dist/module.d.mts",
       "import": "./.dist/module.mjs"
     },
     "./config": {
-      "types": "./.dist/config.d.ts",
+      "types": "./.dist/config.d.mts",
       "import": "./.dist/config.mjs"
     },
     "./constant": {
-      "types": "./.dist/constant.d.ts",
+      "types": "./.dist/constant.d.mts",
       "import": "./.dist/constant.mjs"
     }
   },
@@ -27,8 +27,8 @@
     ".dist"
   ],
   "scripts": {
-    "build": "unbuild",
-    "stub": "unbuild --stub",
+    "build": "obuild",
+    "stub": "obuild --stub",
     "lint": "oxlint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

@@ -9,10 +9,6 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "types": ["node", "@nuxt/nitro-server"],
-    "declaration": true,
-    "declarationMap": true,
-    "outDir": "../nuxt/.dist",
-    "rootDir": "../nuxt",
     "paths": {
       "#app": ["../nuxt/src/stubs/app.d.ts"],
       "#imports": ["../nuxt/src/stubs/imports.d.ts"],

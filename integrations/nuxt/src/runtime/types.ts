@@ -1,6 +1,7 @@
 import type { Contract } from "#build/untheme/config.mjs";
 import type { LayerEntry } from "#build/untheme/layers.mjs";
 import type { Config, Input, Layer, Patch, Theme, Untheme } from "untheme";
+import type { Ref } from "vue";
 import type { Catalog } from "untheme/catalog";
 import type { Renderer } from "untheme/css";
 
@@ -34,6 +35,18 @@ export type AppUnthemeInput = Input<AppUnthemeContract>;
  * The state container of the service. It holds the patch and the selection.
  */
 export type AppUnthemeConfig = Config<AppUnthemeContract>;
+
+/**
+ * The shared state of the plugin and the composable: the state container and
+ * the cookies that carry the selection and the layer.
+ */
+export type AppUnthemeStore = {
+  config: Ref<AppUnthemeConfig>;
+  cookies: {
+    input: Ref<AppUnthemeInput | null>;
+    key: Ref<string | null>;
+  };
+};
 
 /**
  * The service of the app: the `Untheme` service for its contract, with the
