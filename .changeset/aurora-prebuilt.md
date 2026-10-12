@@ -12,8 +12,7 @@ each modifier and each context. An app imports the config and boots
 `makeUntheme` with no kit of its own. The build has the whole preset and all
 thirty-one themes. The `./src/*` exports are the same as before, so a kit
 config that points at the resolver, keeps some themes, or lists the files in a
-resolver of its own builds as before. `untheme` is an optional peer dependency,
-for the types of the modules.
+resolver of its own builds as before.
 
 Aurora has its own test suite. The suite of the kit no longer builds aurora,
 and the kit no longer depends on it. The loader tests of the kit resolve
