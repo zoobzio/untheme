@@ -34,16 +34,16 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@nuxt/kit": "^4.4.6",
+    "@nuxt/kit": "catalog:",
     "@untheme/kit": "workspace:*",
-    "objectively": "^0.2.0",
+    "objectively": "catalog:",
     "untheme": "workspace:*",
-    "vue": "^3.5.35"
+    "vue": "catalog:"
   },
   "devDependencies": {
-    "@nuxt/nitro-server": "^4.4.6",
-    "@nuxt/schema": "^4.4.6",
-    "@types/node": "^25.9.1",
-    "nuxt": "^4.4.6"
+    "@nuxt/nitro-server": "catalog:",
+    "@nuxt/schema": "catalog:",
+    "@types/node": "catalog:",
+    "nuxt": "catalog:"
   }
 }

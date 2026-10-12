@@ -26,13 +26,13 @@
     "test": "vitest run"
   },
   "peerDependencies": {
-    "shiki": "^3.0.0"
+    "shiki": "catalog:peers"
   },
   "dependencies": {
     "untheme": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^25.9.1",
-    "shiki": "^3.0.0"
+    "@types/node": "catalog:",
+    "shiki": "catalog:"
   }
 }

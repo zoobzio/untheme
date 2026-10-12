@@ -47,10 +47,10 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@types/node": "^25.9.1",
+    "@types/node": "catalog:",
     "@untheme/kit": "workspace:*",
     "@untheme/testing": "workspace:*",
-    "typescript": "^6.0.3",
+    "typescript": "catalog:",
     "untheme": "workspace:*"
   }
 }
