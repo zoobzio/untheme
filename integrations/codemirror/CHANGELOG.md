@@ -1,5 +1,16 @@
 # @untheme/codemirror
 
+## 0.6.0
+
+### Patch Changes
+
+- [`e842cfe`](https://github.com/zoobzio/untheme/commit/e842cfefa8c0738304ea35f28aa0f39d31be575e) Thanks [@zoobzio](https://github.com/zoobzio)! - Documentation and source comments are rewritten in Simplified Technical
+  English. READMEs, JSDoc, and inline comments across every package use short
+  declarative sentences, one idea per sentence, with a consistent vocabulary.
+  No code, types, or emitted output change.
+- Updated dependencies [[`afbf821`](https://github.com/zoobzio/untheme/commit/afbf82171cb07d5986b4af5386d3eddca63aff6d), [`e240f21`](https://github.com/zoobzio/untheme/commit/e240f21ae67f96aaadcf28e9c33b38520e5b54d2), [`e842cfe`](https://github.com/zoobzio/untheme/commit/e842cfefa8c0738304ea35f28aa0f39d31be575e)]:
+  - untheme@0.6.0
+
 ## 0.5.0
 
 ### Patch Changes

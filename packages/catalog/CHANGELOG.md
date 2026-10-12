@@ -1,5 +1,16 @@
 # @untheme/catalog
 
+## 0.6.0
+
+### Patch Changes
+
+- [`e842cfe`](https://github.com/zoobzio/untheme/commit/e842cfefa8c0738304ea35f28aa0f39d31be575e) Thanks [@zoobzio](https://github.com/zoobzio)! - Documentation and source comments are rewritten in Simplified Technical
+  English. READMEs, JSDoc, and inline comments across every package use short
+  declarative sentences, one idea per sentence, with a consistent vocabulary.
+  No code, types, or emitted output change.
+- Updated dependencies [[`e842cfe`](https://github.com/zoobzio/untheme/commit/e842cfefa8c0738304ea35f28aa0f39d31be575e)]:
+  - @untheme/schema@0.6.0
+
 ## 0.5.0
 
 ### Patch Changes

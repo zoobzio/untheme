@@ -1,5 +1,24 @@
 # @untheme/utils
 
+## 0.6.0
+
+### Patch Changes
+
+- [`e240f21`](https://github.com/zoobzio/untheme/commit/e240f21ae67f96aaadcf28e9c33b38520e5b54d2) Thanks [@zoobzio](https://github.com/zoobzio)! - `copy` is no longer exported from `@untheme/utils` or `untheme`; every copy is
+  objectively's `copy`, a deep structural copy in a single walk. `clone` rebuilds
+  a theme through `remap` onto its own type. Neither re-reads the source to
+  prove the rebuild, so snapshotting a theme out of a reactive container — what
+  `makeUntheme` does at construction, and the Nuxt plugin on every request and
+  client boot — reads each member once instead of three times, about 60% less
+  construction time on a large theme.
+
+- [`e842cfe`](https://github.com/zoobzio/untheme/commit/e842cfefa8c0738304ea35f28aa0f39d31be575e) Thanks [@zoobzio](https://github.com/zoobzio)! - Documentation and source comments are rewritten in Simplified Technical
+  English. READMEs, JSDoc, and inline comments across every package use short
+  declarative sentences, one idea per sentence, with a consistent vocabulary.
+  No code, types, or emitted output change.
+- Updated dependencies [[`e842cfe`](https://github.com/zoobzio/untheme/commit/e842cfefa8c0738304ea35f28aa0f39d31be575e)]:
+  - @untheme/schema@0.6.0
+
 ## 0.5.0
 
 ### Patch Changes

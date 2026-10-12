@@ -1,5 +1,104 @@
 # @untheme/nuxt
 
+## 0.6.0
+
+### Minor Changes
+
+- [#3](https://github.com/zoobzio/untheme/pull/3) [`afbf821`](https://github.com/zoobzio/untheme/commit/afbf82171cb07d5986b4af5386d3eddca63aff6d) Thanks [@zoobzio](https://github.com/zoobzio)! - Themes are layers. The kit builds them, the service applies them, and the
+  contract does not carry them.
+
+  **Kit.** A config can declare `layers`. Each layer is a DTCG token document
+  or a list of them, in the same source forms as `add`. `layers` can instead
+  name a local directory: each `.json` file in it is one layer, and the file
+  name is the id. The directory joins the watched documents. The build normalizes
+  each document with Terrazzo, converts it to a `Layer`, and checks it against
+  the built contract with the schema. The build fails with the file and the
+  token when a layer is not applicable. The build writes `layers/<id>.json` for
+  each layer and a `layers.mjs` module with the id, the name, and the
+  description of each one. A server returns the JSON as it is. `apply` takes it
+  as it is.
+
+  **Aurora.** The `theme` modifier is gone. The ramps of the aurora palette are
+  a base set of the resolver. The thirty-one palettes are layers under
+  `src/themes/`, built to `.dist/layers/`. The config points `layers` at that
+  directory and reads no other file. The package exports
+  `@untheme/aurora/layers` and `@untheme/aurora/layers/<id>.json`. The built
+  config shrinks from 725 KB to 55 KB of JSON. The preset has eight modifiers.
+
+  **Core.** `makeUntheme(theme, config, options?)` takes the base theme and
+  the state container as separate arguments. The container holds what changed:
+  the `patch` and the `input`. The base theme is not in the container. The
+  service derives the active theme from the base and the patch and exposes it
+  as `theme()`. An empty patch gives the base theme. `apply` stores a copy of
+  the layer as the patch. `update` merges a patch into the stored patch. The
+  middleware slots are `patch` and `input`.
+
+  **Schema.** A `Patch` can carry an optional `id`, `name`, and `order`. A
+  `Layer` is a `Patch` with a required identity. `merge` in `@untheme/utils`
+  takes patches and returns a theme of the type it received; the `Overlay`
+  type is gone.
+
+  **CSS.** A renderer `Source` has `theme()` in place of `config.theme`. The
+  core service is still a `Source`.
+
+  **Testing.** `bootUntheme` passes the theme as the base of the service.
+
+  **Nuxt.** The state in `useState` is the container: the selection and the
+  patch. The theme travels in the module only. The
+  module writes `#build/untheme.css` and no longer links it into the app CSS;
+  the runtime `<style>` block is the CSS of the active state. The `css` option
+  is gone. The `untheme:theme` hook is now `untheme:patch` and receives the
+  stored patch. The example serves the aurora layers from a server route and
+  applies them from a picker.
+
+- [#8](https://github.com/zoobzio/untheme/pull/8) [`155d4b1`](https://github.com/zoobzio/untheme/commit/155d4b1825112e0da16277fd4977d59272546be0) Thanks [@zoobzio](https://github.com/zoobzio)! - The `untheme:input` and `untheme:patch` hooks forward the `input` and `patch`
+  events of the core service, and the new `untheme:change` hook forwards
+  `change`. Each hook receives the change object of the service: the `field` the
+  write replaced, the stored values `before` and `after` the write, and for the
+  patch the `diff` of the active theme. The plugin calls each hook after the
+  write lands in the state.
+
+- [#5](https://github.com/zoobzio/untheme/pull/5) [`5e7880f`](https://github.com/zoobzio/untheme/commit/5e7880fc383085f6657033f17afb60e08f21f228) Thanks [@zoobzio](https://github.com/zoobzio)! - The module takes a preset. `untheme: { preset: "@untheme/aurora" }` names a
+  package that exports a kit build. The module takes the base theme, the boot
+  selection, the manifest, and the layers from the package. When the build has
+  layers, from a preset or from the kit config of the app, the module adds
+  `load` to `#build/untheme/layers.mjs`: one lazy import for each layer. The
+  list and the layers of a preset are the package's own. `useUnthemeCatalog()`
+  returns a catalog over the module: `list` pages the entries and `get` imports
+  one layer on demand. The service of `useUntheme()` gains `layers`, the
+  entries of the build, and `select(id)`, which loads a layer and applies it.
+  On the server, the key cookie restores the applied layer before the first
+  render, as the input cookie restores the selection. The module links the base
+  cascade, `#build/untheme.css`, into the CSS of the app, and the runtime
+  plugin renders only the patch: a page with no applied layer carries no
+  runtime CSS, and a context switch renders none. An app that serves
+  aurora no longer mounts a server route, lists server assets, writes a kit
+  config, or binds a theme picker of its own.
+
+- [`ca23fed`](https://github.com/zoobzio/untheme/commit/ca23fedad853c4c06b1fee7f134a51e1a2c69f5e) Thanks [@zoobzio](https://github.com/zoobzio)! - **Breaking:** the `@untheme/nuxt/server` entry is removed, along with
+  `createThemeHandler`, and `h3` is no longer a dependency. The module serves
+  the layers of the build through `useUnthemeCatalog()` and `select(id)` of
+  `useUntheme()`; a theme served from elsewhere takes a catalog client of the
+  app's own.
+
+### Patch Changes
+
+- [`e240f21`](https://github.com/zoobzio/untheme/commit/e240f21ae67f96aaadcf28e9c33b38520e5b54d2) Thanks [@zoobzio](https://github.com/zoobzio)! - `copy` is no longer exported from `@untheme/utils` or `untheme`; every copy is
+  objectively's `copy`, a deep structural copy in a single walk. `clone` rebuilds
+  a theme through `remap` onto its own type. Neither re-reads the source to
+  prove the rebuild, so snapshotting a theme out of a reactive container — what
+  `makeUntheme` does at construction, and the Nuxt plugin on every request and
+  client boot — reads each member once instead of three times, about 60% less
+  construction time on a large theme.
+
+- [`e842cfe`](https://github.com/zoobzio/untheme/commit/e842cfefa8c0738304ea35f28aa0f39d31be575e) Thanks [@zoobzio](https://github.com/zoobzio)! - Documentation and source comments are rewritten in Simplified Technical
+  English. READMEs, JSDoc, and inline comments across every package use short
+  declarative sentences, one idea per sentence, with a consistent vocabulary.
+  No code, types, or emitted output change.
+- Updated dependencies [[`1092b20`](https://github.com/zoobzio/untheme/commit/1092b20b4cb2a2c16c275a4ccac0967e8aa8c724), [`ac6cc5f`](https://github.com/zoobzio/untheme/commit/ac6cc5f247a5d6650430058b8c8ab4895fa6a78f), [`e240f21`](https://github.com/zoobzio/untheme/commit/e240f21ae67f96aaadcf28e9c33b38520e5b54d2), [`3c88cf6`](https://github.com/zoobzio/untheme/commit/3c88cf61e4015aedc0bae4d5e1eecb811c2f9cd3), [`afbf821`](https://github.com/zoobzio/untheme/commit/afbf82171cb07d5986b4af5386d3eddca63aff6d), [`e240f21`](https://github.com/zoobzio/untheme/commit/e240f21ae67f96aaadcf28e9c33b38520e5b54d2), [`e842cfe`](https://github.com/zoobzio/untheme/commit/e842cfefa8c0738304ea35f28aa0f39d31be575e)]:
+  - @untheme/kit@0.6.0
+  - untheme@0.6.0
+
 ## 0.5.0
 
 ### Minor Changes
