@@ -116,6 +116,25 @@ describe("makeNuxtUntheme", () => {
       await nextTick();
       expect(u.tokens().primary).toBe("{indigo}");
     });
+
+    it("calls untheme:input and untheme:change after the write lands, with the change", async () => {
+      const u = await make();
+      const seen: unknown[] = [];
+      nuxtApp.callHook.mockImplementation((name: string, change: unknown) => {
+        seen.push([name, change, u.config.input.color, u.tokens().primary]);
+      });
+      u.swap("color", "dark");
+      const change = {
+        field: "input",
+        before: { color: "light" },
+        after: { color: "dark" },
+      };
+      expect(seen).toEqual([
+        ["untheme:input", change, "dark", "{indigo}"],
+        ["untheme:change", change, "dark", "{indigo}"],
+      ]);
+      expect(cookies["untheme-input"]?.value).toEqual({ color: "dark" });
+    });
   });
 
   describe("apply", () => {
@@ -126,7 +145,14 @@ describe("makeNuxtUntheme", () => {
       expect(u.config.patch).toEqual(bravo);
       expect(states["untheme:config"]?.value).toMatchObject({ patch: bravo });
       expect(cookies["untheme-key"]?.value).toBe("bravo");
-      expect(nuxtApp.callHook).toHaveBeenCalledWith("untheme:patch", bravo);
+      expect(nuxtApp.callHook).toHaveBeenCalledWith(
+        "untheme:patch",
+        expect.objectContaining({ field: "patch", before: {}, after: bravo }),
+      );
+      expect(nuxtApp.callHook).toHaveBeenCalledWith(
+        "untheme:change",
+        expect.objectContaining({ field: "patch", after: bravo }),
+      );
     });
 
     it("resolves a layer-carried modifier override on top of the baseline", async () => {
@@ -154,7 +180,10 @@ describe("makeNuxtUntheme", () => {
       expect(cookies["untheme-key"]?.value ?? null).toBeNull();
       expect(nuxtApp.callHook).toHaveBeenCalledWith(
         "untheme:patch",
-        expect.objectContaining({ tokens: { white: smoke } }),
+        expect.objectContaining({
+          after: expect.objectContaining({ tokens: { white: smoke } }),
+          diff: expect.objectContaining({ tokens: { white: smoke } }),
+        }),
       );
     });
   });
@@ -175,7 +204,7 @@ describe("makeNuxtUntheme", () => {
       expect(cookies["untheme-key"]?.value).toBe("charlie");
       expect(nuxtApp.callHook).toHaveBeenCalledWith(
         "untheme:patch",
-        themes.charlie,
+        expect.objectContaining({ after: themes.charlie }),
       );
     });
 

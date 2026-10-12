@@ -11,9 +11,11 @@ import { accessUntheme } from "./store";
 /**
  * Makes the untheme service over the shared state. The base theme is the
  * build module. The state holds the patch and the selection. A write of the
- * patch saves its id, or `null` when it has none, to the key cookie and calls
- * the `untheme:patch` hook. A write of the selection saves it to the input
- * cookie and calls the `untheme:input` hook.
+ * patch saves its id, or `null` when it has none, to the key cookie. A write
+ * of the selection saves it to the input cookie. The `input`, `patch`, and
+ * `change` events of the service call the `untheme:input`, `untheme:patch`,
+ * and `untheme:change` hooks with the same change object, after the write
+ * lands in the state.
  *
  * `layers` lists the layers of the build. `select` loads one by id and applies
  * it. On the server, the function restores the selection from the input
@@ -30,16 +32,24 @@ export const makeNuxtUntheme = async (
       config: {
         patch: (patch) => {
           cookies.key.value = patch.id ?? null;
-          nuxtApp.callHook("untheme:patch", patch);
           return patch;
         },
         input: (input) => {
           cookies.input.value = input;
-          nuxtApp.callHook("untheme:input", input);
           return input;
         },
       },
     },
+  });
+
+  service.on("input", (change) => {
+    void nuxtApp.callHook("untheme:input", change);
+  });
+  service.on("patch", (change) => {
+    void nuxtApp.callHook("untheme:patch", change);
+  });
+  service.on("change", (change) => {
+    void nuxtApp.callHook("untheme:change", change);
   });
 
   const catalog = makeCatalog(service.schema);

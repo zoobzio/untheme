@@ -68,6 +68,35 @@ The service replaces each member of the container as a whole. Change the patch w
 - `apply(layer)`: stores a copy of the layer as the patch. Throws `InvalidLayerError` when the layer violates the contract.
 - `create(layer)`: checks a layer against the contract and returns the layer. The active theme stays the same. Throws `InvalidLayerError` when the layer violates the contract.
 - `extract(id, name)`: returns a copy of the active theme with a new identity.
+- `on(event, listener)`: subscribes a listener to an event. Returns a function that removes the listener.
+
+## Events
+
+The service emits an event after each write lands in the container. Each listener receives one change object. `field` names the member of the container that the write replaced. `before` and `after` are the stored values around the write. A listener reads the new state through `tokens()`, `get`, or `resolve`.
+
+| Event    | Emitted when                               | Listener receives                                      |
+| -------- | ------------------------------------------ | ------------------------------------------------------ |
+| `input`  | The selection changes with `swap`          | `InputChange`: `field`, `before`, `after`              |
+| `patch`  | The patch changes with `update` or `apply` | `PatchChange`: `field`, `before`, `after`, `diff`      |
+| `change` | The selection or the patch changes         | the same `Change` object, after the event of the field |
+
+`diff` is the difference between the active theme before the write and the active theme after it: each binding that the write changed, for each token and for each context. It has the shape of a patch, so `update(diff)` over the old theme makes the same change. The diff holds added and changed bindings. A context override that the write removed shows as the base binding when the base theme has one, and is absent otherwise.
+
+```ts
+ut.on("patch", ({ diff }) => {
+  for (const token of Object.keys(diff.tokens)) {
+    root.style.setProperty(renderer.property(token), renderer.var(token));
+  }
+});
+
+const off = ut.on("change", (change) => {
+  if (change.field === "input") {
+    root.dataset.mode = change.after.mode;
+  }
+});
+```
+
+A write through `config` or through `swap`, `update`, or `apply` emits. A write to the container itself does not. A write that fails the contract throws before it emits. The service builds the change object only when the event or `change` has a listener. The listeners of an event run in subscription order. An error in a listener propagates to the caller of the write. A listener can remove itself or another listener during the call.
 
 ## Baselines
 
