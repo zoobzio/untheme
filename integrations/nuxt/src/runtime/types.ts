@@ -1,6 +1,16 @@
 import type { Contract } from "#build/untheme/config.mjs";
 import type { LayerEntry } from "#build/untheme/layers.mjs";
-import type { Config, Input, Layer, Patch, Theme, Untheme } from "untheme";
+import type {
+  Change,
+  Config,
+  Input,
+  InputChange,
+  Layer,
+  Patch,
+  PatchChange,
+  Theme,
+  Untheme,
+} from "untheme";
 import type { Ref } from "vue";
 import type { Catalog } from "untheme/catalog";
 import type { Renderer } from "untheme/css";
@@ -60,13 +70,16 @@ export interface AppUntheme extends Untheme<AppUnthemeContract> {
 }
 
 /**
- * The runtime hooks of the service, keyed by event name. The `#app`
+ * The runtime hooks of the service, keyed by event name. `untheme:input`,
+ * `untheme:patch`, and `untheme:change` forward the `input`, `patch`, and
+ * `change` events of the service with the same change object. The `#app`
  * augmentation and {@link UnthemeNuxtApp} use this type.
  */
 export interface UnthemeHooks {
   "untheme:ready": (service: AppUntheme) => void;
-  "untheme:input": (input: AppUnthemeInput) => void;
-  "untheme:patch": (patch: AppUnthemePatch) => void;
+  "untheme:input": (change: InputChange<AppUnthemeContract>) => void;
+  "untheme:patch": (change: PatchChange<AppUnthemeContract>) => void;
+  "untheme:change": (change: Change<AppUnthemeContract>) => void;
 }
 
 /**

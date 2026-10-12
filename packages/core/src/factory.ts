@@ -13,7 +13,16 @@ import type {
   Values,
 } from "@untheme/schema";
 import type { Diff } from "@untheme/utils";
-import type { Config, Options, Untheme } from "./types";
+import type {
+  Config,
+  Event,
+  Events,
+  InputChange,
+  Listener,
+  Options,
+  PatchChange,
+  Untheme,
+} from "./types";
 
 import { copy, map, record } from "objectively";
 import { defineSchema } from "@untheme/schema";
@@ -49,9 +58,51 @@ export const makeUntheme = <T extends Theme<T>>(
   options: Options<T> = {},
 ): Untheme<T> => {
   /**
+   * The listeners of each event, in subscription order.
+   */
+  const listeners: { [E in Event<T>]: Set<Listener<T, E>> } = {
+    input: new Set(),
+    patch: new Set(),
+    change: new Set(),
+  };
+
+  /**
+   * Calls the listeners of an event with the arguments. The function iterates
+   * over a copy, so a listener can unsubscribe itself or another listener
+   * during the call.
+   */
+  const emit = <E extends Event<T>>(event: E, ...args: Events<T>[E]): void => {
+    for (const listener of [...listeners[event]]) {
+      listener(...args);
+    }
+  };
+
+  /**
+   * Subscribes a listener to an event and returns the function that removes
+   * it.
+   */
+  const on = <E extends Event<T>>(
+    event: E,
+    listener: Listener<T, E>,
+  ): (() => void) => {
+    listeners[event].add(listener);
+    return () => {
+      listeners[event].delete(listener);
+    };
+  };
+
+  /**
+   * Whether an event or `change` has a listener. The setters skip the work of
+   * a change object when nothing listens.
+   */
+  const heard = (event: "input" | "patch"): boolean =>
+    listeners[event].size > 0 || listeners.change.size > 0;
+
+  /**
    * The active state. A read gets the value from the container and passes it
    * to the matching `options.get` middleware. A write passes the value to the
-   * matching `options.set` middleware and stores the result in the container.
+   * matching `options.set` middleware, stores the result in the container, and
+   * then emits the event of the field and `change` with one change object.
    */
   const proxy: Config<T> = {
     get patch() {
@@ -63,11 +114,21 @@ export const makeUntheme = <T extends Theme<T>>(
     },
     set patch(value) {
       const through = options.set?.config?.patch;
-      if (through) {
-        config.patch = through(value);
+      const listening = heard("patch");
+      const before = config.patch;
+      const previous = listening ? merge<T>(schema.base, before) : undefined;
+      config.patch = through ? through(value) : value;
+      if (previous === undefined) {
         return;
       }
-      config.patch = value;
+      const change: PatchChange<T> = {
+        field: "patch",
+        before,
+        after: config.patch,
+        diff: diff<T>(previous, merge<T>(schema.base, config.patch)),
+      };
+      emit("patch", change);
+      emit("change", change);
     },
     get input() {
       const through = options.get?.config?.input;
@@ -78,11 +139,19 @@ export const makeUntheme = <T extends Theme<T>>(
     },
     set input(value) {
       const through = options.set?.config?.input;
-      if (through) {
-        config.input = through(value);
+      const listening = heard("input");
+      const before = config.input;
+      config.input = through ? through(value) : value;
+      if (!listening) {
         return;
       }
-      config.input = value;
+      const change: InputChange<T> = {
+        field: "input",
+        before,
+        after: config.input,
+      };
+      emit("input", change);
+      emit("change", change);
     },
   };
 
@@ -302,5 +371,6 @@ export const makeUntheme = <T extends Theme<T>>(
     apply,
     create,
     extract,
+    on,
   };
 };

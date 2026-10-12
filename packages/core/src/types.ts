@@ -49,8 +49,72 @@ export type Options<T extends Template> = {
 };
 
 /**
+ * A change of the selection. `before` and `after` are the stored selections
+ * around the write.
+ */
+export type InputChange<T extends Template> = {
+  field: "input";
+  before: Input<T>;
+  after: Input<T>;
+};
+
+/**
+ * A change of the patch. `before` and `after` are the stored patches around
+ * the write. `diff` is the difference between the active theme before the
+ * write and the active theme after it: each binding that the write changed,
+ * for each token and for each context. It is the patch that `update` would
+ * take to make the same change over the old theme. The diff holds added and
+ * changed bindings. A context override that the write removed shows as the
+ * base binding when the base theme has one, and is absent otherwise.
+ */
+export type PatchChange<T extends Template> = {
+  field: "patch";
+  before: Patch<T>;
+  after: Patch<T>;
+  diff: Diff<T>;
+};
+
+/**
+ * A change of the state. `field` tells which member of the container the
+ * write replaced.
+ */
+export type Change<T extends Template> = InputChange<T> | PatchChange<T>;
+
+/**
+ * The events of an {@link Untheme} service, keyed by name. Each value is the
+ * argument list of a listener. The service emits each event after the write
+ * lands in the container, so a listener reads the new state.
+ *
+ * - `input`: the selection changed with `swap`. The listener receives the
+ *   {@link InputChange}.
+ * - `patch`: the patch changed with `update` or `apply`. The listener receives
+ *   the {@link PatchChange}.
+ * - `change`: the selection or the patch changed. The listener receives the
+ *   same {@link Change} object as the event of the field. The service emits
+ *   `change` after `input` or `patch`.
+ */
+export type Events<T extends Template> = {
+  input: [change: InputChange<T>];
+  patch: [change: PatchChange<T>];
+  change: [change: Change<T>];
+};
+
+/**
+ * The name of an event of an {@link Untheme} service.
+ */
+export type Event<T extends Template> = keyof Events<T>;
+
+/**
+ * A listener for one event of an {@link Untheme} service.
+ */
+export type Listener<T extends Template, E extends Event<T>> = (
+  ...args: Events<T>[E]
+) => void;
+
+/**
  * The runtime theme service for a contract. A read gives the active selection.
- * `swap`, `update`, and `apply` change the active state in `config`.
+ * `swap`, `update`, and `apply` change the active state in `config`. Each
+ * write emits an event. `on` subscribes to one.
  */
 export interface Untheme<T extends Template> {
   /**
@@ -140,4 +204,13 @@ export interface Untheme<T extends Template> {
    * `InvalidThemeError` when the `id` and `name` make the theme invalid.
    */
   extract: (id: string, name: string) => Theme<T>;
+
+  /**
+   * Subscribes a listener to an event. The service calls the listeners of an
+   * event in subscription order, after the write lands in the container. A
+   * write through `config` or through `swap`, `update`, or `apply` emits. A
+   * write to the container itself does not. An error in a listener propagates
+   * to the caller of the write. Returns a function that removes the listener.
+   */
+  on: <E extends Event<T>>(event: E, listener: Listener<T, E>) => () => void;
 }

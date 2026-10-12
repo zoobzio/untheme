@@ -8,7 +8,7 @@ import { useNuxtApp } from "#app";
  * Returns the `$untheme` service. Each read and write goes through the
  * reactive `config` container. `swap` saves the selection to the input cookie.
  * `apply` and `update` save the id of the patch to the key cookie. Each one
- * calls a Nuxt hook.
+ * emits an event of the service, and the plugin forwards it to a Nuxt hook.
  */
 export const useUntheme = (): AppUntheme => {
   const { $untheme } = useNuxtApp();

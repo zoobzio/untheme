@@ -450,3 +450,189 @@ describe("Options middleware", () => {
     expect(u.theme().id).toBe("alt");
   });
 });
+
+describe("events", () => {
+  it("emits input and change after swap, with the selections around the write", () => {
+    const u = boot();
+    const seen: unknown[] = [];
+    u.on("input", (change) => {
+      seen.push(["input", change, u.get("color.bg")]);
+    });
+    u.on("change", (change) => {
+      seen.push(["change", change]);
+    });
+    u.swap("mode", "dark");
+    const expected = {
+      field: "input",
+      before: { mode: "light", contrast: "normal" },
+      after: { mode: "dark", contrast: "normal" },
+    };
+    expect(seen).toEqual([
+      ["input", expected, "{color.black}"],
+      ["change", expected],
+    ]);
+  });
+
+  it("passes the same change object to the field event and to change", () => {
+    const u = boot();
+    const objects: unknown[] = [];
+    u.on("input", (change) => objects.push(change));
+    u.on("change", (change) => objects.push(change));
+    u.swap("mode", "dark");
+    expect(objects).toHaveLength(2);
+    expect(objects[0]).toBe(objects[1]);
+  });
+
+  it("emits patch and change after apply, with the diff of the active theme", () => {
+    const u = boot();
+    const seen: unknown[] = [];
+    u.on("patch", (change) => {
+      seen.push(["patch", change, u.theme().id]);
+    });
+    u.on("change", (change) => {
+      seen.push(["change", change.field]);
+    });
+    const layer = {
+      id: "alt",
+      name: "Alt",
+      tokens: { "color.accent": black },
+      modifiers: { contrast: { high: { "color.bg": "{color.accent}" } } },
+    };
+    u.apply(layer);
+    expect(seen).toEqual([
+      [
+        "patch",
+        {
+          field: "patch",
+          before: {},
+          after: layer,
+          diff: {
+            tokens: { "color.accent": black },
+            modifiers: {
+              mode: { light: {}, dark: {} },
+              contrast: { normal: {}, high: { "color.bg": "{color.accent}" } },
+            },
+          },
+        },
+        "alt",
+      ],
+      ["change", "patch"],
+    ]);
+  });
+
+  it("diffs update against the theme before the write, not the base", () => {
+    const u = boot();
+    u.update({ tokens: { "color.bg": "{color.black}" } });
+    const diffs: unknown[] = [];
+    u.on("patch", ({ before, after, diff }) => {
+      diffs.push({ before: before.tokens, after: after.tokens, diff });
+    });
+    u.update({ tokens: { "color.fg": "{color.white}" } });
+    expect(diffs).toEqual([
+      {
+        before: { "color.bg": "{color.black}" },
+        after: { "color.bg": "{color.black}", "color.fg": "{color.white}" },
+        diff: {
+          tokens: { "color.fg": "{color.white}" },
+          modifiers: {
+            mode: { light: {}, dark: {} },
+            contrast: { normal: {}, high: {} },
+          },
+        },
+      },
+    ]);
+  });
+
+  it("emits the value that the set middleware stored", () => {
+    const u = boot(makeConfig(), {
+      set: {
+        config: {
+          input: (input) => ({ ...input, contrast: "high" }),
+        },
+      },
+    });
+    let seen: Input<T> | undefined;
+    u.on("input", ({ after }) => {
+      seen = after;
+    });
+    u.swap("mode", "dark");
+    expect(seen).toEqual({ mode: "dark", contrast: "high" });
+    expect(seen).toBe(u.config.input);
+  });
+
+  it("emits on a write through config, not on a write to the container", () => {
+    const config = makeConfig();
+    const u = boot(config);
+    const fields: string[] = [];
+    u.on("change", (change) => {
+      fields.push(change.field);
+    });
+    config.input = { mode: "dark", contrast: "normal" };
+    expect(fields).toEqual([]);
+    u.config.input = { mode: "light", contrast: "normal" };
+    expect(fields).toEqual(["input"]);
+  });
+
+  it("does not emit when a write fails the contract", () => {
+    const u = boot();
+    const fields: string[] = [];
+    u.on("change", (change) => {
+      fields.push(change.field);
+    });
+    expect(() => u.swap("mode", "sepia" as "dark")).toThrow(InvalidThemeError);
+    expect(() => u.update({ tokens: { nope: "x" } } as Patch<T>)).toThrow(
+      InvalidPatchError,
+    );
+    expect(fields).toEqual([]);
+  });
+
+  it("writes the same state with and without listeners", () => {
+    const quiet = boot();
+    const loud = boot();
+    loud.on("change", () => {});
+    for (const u of [quiet, loud]) {
+      u.swap("mode", "dark");
+      u.apply({ id: "alt", name: "Alt", tokens: {} });
+      u.update({ tokens: { "color.fg": "{color.white}" } });
+    }
+    expect(quiet.config).toEqual(loud.config);
+    expect(quiet.tokens()).toEqual(loud.tokens());
+  });
+
+  it("calls listeners in subscription order and removes one on unsubscribe", () => {
+    const u = boot();
+    const order: string[] = [];
+    const offA = u.on("change", () => {
+      order.push("a");
+    });
+    u.on("change", () => {
+      order.push("b");
+    });
+    u.swap("mode", "dark");
+    offA();
+    offA();
+    u.swap("mode", "light");
+    expect(order).toEqual(["a", "b", "b"]);
+  });
+
+  it("lets a listener unsubscribe itself during the call", () => {
+    const u = boot();
+    let calls = 0;
+    const off = u.on("change", () => {
+      calls += 1;
+      off();
+    });
+    u.swap("mode", "dark");
+    u.swap("mode", "light");
+    expect(calls).toBe(1);
+  });
+
+  it("propagates a listener error to the caller after the write lands", () => {
+    const u = boot();
+    u.on("input", () => {
+      throw new Error("boom");
+    });
+    expect(() => u.swap("mode", "dark")).toThrow("boom");
+    expect(u.config.input.mode).toBe("dark");
+  });
+});

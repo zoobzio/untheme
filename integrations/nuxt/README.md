@@ -140,13 +140,24 @@ The state in `useState` holds the patch and the selection. The base theme is the
 
 ## Hooks
 
-The service calls three Nuxt hooks.
+The plugin calls four Nuxt hooks.
 
-| Hook            | Called when                                  | Payload               |
-| --------------- | -------------------------------------------- | --------------------- |
-| `untheme:ready` | The plugin finishes the setup of the service | the `Untheme` service |
-| `untheme:input` | The selection changes with `swap`            | the new `input`       |
-| `untheme:patch` | The patch changes with `apply` or `update`   | the stored patch      |
+| Hook             | Called when                                  | Payload                                                |
+| ---------------- | -------------------------------------------- | ------------------------------------------------------ |
+| `untheme:ready`  | The plugin finishes the setup of the service | the `Untheme` service                                  |
+| `untheme:input`  | The selection changes with `swap`            | `InputChange`: `field`, `before`, `after`              |
+| `untheme:patch`  | The patch changes with `apply` or `update`   | `PatchChange`: `field`, `before`, `after`, `diff`      |
+| `untheme:change` | The selection or the patch changes           | the same `Change` object, after the event of the field |
+
+`untheme:input`, `untheme:patch`, and `untheme:change` forward the [events](../../packages/core#events) of the service with the same change object. `before` and `after` are the stored values around the write. `diff` is the difference between the active theme before the write and after it. The plugin calls each hook after the write lands in the state, so a hook reads the new state through `useUntheme()`. Code that does not need a Nuxt hook can subscribe to the service directly with `useUntheme().on(...)`, in a component or a plugin.
+
+```ts
+export default defineNuxtPlugin((nuxtApp) => {
+  nuxtApp.hook("untheme:patch", ({ diff }) => {
+    console.log("rebound", Object.keys(diff.tokens));
+  });
+});
+```
 
 ## Related
 
