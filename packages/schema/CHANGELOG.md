@@ -1,5 +1,7 @@
 # @untheme/schema
 
+## 0.6.1
+
 ## 0.6.0
 
 ### Patch Changes

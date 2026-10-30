@@ -1,5 +1,15 @@
 # @untheme/testing
 
+## 0.6.1
+
+### Patch Changes
+
+- [`d59f1b5`](https://github.com/zoobzio/untheme/commit/d59f1b5d41958c08837468f4337d02afa26770c6) Thanks [@zoobzio](https://github.com/zoobzio)! - Bump version.
+
+- Updated dependencies []:
+  - untheme@0.6.1
+  - @untheme/kit@0.6.1
+
 ## 0.6.0
 
 ### Minor Changes

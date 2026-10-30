@@ -1,5 +1,13 @@
 # @untheme/nuxt
 
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - untheme@0.6.1
+  - @untheme/kit@0.6.1
+
 ## 0.6.0
 
 ### Minor Changes
