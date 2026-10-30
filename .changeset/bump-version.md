@@ -1,5 +1,5 @@
 ---
-"@zoobzio/testing": patch
+"@untheme/testing": patch
 ---
 
 Bump version.
